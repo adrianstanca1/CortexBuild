@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store';
-import { ConnectivityMonitor } from '../components/monitoring/ConnectivityMonitor';
+import { ConnectivityMonitor } from '../../components/monitoring/ConnectivityMonitor';
 
 export const MainLayout: React.FC = () => {
   const { user, logout } = useAuthStore();
