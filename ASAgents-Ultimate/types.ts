@@ -211,6 +211,9 @@ export interface User {
   skills?: string[];
   availability?: AvailabilityStatus;
   authProvider?: SocialProvider | 'local';
+  // Additional properties for compatibility
+  name?: string; // Computed from firstName + lastName or provided directly
+  location?: string; // User's location/address
 }
 
 export interface SwitchCompanyResponse {

@@ -1,1 +1,31 @@
-if(!self.define){let e,i={};const s=(s,n)=>(s=new URL(s+".js",n).href,i[s]||new Promise(i=>{if("document"in self){const e=document.createElement("script");e.src=s,e.onload=i,document.head.appendChild(e)}else e=s,importScripts(s),i()}).then(()=>{let e=i[s];if(!e)throw new Error(`Module ${s} didn’t register its module`);return e}));self.define=(n,r)=>{const c=e||("document"in self?document.currentScript.src:"")||location.href;if(i[c])return;let o={};const t=e=>s(e,c),l={module:{uri:c},exports:o,require:t};i[c]=Promise.all(n.map(e=>l[e]||t(e))).then(e=>(r(...e),o))}}define(["./workbox-0ebf8f11"],function(e){"use strict";self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"api-test.html",revision:"d13f6c6117c95e77990989ecd54e2ef1"},{url:"assets/charts-CRWRBaiR.js",revision:null},{url:"assets/index-DTtL2BJt.js",revision:null},{url:"assets/maps-CRWRBaiR.js",revision:null},{url:"assets/ui-CK97iYiv.js",revision:null},{url:"assets/vendor-I-qLDgBd.js",revision:null},{url:"favicon.ico",revision:"499dd941854358cb980b5bbf976d74e3"},{url:"favicon.svg",revision:"499dd941854358cb980b5bbf976d74e3"},{url:"index.html",revision:"4e031d9a73add4c41cbb2fe80e25f8db"},{url:"registerSW.js",revision:"1872c500de691dce40960bb85481de07"},{url:"screenshot-desktop.png",revision:"342de305b8543e0c494bf7bd8bdb6b7b"},{url:"social-preview.svg",revision:"cfc116c266e2038e6749bb1551af5e6d"},{url:"test-api-connection.html",revision:"31f7a3a0b7f6cdb3f656f7cc58c65bd0"},{url:"favicon.ico",revision:"499dd941854358cb980b5bbf976d74e3"},{url:"manifest.webmanifest",revision:"2ea0163c5f69c4c0e2bc5b981c4622a9"}],{}),e.cleanupOutdatedCaches(),e.registerRoute(new e.NavigationRoute(e.createHandlerBoundToURL("index.html"))),e.registerRoute(/^https:\/\/fonts\.googleapis\.com\/.*/i,new e.CacheFirst({cacheName:"google-fonts-cache",plugins:[new e.ExpirationPlugin({maxEntries:10,maxAgeSeconds:31536e3})]}),"GET"),e.registerRoute(/\/api\/.*/i,new e.NetworkFirst({cacheName:"api-cache",plugins:[new e.ExpirationPlugin({maxEntries:100,maxAgeSeconds:3600})]}),"GET")});
+// Service Worker for ASAgents Platform
+// Provides basic caching and offline functionality
+
+const CACHE_NAME = 'asagents-v1';
+const urlsToCache = [
+  '/',
+  '/static/js/bundle.js',
+  '/static/css/main.css',
+  '/manifest.json'
+];
+
+// Install event
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+// Fetch event
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Return cached version or fetch from network
+        return response || fetch(event.request);
+      })
+  );
+});

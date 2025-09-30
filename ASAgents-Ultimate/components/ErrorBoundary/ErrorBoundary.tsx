@@ -22,7 +22,7 @@ interface State {
  * and different fallback strategies based on error level
  */
 
-export class ErrorBoundary extends Component<Props, State> {
+export class ErrorBoundary extends React.Component<Props, State> {
   private resetTimeoutId: number | null = null;
 
   public state: State = {

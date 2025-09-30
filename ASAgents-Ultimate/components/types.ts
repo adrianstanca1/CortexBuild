@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Component-specific types
 export interface ComponentBaseProps {
   className?: string;

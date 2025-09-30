@@ -206,16 +206,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
-    if (file.type.startsWith('image/')) {
-        return <Image className="w-5 h-5 text-blue-500" />;
-    } else if (file.type === 'application/pdf') {
-        return <FileText className="w-5 h-5 text-red-500" />;
-    } else if (file.type.includes('drawing') || file.name.toLowerCase().includes('dwg')) {
-        return <Zap className="w-5 h-5 text-green-500" />;
-    } else {
-        return <File className="w-5 h-5 text-gray-500" />;
-    }
-};
+
+    const getFileIcon = (file: FileWithProgress) => {
+        if (file.type.startsWith('image/')) {
+            return <Image className="w-5 h-5 text-blue-500" />;
+        } else if (file.type === 'application/pdf') {
+            return <FileText className="w-5 h-5 text-red-500" />;
+        } else if (file.type.includes('drawing') || file.name.toLowerCase().includes('dwg')) {
+            return <Zap className="w-5 h-5 text-green-500" />;
+        } else {
+            return <File className="w-5 h-5 text-gray-500" />;
+        }
+    };
 
 const getStatusIcon = (file: FileWithProgress) => {
     switch (file.status) {
@@ -349,11 +351,12 @@ return (
         {isUploading && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                 <div className="text-sm text-blue-700">
-                    Uploading files... Please wait.
+                                    Uploading files... Please wait.
                 </div>
             </div>
         )}
     </div>
-);
+    );
+};
 
 export default FileUpload;

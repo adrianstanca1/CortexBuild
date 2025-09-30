@@ -1,21 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store';
+import { apiClient } from '../lib/api';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const setUser = useAuthStore((state) => state.setUser);
+  const setLoading = useAuthStore((state) => state.setLoading);
+  const setError = useAuthStore((state) => state.setError);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const handleDemoLogin = () => {
-    // Demo login
-    setUser({
-      id: 'demo-user-1',
-      email: 'demo@asagents.com',
-      firstName: 'Demo',
-      lastName: 'User',
-      role: 'admin',
-    });
-    navigate('/dashboard');
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setLocalError(null);
+    
+    try {
+      // Try to login with demo credentials
+      const response = await apiClient.auth.login('demo@asagents.com', 'demo123');
+      
+      // Handle response based on structure (check if data is nested)
+      const data = response.data || response;
+      
+      if (data.token) {
+        localStorage.setItem('auth-token', data.token);
+        if (data.refreshToken) {
+          localStorage.setItem('refresh-token', data.refreshToken);
+        }
+      }
+      
+      // Set user in store - normalize the user object
+      const user = data.user || data;
+      setUser({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || user.name?.split(' ')[0] || 'Demo',
+        lastName: user.lastName || user.name?.split(' ')[1] || 'User',
+        role: user.role || 'admin',
+      });
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      
+      // Fallback to demo user if backend is not available
+      console.log('Backend unavailable, using demo mode');
+      setUser({
+        id: 'demo-user-1',
+        email: 'demo@asagents.com',
+        firstName: 'Demo',
+        lastName: 'User',
+        role: 'admin',
+      });
+      navigate('/dashboard');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

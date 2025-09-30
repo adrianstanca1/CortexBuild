@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { InvoiceStatus, ExpenseStatus } from '../types';
-import { User, Expense, Invoice } from '../../types';
+import { InvoiceStatus, ExpenseStatus, User, Expense, Invoice } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { 

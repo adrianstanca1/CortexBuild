@@ -19,6 +19,9 @@ const registeredEmails = new Set<string>();
 // Simple delay function for simulating API calls
 const delay = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Helper type for backward compatibility - allows string IDs or options object
+type MaybeOptions = string | { signal?: AbortSignal } | undefined;
+
 // Mock data for testing
 const mockCompany: Company = {
   id: '1',
@@ -388,17 +391,17 @@ export const api = {
     return [];
   },
 
-  createInvoice: async (invoice: any, companyId?: string, options?: { signal?: AbortSignal }) => {
+  createInvoice: async (invoice: any, companyIdOrOptions?: string | { signal?: AbortSignal }, options?: { signal?: AbortSignal }) => {
     await delay();
     return { id: Date.now().toString(), ...invoice };
   },
 
-  updateInvoice: async (invoiceId: string, updates: any, options?: { signal?: AbortSignal }) => {
+  updateInvoice: async (invoiceId: string, updates: any, companyIdOrOptions?: string | { signal?: AbortSignal }, options?: { signal?: AbortSignal }) => {
     await delay();
     return { id: invoiceId, ...updates };
   },
 
-  recordPaymentForInvoice: async (invoiceId: string, payment: any, options?: { signal?: AbortSignal }) => {
+  recordPaymentForInvoice: async (invoiceId: string, payment: any, optionsOrUserId?: MaybeOptions, options?: { signal?: AbortSignal }) => {
     await delay();
     return { id: Date.now().toString(), ...payment };
   },

@@ -23,7 +23,7 @@ interface ErrorBoundaryProps {
   level?: 'page' | 'component' | 'critical';
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private retryTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(props: ErrorBoundaryProps) {

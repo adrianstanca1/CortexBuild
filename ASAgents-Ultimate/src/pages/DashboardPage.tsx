@@ -1,6 +1,6 @@
 import React from 'react';
-import { EnhancedDashboard } from 'components/dashboard/EnhancedDashboard';
+import { SimpleDashboard } from './SimpleDashboard';
 
 export const DashboardPage: React.FC = () => {
-  return <EnhancedDashboard />;
+  return <SimpleDashboard />;
 };

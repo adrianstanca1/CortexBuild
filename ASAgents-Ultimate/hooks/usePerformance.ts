@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import React from 'react';
 import {
   performanceMonitor,
   apiCache,

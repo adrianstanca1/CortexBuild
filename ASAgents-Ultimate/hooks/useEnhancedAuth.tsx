@@ -1,5 +1,6 @@
 // React Hook for Enhanced Dual Backend Authentication
 import { useState, useEffect, useCallback, useContext, createContext } from 'react';
+import React from 'react';
 import { enhancedAuthService, type AuthState, type AuthContextType } from '../services/enhancedAuthService';
 import type { LoginCredentials } from '../types';
 

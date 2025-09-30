@@ -124,6 +124,14 @@ export interface Configuration {
   type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   environment?: string;
   updatedAt: Date;
+  // Additional properties for ConfigurationManager
+  description?: string;
+  tags?: string[];
+  isSecret?: boolean;
+  isRequired?: boolean;
+  defaultValue?: any;
+  validation?: any;
+  createdAt?: Date;
 }
 
 export interface FeatureFlag {
@@ -140,13 +148,18 @@ export interface ConfigurationManagerConfig extends ManagerConfig {
 }
 
 // Monitoring Manager types
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+
 export interface LogEntry {
   id: string;
-  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  level: LogLevel;
   message: string;
   timestamp: Date;
   metadata?: Record<string, any>;
   stack?: string;
+  // Additional properties
+  category?: string;
+  userId?: string;
 }
 
 export interface Metric {
@@ -155,6 +168,8 @@ export interface Metric {
   unit?: string;
   tags?: Record<string, string>;
   timestamp: Date;
+  // Additional properties
+  type?: string;
 }
 
 export interface Alert {
@@ -165,6 +180,12 @@ export interface Alert {
   timestamp: Date;
   resolved: boolean;
   metadata?: Record<string, any>;
+  // Additional properties
+  name?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  enabled?: boolean;
+  lastTriggered?: Date;
+  channels?: string[];
 }
 
 export interface MonitoringManagerConfig extends ManagerConfig {
@@ -197,6 +218,9 @@ export interface SecretsManagerConfig extends ManagerConfig {
   cacheTTL?: number;
   rotationEnabled?: boolean;
   rotationInterval?: number;
+  defaultRotationInterval?: number; // Default rotation interval in milliseconds
+  encryptionAlgorithm?: string; // Encryption algorithm (e.g., 'aes-256-cbc')
+  auditLogging?: boolean; // Enable audit logging
 }
 
 export interface SecurityManagerConfig extends ManagerConfig {
@@ -225,7 +249,7 @@ export class ManagerError extends Error {
 
 // Secrets Manager types
 export type Environment = 'development' | 'staging' | 'production' | 'test';
-export type SecretType = 'api_key' | 'password' | 'token' | 'certificate' | 'key_pair' | 'config';
+export type SecretType = 'api_key' | 'password' | 'token' | 'certificate' | 'key_pair' | 'config' | 'jwt_secret' | 'encryption_key';
 
 export interface Secret {
   id: string;
@@ -237,6 +261,14 @@ export interface Secret {
   updatedAt: Date;
   expiresAt?: Date;
   rotationConfig?: SecretRotationConfig;
+  // Additional properties for SecretsManager
+  key?: string;
+  encryptedValue?: string;
+  environment?: Environment;
+  isActive?: boolean;
+  description?: string;
+  salt?: string;
+  iv?: string;
 }
 
 export interface SecretValue {
@@ -253,6 +285,11 @@ export interface SecretMetadata {
   version: number;
   previousVersions?: string[];
   type?: SecretType;
+  // Additional properties for SecretsManager
+  key?: string;
+  expiresAt?: Date;
+  rotationInterval?: number;
+  permissions?: string[];
 }
 
 export interface SecretAccess {
@@ -262,6 +299,7 @@ export interface SecretAccess {
   action: 'read' | 'write' | 'delete' | 'rotate';
   success: boolean;
   metadata?: Record<string, any>;
+  userId?: string;
 }
 
 export interface SecretRotationConfig {

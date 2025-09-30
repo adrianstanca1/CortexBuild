@@ -2,6 +2,7 @@
  * ASAgents Platform - Production Monitoring System
  * Comprehensive monitoring with performance metrics, error tracking, and alerting
  */
+import React from 'react';
 
 interface PerformanceMetric {
   name: string;
