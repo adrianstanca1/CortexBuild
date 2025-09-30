@@ -1,0 +1,513 @@
+
+> asagents-ultimate@1.0.0 type-check
+> tsc --noEmit
+
+components/ChatView.tsx(165,79): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/ClientsView.tsx(439,25): error TS2345: Argument of type '{}' is not assignable to parameter of type 'SetStateAction<ClientInsights>'.
+components/dashboard/EnhancedDashboard.tsx(46,57): error TS2554: Expected 0-1 arguments, but got 2.
+components/dashboard/PrincipalAdminDashboard.tsx(151,44): error TS2339: Property 'tenants' does not exist on type 'any[]'.
+components/dashboard/PrincipalAdminDashboard.tsx(152,44): error TS2339: Property 'source' does not exist on type 'any[]'.
+components/dashboard/PrincipalAdminDashboard.tsx(153,49): error TS2339: Property 'generatedAt' does not exist on type 'any[]'.
+components/dashboard/PrincipalAdminDashboard.tsx(154,26): error TS2345: Argument of type '{ totalCompanies: number; totalUsers: number; totalProjects: number; activeUsers: number; }' is not assignable to parameter of type 'SetStateAction<PlatformMetricsResponse>'.
+components/dashboard/PrincipalAdminDashboard.tsx(155,45): error TS2339: Property 'generatedAt' does not exist on type '{ totalCompanies: number; totalUsers: number; totalProjects: number; activeUsers: number; }'.
+components/enhanced/EnhancedDashboard.tsx(414,9): error TS2322: Type 'string | Date' is not assignable to type 'string'.
+  Type 'Date' is not assignable to type 'string'.
+components/enhanced/EnhancedKanbanBoard.tsx(93,53): error TS2322: Type '{ priority: TodoPriority; size: string; }' is not assignable to type 'IntrinsicAttributes & { priority: TodoPriority; }'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & { priority: TodoPriority; }'.
+components/enhanced/EnhancedKanbanBoard.tsx(227,21): error TS2322: Type '{ key: string; todo: Todo; allTodos: Todo[]; user: User; personnel: User[]; isSelected: boolean; onSelectionChange: (taskId: string | number, selected: boolean) => void; onDragStart: () => void; onEdit: (task: Todo) => void; isCompact: true; }' is not assignable to type 'IntrinsicAttributes & TaskCardProps'.
+  Property 'allTodos' does not exist on type 'IntrinsicAttributes & TaskCardProps'.
+components/enhanced/EnhancedKanbanBoard.tsx(263,13): error TS2322: Type '{ key: string; todo: Todo; allTodos: Todo[]; user: User; personnel: User[]; isSelected: boolean; onSelectionChange: (taskId: string | number, selected: boolean) => void; onDragStart: () => void; onEdit: (task: Todo) => void; }' is not assignable to type 'IntrinsicAttributes & TaskCardProps'.
+  Property 'allTodos' does not exist on type 'IntrinsicAttributes & TaskCardProps'.
+components/enhanced/GlobalSearch.tsx(303,15): error TS2322: Type 'string | Date' is not assignable to type 'string'.
+  Type 'Date' is not assignable to type 'string'.
+components/financial/FinancialReports.tsx(2,10): error TS2305: Module '"../types"' has no exported member 'InvoiceStatus'.
+components/financial/FinancialReports.tsx(2,25): error TS2305: Module '"../types"' has no exported member 'ExpenseStatus'.
+components/financials/InvoiceModal.tsx(106,72): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/financials/PaymentModal.tsx(31,89): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/KanbanBoard.tsx(53,13): error TS2322: Type '{ key: string; todo: Todo; allTodos: Todo[]; user: User; personnel: User[]; isSelected: boolean; onSelectionChange: (id: string | number) => void; onDragStart: () => void; }' is not assignable to type 'IntrinsicAttributes & TaskCardProps'.
+  Property 'todo' does not exist on type 'IntrinsicAttributes & TaskCardProps'.
+components/MapView.tsx(95,91): error TS2322: Type '{ children: (Element | Element[])[]; ref: MutableRefObject<Map>; center: [number, number]; zoom: number; scrollWheelZoom: true; onMoveEnd: () => void; onZoomEnd: () => void; onMount: () => void; }' is not assignable to type 'IntrinsicAttributes & MapContainerProps & RefAttributes<Map>'.
+  Property 'onMoveEnd' does not exist on type 'IntrinsicAttributes & MapContainerProps & RefAttributes<Map>'.
+components/media/MediaGallery.tsx(357,13): error TS2322: Type '"default" | "outline"' is not assignable to type '"success" | "secondary" | "danger" | "outline" | "primary" | "ghost"'.
+  Type '"default"' is not assignable to type '"success" | "secondary" | "danger" | "outline" | "primary" | "ghost"'.
+components/media/MediaGallery.tsx(364,13): error TS2322: Type '"default" | "outline"' is not assignable to type '"success" | "secondary" | "danger" | "outline" | "primary" | "ghost"'.
+  Type '"default"' is not assignable to type '"success" | "secondary" | "danger" | "outline" | "primary" | "ghost"'.
+components/media/MediaRenderer.tsx(316,12): error TS2322: Type '{ src: string; alt: string; className: string; ref: MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>; onLoad: () => void; onError: (err: any) => void; style: { ...; }; }' is not assignable to type 'DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>'.
+  Type '{ src: string; alt: string; className: string; ref: MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>; onLoad: () => void; onError: (err: any) => void; style: { ...; }; }' is not assignable to type 'ClassAttributes<HTMLImageElement>'.
+    Types of property 'ref' are incompatible.
+      Type 'MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>' is not assignable to type 'LegacyRef<HTMLImageElement>'.
+        Type 'MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>' is not assignable to type 'RefObject<HTMLImageElement>'.
+          Types of property 'current' are incompatible.
+            Type 'HTMLImageElement | HTMLVideoElement | HTMLAudioElement' is not assignable to type 'HTMLImageElement'.
+              Type 'HTMLVideoElement' is missing the following properties from type 'HTMLImageElement': align, alt, border, complete, and 18 more.
+components/media/MediaRenderer.tsx(326,12): error TS2322: Type '{ src: string; autoPlay: boolean; onPlay: () => void; onPause: () => void; onTimeUpdate: () => void; className: string; ref: MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>; onLoad: () => void; onError: (err: any) => void; style: { ...; }; }' is not assignable to type 'DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>'.
+  Type '{ src: string; autoPlay: boolean; onPlay: () => void; onPause: () => void; onTimeUpdate: () => void; className: string; ref: MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>; onLoad: () => void; onError: (err: any) => void; style: { ...; }; }' is not assignable to type 'ClassAttributes<HTMLVideoElement>'.
+    Types of property 'ref' are incompatible.
+      Type 'MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>' is not assignable to type 'LegacyRef<HTMLVideoElement>'.
+        Type 'MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>' is not assignable to type 'RefObject<HTMLVideoElement>'.
+          Types of property 'current' are incompatible.
+            Type 'HTMLImageElement | HTMLVideoElement | HTMLAudioElement' is not assignable to type 'HTMLVideoElement'.
+              Type 'HTMLImageElement' is missing the following properties from type 'HTMLVideoElement': disablePictureInPicture, onenterpictureinpicture, onleavepictureinpicture, playsInline, and 53 more.
+components/media/MediaRenderer.tsx(339,12): error TS2322: Type '{ src: string; autoPlay: boolean; onPlay: () => void; onPause: () => void; onTimeUpdate: () => void; className: string; ref: MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>; onLoad: () => void; onError: (err: any) => void; style: { ...; }; }' is not assignable to type 'DetailedHTMLProps<AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>'.
+  Type '{ src: string; autoPlay: boolean; onPlay: () => void; onPause: () => void; onTimeUpdate: () => void; className: string; ref: MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>; onLoad: () => void; onError: (err: any) => void; style: { ...; }; }' is not assignable to type 'ClassAttributes<HTMLAudioElement>'.
+    Types of property 'ref' are incompatible.
+      Type 'MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>' is not assignable to type 'LegacyRef<HTMLAudioElement>'.
+        Type 'MutableRefObject<HTMLImageElement | HTMLVideoElement | HTMLAudioElement>' is not assignable to type 'RefObject<HTMLAudioElement>'.
+          Types of property 'current' are incompatible.
+            Type 'HTMLImageElement | HTMLVideoElement | HTMLAudioElement' is not assignable to type 'HTMLAudioElement'.
+              Type 'HTMLImageElement' is missing the following properties from type 'HTMLAudioElement': autoplay, buffered, controls, currentTime, and 42 more.
+components/media/MediaRenderer.tsx(427,63): error TS2322: Type '{ children: Element[]; className: string; ref: MutableRefObject<HTMLDivElement>; }' is not assignable to type 'IntrinsicAttributes & CardProps'.
+  Property 'ref' does not exist on type 'IntrinsicAttributes & CardProps'.
+components/modals/CreateProjectModal.tsx(69,20): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/modals/CreateProjectModal.tsx(86,73): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+components/modals/TaskModal.tsx(55,63): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/multimodal/MultimodalAnalytics.tsx(309,59): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+components/multimodal/MultimodalInput.tsx(143,9): error TS2322: Type '"text_input"' is not assignable to type '"url" | "upload" | "generated"'.
+components/multimodal/MultimodalSearch.tsx(46,9): error TS2353: Object literal may only specify known properties, and 'query' does not exist in type 'MultimodalSearchQuery'.
+components/multimodal/MultimodalViewer.tsx(205,25): error TS2322: Type '"purple"' is not assignable to type '"yellow" | "green" | "blue" | "red" | "gray"'.
+components/MyDayView.tsx(75,93): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/MyDayView.tsx(100,21): error TS2339: Property 'prioritizedTaskIds' does not exist on type 'any[]'.
+components/MyDayView.tsx(100,81): error TS2554: Expected 1 arguments, but got 3.
+components/ProjectDetailView.tsx(111,20): error TS2352: Conversion of type 'string' to type 'User' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+components/projects/ProjectForm.tsx(58,5): error TS2820: Type '"planning"' is not assignable to type 'ProjectStatus'. Did you mean '"PLANNING"'?
+components/projects/ProjectForm.tsx(75,58): error TS2551: Property 'toISOString' does not exist on type 'string'. Did you mean 'toString'?
+components/projects/ProjectForm.tsx(76,52): error TS2551: Property 'toISOString' does not exist on type 'string'. Did you mean 'toString'?
+components/projects/ProjectForm.tsx(78,9): error TS2322: Type 'string | Location' is not assignable to type 'string'.
+  Type 'Location' is not assignable to type 'string'.
+components/projects/ProjectForm.tsx(79,9): error TS2322: Type '"low" | "high" | "critical" | "medium"' is not assignable to type '"low" | "high" | "medium"'.
+  Type '"critical"' is not assignable to type '"low" | "high" | "medium"'.
+components/projects/ProjectForm.tsx(80,9): error TS2322: Type '"planning" | ProjectStatus' is not assignable to type 'ProjectStatus'.
+  Type '"planning"' is not assignable to type 'ProjectStatus'. Did you mean '"PLANNING"'?
+components/projects/ProjectForm.tsx(86,24): error TS2551: Property 'toISOString' does not exist on type 'string'. Did you mean 'toString'?
+components/projects/ProjectForm.tsx(139,9): error TS2322: Type 'Date' is not assignable to type 'string'.
+components/projects/ProjectForm.tsx(140,9): error TS2322: Type 'Date' is not assignable to type 'string'.
+components/projects/ProjectForm.tsx(142,9): error TS2322: Type 'string' is not assignable to type 'Location'.
+components/projects/ProjectForm.tsx(147,9): error TS2322: Type '{ id: string; name: string; date: Date; completed: boolean; }[]' is not assignable to type 'ProjectMilestone[]'.
+  Type '{ id: string; name: string; date: Date; completed: boolean; }' is missing the following properties from type 'ProjectMilestone': projectId, dueDate, status
+components/projects/ProjectGantt.tsx(33,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+components/projects/ProjectGantt.tsx(34,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+components/projects/ProjectGantt.tsx(46,11): error TS2322: Type 'string' is not assignable to type 'Date'.
+components/projects/ProjectGantt.tsx(47,11): error TS2322: Type 'string' is not assignable to type 'Date'.
+components/projects/ProjectsView.tsx(135,50): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/projects/ProjectsView.tsx(182,8): error TS2322: Type '{ children: Element; title: string; }' is not assignable to type 'IntrinsicAttributes & ViewHeaderProps'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & ViewHeaderProps'.
+components/projects/ProjectsView.tsx(202,93): error TS2339: Property 'totalBudget' does not exist on type 'ProjectPortfolioSummary'.
+components/projects/ProjectsView.tsx(206,93): error TS2339: Property 'totalSpent' does not exist on type 'ProjectPortfolioSummary'.
+components/projects/ProjectTimeline.tsx(32,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+components/projects/ProjectTimeline.tsx(43,9): error TS2322: Type 'string' is not assignable to type 'Date'.
+components/projects/ProjectTimeline.tsx(55,11): error TS2322: Type 'string' is not assignable to type 'Date'.
+components/projects/ProjectTimeline.tsx(77,62): error TS2339: Property 'getTime' does not exist on type 'string'.
+components/projects/ProjectTimeline.tsx(78,62): error TS2339: Property 'getTime' does not exist on type 'string'.
+components/projects/ProjectTimeline.tsx(105,39): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Date'.
+components/projects/ProjectTimeline.tsx(106,37): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Date'.
+components/projects/ProjectTimeline.tsx(190,58): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Date'.
+components/projects/ProjectTimeline.tsx(251,35): error TS2367: This comparison appears to be unintentional because the types 'ProjectStatus' and '"active"' have no overlap.
+components/projects/ProjectTimeline.tsx(265,35): error TS2365: Operator '<' cannot be applied to types 'string' and 'Date'.
+components/projects/ProjectTimeline.tsx(265,61): error TS2367: This comparison appears to be unintentional because the types 'ProjectStatus' and '"completed"' have no overlap.
+components/SettingsView.tsx(48,37): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+components/SettingsView.tsx(58,29): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+components/SettingsView.tsx(74,80): error TS2339: Property 'summary' does not exist on type 'FailedActionForUI'.
+components/SettingsView.tsx(78,96): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+components/SettingsView.tsx(79,92): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+components/tools/AIAdvisor.tsx(201,7): error TS2322: Type '{ role: string; text: string; }[]' is not assignable to type 'ChatMessage[]'.
+  Type '{ role: string; text: string; }' is not assignable to type 'ChatMessage'.
+    Types of property 'role' are incompatible.
+      Type 'string' is not assignable to type '"user" | "assistant"'.
+components/tools/AIAdvisor.tsx(202,18): error TS2345: Argument of type '{ role: string; text: string; }[]' is not assignable to parameter of type 'SetStateAction<ChatMessage[]>'.
+  Type '{ role: string; text: string; }[]' is not assignable to type 'ChatMessage[]'.
+    Type '{ role: string; text: string; }' is not assignable to type 'ChatMessage'.
+      Types of property 'role' are incompatible.
+        Type 'string' is not assignable to type '"user" | "assistant"'.
+components/tools/BidPackageGenerator.tsx(29,88): error TS2554: Expected 2 arguments, but got 3.
+components/tools/ResourceScheduler.tsx(88,3): error TS1184: Modifiers cannot appear here.
+components/tools/ResourceScheduler.tsx(145,100): error TS2554: Expected 2 arguments, but got 3.
+components/tools/ResourceScheduler.tsx(149,78): error TS2554: Expected 1 arguments, but got 2.
+components/tools/ResourceScheduler.tsx(162,56): error TS2554: Expected 1 arguments, but got 2.
+components/ui/FileUpload.tsx(209,9): error TS2552: Cannot find name 'file'. Did you mean 'files'?
+components/ui/FileUpload.tsx(211,16): error TS2552: Cannot find name 'file'. Did you mean 'files'?
+components/ui/FileUpload.tsx(213,16): error TS2552: Cannot find name 'file'. Did you mean 'files'?
+components/ui/FileUpload.tsx(213,49): error TS2552: Cannot find name 'file'. Did you mean 'files'?
+components/ui/FileUpload.tsx(231,1): error TS1108: A 'return' statement can only be used within a function body.
+components/ui/StatusBadge.tsx(28,9): error TS2739: Type '{ REPORTED: { label: string; color: string; indicator: string; }; UNDER_INVESTIGATION: { label: string; color: string; indicator: string; }; RESOLVED: { label: string; color: string; indicator: string; }; }' is missing the following properties from type 'Record<IncidentStatus, { label: string; color: string; indicator: string; }>': OPEN, CLOSED
+components/users/UserActivity.tsx(262,25): error TS2339: Property 'name' does not exist on type 'User'.
+components/users/UserForm.tsx(52,17): error TS2339: Property 'name' does not exist on type 'User'.
+components/users/UserForm.tsx(55,21): error TS2339: Property 'location' does not exist on type 'User'.
+components/users/UserForm.tsx(56,5): error TS2322: Type '"user" | Role' is not assignable to type 'Role'.
+  Type '"user"' is not assignable to type 'Role'.
+components/users/UserForm.tsx(92,7): error TS2322: Type 'string' is not assignable to type 'string[]'.
+components/users/UserForm.tsx(113,7): error TS2322: Type 'string[]' is not assignable to type 'Permission[]'.
+  Type 'string' is not assignable to type 'Permission'.
+components/users/UserForm.tsx(131,12): error TS2678: Type '"owner"' is not comparable to type 'Role'.
+components/users/UserForm.tsx(133,12): error TS2678: Type '"admin"' is not comparable to type 'Role'.
+components/users/UserForm.tsx(135,12): error TS2678: Type '"manager"' is not comparable to type 'Role'.
+components/users/UserForm.tsx(137,12): error TS2678: Type '"user"' is not comparable to type 'Role'.
+components/users/UserList.tsx(106,9): error TS2367: This comparison appears to be unintentional because the types 'Role' and '"owner"' have no overlap.
+components/users/UserList.tsx(108,9): error TS2367: This comparison appears to be unintentional because the types 'Role' and '"admin"' have no overlap.
+components/users/UserList.tsx(108,41): error TS2367: This comparison appears to be unintentional because the types 'Role' and '"owner"' have no overlap.
+components/users/UserList.tsx(110,9): error TS2367: This comparison appears to be unintentional because the types 'Role' and '"manager"' have no overlap.
+components/users/UserList.tsx(110,43): error TS2367: This comparison appears to be unintentional because the types 'Role' and '"user"' have no overlap.
+components/users/UserList.tsx(200,33): error TS2339: Property 'name' does not exist on type 'User'.
+components/users/UserList.tsx(207,77): error TS2339: Property 'name' does not exist on type 'User'.
+components/users/UserList.tsx(287,29): error TS2339: Property 'location' does not exist on type 'User'.
+components/users/UserList.tsx(290,39): error TS2339: Property 'location' does not exist on type 'User'.
+components/utils/finance.ts(51,26): error TS2367: This comparison appears to be unintentional because the types 'InvoiceStatus.DRAFT | InvoiceStatus.SENT | InvoiceStatus.OVERDUE | InvoiceStatus.CANCELLED' and 'InvoiceStatus.PAID' have no overlap.
+components/views/ClientsView.tsx(386,8): error TS2741: Property 'title' is missing in type '{ view: string; actions: Element; meta: ({ label: string; value: string; helper: string; } | { label: string; value: string; helper: string; indicator: "positive" | "neutral"; })[]; }' but required in type 'ViewHeaderProps'.
+components/views/InvoicesView.tsx(3,15): error TS2614: Module '"../../services/mockApi"' has no exported member 'backendCapabilities'. Did you mean to use 'import backendCapabilities from "../../services/mockApi"' instead?
+components/views/InvoicesView.tsx(53,62): error TS2322: Type 'string | Date' is not assignable to type 'string'.
+  Type 'Date' is not assignable to type 'string'.
+components/views/InvoicesView.tsx(55,73): error TS2551: Property 'issuedAt' does not exist on type 'Invoice'. Did you mean 'issueDate'?
+components/views/InvoicesView.tsx(165,15): error TS2339: Property 'getInvoiceInsights' does not exist on type '{ getProjectTemplates: (companyId: string, options?: { signal?: AbortSignal; }) => Promise<any[]>; createProjectTemplate: (template: any, userId: string) => Promise<any>; ... 77 more ...; prioritizeTasks: (tasks: any[]) => Promise<...>; }'.
+components/views/InvoicesView.tsx(450,83): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/views/InvoicesView.tsx(479,96): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/views/InvoicesView.tsx(612,40): error TS2339: Property 'id' does not exist on type '{ amount: number; date: Date; }'.
+components/views/InvoicesView.tsx(617,89): error TS2345: Argument of type 'Date' is not assignable to parameter of type 'string'.
+components/views/InvoicesView.tsx(620,38): error TS2339: Property 'method' does not exist on type '{ amount: number; date: Date; }'.
+components/views/InvoicesView.tsx(621,38): error TS2339: Property 'reference' does not exist on type '{ amount: number; date: Date; }'.
+components/views/InvoicesView.tsx(621,68): error TS2339: Property 'reference' does not exist on type '{ amount: number; date: Date; }'.
+components/views/MyDayView.tsx(75,93): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/views/MyDayView.tsx(100,21): error TS2339: Property 'prioritizedTaskIds' does not exist on type 'any[]'.
+components/views/MyDayView.tsx(100,81): error TS2554: Expected 1 arguments, but got 3.
+components/views/MyDayView.tsx(156,21): error TS2322: Type '{ todos: Todo[]; allTodos: Todo[]; user: User; personnel: User[]; onTaskStatusChange: (taskId: string | number, newStatus: TodoStatus) => Promise<void>; onTaskSelectionChange: (taskId: string | number) => void; selectedTaskIds: Set<...>; }' is not assignable to type 'IntrinsicAttributes & KanbanBoardProps'.
+  Property 'todos' does not exist on type 'IntrinsicAttributes & KanbanBoardProps'.
+components/views/SafetyView.tsx(37,107): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/views/SafetyView.tsx(77,74): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/views/SafetyView.tsx(119,37): error TS2322: Type '{ user: User; addToast: (m: string, t: "error" | "success") => void; }' is not assignable to type 'IntrinsicAttributes & SafetyAnalysisProps'.
+  Property 'user' does not exist on type 'IntrinsicAttributes & SafetyAnalysisProps'.
+components/views/SafetyView.tsx(147,5): error TS1184: Modifiers cannot appear here.
+components/views/SettingsView.tsx(6,5): error TS2614: Module '"../../config/environment"' has no exported member 'getEnvironmentSnapshot'. Did you mean to use 'import getEnvironmentSnapshot from "../../config/environment"' instead?
+components/views/SettingsView.tsx(7,5): error TS2614: Module '"../../config/environment"' has no exported member 'refreshEnvironment'. Did you mean to use 'import refreshEnvironment from "../../config/environment"' instead?
+components/views/SettingsView.tsx(8,10): error TS2724: '"../../config/environment"' has no exported member named 'EnvironmentShape'. Did you mean 'environment'?
+components/views/TeamView.tsx(89,82): error TS2559: Type 'string' has no properties in common with type '{ signal?: AbortSignal; }'.
+components/views/TeamView.tsx(92,91): error TS2554: Expected 2-3 arguments, but got 4.
+components/views/TeamView.tsx(252,5): error TS1184: Modifiers cannot appear here.
+components/views/TimeTrackingView.tsx(8,19): error TS2614: Module '"./MapView"' has no exported member 'MapMarkerData'. Did you mean to use 'import MapMarkerData from "./MapView"' instead?
+components/views/TimeTrackingView.tsx(183,39): error TS2322: Type '{ markers: MapMarkerData[]; }' is not assignable to type 'IntrinsicAttributes & MapViewProps'.
+  Property 'markers' does not exist on type 'IntrinsicAttributes & MapViewProps'.
+components/WhiteboardView.tsx(119,5): error TS1184: Modifiers cannot appear here.
+components/WhiteboardView.tsx(160,77): error TS2554: Expected 1 arguments, but got 2.
+components/WhiteboardView.tsx(172,61): error TS2554: Expected 2 arguments, but got 3.
+components/WhiteboardView.tsx(183,52): error TS2554: Expected 1 arguments, but got 2.
+components/workflow/WorkflowManagement.tsx(261,30): error TS2322: Type '"default" | "secondary" | "destructive"' is not assignable to type '"default" | "success" | "secondary" | "warning" | "danger" | "outline"'.
+  Type '"destructive"' is not assignable to type '"default" | "success" | "secondary" | "warning" | "danger" | "outline"'.
+contexts/Auth0Context.tsx(2,22): error TS2307: Cannot find module '@auth0/auth0-spa-js' or its corresponding type declarations.
+contexts/AuthContext.tsx(11,70): error TS2304: Cannot find name 'AuthSuccessPayload'.
+contexts/AuthContext.tsx(12,94): error TS2304: Cannot find name 'AuthSuccessPayload'.
+contexts/AuthContext.tsx(112,26): error TS2339: Property 'mfaRequired' does not exist on type 'AuthSuccessPayload'.
+contexts/AuthContext.tsx(114,62): error TS2551: Property 'userId' does not exist on type 'AuthSuccessPayload'. Did you mean 'user'?
+contexts/AuthContext.tsx(148,93): error TS2304: Cannot find name 'AuthSuccessPayload'.
+contexts/AuthContext.tsx(182,117): error TS2304: Cannot find name 'AuthSuccessPayload'.
+contexts/SecurityContext.tsx(119,22): error TS2339: Property 'tenantId' does not exist on type 'User'.
+hooks/useDashboardData.ts(7,26): error TS2673: Constructor of class 'AnalyticsService' is private and only accessible within the class declaration.
+hooks/useDashboardData.ts(32,34): error TS2339: Property 'getProjects' does not exist on type 'EnhancedDashboardService'.
+hooks/useDashboardData.ts(33,34): error TS2339: Property 'getFinancials' does not exist on type 'EnhancedDashboardService'.
+hooks/useDashboardData.ts(34,34): error TS2339: Property 'getTeamData' does not exist on type 'EnhancedDashboardService'.
+hooks/useDashboardData.ts(36,34): error TS2339: Property 'getRiskAssessment' does not exist on type 'EnhancedDashboardService'.
+hooks/useDashboardData.ts(78,26): error TS2551: Property 'unsubscribe' does not exist on type 'EnhancedWebSocketService'. Did you mean 'subscribe'?
+hooks/useErrorHandling.ts(293,3): error TS2686: 'React' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+hooks/useOfflineSync.ts(3,10): error TS2614: Module '"../services/mockApi"' has no exported member 'processOfflineQueue'. Did you mean to use 'import processOfflineQueue from "../services/mockApi"' instead?
+hooks/usePerformance.ts(167,17): error TS2323: Cannot redeclare exported variable 'useRenderPerformance'.
+hooks/usePerformance.ts(167,17): error TS2393: Duplicate function implementation.
+hooks/usePerformance.ts(343,17): error TS2323: Cannot redeclare exported variable 'useRenderPerformance'.
+hooks/usePerformance.ts(343,17): error TS2393: Duplicate function implementation.
+hooks/useRealTimeSync.ts(79,9): error TS2353: Object literal may only specify known properties, and 'cacheKey' does not exist in type 'Omit<ApiRequestOptions, "body" | "method">'.
+hooks/useRealTimeSync.ts(97,50): error TS2339: Property 'version' does not exist on type '{ total?: number; page?: number; limit?: number; hasMore?: boolean; }'.
+hooks/useTasks.ts(93,43): error TS2339: Property 'remove' does not exist on type '{ list(filters?: any): Promise<ApiResponse<any>>; create(task: Partial<Task>): Promise<ApiResponse<any>>; get(id: string): Promise<...>; update(id: string, updates: Partial<...>): Promise<...>; delete(id: string): Promise<...>; complete(id: string): Promise<...>; }'.
+hooks/useValidation.ts(34,39): error TS2339: Property 'errors' does not exist on type '{ success: false; errors: string[]; } | { success: true; data: T; }'.
+  Property 'errors' does not exist on type '{ success: true; data: T; }'.
+hooks/useValidation.ts(50,34): error TS2339: Property 'pick' does not exist on type 'ZodType<T, ZodTypeDef, T>'.
+hooks/useValidation.ts(120,43): error TS2339: Property 'shape' does not exist on type 'ZodType<T, ZodTypeDef, T>'.
+lib/supabase.ts(5,30): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+lib/utils.ts(6,25): error TS2307: Cannot find module 'tailwind-merge' or its corresponding type declarations.
+services/ai.ts(137,23): error TS2448: Block-scoped variable 'environment' used before its declaration.
+services/ai/development.ts(67,7): error TS2741: Property 'extensions' is missing in type '{ id: string; name: string; language: string; capabilities: string[]; }' but required in type 'DevelopmentEnvironment'.
+services/ai/development.ts(73,7): error TS2741: Property 'extensions' is missing in type '{ id: string; name: string; language: string; capabilities: string[]; }' but required in type 'DevelopmentEnvironment'.
+services/ai/development.ts(79,7): error TS2741: Property 'extensions' is missing in type '{ id: string; name: string; language: string; capabilities: string[]; }' but required in type 'DevelopmentEnvironment'.
+services/ai/development.ts(85,7): error TS2741: Property 'extensions' is missing in type '{ id: string; name: string; language: string; framework: string; capabilities: string[]; }' but required in type 'DevelopmentEnvironment'.
+services/ai/development.ts(92,7): error TS2741: Property 'extensions' is missing in type '{ id: string; name: string; language: string; framework: string; capabilities: string[]; }' but required in type 'DevelopmentEnvironment'.
+services/ai/development.ts(99,7): error TS2741: Property 'extensions' is missing in type '{ id: string; name: string; language: string; framework: string; capabilities: string[]; }' but required in type 'DevelopmentEnvironment'.
+services/ai/development.ts(270,26): error TS2339: Property 'replace' does not exist on type 'never'.
+services/ai/development.ts(534,9): error TS2322: Type '{ react: string; 'react-dom': string; 'react-router-dom': string; }' is not assignable to type 'string'.
+services/ai/development.ts(539,9): error TS2322: Type '{ react: string; 'react-dom': string; 'react-router-dom': string; }' is not assignable to type 'string'.
+services/ai/multimodal.ts(331,20): error TS2353: Object literal may only specify known properties, and 'data' does not exist in type 'File'.
+services/ai/multimodal.ts(419,7): error TS2322: Type '{ data: string; type: string; }[]' is not assignable to type 'string[] | File[]'.
+  Type '{ data: string; type: string; }[]' is not assignable to type 'string[]'.
+    Type '{ data: string; type: string; }' is not assignable to type 'string'.
+services/ai/multimodal.ts(427,9): error TS2353: Object literal may only specify known properties, and 'data' does not exist in type 'File'.
+services/ai/multimodal.ts(434,9): error TS2353: Object literal may only specify known properties, and 'data' does not exist in type 'File'.
+services/ai/providers.ts(1,10): error TS2305: Module '"@google/genai"' has no exported member 'GoogleGenerativeAI'.
+services/ai/providers.ts(142,5): error TS1016: A required parameter cannot follow an optional parameter.
+services/ai/providers.ts(213,5): error TS1016: A required parameter cannot follow an optional parameter.
+services/ai/providers.ts(320,5): error TS1016: A required parameter cannot follow an optional parameter.
+services/ai/providers.ts(346,5): error TS1016: A required parameter cannot follow an optional parameter.
+services/apiClient.ts(380,15): error TS2484: Export declaration conflicts with exported declaration of 'ApiResponse'.
+services/apiClient.ts(380,28): error TS2484: Export declaration conflicts with exported declaration of 'ApiRequestOptions'.
+services/apiClient.ts(380,47): error TS2484: Export declaration conflicts with exported declaration of 'PaginationParams'.
+services/auth0Service.ts(1,54): error TS2307: Cannot find module '@auth0/auth0-spa-js' or its corresponding type declarations.
+services/authenticationService.ts(4,48): error TS2307: Cannot find module '@auth0/auth0-spa-js' or its corresponding type declarations.
+services/authenticationService.ts(5,46): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+services/authenticationService.ts(71,35): error TS2339: Property 'apiBaseUrl' does not exist on type '{ apiUrl: any; apiTimeout: number; auth0Domain: any; auth0ClientId: any; googleClientId: any; githubClientId: any; supabaseUrl: any; supabaseAnonKey: any; geminiApiKey: any; openaiApiKey: any; ... 7 more ...; appName: string; }'.
+services/backendApiService.ts(165,5): error TS2322: Type 'ApiResponse<unknown>' is not assignable to type 'ApiResponse<void>'.
+  Type 'unknown' is not assignable to type 'void'.
+services/connectivityService.ts(58,9): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | URL | Request, init?: RequestInit): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, and 'timeout' does not exist in type 'RequestInit'.
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit): Promise<Response>', gave the following error.
+    Object literal may only specify known properties, and 'timeout' does not exist in type 'RequestInit'.
+services/connectivityService.ts(116,27): error TS2339: Property 'testConnection' does not exist on type 'GeminiService'.
+services/database.ts(3,46): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+services/deploymentValidator.ts(515,45): error TS2339: Property 'src' does not exist on type 'Element'.
+services/dualBackendService.ts(146,9): error TS2353: Object literal may only specify known properties, and 'error' does not exist in type 'EnhancedAuthResponse'.
+services/dualBackendService.ts(258,9): error TS2322: Type '"none"' is not assignable to type '"java" | "nodejs" | "combined"'.
+services/dualBackendService.ts(354,9): error TS2322: Type '"none"' is not assignable to type '"java" | "nodejs" | "combined"'.
+services/dualBackendService.ts(446,9): error TS2353: Object literal may only specify known properties, and 'error' does not exist in type 'MultimodalProcessingResponse'.
+services/dualBackendService.ts(510,13): error TS2353: Object literal may only specify known properties, and 'aiEnhanced' does not exist in type 'Project'.
+services/dualBackendService.ts(518,13): error TS2353: Object literal may only specify known properties, and 'enterpriseFeatures' does not exist in type 'Project'.
+services/dualBackendService.ts(541,37): error TS2339: Property 'getWithFallback' does not exist on type 'DualBackendService'.
+services/dualBackendService.ts(548,35): error TS2339: Property 'getWithFallback' does not exist on type 'DualBackendService'.
+services/enhancedAuthService.ts(127,31): error TS2339: Property 'error' does not exist on type 'EnhancedAuthResponse'.
+services/enhancedAuthService.ts(283,35): error TS2551: Property 'avatarUrl' does not exist on type 'User'. Did you mean 'avatar'?
+services/enhancedBackendService.ts(34,23): error TS2339: Property 'features' does not exist on type '{ apiUrl: any; apiTimeout: number; auth0Domain: any; auth0ClientId: any; googleClientId: any; githubClientId: any; supabaseUrl: any; supabaseAnonKey: any; geminiApiKey: any; openaiApiKey: any; ... 7 more ...; appName: string; }'.
+services/enhancedBackendService.ts(35,27): error TS2339: Property 'features' does not exist on type '{ apiUrl: any; apiTimeout: number; auth0Domain: any; auth0ClientId: any; googleClientId: any; githubClientId: any; supabaseUrl: any; supabaseAnonKey: any; geminiApiKey: any; openaiApiKey: any; ... 7 more ...; appName: string; }'.
+services/enhancedBackendService.ts(117,21): error TS2339: Property 'login' does not exist on type '{ getProjectTemplates: (companyId: string, options?: { signal?: AbortSignal; }) => Promise<any[]>; createProjectTemplate: (template: any, userId: string) => Promise<any>; ... 77 more ...; prioritizeTasks: (tasks: any[]) => Promise<...>; }'.
+services/enhancedBackendService.ts(131,21): error TS2339: Property 'register' does not exist on type '{ getProjectTemplates: (companyId: string, options?: { signal?: AbortSignal; }) => Promise<any[]>; createProjectTemplate: (template: any, userId: string) => Promise<any>; ... 77 more ...; prioritizeTasks: (tasks: any[]) => Promise<...>; }'.
+services/enhancedBackendService.ts(144,21): error TS2339: Property 'logout' does not exist on type '{ getProjectTemplates: (companyId: string, options?: { signal?: AbortSignal; }) => Promise<any[]>; createProjectTemplate: (template: any, userId: string) => Promise<any>; ... 77 more ...; prioritizeTasks: (tasks: any[]) => Promise<...>; }'.
+services/enhancedBackendService.ts(159,21): error TS2339: Property 'getCurrentUser' does not exist on type '{ getProjectTemplates: (companyId: string, options?: { signal?: AbortSignal; }) => Promise<any[]>; createProjectTemplate: (template: any, userId: string) => Promise<any>; ... 77 more ...; prioritizeTasks: (tasks: any[]) => Promise<...>; }'.
+services/enhancedBackendService.ts(333,5): error TS2740: Type '{}' is missing the following properties from type 'DashboardSnapshot': projects, team, equipment, tasks, and 6 more.
+services/enhancedBackendService.ts(360,42): error TS2345: Argument of type '{ userId: string; companyId: string; signal?: AbortSignal; forceRefresh?: boolean; }' is not assignable to parameter of type 'string'.
+services/fileProcessingService.ts(2,8): error TS2613: Module '"/Users/admin/ASAgents-Ultimate/services/multimodalService"' has no default export. Did you mean to use 'import { multimodalService } from "/Users/admin/ASAgents-Ultimate/services/multimodalService"' instead?
+services/geminiService.ts(67,23): error TS2339: Property 'gemini' does not exist on type '{ apiUrl: any; apiTimeout: number; auth0Domain: any; auth0ClientId: any; googleClientId: any; githubClientId: any; supabaseUrl: any; supabaseAnonKey: any; geminiApiKey: any; openaiApiKey: any; ... 7 more ...; appName: string; }'.
+services/integrationTest.ts(66,31): error TS2339: Property 'connectWebSocket' does not exist on type 'BackendApiService'.
+services/managers/APIManager.ts(2,17): error TS2307: Cannot find module 'jsonwebtoken' or its corresponding type declarations.
+services/managers/APIManager.ts(443,41): error TS2339: Property 'requests' does not exist on type 'RateLimit'.
+services/managers/APIManager.ts(457,21): error TS2349: This expression is not callable.
+  Type 'RateLimit' has no call signatures.
+services/managers/APIManager.ts(459,22): error TS2339: Property 'requests' does not exist on type 'RateLimit'.
+services/managers/ConfigurationManager.ts(36,9): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/ConfigurationManager.ts(62,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'Configuration'.
+services/managers/ConfigurationManager.ts(62,30): error TS2339: Property 'description' does not exist on type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(63,23): error TS2339: Property 'tags' does not exist on type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(64,27): error TS2339: Property 'isSecret' does not exist on type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(65,29): error TS2339: Property 'isRequired' does not exist on type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(66,31): error TS2339: Property 'defaultValue' does not exist on type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(67,29): error TS2339: Property 'validation' does not exist on type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(68,28): error TS2339: Property 'createdAt' does not exist on type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(76,18): error TS2339: Property 'isSecret' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(99,9): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/ConfigurationManager.ts(120,92): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/ConfigurationManager.ts(124,18): error TS2339: Property 'isSecret' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(139,9): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/ConfigurationManager.ts(153,92): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/ConfigurationManager.ts(157,18): error TS2339: Property 'isSecret' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(174,9): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/ConfigurationManager.ts(233,7): error TS2353: Object literal may only specify known properties, and 'environment' does not exist in type 'FeatureFlag'.
+services/managers/ConfigurationManager.ts(236,49): error TS2339: Property 'createdAt' does not exist on type 'FeatureFlag'.
+services/managers/ConfigurationManager.ts(289,40): error TS2339: Property 'environment' does not exist on type 'FeatureFlag'.
+services/managers/ConfigurationManager.ts(332,18): error TS2339: Property 'isRequired' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(370,17): error TS2339: Property 'validation' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(372,13): error TS2339: Property 'validation' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(483,19): error TS2339: Property 'isSecret' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(488,31): error TS2339: Property 'description' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(489,24): error TS2339: Property 'tags' does not exist on type 'Configuration'.
+services/managers/ConfigurationManager.ts(503,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'Partial<Configuration>'.
+services/managers/ConfigurationManager.ts(523,51): error TS2339: Property 'isSecret' does not exist on type 'Configuration'.
+services/managers/ManagersIntegration.ts(94,9): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/ManagersIntegration.ts(140,15): error TS2339: Property 'category' does not exist on type 'LogEntry'.
+services/managers/ManagersIntegration.ts(147,15): error TS2339: Property 'category' does not exist on type 'LogEntry'.
+services/managers/ManagersIntegration.ts(156,15): error TS2339: Property 'category' does not exist on type 'LogEntry'.
+services/managers/ManagersIntegration.ts(394,7): error TS2353: Object literal may only specify known properties, and 'handler' does not exist in type 'APIEndpoint'.
+services/managers/ManagersIntegration.ts(424,18): error TS2339: Property 'rotationInterval' does not exist on type 'SecretMetadata'.
+services/managers/ManagersIntegration.ts(424,45): error TS2339: Property 'rotationInterval' does not exist on type 'SecretMetadata'.
+services/managers/ManagersIntegration.ts(426,50): error TS2339: Property 'key' does not exist on type 'SecretMetadata'.
+services/managers/ManagersIntegration.ts(427,31): error TS2339: Property 'key' does not exist on type 'SecretMetadata'.
+services/managers/ManagersIntegration.ts(428,58): error TS2339: Property 'key' does not exist on type 'SecretMetadata'.
+services/managers/ManagersIntegration.ts(430,30): error TS2339: Property 'key' does not exist on type 'SecretMetadata'.
+services/managers/ManagersIntegration.ts(431,68): error TS2339: Property 'key' does not exist on type 'SecretMetadata'.
+services/managers/ManagersIntegration.ts(458,34): error TS2339: Property 'authentication' does not exist on type 'APIEndpoint'.
+services/managers/ManagersIntegration.ts(459,33): error TS2339: Property 'authorization' does not exist on type 'APIEndpoint'.
+services/managers/MonitoringManager.ts(5,3): error TS2305: Module '"../../types/managers"' has no exported member 'LogLevel'.
+services/managers/MonitoringManager.ts(48,7): error TS2353: Object literal may only specify known properties, and 'category' does not exist in type 'LogEntry'.
+services/managers/MonitoringManager.ts(176,55): error TS2339: Property 'category' does not exist on type 'LogEntry'.
+services/managers/MonitoringManager.ts(180,55): error TS2339: Property 'userId' does not exist on type 'LogEntry'.
+services/managers/MonitoringManager.ts(214,18): error TS2339: Property 'type' does not exist on type 'Metric'.
+services/managers/MonitoringManager.ts(220,7): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'Metric'.
+services/managers/MonitoringManager.ts(334,21): error TS2339: Property 'severity' does not exist on type 'Alert'.
+services/managers/MonitoringManager.ts(339,7): error TS2353: Object literal may only specify known properties, and 'name' does not exist in type 'Alert'.
+services/managers/MonitoringManager.ts(357,21): error TS2339: Property 'severity' does not exist on type 'Alert'.
+services/managers/MonitoringManager.ts(362,26): error TS2339: Property 'enabled' does not exist on type 'Alert'.
+services/managers/MonitoringManager.ts(367,11): error TS2339: Property 'lastTriggered' does not exist on type 'Alert'.
+services/managers/MonitoringManager.ts(400,13): error TS2339: Property 'enabled' does not exist on type 'Alert'.
+services/managers/MonitoringManager.ts(521,11): error TS2339: Property 'channels' does not exist on type 'Alert'.
+services/managers/MonitoringManager.ts(524,41): error TS2339: Property 'name' does not exist on type 'Alert'.
+services/managers/MonitoringManager.ts(569,43): error TS2339: Property 'enabled' does not exist on type 'Alert'.
+services/managers/SecretsManager.ts(57,9): error TS2345: Argument of type '{ originalError: string; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(83,9): error TS2353: Object literal may only specify known properties, and 'key' does not exist in type 'Secret'.
+services/managers/SecretsManager.ts(90,29): error TS2339: Property 'expiresAt' does not exist on type 'Partial<SecretMetadata>'.
+services/managers/SecretsManager.ts(91,36): error TS2339: Property 'rotationInterval' does not exist on type 'Partial<SecretMetadata>'.
+services/managers/SecretsManager.ts(91,68): error TS2551: Property 'defaultRotationInterval' does not exist on type 'SecretsManagerConfig'. Did you mean 'rotationInterval'?
+services/managers/SecretsManager.ts(95,31): error TS2339: Property 'permissions' does not exist on type 'Partial<SecretMetadata>'.
+services/managers/SecretsManager.ts(106,53): error TS2339: Property 'environment' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(120,9): error TS2345: Argument of type '{ key: string; originalError: string; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(150,80): error TS2345: Argument of type '{ key: string; environment: Environment; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(153,19): error TS2339: Property 'isActive' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(154,81): error TS2345: Argument of type '{ key: string; environment: Environment; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(158,80): error TS2345: Argument of type '{ key: string; environment: Environment; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(183,9): error TS2345: Argument of type '{ key: string; environment: Environment; originalError: string; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(200,80): error TS2345: Argument of type '{ key: string; environment: Environment; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(212,9): error TS2353: Object literal may only specify known properties, and 'encryptedValue' does not exist in type 'Secret'.
+services/managers/SecretsManager.ts(238,9): error TS2345: Argument of type '{ key: string; environment: Environment; originalError: string; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(254,80): error TS2345: Argument of type '{ key: string; environment: Environment; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(274,9): error TS2345: Argument of type '{ key: string; environment: Environment; originalError: string; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(285,7): error TS2322: Type '{ id: string; name: string; type: SecretType; value: SecretValue; metadata: SecretMetadata; createdAt: Date; updatedAt: Date; expiresAt?: Date; rotationConfig?: SecretRotationConfig; }[]' is not assignable to type 'SecretMetadata[]'.
+  Type '{ id: string; name: string; type: SecretType; value: SecretValue; metadata: SecretMetadata; createdAt: Date; updatedAt: Date; expiresAt?: Date; rotationConfig?: SecretRotationConfig; }' is missing the following properties from type 'SecretMetadata': environment, version
+services/managers/SecretsManager.ts(286,17): error TS2339: Property 'encryptedValue' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(286,33): error TS2339: Property 'salt' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(286,39): error TS2339: Property 'iv' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(293,9): error TS2345: Argument of type '{ environment: Environment; originalError: string; }' is not assignable to parameter of type 'number'.
+services/managers/SecretsManager.ts(302,25): error TS2339: Property 'encryptedValue' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(303,20): error TS2339: Property 'salt' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(304,18): error TS2339: Property 'iv' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(305,30): error TS2339: Property 'encryptionAlgorithm' does not exist on type 'SecretsManagerConfig'.
+services/managers/SecretsManager.ts(316,12): error TS2678: Type '"jwt_secret"' is not comparable to type 'SecretType'.
+services/managers/SecretsManager.ts(318,12): error TS2678: Type '"encryption_key"' is not comparable to type 'SecretType'.
+services/managers/SecretsManager.ts(345,22): error TS2339: Property 'auditLogging' does not exist on type 'SecretsManagerConfig'.
+services/managers/SecretsManager.ts(349,7): error TS2353: Object literal may only specify known properties, and 'userId' does not exist in type 'SecretAccess'.
+services/managers/SecretsManager.ts(400,48): error TS2339: Property 'key' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(400,60): error TS2339: Property 'environment' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(411,32): error TS2339: Property 'environment' does not exist on type 'Secret'.
+services/managers/SecretsManager.ts(411,54): error TS2339: Property 'key' does not exist on type 'Secret'.
+services/managers/SecurityManager.ts(3,10): error TS2305: Module '"../../types/managers"' has no exported member 'EncryptionResult'.
+services/managers/SecurityManager.ts(66,9): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/SecurityManager.ts(101,9): error TS2554: Expected 1-3 arguments, but got 4.
+services/managers/SecurityManager.ts(173,39): error TS2339: Property 'passwordMinLength' does not exist on type 'SecurityPolicy'.
+services/managers/SecurityManager.ts(174,60): error TS2339: Property 'passwordMinLength' does not exist on type 'SecurityPolicy'.
+services/managers/SecurityManager.ts(177,21): error TS2339: Property 'passwordRequireUppercase' does not exist on type 'SecurityPolicy'.
+services/managers/SecurityManager.ts(181,21): error TS2339: Property 'passwordRequireLowercase' does not exist on type 'SecurityPolicy'.
+services/managers/SecurityManager.ts(185,21): error TS2339: Property 'passwordRequireNumbers' does not exist on type 'SecurityPolicy'.
+services/managers/SecurityManager.ts(189,21): error TS2339: Property 'passwordRequireSymbols' does not exist on type 'SecurityPolicy'.
+services/managers/SecurityManager.ts(253,22): error TS2339: Property 'securityHeaders' does not exist on type 'SecurityPolicy'.
+services/mockApi.ts(37,3): error TS2353: Object literal may only specify known properties, and 'licenseNumber' does not exist in type 'Company'.
+services/mockApi.ts(87,5): error TS2740: Type '{}' is missing the following properties from type 'NotificationSettings': email, push, sms, taskReminders, and 2 more.
+services/mockApi.ts(88,5): error TS2739: Type '{}' is missing the following properties from type 'DashboardSettings': defaultView, pinnedWidgets, hiddenWidgets
+services/mockApi.ts(109,74): error TS2353: Object literal may only specify known properties, and 'role' does not exist in type 'CompanyAccessSummary'.
+services/mockApi.ts(140,92): error TS2353: Object literal may only specify known properties, and 'role' does not exist in type 'CompanyAccessSummary'.
+services/mockApi.ts(164,92): error TS2353: Object literal may only specify known properties, and 'role' does not exist in type 'CompanyAccessSummary'.
+services/mockApi.ts(184,74): error TS2353: Object literal may only specify known properties, and 'role' does not exist in type 'CompanyAccessSummary'.
+services/mockApi.ts(228,65): error TS2353: Object literal may only specify known properties, and 'role' does not exist in type 'CompanyAccessSummary'.
+services/mockApi.ts(242,74): error TS2353: Object literal may only specify known properties, and 'role' does not exist in type 'CompanyAccessSummary'.
+services/mockData.ts(209,99): error TS2352: Conversion of type '{ id: string; description: string; amount: number; category: string; projectId: string; userId: string; date: string; status: ExpenseStatus.APPROVED; }[]' to type 'Partial<Expense>[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Object literal may only specify known properties, and 'userId' does not exist in type 'Partial<Expense>'.
+services/monitoring.ts(145,26): error TS2339: Property 'processingStart' does not exist on type 'PerformanceEntry'.
+services/monitoring.ts(157,22): error TS2339: Property 'hadRecentInput' does not exist on type 'PerformanceEntry'.
+services/monitoring.ts(158,31): error TS2339: Property 'value' does not exist on type 'PerformanceEntry'.
+services/monitoring.ts(184,26): error TS2339: Property 'responseEnd' does not exist on type 'PerformanceEntry'.
+services/monitoring.ts(188,27): error TS2339: Property 'initiatorType' does not exist on type 'PerformanceEntry'.
+services/monitoring.ts(202,67): error TS2339: Property 'url' does not exist on type 'URL | Request'.
+  Property 'url' does not exist on type 'URL'.
+services/monitoring.ts(271,35): error TS2307: Cannot find module '@sentry/browser' or its corresponding type declarations.
+services/monitoring.ts(272,45): error TS2307: Cannot find module '@sentry/tracing' or its corresponding type declarations.
+services/monitoring.ts(341,42): error TS2339: Property 'Sentry' does not exist on type 'Window & typeof globalThis'.
+services/monitoring.ts(342,14): error TS2339: Property 'Sentry' does not exist on type 'Window & typeof globalThis'.
+services/monitoring.ts(478,5): error TS2686: 'React' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+services/monitoring.ts(483,12): error TS2686: 'React' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+services/multimodalAnalytics.ts(4,29): error TS2305: Module '"../types/multimodal"' has no exported member 'MediaType'.
+services/multimodalAnalytics.ts(4,40): error TS2305: Module '"../types/multimodal"' has no exported member 'ProcessingResult'.
+services/multimodalAnalytics.ts(308,19): error TS2339: Property 'tags' does not exist on type 'MultimodalContent'.
+services/multimodalAnalytics.ts(309,35): error TS2339: Property 'tags' does not exist on type 'MultimodalContent'.
+services/multimodalSearch.ts(4,29): error TS2305: Module '"../types/multimodal"' has no exported member 'MediaType'.
+services/multimodalSearch.ts(4,40): error TS2305: Module '"../types/multimodal"' has no exported member 'ProcessingResult'.
+services/multimodalSearch.ts(135,23): error TS2339: Property 'tags' does not exist on type 'MultimodalContent'.
+services/multimodalSearch.ts(146,68): error TS2339: Property 'tags' does not exist on type 'MultimodalContent'.
+services/multimodalSearch.ts(376,17): error TS2339: Property 'text' does not exist on type 'MultimodalContent'.
+services/multimodalSearch.ts(377,30): error TS2339: Property 'text' does not exist on type 'MultimodalContent'.
+services/multimodalSearch.ts(403,17): error TS2339: Property 'tags' does not exist on type 'MultimodalContent'.
+services/multimodalSearch.ts(404,33): error TS2339: Property 'tags' does not exist on type 'MultimodalContent'.
+services/multimodalSearch.ts(531,7): error TS2322: Type 'unknown[]' is not assignable to type 'string[]'.
+  Type 'unknown' is not assignable to type 'string'.
+services/multimodalSearch.ts(699,7): error TS2322: Type 'string' is not assignable to type 'Date'.
+services/multimodalService.ts(36,31): error TS2339: Property 'enabledProviders' does not exist on type 'MultimodalConfig'.
+services/multimodalService.ts(98,37): error TS2339: Property 'getGenerativeModel' does not exist on type 'GoogleGenAI'.
+services/multimodalService.ts(143,37): error TS2339: Property 'getGenerativeModel' does not exist on type 'GoogleGenAI'.
+services/multimodalService.ts(193,7): error TS2322: Type '{ text: string; confidence: number; language: string; }' is not assignable to type 'string'.
+services/multimodalService.ts(221,7): error TS2353: Object literal may only specify known properties, and 'motion' does not exist in type 'VideoAnalysisResult'.
+services/multimodalService.ts(246,7): error TS2741: Property 'paragraphs' is missing in type '{ headings: undefined[]; tables: undefined[]; images: undefined[]; }' but required in type '{ headings: { level: number; text: string; page: number; }[]; paragraphs: { text: string; page: number; }[]; tables: { data: string[][]; page: number; }[]; images: { description: string; page: number; }[]; }'.
+services/multimodalService.ts(355,7): error TS2353: Object literal may only specify known properties, and 'wordCount' does not exist in type 'TextAnalysisResult'.
+services/multimodalService.ts(400,3): error TS2353: Object literal may only specify known properties, and 'enabledProviders' does not exist in type 'MultimodalConfig'.
+services/multimodalStorage.ts(4,29): error TS2305: Module '"../types/multimodal"' has no exported member 'MediaType'.
+services/multimodalStorage.ts(247,12): error TS2678: Type '"document"' is not comparable to type '"audio" | "video" | "text" | "image"'.
+services/notificationService.ts(188,9): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'string | BufferSource'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.
+          Types of property '[Symbol.toStringTag]' are incompatible.
+            Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.
+services/oauthService.ts(33,23): error TS2339: Property 'oauth' does not exist on type '{ apiUrl: any; apiTimeout: number; auth0Domain: any; auth0ClientId: any; googleClientId: any; githubClientId: any; supabaseUrl: any; supabaseAnonKey: any; geminiApiKey: any; openaiApiKey: any; ... 7 more ...; appName: string; }'.
+services/oauthService.ts(165,21): error TS2339: Property 'error' does not exist on type '{ access_token: string; id_token: string; expires_in: number; }'.
+services/oauthService.ts(166,58): error TS2339: Property 'error_description' does not exist on type '{ access_token: string; id_token: string; expires_in: number; }'.
+services/oauthService.ts(237,21): error TS2339: Property 'error' does not exist on type '{ access_token: string; token_type: string; }'.
+services/oauthService.ts(238,58): error TS2339: Property 'error_description' does not exist on type '{ access_token: string; token_type: string; }'.
+services/productionApi.ts(72,44): error TS2339: Property 'token' does not exist on type 'unknown'.
+services/productionApi.ts(73,34): error TS2339: Property 'token' does not exist on type 'unknown'.
+services/productionApi.ts(74,56): error TS2339: Property 'token' does not exist on type 'unknown'.
+services/productionApi.ts(75,65): error TS2339: Property 'user' does not exist on type 'unknown'.
+services/realTimeClient.ts(187,51): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(type: "message", listener: (this: WebSocket, ev: MessageEvent<any>) => any, options?: boolean | EventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type '(this: WebSocket, ev: MessageEvent<any>) => any'.
+      Types of parameters 'message' and 'ev' are incompatible.
+        Type 'MessageEvent<any>' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+  Overload 2 of 2, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type 'EventListenerOrEventListenerObject'.
+      Type '(message: WebSocketMessage) => void' is not assignable to type 'EventListener'.
+        Types of parameters 'message' and 'evt' are incompatible.
+          Type 'Event' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+services/realTimeClient.ts(190,51): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(type: "message", listener: (this: WebSocket, ev: MessageEvent<any>) => any, options?: boolean | EventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type '(this: WebSocket, ev: MessageEvent<any>) => any'.
+      Types of parameters 'message' and 'ev' are incompatible.
+        Type 'MessageEvent<any>' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+  Overload 2 of 2, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type 'EventListenerOrEventListenerObject'.
+      Type '(message: WebSocketMessage) => void' is not assignable to type 'EventListener'.
+        Types of parameters 'message' and 'evt' are incompatible.
+          Type 'Event' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+services/realTimeClient.ts(194,44): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(type: "message", listener: (this: WebSocket, ev: MessageEvent<any>) => any, options?: boolean | AddEventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type '(this: WebSocket, ev: MessageEvent<any>) => any'.
+      Types of parameters 'message' and 'ev' are incompatible.
+        Type 'MessageEvent<any>' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+  Overload 2 of 2, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type 'EventListenerOrEventListenerObject'.
+      Type '(message: WebSocketMessage) => void' is not assignable to type 'EventListener'.
+        Types of parameters 'message' and 'evt' are incompatible.
+          Type 'Event' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+services/realTimeClient.ts(205,49): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(type: "message", listener: (this: WebSocket, ev: MessageEvent<any>) => any, options?: boolean | EventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type '(this: WebSocket, ev: MessageEvent<any>) => any'.
+      Types of parameters 'message' and 'ev' are incompatible.
+        Type 'MessageEvent<any>' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+  Overload 2 of 2, '(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void', gave the following error.
+    Argument of type '(message: WebSocketMessage) => void' is not assignable to parameter of type 'EventListenerOrEventListenerObject'.
+      Type '(message: WebSocketMessage) => void' is not assignable to type 'EventListener'.
+        Types of parameters 'message' and 'evt' are incompatible.
+          Type 'Event' is missing the following properties from type 'WebSocketMessage': payload, timestamp
+services/supabaseClient.ts(1,30): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+services/websocketService.ts(61,20): error TS2339: Property 'wsUrl' does not exist on type '{ apiUrl: any; apiTimeout: number; auth0Domain: any; auth0ClientId: any; googleClientId: any; githubClientId: any; supabaseUrl: any; supabaseAnonKey: any; geminiApiKey: any; openaiApiKey: any; ... 7 more ...; appName: string; }'.
+services/websocketService.ts(516,15): error TS2484: Export declaration conflicts with exported declaration of 'WebSocketMessage'.
+services/websocketService.ts(516,33): error TS2484: Export declaration conflicts with exported declaration of 'WebSocketOptions'.
+services/websocketService.ts(516,51): error TS2484: Export declaration conflicts with exported declaration of 'ConnectionStats'.
+src/pages/SimpleDashboard.tsx(99,80): error TS2339: Property 'activeProjects' does not exist on type '{}'.
+src/pages/SimpleDashboard.tsx(116,32): error TS2339: Property 'totalBudget' does not exist on type '{}'.
+src/pages/SimpleDashboard.tsx(133,80): error TS2339: Property 'averageProgress' does not exist on type '{}'.
+src/pages/SimpleDashboard.tsx(149,82): error TS2339: Property 'profitMargin' does not exist on type '{}'.
+src/pages/SimpleDashboard.tsx(273,32): error TS2339: Property 'revenue' does not exist on type '{}'.
+src/pages/SimpleDashboard.tsx(279,32): error TS2339: Property 'expenses' does not exist on type '{}'.
+src/pages/SimpleDashboard.tsx(285,32): error TS2339: Property 'profit' does not exist on type '{}'.
+types/managers.ts(74,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+types/managers.ts(81,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+types/managers.ts(88,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+types/managers.ts(95,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+utils/finance.ts(44,18): error TS2345: Argument of type 'string | Date' is not assignable to parameter of type 'string'.
+  Type 'Date' is not assignable to type 'string'.
+utils/performance.ts(482,54): error TS2339: Property 'navigationStart' does not exist on type 'PerformanceNavigationTiming'.
+utils/testUtils.tsx(6,39): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+utils/testUtils.tsx(141,15): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
