@@ -1,0 +1,35 @@
+node_modules
+.vercel
+
+# OS-generated files
+.DS_Store
+
+# Build outputs (any app)
+dist
+build
+coverage
+.next
+out
+
+# Environment files (keep examples tracked)
+.env
+.env.*
+.env*.local
+.envrc
+!.env.example
+!**/.env.example
+!*.example
+
+# Package tarballs and archives
+*.tgz
+*.tar
+*.tar.gz
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# External project (keep out of repo per AGENTS.md)
+Desktop/asagents.co.uk-ready
