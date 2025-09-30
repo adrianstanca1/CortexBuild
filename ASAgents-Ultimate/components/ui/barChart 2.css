@@ -1,0 +1,4 @@
+.bar-chart-bar {
+  height: var(--bar-height, 50%);
+  transition: height 0.3s;
+}

@@ -1,0 +1,2 @@
+com/multimodal/security/SecuritySmokeTest.class
+com/multimodal/security/JwtAuthenticationFilterTest.class

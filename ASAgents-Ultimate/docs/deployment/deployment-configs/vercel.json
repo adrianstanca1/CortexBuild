@@ -1,0 +1,58 @@
+{
+<<<<<<< HEAD
+<<<<<<< HEAD
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+=======
+<<<<<<< HEAD
+>>>>>>> df64595 (Log sixth autonomous deployment run)
+  "version": 2,
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev -- --host 0.0.0.0 --port 5173",
+  "routes": [
+<<<<<<< HEAD
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/.*",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_BASE_URL": "https://asagents-backend.onrender.com"
+  }
+=======
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
+  ]
+=======
+=======
+>>>>>>> e7ec06c (Log sixth autonomous deployment run)
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev -- --host 0.0.0.0 --port 4173",
+  "env": {
+    "VITE_GEMINI_API_KEY": "@gemini_api_key",
+    "GEMINI_API_KEY": "@gemini_api_key"
+  },
+  "preview": {
+    "env": {
+      "VITE_API_BASE_URL": "@preview_api_base_url"
+    }
+  },
+  "production": {
+    "env": {
+      "VITE_API_BASE_URL": "@production_api_base_url"
+    }
+  }
+<<<<<<< HEAD
+>>>>>>> e7ec06c (Log sixth autonomous deployment run)
+>>>>>>> df64595 (Log sixth autonomous deployment run)
+=======
+>>>>>>> e7ec06c (Log sixth autonomous deployment run)
+}

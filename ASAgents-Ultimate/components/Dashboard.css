@@ -1,0 +1,11 @@
+/* Dashboard bar chart styles */
+.dashboard-bar {
+  width: 100%;
+  border-radius: 0.125rem 0.125rem 0 0;
+  transition: opacity 0.3s;
+  min-height: 4px;
+}
+
+.dashboard-bar:hover {
+  opacity: 0.8;
+}

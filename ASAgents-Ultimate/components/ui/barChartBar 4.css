@@ -1,0 +1,7 @@
+.bar-chart-bar {
+  width: 75%;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  /* color classes applied dynamically */
+  block-size: var(--bar-height, 0%);
+}

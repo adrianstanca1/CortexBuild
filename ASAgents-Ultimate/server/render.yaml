@@ -1,0 +1,53 @@
+services:
+  - type: web
+    name: asagents-backend
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DB_HOST
+        fromDatabase:
+          name: asagents-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: asagents-postgres
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: asagents-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: asagents-postgres
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: asagents-postgres
+          property: database
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: "900"
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: "604800"
+      - key: GEMINI_API_KEY
+        value: AIzaSyB3J8F7b9NmXYIaVDvO6JFkjrWUTaRbEfM
+      - key: CORS_ORIGIN
+        value: https://final-fm0swwmd5-adrian-b7e84541.vercel.app
+      - key: IONOS_API_PREFIX
+        value: 180a1703cc0e46e7ba577daaf6321944
+      - key: IONOS_API_SECRET
+        value: XXsr6IVem7_4-EHduB8SAvEZCxP9RfiYtQ1b4JmSIFwFOEgqW-VmXLNbrDDM6rjuKvZCl3uLzELq_nBtLorAIw
+
+databases:
+  - name: asagents-postgres
+    databaseName: asagents_db
+    user: asagents_user

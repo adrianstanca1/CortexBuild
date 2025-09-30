@@ -1,0 +1,466 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '20.x'
+  JAVA_VERSION: '21'
+  MYSQL_ROOT_PASSWORD: test_password_for_ci
+  JWT_SECRET: test-jwt-secret-256-bits-minimum-length-for-hmac-sha256-testing
+  JWT_ISSUER: asagents-api
+  JWT_AUDIENCE: asagents-client
+
+jobs:
+  # Frontend Tests
+  frontend-test:
+    runs-on: ubuntu-latest
+    name: Frontend Tests & Build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run ESLint
+      run: npm run lint
+      
+    - name: Run type checking
+      run: npm run type-check
+      
+    - name: Run unit tests
+      run: npm run test:ci
+      
+    - name: Build frontend
+      run: npm run build
+      
+    - name: Upload frontend artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-dist
+        path: dist/
+        retention-days: 30
+
+  # Node.js Backend Tests
+  node-backend-test:
+    runs-on: ubuntu-latest
+    name: Node.js Backend Tests
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: asagents_db_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: server/package-lock.json
+        
+    - name: Install backend dependencies
+      working-directory: ./server
+      run: npm ci
+      
+    - name: Wait for MySQL
+      run: |
+        while ! mysqladmin ping -h127.0.0.1 -P3306 -uroot -p${{ env.MYSQL_ROOT_PASSWORD }} --silent; do
+          sleep 1
+        done
+        
+    - name: Run database migrations
+      working-directory: ./server
+      env:
+        DATABASE_URL: mysql://root:${{ env.MYSQL_ROOT_PASSWORD }}@localhost:3306/asagents_db_test
+        JWT_SECRET: ${{ env.JWT_SECRET }}
+      run: npm run migrate
+      
+    - name: Run Node.js backend tests
+      working-directory: ./server
+      env:
+        NODE_ENV: test
+        DATABASE_URL: mysql://root:${{ env.MYSQL_ROOT_PASSWORD }}@localhost:3306/asagents_db_test
+        JWT_SECRET: ${{ env.JWT_SECRET }}
+        JWT_ISSUER: ${{ env.JWT_ISSUER }}
+        JWT_AUDIENCE: ${{ env.JWT_AUDIENCE }}
+      run: npm test
+      
+    - name: Upload Node.js coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: node-backend-coverage
+        path: server/coverage/
+        retention-days: 30
+
+  # Java Backend Tests
+  java-backend-test:
+    runs-on: ubuntu-latest
+    name: Java Backend Tests
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: asagents_db_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Wait for MySQL
+      run: |
+        while ! mysqladmin ping -h127.0.0.1 -P3306 -uroot -p${
+    {
+        env.MYSQL_ROOT_PASSWORD
+    }} --silent; do
+          sleep 1
+        done
+        
+    - name: Run Java backend tests
+      working-directory: ./backend/java
+      env:
+        SPRING_PROFILES_ACTIVE: test
+        SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/asagents_db_test
+        SPRING_DATASOURCE_USERNAME: root
+        SPRING_DATASOURCE_PASSWORD: ${
+    {
+        env.MYSQL_ROOT_PASSWORD
+    }}
+        JWT_SECRET: ${
+    {
+        env.JWT_SECRET
+    }}
+        JWT_ISSUER: ${
+    {
+        env.JWT_ISSUER
+    }}
+        JWT_AUDIENCE: ${
+    {
+        env.JWT_AUDIENCE
+    }}
+      run: |
+        mvn clean test
+        mvn jacoco:report
+        
+    - name: Build Java backend
+      working-directory: ./backend/java
+      env:
+        SPRING_PROFILES_ACTIVE: production
+        JWT_SECRET: ${
+    {
+        env.JWT_SECRET
+    }}
+      run: mvn clean package -DskipTests
+      
+    - name: Upload Java coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: java-backend-coverage
+        path: backend/java/target/site/jacoco/
+        retention-days: 30
+        
+    - name: Upload Java artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: java-backend-jar
+        path: backend/java/target/*.jar
+        retention-days: 30
+
+  # Integration Tests
+  integration-test:
+    runs-on: ubuntu-latest
+    name: Integration Tests
+    needs: [frontend-test, node-backend-test, java-backend-test]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: asagents_db_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Download frontend artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-dist
+        path: dist/
+        
+    - name: Download Java backend artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: java-backend-jar
+        path: backend/java/target/
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd server && npm ci
+        
+    - name: Wait for MySQL
+      run: |
+        while ! mysqladmin ping -h127.0.0.1 -P3306 -uroot -p${{ env.MYSQL_ROOT_PASSWORD }} --silent; do
+          sleep 1
+        done
+        
+    - name: Setup test database
+      working-directory: ./server
+      env:
+        DATABASE_URL: mysql://root:${{ env.MYSQL_ROOT_PASSWORD }}@localhost:3306/asagents_db_test
+        JWT_SECRET: ${{ env.JWT_SECRET }}
+      run: npm run migrate
+      
+    - name: Start Node.js backend
+      working-directory: ./server
+      env:
+        NODE_ENV: test
+        PORT: 4000
+        DATABASE_URL: mysql://root:${{ env.MYSQL_ROOT_PASSWORD }}@localhost:3306/asagents_db_test
+        JWT_SECRET: ${{ env.JWT_SECRET }}
+        JWT_ISSUER: ${{ env.JWT_ISSUER }}
+        JWT_AUDIENCE: ${{ env.JWT_AUDIENCE }}
+        CORS_ORIGINS: http://localhost:5173
+      run: |
+        npm start &
+        echo $! > node_backend.pid
+        sleep 10
+        
+    - name: Start Java backend
+      working-directory: ./backend/java
+      env:
+        SPRING_PROFILES_ACTIVE: test
+        SERVER_PORT: 4001
+        SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/asagents_db_test
+        SPRING_DATASOURCE_USERNAME: root
+        SPRING_DATASOURCE_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+        JWT_SECRET: ${{ env.JWT_SECRET }}
+        JWT_ISSUER: ${{ env.JWT_ISSUER }}
+        JWT_AUDIENCE: ${{ env.JWT_AUDIENCE }}
+      run: |
+        java -jar target/*.jar &
+        echo $! > java_backend.pid
+        sleep 15
+        
+    - name: Run integration tests
+      env:
+        NODE_BACKEND_URL: http://localhost:4000
+        JAVA_BACKEND_URL: http://localhost:4001
+        JWT_SECRET: ${{ env.JWT_SECRET }}
+      run: npm run test:integration
+      
+    - name: Stop backends
+      if: always()
+      run: |
+        cd server && [ -f node_backend.pid ] && kill $(cat node_backend.pid) || true
+        cd backend/java && [ -f java_backend.pid ] && kill $(cat java_backend.pid) || true
+
+  # Security Scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scanning
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run npm audit (Frontend)
+      run: |
+        npm audit --audit-level=high
+        npm audit fix --dry-run
+        
+    - name: Run npm audit (Node.js Backend)
+      working-directory: ./server
+      run: |
+        npm audit --audit-level=high
+        npm audit fix --dry-run
+        
+    - name: Run OWASP Dependency Check (Java)
+      working-directory: ./backend/java
+      run: |
+        mvn org.owasp:dependency-check-maven:check
+        
+    - name: Upload security reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          backend/java/target/dependency-check-report.html
+        retention-days: 30
+
+  # Docker Build and Test
+  docker-build:
+    runs-on: ubuntu-latest
+    name: Docker Build & Test
+    needs: [frontend-test, node-backend-test, java-backend-test]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Download frontend artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-dist
+        path: dist/
+        
+    - name: Download Java backend artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: java-backend-jar
+        path: backend/java/target/
+        
+    - name: Build frontend Docker image
+      run: |
+        docker build -f Dockerfile.frontend.production -t asagents/frontend:${{ github.sha }} .
+        
+    - name: Build Node.js backend Docker image
+      working-directory: ./server
+      run: |
+        docker build -f Dockerfile.production -t asagents/node-backend:${{ github.sha }} .
+        
+    - name: Build Java backend Docker image
+      working-directory: ./backend/java
+      run: |
+        docker build -f Dockerfile.production -t asagents/java-backend:${{ github.sha }} .
+        
+    - name: Test Docker Compose
+      env:
+        MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+        JWT_SECRET: ${{ env.JWT_SECRET }}
+        JWT_ISSUER: ${{ env.JWT_ISSUER }}
+        JWT_AUDIENCE: ${{ env.JWT_AUDIENCE }}
+      run: |
+        docker-compose -f docker-compose.dual.yml up -d
+        sleep 30
+        
+        # Test health endpoints
+        curl -f http://localhost:4000/health || exit 1
+        curl -f http://localhost:4001/actuator/health || exit 1
+        
+        docker-compose -f docker-compose.dual.yml down
+
+  # Deployment (only on main branch)
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    needs: [integration-test, security-scan, docker-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Deploy to Vercel (Frontend)
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        
+    - name: Deploy backends to production
+      env:
+        PRODUCTION_SERVER: ${{ secrets.PRODUCTION_SERVER }}
+        PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+      run: |
+        # Add deployment script here
+        echo "Deploying to production server..."
+        # This would typically involve uploading Docker images and updating services
+
+  # Cleanup
+  cleanup:
+    runs-on: ubuntu-latest
+    name: Cleanup Artifacts
+    needs: [deploy]
+    if: always()
+    
+    steps:
+    - name: Delete temporary artifacts
+      uses: geekyeggo/delete-artifact@v4
+      with:
+        name: |
+          frontend-dist
+          java-backend-jar
+        failOnError: false

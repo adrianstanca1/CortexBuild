@@ -1,0 +1,9 @@
+// Code rendering components and utilities
+export { CodeRenderer } from './CodeRenderer';
+export { CodeRenderingDemo } from './CodeRenderingDemo';
+export { EnhancedMediaRenderer as default } from '../media/MediaRenderer';
+export type { CodeFile } from './CodeRenderer';
+
+// Re-export enhanced media renderer as default for easy importing
+import { EnhancedMediaRenderer } from './CodeRenderer';
+export default EnhancedMediaRenderer;

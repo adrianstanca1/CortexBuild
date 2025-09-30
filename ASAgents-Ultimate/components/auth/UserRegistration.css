@@ -1,0 +1,24 @@
+/* Password strength indicator styles */
+.password-strength-bar {
+  height: 0.375rem;
+  border-radius: 9999px;
+  transition: all 300ms;
+  width: 0%;
+}
+
+/* Width classes based on data attribute */
+.password-strength-bar[data-width="25"] {
+  width: 25%;
+}
+
+.password-strength-bar[data-width="50"] {
+  width: 50%;
+}
+
+.password-strength-bar[data-width="75"] {
+  width: 75%;
+}
+
+.password-strength-bar[data-width="100"] {
+  width: 100%;
+}

@@ -1,0 +1,414 @@
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle, RefreshCw, Home, Bug, Copy, ExternalLink } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
+import { performanceMonitor } from '../../utils/performance';
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: ErrorInfo | null;
+  errorId: string | null;
+  retryCount: number;
+}
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  enableRetry?: boolean;
+  maxRetries?: number;
+  showErrorDetails?: boolean;
+  reportingEndpoint?: string;
+  level?: 'page' | 'component' | 'critical';
+}
+
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private retryTimeoutId: NodeJS.Timeout | null = null;
+
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: null,
+      retryCount: 0,
+    };
+  }
+
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+    // Generate unique error ID
+    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    return {
+      hasError: true,
+      error,
+      errorId,
+    };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const { onError, reportingEndpoint, level = 'component' } = this.props;
+    
+    this.setState({ errorInfo });
+
+    // Call custom error handler
+    onError?.(error, errorInfo);
+
+    // Log error details
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+
+    // Record error metric
+    performanceMonitor.recordMetric({
+      name: 'error_boundary_triggered',
+      value: 1,
+      timestamp: Date.now(),
+      type: 'counter',
+      tags: {
+        level,
+        errorName: error.name,
+        errorMessage: error.message,
+        componentStack: errorInfo.componentStack?.split('\n')[1] || 'unknown',
+      },
+    });
+
+    // Report error to external service
+    this.reportError(error, errorInfo);
+  }
+
+  private async reportError(error: Error, errorInfo: ErrorInfo) {
+    const { reportingEndpoint } = this.props;
+    
+    if (!reportingEndpoint) return;
+
+    try {
+      const errorReport = {
+        errorId: this.state.errorId,
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        userId: this.getUserId(),
+        sessionId: this.getSessionId(),
+        buildVersion: process.env.REACT_APP_VERSION || 'unknown',
+        level: this.props.level || 'component',
+      };
+
+      await fetch(reportingEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(errorReport),
+      });
+    } catch (reportingError) {
+      console.error('Failed to report error:', reportingError);
+    }
+  }
+
+  private getUserId(): string | null {
+    // Try to get user ID from various sources
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      return user.id || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private getSessionId(): string | null {
+    // Try to get session ID from sessionStorage
+    try {
+      return sessionStorage.getItem('sessionId') || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private handleRetry = () => {
+    const { maxRetries = 3 } = this.props;
+    
+    if (this.state.retryCount >= maxRetries) {
+      return;
+    }
+
+    this.setState(prevState => ({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: null,
+      retryCount: prevState.retryCount + 1,
+    }));
+
+    // Record retry metric
+    performanceMonitor.recordMetric({
+      name: 'error_boundary_retry',
+      value: 1,
+      timestamp: Date.now(),
+      type: 'counter',
+      tags: {
+        retryCount: this.state.retryCount + 1,
+        level: this.props.level || 'component',
+      },
+    });
+  };
+
+  private handleReload = () => {
+    window.location.reload();
+  };
+
+  private handleGoHome = () => {
+    window.location.href = '/';
+  };
+
+  private handleCopyError = () => {
+    const { error, errorInfo, errorId } = this.state;
+    
+    const errorText = `
+Error ID: ${errorId}
+Error: ${error?.name}: ${error?.message}
+Stack: ${error?.stack}
+Component Stack: ${errorInfo?.componentStack}
+URL: ${window.location.href}
+Timestamp: ${new Date().toISOString()}
+User Agent: ${navigator.userAgent}
+    `.trim();
+
+    navigator.clipboard.writeText(errorText).then(() => {
+      // Could show a toast notification here
+      console.log('Error details copied to clipboard');
+    }).catch(err => {
+      console.error('Failed to copy error details:', err);
+    });
+  };
+
+  private handleReportBug = () => {
+    const { error, errorInfo, errorId } = this.state;
+    
+    const bugReportUrl = new URL('https://github.com/your-org/your-repo/issues/new');
+    bugReportUrl.searchParams.set('title', `Bug Report: ${error?.name || 'Unknown Error'}`);
+    bugReportUrl.searchParams.set('body', `
+**Error ID:** ${errorId}
+
+**Error Message:** ${error?.message}
+
+**Steps to Reproduce:**
+1. 
+2. 
+3. 
+
+**Expected Behavior:**
+
+
+**Actual Behavior:**
+
+
+**Additional Context:**
+- URL: ${window.location.href}
+- Timestamp: ${new Date().toISOString()}
+- User Agent: ${navigator.userAgent}
+
+**Error Stack:**
+\`\`\`
+${error?.stack}
+\`\`\`
+
+**Component Stack:**
+\`\`\`
+${errorInfo?.componentStack}
+\`\`\`
+    `);
+
+    window.open(bugReportUrl.toString(), '_blank');
+  };
+
+  render() {
+    const { hasError, error, errorInfo, errorId, retryCount } = this.state;
+    const { 
+      children, 
+      fallback, 
+      enableRetry = true, 
+      maxRetries = 3, 
+      showErrorDetails = false,
+      level = 'component'
+    } = this.props;
+
+    if (hasError) {
+      // Use custom fallback if provided
+      if (fallback) {
+        return fallback;
+      }
+
+      // Different UI based on error level
+      if (level === 'critical') {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+            <Card className="max-w-lg w-full p-8 text-center">
+              <div className="text-red-500 mb-6">
+                <AlertTriangle size={64} className="mx-auto" />
+              </div>
+              
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                Critical Error
+              </h1>
+              
+              <p className="text-gray-600 mb-6">
+                A critical error has occurred that prevents the application from functioning properly.
+                Please reload the page or contact support if the problem persists.
+              </p>
+
+              {errorId && (
+                <p className="text-sm text-gray-500 mb-6">
+                  Error ID: <code className="bg-gray-100 px-2 py-1 rounded">{errorId}</code>
+                </p>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button onClick={this.handleReload} className="flex items-center gap-2">
+                  <RefreshCw size={16} />
+                  Reload Page
+                </Button>
+                
+                <Button variant="outline" onClick={this.handleGoHome} className="flex items-center gap-2">
+                  <Home size={16} />
+                  Go Home
+                </Button>
+              </div>
+            </Card>
+          </div>
+        );
+      }
+
+      // Component-level error UI
+      return (
+        <Card className="p-6 border-red-200 bg-red-50">
+          <div className="flex items-start gap-4">
+            <div className="text-red-500 flex-shrink-0">
+              <AlertTriangle size={24} />
+            </div>
+            
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-red-800 mb-2">
+                Something went wrong
+              </h3>
+              
+              <p className="text-red-700 mb-4">
+                {level === 'page' 
+                  ? 'This page encountered an error and cannot be displayed properly.'
+                  : 'This component encountered an error and cannot be displayed properly.'
+                }
+              </p>
+
+              {errorId && (
+                <p className="text-sm text-red-600 mb-4">
+                  Error ID: <code className="bg-red-100 px-2 py-1 rounded text-xs">{errorId}</code>
+                </p>
+              )}
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                {enableRetry && retryCount < maxRetries && (
+                  <Button 
+                    size="sm" 
+                    onClick={this.handleRetry}
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw size={14} />
+                    Try Again {retryCount > 0 && `(${retryCount}/${maxRetries})`}
+                  </Button>
+                )}
+                
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={this.handleCopyError}
+                  className="flex items-center gap-2"
+                >
+                  <Copy size={14} />
+                  Copy Error
+                </Button>
+                
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={this.handleReportBug}
+                  className="flex items-center gap-2"
+                >
+                  <Bug size={14} />
+                  Report Bug
+                </Button>
+              </div>
+
+              {showErrorDetails && error && (
+                <details className="mt-4">
+                  <summary className="cursor-pointer text-sm font-medium text-red-800 mb-2">
+                    Error Details
+                  </summary>
+                  <div className="bg-red-100 p-3 rounded text-xs font-mono overflow-auto max-h-40">
+                    <div className="mb-2">
+                      <strong>Error:</strong> {error.name}: {error.message}
+                    </div>
+                    {error.stack && (
+                      <div className="mb-2">
+                        <strong>Stack:</strong>
+                        <pre className="whitespace-pre-wrap mt-1">{error.stack}</pre>
+                      </div>
+                    )}
+                    {errorInfo?.componentStack && (
+                      <div>
+                        <strong>Component Stack:</strong>
+                        <pre className="whitespace-pre-wrap mt-1">{errorInfo.componentStack}</pre>
+                      </div>
+                    )}
+                  </div>
+                </details>
+              )}
+            </div>
+          </div>
+        </Card>
+      );
+    }
+
+    return children;
+  }
+}
+
+// Higher-order component for easier usage
+export function withErrorBoundary<P extends object>(
+  Component: React.ComponentType<P>,
+  errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
+) {
+  const WrappedComponent = (props: P) => (
+    <ErrorBoundary {...errorBoundaryProps}>
+      <Component {...props} />
+    </ErrorBoundary>
+  );
+
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
+  
+  return WrappedComponent;
+}
+
+// Hook for programmatic error reporting
+export function useErrorReporting() {
+  const reportError = (error: Error, context?: Record<string, any>) => {
+    // Record error metric
+    performanceMonitor.recordMetric({
+      name: 'manual_error_report',
+      value: 1,
+      timestamp: Date.now(),
+      type: 'counter',
+      tags: {
+        errorName: error.name,
+        errorMessage: error.message,
+        ...context,
+      },
+    });
+
+    console.error('Manual error report:', error, context);
+  };
+
+  return { reportError };
+}

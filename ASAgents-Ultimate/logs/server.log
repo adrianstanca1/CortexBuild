@@ -1,0 +1,8 @@
+
+> asagents-backend@1.0.0 dev:simple
+> npx tsx watch simple-server.ts
+
+🎉 Simple Server started successfully!
+📡 API: http://localhost:4000/api
+❤️  Health: http://localhost:4000/api/system/health
+✨ Ready to receive requests!

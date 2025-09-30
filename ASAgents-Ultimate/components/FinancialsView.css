@@ -1,0 +1,4 @@
+/* FinancialsView bar chart styles */
+.financials-bar {
+  height: var(--bar-height);
+}

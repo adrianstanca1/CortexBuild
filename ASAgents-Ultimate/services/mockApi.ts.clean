@@ -1,0 +1,236 @@
+import { 
+  User, 
+  Company, 
+  LoginCredentials, 
+  RegisterCredentials, 
+  SocialProvider, 
+  SocialAuthRequest, 
+  AuthSuccessPayload,
+  CompanyAccessSummary,
+  SwitchCompanyResponse,
+  TenantDirectoryContext,
+  Permission,
+  Role 
+} from '../types';
+
+// Simple storage for tracking registered emails
+const registeredEmails = new Set<string>();
+
+// Simple delay function for simulating API calls
+const delay = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Mock data for testing
+const mockCompany: Company = {
+  id: '1',
+  name: 'Demo Construction Co',
+  type: 'GENERAL_CONTRACTOR',
+  address: {
+    street: '123 Main St',
+    city: 'Demo City',
+    state: 'Demo State',
+    zipCode: '12345',
+    country: 'United States'
+  },
+  phone: '555-0123',
+  email: 'info@democonstruction.com',
+  website: 'https://democonstruction.com',
+  licenseNumber: 'LIC123456',
+  insuranceInfo: {
+    provider: 'Demo Insurance',
+    policyNumber: 'POL123456',
+    expiryDate: '2025-12-31'
+  },
+  isActive: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  settings: {
+    timeZone: 'America/New_York',
+    dateFormat: 'MM/DD/YYYY',
+    currency: 'USD',
+    theme: 'light',
+    accessibility: { highContrast: false },
+    features: {
+      projectManagement: true,
+      reporting: true,
+      timeTracking: true,
+      financials: true,
+      documents: true,
+      safety: true,
+      equipment: true
+    },
+    workingHours: {
+      start: '08:00',
+      end: '17:00',
+      workDays: [1, 2, 3, 4, 5]
+    }
+  },
+  plan: 'FREE',
+  status: 'Active',
+  storageUsageGB: 0
+};
+
+const createMockUser = (email: string, firstName = 'Demo', lastName = 'User'): User => ({
+  id: Date.now().toString(),
+  firstName,
+  lastName,
+  email,
+  role: Role.OWNER,
+  permissions: [Permission.VIEW_DASHBOARD, Permission.EDIT_PROJECTS],
+  companyId: mockCompany.id,
+  isActive: true,
+  isEmailVerified: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  preferences: {
+    theme: 'light',
+    language: 'en',
+    notifications: {},
+    dashboard: {}
+  }
+});
+
+// Auth API functions
+export const authApi = {
+  login: async (credentials: LoginCredentials): Promise<AuthSuccessPayload> => {
+    await delay();
+    
+    // Simple validation
+    if (!credentials.email || !credentials.password) {
+      throw new Error('Email and password are required');
+    }
+
+    // For demo purposes, accept any email/password combo
+    const user = createMockUser(credentials.email);
+    
+    return {
+      success: true,
+      user,
+      company: mockCompany,
+      availableCompanies: [{ id: mockCompany.id, name: mockCompany.name, role: Role.OWNER }],
+      activeCompanyId: mockCompany.id,
+      token: 'mock-jwt-token',
+      refreshToken: 'mock-refresh-token',
+      mfaRequired: false
+    };
+  },
+
+  register: async (credentials: Partial<RegisterCredentials>): Promise<void> => {
+    await delay();
+    
+    if (!credentials.email || !credentials.password) {
+      throw new Error('Email and password are required');
+    }
+
+    if (registeredEmails.has(credentials.email)) {
+      throw new Error('Email already exists');
+    }
+
+    registeredEmails.add(credentials.email);
+  },
+
+  socialLogin: async (provider: SocialProvider, profile: SocialAuthRequest): Promise<void> => {
+    await delay();
+    
+    if (!profile.email) {
+      throw new Error('Email is required for social login');
+    }
+
+    // Mock social login success
+  },
+
+  verifyMfaAndFinalize: async (userId: string, code: string): Promise<AuthSuccessPayload> => {
+    await delay();
+    
+    if (code !== '123456') {
+      throw new Error('Invalid MFA code');
+    }
+
+    const user = createMockUser('demo@example.com');
+    
+    return {
+      success: true,
+      user,
+      company: mockCompany,
+      availableCompanies: [{ id: mockCompany.id, name: mockCompany.name, role: Role.OWNER }],
+      activeCompanyId: mockCompany.id,
+      token: 'mock-jwt-token',
+      refreshToken: 'mock-refresh-token',
+      mfaRequired: false
+    };
+  },
+
+  updateUserProfile: async (userId: string, updates: Partial<User>): Promise<User> => {
+    await delay();
+    
+    const user = createMockUser('demo@example.com');
+    return { ...user, ...updates };
+  },
+
+  requestPasswordReset: async (email: string): Promise<void> => {
+    await delay();
+    // Mock password reset request
+  },
+
+  resetPassword: async (token: string, newPassword: string): Promise<void> => {
+    await delay();
+    // Mock password reset
+  },
+
+  refreshToken: async (refreshToken: string): Promise<{ token: string; refreshToken?: string }> => {
+    await delay();
+    
+    return {
+      token: 'new-mock-jwt-token',
+      refreshToken: 'new-mock-refresh-token'
+    };
+  },
+
+  getCurrentUser: async (): Promise<User> => {
+    await delay();
+    
+    return createMockUser('demo@example.com');
+  },
+
+  listTenants: async (): Promise<TenantDirectoryContext> => {
+    await delay();
+    
+    return {
+      companies: [{ id: mockCompany.id, name: mockCompany.name, role: Role.OWNER }],
+      activeCompanyId: mockCompany.id,
+      activeCompany: mockCompany
+    };
+  },
+
+  switchCompany: async (companyId: string): Promise<SwitchCompanyResponse> => {
+    await delay();
+    
+    const user = createMockUser('demo@example.com');
+    
+    return {
+      user,
+      company: mockCompany,
+      availableCompanies: [{ id: mockCompany.id, name: mockCompany.name, role: Role.OWNER }],
+      activeCompanyId: companyId
+    };
+  }
+};
+
+// Simple API object for compatibility
+export const api = {
+  getProjectTemplates: async (companyId: string, options?: { signal?: AbortSignal }) => {
+    await delay();
+    return [];
+  },
+
+  createProjectTemplate: async (template: any, userId: string) => {
+    await delay();
+    return { id: Date.now().toString(), ...template };
+  }
+};
+
+// Reset function for tests
+export const resetMockApi = () => {
+  registeredEmails.clear();
+};
+
+export default api;
