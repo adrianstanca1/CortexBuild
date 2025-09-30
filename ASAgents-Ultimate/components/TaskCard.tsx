@@ -1,6 +1,6 @@
 import React from 'react';
 // FIX: Replaced Todo with Task
-import { Task, User, TaskStatus, TaskPriority } from '../types'; // Use Task types
+import { Task, User, TodoStatus, TodoPriority } from '../types'; // Use Todo enums for values
 import { Avatar } from './ui/Avatar';
 import { PriorityDisplay } from './ui/PriorityDisplay';
 
@@ -24,7 +24,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, allTasks, user, person
         if (!dependsOn || dependsOn.length === 0) return false;
         return dependsOn.some((depId: any) => {
             const dependency = allTasks.find(t => t.id == depId); // Use loose equality for mixed types
-            return dependency && dependency.status !== TaskStatus.DONE;
+            return dependency && dependency.status !== TodoStatus.DONE;
         });
     }, [task, allTasks]);
 
@@ -33,7 +33,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, allTasks, user, person
         if (!isBlocked || !dependsOn) return '';
         return dependsOn
             .map((depId: any) => allTasks.find(t => t.id == depId)) // Use loose equality
-            .filter((t): t is Task => !!t && t.status !== TaskStatus.DONE)
+            .filter((t): t is Task => !!t && t.status !== TodoStatus.DONE)
             .map((t: any) => `#${t.id.toString().substring(0, 5)} - ${t.text || t.title}`)
             .join('\n');
     }, [isBlocked, task, allTasks]);
@@ -64,7 +64,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, allTasks, user, person
                 // FIX: Use enum for priority comparison
                 : `bg-white dark:bg-slate-900 cursor-pointer ${isSelected ? 'ring-2 ring-sky-500' : 'hover:shadow-md'}`
                 }`}
-            style={{ borderColor: task.priority === TaskPriority.HIGH ? '#ef4444' : task.priority === TaskPriority.MEDIUM ? '#f59e0b' : '#3b82f6' }}
+            style={{ borderColor: task.priority === TodoPriority.HIGH ? '#ef4444' : task.priority === TodoPriority.MEDIUM ? '#f59e0b' : '#3b82f6' }}
         >
             <div className="flex justify-between items-start">
                 <p className="font-medium text-sm text-slate-800 dark:text-slate-100 pr-2">{text}</p>

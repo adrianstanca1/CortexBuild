@@ -490,6 +490,10 @@ export interface Project {
   risks?: ProjectRisk[];
   workforce?: WorkforceAllocation[];
   color?: string;
+  owner?: string;
+  priority?: 'low' | 'medium' | 'high' | 'critical';
+  tags?: string[];
+  locationAddress?: string;
 }
 
 export interface UpcomingProjectDeadline {
@@ -652,6 +656,7 @@ export interface Expense {
   approvedBy?: string;
   approvedAt?: string;
   notes?: string;
+  currency?: string; // FIX: Added currency field
 }
 
 export interface InvoiceLineItem {
@@ -694,6 +699,7 @@ export interface Invoice {
   retentionAmount?: number;
   amountPaid?: number;
   balance?: number;
+  paidDate?: string | Date; // FIX: Added paidDate field
 }
 
 export interface InvoicePayment {
@@ -1442,6 +1448,8 @@ export interface ProjectMilestone {
   completedDate?: string;
   status: 'pending' | 'completed' | 'overdue';
   dependencies?: string[];
+  date?: string; // FIX: Added for compatibility
+  completed?: boolean; // FIX: Added for compatibility
 }
 
 export interface ProjectRisk {

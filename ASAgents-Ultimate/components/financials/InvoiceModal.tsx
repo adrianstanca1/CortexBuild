@@ -29,7 +29,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 }) => {
     const [clientId, setClientId] = useState<string>(invoiceToEdit?.clientId.toString() || '');
     const [projectId, setProjectId] = useState<string>(invoiceToEdit?.projectId.toString() || '');
-    const [issuedAt, setIssuedAt] = useState(new Date(invoiceToEdit?.issuedAt || new Date()).toISOString().split('T')[0]);
+    const [issueDate, setIssuedAt] = useState(new Date(invoiceToEdit?.issueDate || new Date()).toISOString().split('T')[0]);
     const [dueAt, setDueAt] = useState(
         new Date(invoiceToEdit?.dueAt || Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     );
@@ -86,7 +86,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
             const invoiceData = {
                 clientId: clientId,
                 projectId: projectId,
-                issuedAt: new Date(issuedAt).toISOString(),
+                issueDate: new Date(issueDate).toISOString(),
                 dueAt: new Date(dueAt).toISOString(),
                 lineItems: finalLineItems,
                 taxRate: Number(taxRate) / 100,
@@ -160,7 +160,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                             <label className="text-xs">Issued Date</label>
                             <input
                                 type="date"
-                                value={issuedAt}
+                                value={issueDate}
                                 onChange={e => setIssuedAt(e.target.value)}
                                 className="w-full p-2 border rounded"
                                 disabled={isReadOnly}

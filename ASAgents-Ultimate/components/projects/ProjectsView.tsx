@@ -11,7 +11,7 @@ import { api } from '../../services/mockApi';
 import { hasPermission } from '../../services/auth';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { ProjectModal } from '../project/CreateProjectModal';
+import ProjectModal from '../project/CreateProjectModal';
 import { ViewHeader } from '../layout/ViewHeader';
 import { Tag } from '../ui/Tag';
 import { computeProjectPortfolioSummary, PROJECT_STATUS_ORDER } from '../../utils/projectPortfolio';

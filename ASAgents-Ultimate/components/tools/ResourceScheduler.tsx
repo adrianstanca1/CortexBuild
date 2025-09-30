@@ -85,7 +85,7 @@ const AssignmentModal: React.FC<{
         </div>
     );
 
-    export const ResourceScheduler: React.FC<ResourceSchedulerProps> = ({ user, addToast }) => {
+  private const ResourceScheduler: React.FC<ResourceSchedulerProps> = ({ user, addToast }) => {
         const [assignments, setAssignments] = useState<ResourceAssignment[]>([]);
         const [projects, setProjects] = useState<Project[]>([]);
         const [users, setUsers] = useState<User[]>([]);

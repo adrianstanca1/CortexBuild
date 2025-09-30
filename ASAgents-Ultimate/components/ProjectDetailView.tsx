@@ -7,7 +7,7 @@ import { hasPermission } from '../services/auth';
 import { PriorityDisplay } from './ui/priorityDisplay';
 import { Avatar } from './ui/Avatar';
 import { IncidentSeverityBadge, IncidentStatusBadge } from './ui/statusBadge';
-import { ProjectModal } from './project/CreateProjectModal';
+import ProjectModal from './project/CreateProjectModal';
 import { ReminderControl } from './reminder/ReminderControl';
 import { TaskModal } from './task/TaskModal';
 import { Tag } from './ui/Tag';

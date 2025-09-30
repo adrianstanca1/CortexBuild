@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { InvoiceStatus, ExpenseStatus } from '../types';
 import { User, Expense, Invoice } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -117,7 +118,7 @@ export const FinancialReports: React.FC<FinancialReportsProps> = ({
       const monthStart = startOfMonth(month);
       const monthEnd = endOfMonth(month);
       return invoices
-        .filter(inv => inv.status === 'paid' && inv.paidDate && 
+        .filter(inv => inv.status === InvoiceStatus.PAID && inv.paidDate && 
           inv.paidDate >= monthStart && inv.paidDate <= monthEnd)
         .reduce((sum, inv) => sum + inv.total, 0);
     });
@@ -126,7 +127,7 @@ export const FinancialReports: React.FC<FinancialReportsProps> = ({
       const monthStart = startOfMonth(month);
       const monthEnd = endOfMonth(month);
       return expenses
-        .filter(exp => exp.status === 'approved' && 
+        .filter(exp => exp.status === ExpenseStatus.APPROVED && 
           exp.date >= monthStart && exp.date <= monthEnd)
         .reduce((sum, exp) => sum + exp.amount, 0);
     });
@@ -149,7 +150,7 @@ export const FinancialReports: React.FC<FinancialReportsProps> = ({
     const categories = Array.from(new Set(expenses.map(e => e.category)));
     const categoryTotals = categories.map(category =>
       expenses
-        .filter(exp => exp.category === category && exp.status === 'approved' &&
+        .filter(exp => exp.category === category && exp.status === ExpenseStatus.APPROVED &&
           exp.date >= startDate && exp.date <= endDate)
         .reduce((sum, exp) => sum + exp.amount, 0)
     );

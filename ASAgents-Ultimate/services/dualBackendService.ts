@@ -532,6 +532,27 @@ class DualBackendService {
       overall: this.backendHealth.nodejs || this.backendHealth.java
     };
   }
+
+  // Health check method
+  async checkBackendHealth(): Promise<{ node: boolean; typescript: boolean }> {
+    const results = { node: false, typescript: false };
+    
+    try {
+      const nodeHealth = await this.getWithFallback('/api/health');
+      results.node = nodeHealth.success || false;
+    } catch {
+      results.node = false;
+    }
+    
+    try {
+      const tsHealth = await this.getWithFallback('/api/health', { preferBackend: 'typescript' });
+      results.typescript = tsHealth.success || false;
+    } catch {
+      results.typescript = false;
+    }
+    
+    return results;
+  }
 }
 
 export const dualBackendService = new DualBackendService();

@@ -436,7 +436,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ user, addToast }) => {
             if (controller.signal.aborted) return;
             setClients(clientData);
             if (controller.signal.aborted) return;
-            setInsights(insightData || null);
+            setInsights(insightData || {} as ClientInsights);
         } catch (error) {
             if (controller.signal.aborted) return;
             addToast("Failed to load clients.", "error");

@@ -141,18 +141,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       errorInfo: null,
       errorId: null,
       retryCount: prevState.retryCount + 1,
-    }));
-
-    // Record retry metric
-    performanceMonitor.recordMetric({
-      name: 'error_boundary_retry',
-      value: 1,
-      timestamp: Date.now(),
-      type: 'counter',
-      tags: {
-        retryCount: String(retryCount + 1),
-        level: this.props.level || 'component',
-      },
+    }), () => {
+      // Record retry metric
+      performanceMonitor.recordMetric({
+        name: 'error_boundary_retry',
+        value: 1,
+        timestamp: Date.now(),
+        type: 'counter',
+        tags: {
+          retryCount: String(this.state.retryCount),
+          level: this.props.level || 'component',
+        },
+      });
     });
   };
 
