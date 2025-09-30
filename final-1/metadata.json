@@ -1,0 +1,8 @@
+{
+  "name": "Asagents - Final",
+  "description": "A multitenant system for construction companies to manage projects, teams, and timekeeping with role-based access for admins, project managers, and operatives. Features include location-based clock-in, timesheet management, document sharing, and project tracking.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}

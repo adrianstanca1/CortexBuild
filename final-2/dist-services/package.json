@@ -1,0 +1,12 @@
+{
+  "name": "construction-app-services-demo",
+  "version": "1.0.0",
+  "description": "Construction Management App - Services Integration Demo",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 3000 || python -m SimpleHTTPServer 3000"
+  },
+  "dependencies": {
+    "sanitize-html": "^2.17.0"
+}
+}

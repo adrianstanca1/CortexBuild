@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AS Agents - Construction Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""/>
+    <style>
+      :root {
+        --color-primary: 217 91% 60%; /* Blue */
+        --color-secondary: 14 84% 56%; /* Reddish-Orange */
+        --color-success: 145 63% 49%;
+        --color-danger: 0 84% 60%;
+        --color-warning: 38 92% 50%;
+        
+        --background: 240 10% 99%; /* almost white */
+        --foreground: 240 10% 3.9%;
+        
+        --card: 0 0% 100%;
+        --card-foreground: 240 10% 3.9%;
+        
+        --muted: 240 4.8% 95.9%;
+        --muted-foreground: 240 3.8% 46.1%;
+        
+        --border: 240 5.9% 90%;
+        --input: 240 5.9% 90%;
+        
+        --ring: 217 91% 60%;
+      }
+
+      .dark {
+        --color-primary: 210 40% 98%; /* almost white */
+        --color-secondary: 217 91% 60%; /* slate-800 */
+        
+        --background: 222 47% 11%; /* dark slate */
+        --foreground: 210 40% 98%; /* almost white */
+        
+        --card: 222 47% 15%; /* slightly lighter dark slate */
+        --card-foreground: 210 40% 98%;
+        
+        --muted: 222 47% 20%; /* for muted backgrounds like sidebars */
+        --muted-foreground: 215 20% 65%;
+        
+        --border: 217 32% 27%;
+        --input: 217 32% 27%;
+        
+        --ring: 215 28% 42%;
+      }
+      
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: hsl(var(--muted));
+        color: hsl(var(--foreground));
+        transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+      }
+
+      /* Dark mode overrides for common tailwind classes */
+      .dark .bg-white { background-color: hsl(var(--card)); }
+      .dark .text-gray-900, .dark .text-slate-900, .dark .text-slate-800, .dark .text-slate-700 { color: hsl(var(--card-foreground)); }
+      .dark .text-gray-800, .dark .text-gray-700 { color: hsl(var(--muted-foreground)); }
+      .dark .text-gray-600, .dark .text-slate-600, .dark .text-slate-500 { color: hsl(var(--muted-foreground)); }
+      .dark .text-slate-400 { color: hsl(var(--muted-foreground) / 0.8); }
+      .dark .text-slate-300 { color: hsl(var(--muted-foreground) / 0.7); }
+      
+      .dark .border, .dark .border-gray-200, .dark .border-gray-200\/80, .dark .border-slate-200, .dark .border-slate-200\/80 { border-color: hsl(var(--border)); }
+      .dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: hsl(var(--border)); }
+      
+      .dark .bg-slate-50 { background-color: hsl(var(--background) / 0.7); }
+      .dark .bg-slate-100 { background-color: hsl(var(--muted) / 0.7); }
+      .dark .hover\:bg-slate-100:hover { background-color: hsl(var(--muted) / 0.7); }
+      .dark .hover\:bg-slate-200:hover { background-color: hsl(var(--muted)); }
+      .dark .bg-slate-800 { background-color: hsl(var(--muted)); } /* sidebar */
+      .dark .bg-slate-900 { background-color: hsl(var(--card)); } /* active sidebar */
+      .dark .hover\:bg-slate-700:hover { background-color: hsl(var(--card) / 0.7); }
+      .dark .bg-white\/80 { background-color: hsl(var(--card) / 0.8); } /* header */
+
+      .dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2); }
+      .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25); }
+      
+      .dark select {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      }
+      .dark input, .dark select, .dark textarea {
+          background-color: hsl(var(--input));
+          border-color: hsl(var(--border));
+          color: hsl(var(--foreground));
+      }
+      .dark input::placeholder, .dark textarea::placeholder {
+          color: hsl(var(--muted-foreground));
+      }
+
+      /* Maps */
+      .dark .leaflet-tile {
+          filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+      }
+      .dark .leaflet-container {
+        background-color: hsl(var(--muted));
+      }
+
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+      
+      /* Styles for cluster markers */
+      .cluster-marker {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+        border-radius: 50%;
+        background: hsla(217, 91%, 60%, 0.85);
+        border: 2px solid white;
+        box-shadow: 0 0 0 1px hsla(217, 91%, 60%, 0.5);
+      }
+
+      .dark .cluster-marker {
+        background: hsla(210, 40%, 98%, 0.85);
+        color: hsl(var(--background));
+        border-color: hsl(var(--background));
+        box-shadow: 0 0 0 1px hsla(210, 40%, 98%, 0.5);
+      }
+      
+      /* Custom Marker Styles */
+      .custom-marker-icon {
+        background: none;
+        border: none;
+      }
+      .custom-marker-icon svg {
+        width: 32px;
+        height: 32px;
+        filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+      }
+      .marker-active { fill: hsl(var(--color-success)); }
+      .marker-on-hold { fill: hsl(var(--color-warning)); }
+      .marker-completed { fill: hsl(var(--color-secondary)); }
+
+      .dark .marker-active { fill: hsl(145 63% 60%); }
+      .dark .marker-on-hold { fill: hsl(38 92% 60%); }
+      .dark .marker-completed { fill: hsl(14 84% 66%); }
+
+
+      /* Animation for cards */
+      @keyframes card-enter {
+        from {
+          opacity: 0;
+          transform: translateY(10px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .animate-card-enter {
+        animation: card-enter 0.4s ease-out forwards;
+      }
+
+      /* Accessibility utility */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+
+      /* Whiteboard styles */
+      .whiteboard-bg {
+        background-color: #f8f9fa;
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+      }
+      .dark .whiteboard-bg {
+        background-color: hsl(var(--muted) / 0.5);
+      }
+      .post-it {
+        font-family: 'Caveat', cursive;
+        font-size: 1.1rem;
+        line-height: 1.4;
+        padding: 1rem;
+        box-shadow: 5px 5px 7px rgba(33,33,33,.2);
+      }
+      .post-it-yellow { background-color: #fffb91; }
+      .post-it-green { background-color: #d3f8e2; }
+      .post-it-blue { background-color: #a6d9f7; }
+      .dark .post-it-yellow { background-color: #4a492c; }
+      .dark .post-it-green { background-color: #314a3a; }
+      .dark .post-it-blue { background-color: #2e4452; }
+
+
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react": "https://esm.sh/react@18.2.0",
+    "leaflet": "https://esm.sh/leaflet@1.9.4",
+    "react-leaflet": "https://esm.sh/react-leaflet@4.2.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.17.0",
+    "use-supercluster": "https://esm.sh/use-supercluster@0.4.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

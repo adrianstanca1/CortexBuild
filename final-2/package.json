@@ -1,0 +1,49 @@
+{
+  "name": "asagents---final",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "install": "node ./scripts/install-deps.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --coverage",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'Linting not configured yet'",
+    "deploy": "npm run build",
+    "start": "npm run preview",
+    "analyze": "ANALYZE_BUNDLE=true npm run build"
+  },
+  "dependencies": {
+    "@google/genai": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "leaflet": "1.9.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-leaflet": "4.2.1",
+    "use-supercluster": "0.4.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.8.0",
+     "@types/node": "^22.14.0",
+    "jsdom": "^27.0.0",
+      "@types/node": "^22.14.0",
+ 
+     "@types/node": "^22.14.0",
+     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@types/node": "^22.14.0",
+   
+     "jsdom": "^27.0.0",
+     "terser": "^5.44.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,145 @@
+// full contents of services/mockData.ts
+
+// FIX: Added missing type imports to allow for explicit typing of mock data arrays.
+// FIX: Replaced UserRole with Role
+import {
+  Company,
+  User,
+  Project,
+  ProjectAssignment,
+  Task,
+  Timesheet,
+  SafetyIncident,
+  Equipment,
+  ResourceAssignment,
+  Client,
+  Invoice,
+  Quote,
+  Expense,
+  ProjectTemplate,
+  ProjectInsight,
+  FinancialForecast,
+  Notification,
+  AuditLog,
+  Conversation,
+  Message,
+  Document,
+  Role,
+  TodoStatus,
+  TimesheetStatus,
+  IncidentStatus,
+  IncidentSeverity,
+  TodoPriority,
+  InvoiceStatus,
+  QuoteStatus,
+  ExpenseCategory,
+  ExpenseStatus,
+  NotificationType,
+  DocumentStatus,
+  EquipmentStatus,
+  AvailabilityStatus,
+  WhiteboardNote,
+  SiteUpdate,
+  ProjectMessage,
+  Todo,
+} from '../types';
+
+export const initialData = {
+    companies: [
+        { id: '0', name: 'Platform Administration' },
+        { id: '1', name: 'ConstructCo' },
+        { id: '2', name: 'Renovate Ltd.' },
+        { id: '3', name: 'As Cladding and Roofing Ltd' },
+    ] as Partial<Company>[],
+    users: [
+        { id: '0', firstName: 'Adrian', lastName: 'Admin', email: 'adrian@ascladdingltd.co.uk', role: Role.PRINCIPAL_ADMIN, companyId: '0', avatar: 'https://i.pravatar.cc/150?u=0', password: 'Cumparavinde1', mfaEnabled: false },
+        { id: '1', firstName: 'Samantha', lastName: 'Lee', email: 'sam@constructco.com', role: Role.ADMIN, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=1', phone: '07123456781', password: 'password123', mfaEnabled: false },
+        { id: '2', firstName: 'David', lastName: 'Chen', email: 'david@constructco.com', role: Role.PROJECT_MANAGER, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=2', phone: '07123456782', password: 'password123', mfaEnabled: true },
+        { id: '3', firstName: 'Maria', lastName: 'Garcia', email: 'maria@constructco.com', role: Role.FOREMAN, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=3', phone: '07123456783', password: 'password123', mfaEnabled: false },
+        { id: '4', firstName: 'Bob', lastName: 'Williams', email: 'bob@constructco.com', role: Role.OPERATIVE, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=4', phone: '07123456784', password: 'password123', mfaEnabled: false },
+        { id: '5', firstName: 'John', lastName: 'Smith', email: 'john@renovate.com', role: Role.ADMIN, companyId: '2', avatar: 'https://i.pravatar.cc/150?u=5', phone: '07123456785', password: 'password123', mfaEnabled: false },
+        { id: '6', firstName: 'Emily', lastName: 'White', email: 'emily@renovate.com', role: Role.PROJECT_MANAGER, companyId: '2', avatar: 'https://i.pravatar.cc/150?u=6', phone: '07123456786', password: 'password123', mfaEnabled: false },
+        { id: '7', firstName: 'Carlos', lastName: 'Diaz', email: 'carlos@constructco.com', role: Role.OPERATIVE, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=7', phone: '07123456787', password: 'password123', mfaEnabled: false },
+        { id: '8', firstName: 'Admin', lastName: 'User', email: 'admin@ascladding.com', role: Role.OWNER, companyId: '3', avatar: 'https://i.pravatar.cc/150?u=8', phone: '07123456788', password: 'password123', mfaEnabled: false },
+    ] as Partial<User>[],
+    projects: [
+        { id: '101', companyId: '1', name: 'Downtown Tower', location: { address: '123 Main St, London', lat: 51.5074, lng: -0.1278 }, budget: 5000000, spent: 3250000, actualCost: 3250000, startDate: '2023-01-15', status: 'ACTIVE', image: 'https://picsum.photos/seed/tower/800/400' },
+        { id: '102', companyId: '1', name: 'North Bridge Retrofit', location: { address: '456 Oak Ave, Manchester', lat: 53.4808, lng: -2.2426 }, budget: 1200000, spent: 1350000, actualCost: 1350000, startDate: '2022-11-01', status: 'COMPLETED', image: 'https://picsum.photos/seed/bridge/800/400' },
+        { id: '201', companyId: '2', name: 'Victorian House Reno', location: { address: '789 Pine Ln, Bristol', lat: 51.4545, lng: -2.5879 }, budget: 250000, spent: 180000, actualCost: 180000, startDate: '2023-03-10', status: 'ACTIVE', image: 'https://picsum.photos/seed/house/800/400' },
+    ] as Partial<Project>[],
+    todos: [
+        { id: 't-1', text: 'Finalize foundation pouring', title: 'Finalize foundation pouring', status: TodoStatus.IN_PROGRESS, priority: TodoPriority.HIGH, assignedTo: '3', projectId: '101' },
+        { id: 't-2', text: 'Install HVAC system on floor 5', title: 'Install HVAC system on floor 5', status: TodoStatus.TODO, priority: TodoPriority.MEDIUM, assignedTo: '4', projectId: '101' },
+        { id: 't-3', text: 'Source interior fixtures', title: 'Source interior fixtures', status: TodoStatus.TODO, priority: TodoPriority.LOW, assignedTo: '2', projectId: '101' },
+        { id: 't-4', text: 'Strip wallpaper in living room', title: 'Strip wallpaper in living room', status: TodoStatus.DONE, priority: TodoPriority.MEDIUM, assignedTo: '6', projectId: '201' },
+    ] as Partial<Todo>[],
+    expenses: [
+      { id: 'e-1', description: 'Client Lunch', amount: 150, category: 'Other', projectId: '101', userId: '2', date: '2024-01-15', status: ExpenseStatus.APPROVED }
+    ] as Partial<Expense>[],
+    invoices: [
+        { id: 'inv-1', companyId: '1', invoiceNumber: 'INV-001', projectId: '101', clientId: 'c-1', issueDate: '2024-01-20', dueDate: '2024-02-20', status: InvoiceStatus.PAID, lineItems: [{id: 'li-1', description: 'Phase 1', quantity: 1, rate: 100000, amount: 100000}], subtotal: 100000, taxRate: 0.2, taxAmount: 20000, retentionRate: 0.05, retentionAmount: 5000, total: 115000, amountPaid: 115000, balance: 0 }
+    ] as Partial<Invoice>[],
+    siteUpdates: [
+        { id: 'su-1', projectId: '101', userId: '3', message: 'Concrete pour for the ground floor is complete.', timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString(), images: ['https://picsum.photos/seed/concrete/400/200'] },
+    ] as Partial<SiteUpdate>[],
+    projectMessages: [
+        { id: 'pm-1', projectId: '101', senderId: '2', message: 'Team, please remember the safety briefing at 7 AM sharp tomorrow.', timestamp: new Date(Date.now() - 20 * 60 * 1000).toISOString() },
+    ] as Partial<ProjectMessage>[],
+    safetyIncidents: [
+        { id: 'si-1', title: 'Minor Slip', description: 'Minor slip on wet surface, no injury.', severity: IncidentSeverity.LOW, projectId: '101', reportedBy: '3', incidentDate: new Date().toISOString(), status: IncidentStatus.RESOLVED },
+    ] as Partial<SafetyIncident>[],
+    equipment: [
+        { id: 'eq-1', name: 'Excavator CAT 320', status: EquipmentStatus.AVAILABLE, companyId: '1' },
+    ] as Partial<Equipment>[],
+    timeEntries: [
+        { id: 'te-1', userId: '4', projectId: '101', startTime: new Date(Date.now() - 8 * 3600 * 1000).toISOString(), endTime: new Date().toISOString(), status: TimesheetStatus.PENDING }
+    ] as Partial<Timesheet>[],
+    projectInsights: [] as Partial<ProjectInsight>[],
+    financialForecasts: [] as Partial<FinancialForecast>[],
+    clients: [
+        {
+            id: 'c-1',
+            companyId: '1',
+            name: 'Global Real Estate Inc.',
+            contactPerson: 'Ava Harris',
+            contactEmail: 'ava.harris@gre.com',
+            contactPhone: '+44 20 7946 0101',
+            email: 'accounts@gre.com',
+            phone: '+44 20 7946 0101',
+            billingAddress: 'Accounts Payable, 100 Market Street, London SW1A 1AA',
+            paymentTerms: 'Net 30',
+            isActive: true,
+            createdAt: '2024-01-15T09:00:00Z',
+            updatedAt: '2024-12-10T10:30:00Z',
+            address: {
+                street: '100 Market Street',
+                city: 'London',
+                state: 'Greater London',
+                zipCode: 'SW1A 1AA',
+                country: 'United Kingdom',
+            },
+        },
+        {
+            id: 'c-2',
+            companyId: '1',
+            name: 'Northbridge Retail Group',
+            contactPerson: 'Leo Patel',
+            contactEmail: 'leo.patel@northbridge.com',
+            contactPhone: '+44 161 555 0198',
+            email: 'finance@northbridge.com',
+            phone: '+44 161 555 0198',
+            billingAddress: 'Finance Office, 50 King Street, Manchester M2 4LY',
+            paymentTerms: 'Net 45',
+            isActive: true,
+            createdAt: '2024-11-28T12:00:00Z',
+            updatedAt: '2024-12-15T08:15:00Z',
+            address: {
+                street: '50 King Street',
+                city: 'Manchester',
+                state: 'Greater Manchester',
+                zipCode: 'M2 4LY',
+                country: 'United Kingdom',
+            },
+        },
+    ] as Partial<Client>[],
+};
