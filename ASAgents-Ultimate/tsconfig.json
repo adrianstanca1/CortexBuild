@@ -8,6 +8,8 @@
     "skipLibCheck": true,
     "noErrorTruncation": false,
     "types": ["node", "vite/client"],
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
