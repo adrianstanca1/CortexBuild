@@ -1,7 +1,0 @@
-📊 Current TypeScript Errors:
-
-> asagents-ultimate@1.0.0 type-check
-> tsc --noEmit
-
-components/ChatView.tsx(176,6): error TS1472: 'catch' or 'finally' expected.
-components/ChatView.tsx(249,3): error TS1005: '}' expected.

@@ -1,4 +1,0 @@
-.storage-usage-bar {
-  width: var(--storage-usage, 0%);
-  transition: width 0.3s;
-}

@@ -39,7 +39,7 @@
 - Prefer `pnpm -C <app>` commands. If you add scripts/config, document them here.
 
 ## App: final
-- Env: add `GEMINI_API_KEY` to `final/.env.local`. Vite loads it via `loadEnv` and defines `process.env.*`, so no `VITE_` prefix needed here.
+- Env: add `GEMINI_API_KEY` and `OPENAI_API_KEY` to `final/.env.local`. Multi-provider AI system with OpenAI as primary and Gemini as fallback. Also includes GitHub OAuth configuration with private key SHA256. Deployment credentials for IONOS webspace host (access-5018479682.webspace-host.com) configured for SFTP deployment.
 - Aliases: import using `@/` (alias to `final/src`). Example: `import { api } from '@/services/apiClient'`.
 - Install: `pnpm -C final install` (runs lifecycle install + deps).
 - Develop: `pnpm -C final dev`; Type‑check: `pnpm -C final type-check`.
@@ -53,15 +53,79 @@
 
 ## App: asagents.co.uk-ready
 - Location: `Desktop/asagents.co.uk-ready` (uses npm with `package-lock.json`).
-- Env: create `.env.local` with `GEMINI_API_KEY` (and optional `VAPID_PUBLIC_KEY`). Deployment config also sets `API_BASE_URL`/`WEBSOCKET_URL` per environment.
+- Env: create `.env.local` with `GEMINI_API_KEY` and `OPENAI_API_KEY` (and optional `VAPID_PUBLIC_KEY`). Multi-provider AI system for enhanced functionality. GitHub OAuth integration configured with private key SHA256. Production deployment configured for IONOS webspace-host.com SFTP server.
 - Aliases: `@` maps to project root `.`. Imports: `import { something } from '@/services/ai'`.
 - Install/Dev: `npm ci` then `npm run dev` (inside the folder).
 - Tests: `npm test` or `npm run test:watch`; coverage: `npm run test:coverage` (tests live in `services/__tests__` and `services/*.test.ts`).
 - Build/Preview: `npm run build` / `npm run preview`.
-- Deploy: `npm run deploy:staging` | `deploy:production` | target overrides (`deploy:vercel`, `deploy:netlify`, `deploy:docker`, `deploy:dry-run`).
+- Deploy: `npm run deploy:staging` | `deploy:production` | `deploy:ionos` | `deploy:sftp` | target overrides (`deploy:vercel`, `deploy:netlify`, `deploy:docker`, `deploy:dry-run`).
+
+## App: construction-manager
+- Framework: Next.js 15 with Turbopack, uses npm with `package-lock.json`.
+- UI: Radix UI primitives, Tailwind CSS, shadcn/ui components.
+- Install: `npm --prefix construction-manager install`
+- Develop: `npm --prefix construction-manager run dev` (Next.js with Turbopack)
+- Build/Start: `npm --prefix construction-manager run build` / `npm run start`
+- Lint: `npm --prefix construction-manager run lint`
+
+## App: main
+- Framework: Vite-based construction management app, React 18.2.
+- Features: Leaflet maps with react-leaflet, Google Generative AI integration.
+- Install: `pnpm -C main install` or `npm --prefix main install`
+- Develop: `pnpm -C main dev` (Vite dev server)
+- Build/Preview: `pnpm -C main build` / `pnpm -C main preview`
+
+## App: final-1
+- Framework: Vite + React 18.2, TypeScript with Vitest testing.
+- Features: Construction management with maps (Leaflet), Google Generative AI.
+- Install: `pnpm -C final-1 install`
+- Develop: `pnpm -C final-1 dev` (uses `npx vite`)
+- Build/Preview: `pnpm -C final-1 build` / `pnpm -C final-1 preview`
+- Test: `pnpm -C final-1 test` (Vitest)
+
+## App: final-2
+- Framework: Vite + React 18.2, enhanced version with lifecycle scripts.
+- Features: Construction management, maps, testing with coverage.
+- Install: `pnpm -C final-2 install` (runs custom `scripts/install-deps.mjs`)
+- Develop: `pnpm -C final-2 dev`
+- Build/Preview: `pnpm -C final-2 build` / `pnpm -C final-2 preview`
+- Test: `pnpm -C final-2 test` | `test:watch` | `test:coverage`
+- Type-check: `pnpm -C final-2 type-check`
+- Deploy: `pnpm -C final-2 deploy` (builds for deployment)
+
+## App: open-lovable
+- Framework: Next.js 15 AI coding assistant with multiple AI providers.
+- AI Providers: Anthropic, OpenAI, Google, Groq with Vercel AI SDK.
+- Features: Code interpreter (@e2b), web scraping (Firecrawl), sandbox execution.
+- UI: Radix UI, Framer Motion, Tailwind CSS, syntax highlighting.
+- Install: `pnpm -C open-lovable install` or `npm --prefix open-lovable install`
+- Develop: `pnpm -C open-lovable dev` (Next.js with Turbopack)
+- Build/Start: `pnpm -C open-lovable build` / `pnpm -C open-lovable start`
+- Test: `pnpm -C open-lovable run test:api` | `test:code` | `test:all`
+- Lint: `pnpm -C open-lovable lint`
+
+## App: test-vite
+- Framework: Simple Vite + React 19 test/demo app.
+- Purpose: Testing and experimentation with latest Vite/React.
+- Install: `pnpm -C test-vite install`
+- Develop: `pnpm -C test-vite dev`
+- Build/Preview: `pnpm -C test-vite build` / `pnpm -C test-vite preview`
+- Lint: `pnpm -C test-vite lint`
+
+## Platform Services (@construction/*)
+- Workspace: PNPM workspace defined in `pnpm-workspace.yaml` for `construction-ai-platform/`.
+- Packages: `@construction/apps-web`, `@construction/service-api-gateway`, `@construction/service-finance`.
+- Note: Platform packages are referenced in root scripts but not yet implemented.
+- Root scripts available:
+  - `pnpm run platform:install` - Install all platform dependencies
+  - `pnpm run platform:dev` - Run web app (`@construction/apps-web`)
+  - `pnpm run platform:dev:gateway` - Run API gateway service
+  - `pnpm run platform:dev:finance` - Run finance service
+  - `pnpm run platform:lint` | `platform:test` | `platform:build` - Run for all platform packages
 
 ## Root Convenience Scripts
 - Examples (run at repo root):
-  - `pnpm run final:dev` | `final:build` | `final:test`
-  - `pnpm run asagents:dev` | `asagents:build` | `asagents:test`
-  - Install: `pnpm run final:install` or `pnpm run asagents:install`
+  - `pnpm run final:dev` | `final:build` | `final:test` | `final:coverage` | `final:deploy:staging`
+  - `pnpm run asagents:dev` | `asagents:build` | `asagents:test` | `asagents:deploy:production`
+  - `pnpm run platform:dev` | `platform:build` | `platform:test`
+  - Install: `pnpm run final:install` | `asagents:install` | `platform:install`
