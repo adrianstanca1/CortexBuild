@@ -4,7 +4,6 @@ import { User, View, Project, Timesheet, TimesheetStatus, Permission, SafetyInci
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { Dashboard } from './components/Dashboard';
-import { EnhancedDashboard } from './components/EnhancedDashboard';
 import { ProjectDetailView } from './components/ProjectDetailView';
 import { DocumentsView } from './components/DocumentsView';
 import { SafetyView } from './components/SafetyView';
@@ -30,7 +29,6 @@ import { hasPermission } from './services/auth';
 import { ProjectsMapView } from './components/ProjectsMapView';
 import { PrincipalAdminDashboard } from './components/PrincipalAdminDashboard';
 import { socketService } from './services/socketService';
-import { DashboardErrorBoundary, ErrorBoundary } from './components/ErrorBoundary';
 
 interface Toast {
     id: number;
@@ -129,122 +127,28 @@ const App: React.FC = () => {
     const renderView = () => {
         if (!user) return null;
         if (selectedProject && activeView === 'projects') {
-            return (
-                <ErrorBoundary>
-                    <ProjectDetailView project={selectedProject} user={user!} onBack={() => setSelectedProject(null)} addToast={addToast} isOnline={isOnline} onStartChat={handleStartChat} />
-                </ErrorBoundary>
-            );
+            return <ProjectDetailView project={selectedProject} user={user!} onBack={() => setSelectedProject(null)} addToast={addToast} isOnline={isOnline} onStartChat={handleStartChat} />;
         }
         
         switch (activeView) {
-            case 'dashboard': 
-                return (
-                    <DashboardErrorBoundary>
-                        <EnhancedDashboard user={user!} addToast={addToast} activeView={activeView} setActiveView={setActiveView} onSelectProject={handleSelectProject} />
-                    </DashboardErrorBoundary>
-                );
-            case 'my-day': 
-                return (
-                    <ErrorBoundary>
-                        <MyDayView user={user!} addToast={addToast} setActiveView={setActiveView} />
-                    </ErrorBoundary>
-                );
-            case 'principal-dashboard': 
-                return (
-                    <DashboardErrorBoundary>
-                        <PrincipalAdminDashboard user={user!} addToast={addToast} />
-                    </DashboardErrorBoundary>
-                );
-            case 'projects': 
-                return (
-                    <ErrorBoundary>
-                        <ProjectsView user={user!} addToast={addToast} onSelectProject={handleSelectProject} />
-                    </ErrorBoundary>
-                );
-            case 'documents': 
-                return (
-                    <ErrorBoundary>
-                        <DocumentsView user={user!} addToast={addToast} isOnline={isOnline} />
-                    </ErrorBoundary>
-                );
-            case 'safety': 
-                return (
-                    <ErrorBoundary>
-                        <SafetyView user={user!} addToast={addToast} />
-                    </ErrorBoundary>
-                );
-            case 'timesheets': 
-                return (
-                    <ErrorBoundary>
-                        <TimesheetsView user={user!} addToast={addToast} />
-                    </ErrorBoundary>
-                );
-            case 'time': 
-                return (
-                    <ErrorBoundary>
-                        <TimeTrackingView user={user!} addToast={addToast} setActiveView={setActiveView} />
-                    </ErrorBoundary>
-                );
-            case 'settings': 
-                return (
-                    <ErrorBoundary>
-                        <SettingsView user={user!} addToast={addToast} theme={theme} setTheme={setTheme} />
-                    </ErrorBoundary>
-                );
-            case 'users': 
-                return (
-                    <ErrorBoundary>
-                        <TeamView user={user!} addToast={addToast} onStartChat={handleStartChat} />
-                    </ErrorBoundary>
-                );
-            case 'chat': 
-                return (
-                    <ErrorBoundary>
-                        <ChatView user={user!} addToast={addToast} initialRecipient={chatRecipient} />
-                    </ErrorBoundary>
-                );
-            case 'tools': 
-                return (
-                    <ErrorBoundary>
-                        <ToolsView user={user!} addToast={addToast} setActiveView={setActiveView} />
-                    </ErrorBoundary>
-                );
-            case 'financials': 
-                return (
-                    <ErrorBoundary>
-                        <FinancialsView user={user!} addToast={addToast} />
-                    </ErrorBoundary>
-                );
-            case 'equipment': 
-                return (
-                    <ErrorBoundary>
-                        <EquipmentView user={user!} addToast={addToast} />
-                    </ErrorBoundary>
-                );
-            case 'templates': 
-                return (
-                    <ErrorBoundary>
-                        <TemplatesView user={user!} addToast={addToast} />
-                    </ErrorBoundary>
-                );
-            case 'all-tasks': 
-                return (
-                    <ErrorBoundary>
-                        <AllTasksView user={user!} addToast={addToast} isOnline={isOnline} />
-                    </ErrorBoundary>
-                );
-            case 'map': 
-                return (
-                    <ErrorBoundary>
-                        <ProjectsMapView user={user!} addToast={addToast} />
-                    </ErrorBoundary>
-                );
-            default: 
-                return (
-                    <DashboardErrorBoundary>
-                        <EnhancedDashboard user={user!} addToast={addToast} activeView={activeView} setActiveView={setActiveView} onSelectProject={handleSelectProject} />
-                    </DashboardErrorBoundary>
-                );
+            case 'dashboard': return <Dashboard user={user!} addToast={addToast} activeView={activeView} setActiveView={setActiveView} onSelectProject={handleSelectProject} />;
+            case 'my-day': return <MyDayView user={user!} addToast={addToast} setActiveView={setActiveView} />;
+            case 'principal-dashboard': return <PrincipalAdminDashboard user={user!} addToast={addToast} />;
+            case 'projects': return <ProjectsView user={user!} addToast={addToast} onSelectProject={handleSelectProject} />;
+            case 'documents': return <DocumentsView user={user!} addToast={addToast} isOnline={isOnline} />;
+            case 'safety': return <SafetyView user={user!} addToast={addToast} />;
+            case 'timesheets': return <TimesheetsView user={user!} addToast={addToast} />;
+            case 'time': return <TimeTrackingView user={user!} addToast={addToast} setActiveView={setActiveView} />;
+            case 'settings': return <SettingsView user={user!} addToast={addToast} theme={theme} setTheme={setTheme} />;
+            case 'users': return <TeamView user={user!} addToast={addToast} onStartChat={handleStartChat} />;
+            case 'chat': return <ChatView user={user!} addToast={addToast} initialRecipient={chatRecipient} />;
+            case 'tools': return <ToolsView user={user!} addToast={addToast} setActiveView={setActiveView} />;
+            case 'financials': return <FinancialsView user={user!} addToast={addToast} />;
+            case 'equipment': return <EquipmentView user={user!} addToast={addToast} />;
+            case 'templates': return <TemplatesView user={user!} addToast={addToast} />;
+            case 'all-tasks': return <AllTasksView user={user!} addToast={addToast} isOnline={isOnline} />;
+            case 'map': return <ProjectsMapView user={user!} addToast={addToast} />;
+            default: return <Dashboard user={user!} addToast={addToast} activeView={activeView} setActiveView={setActiveView} onSelectProject={handleSelectProject} />;
         }
     };
 

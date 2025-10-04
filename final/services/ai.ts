@@ -1,4 +1,5 @@
 import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
+import OpenAI from 'openai';
 import {
   Project,
   Todo,
@@ -18,90 +19,215 @@ import {
 import { apiCache } from './cacheService';
 import { wrapError, withRetry } from '../utils/errorHandling';
 
-const MODEL_NAME = 'gemini-2.0-flash-001';
-const API_KEY = typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY
-  ? (import.meta as any).env.VITE_GEMINI_API_KEY
-  : typeof process !== 'undefined'
-    ? (process.env?.GEMINI_API_KEY as string | undefined)
-    : undefined;
+// AI Provider Configuration
+type AIProvider = 'gemini' | 'openai';
 
-let cachedClient: GoogleGenAI | null = null;
+const PROVIDERS = {
+  gemini: {
+    model: 'gemini-2.0-flash-001',
+    apiKey: typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY
+      ? (import.meta as any).env.VITE_GEMINI_API_KEY
+      : typeof process !== 'undefined'
+        ? (process.env?.GEMINI_API_KEY as string | undefined)
+        : undefined,
+  },
+  openai: {
+    model: 'gpt-4o',
+    apiKey: typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_OPENAI_API_KEY
+      ? (import.meta as any).env.VITE_OPENAI_API_KEY
+      : typeof process !== 'undefined'
+        ? (process.env?.OPENAI_API_KEY as string | undefined)
+        : undefined,
+  }
+} as const;
+
+// Default provider order (primary -> fallback)
+const DEFAULT_PROVIDER_ORDER: AIProvider[] = ['openai', 'gemini'];
+
+let cachedGeminiClient: GoogleGenAI | null = null;
+let cachedOpenAIClient: OpenAI | null = null;
 
 const DEFAULT_GENERATION_CONFIG = {
   temperature: 0.35,
   maxOutputTokens: 768,
 };
 
-const getClient = (): GoogleGenAI | null => {
-  if (!API_KEY) {
+const getGeminiClient = (): GoogleGenAI | null => {
+  if (!PROVIDERS.gemini.apiKey) {
     return null;
   }
 
-  if (cachedClient) {
-    return cachedClient;
+  if (cachedGeminiClient) {
+    return cachedGeminiClient;
   }
 
   try {
-    cachedClient = new GoogleGenAI({ apiKey: API_KEY });
-    return cachedClient;
+    cachedGeminiClient = new GoogleGenAI({ apiKey: PROVIDERS.gemini.apiKey });
+    return cachedGeminiClient;
   } catch (error) {
     console.error('Failed to initialise Gemini client', error);
     return null;
   }
 };
 
+const getOpenAIClient = (): OpenAI | null => {
+  if (!PROVIDERS.openai.apiKey) {
+    return null;
+  }
+
+  if (cachedOpenAIClient) {
+    return cachedOpenAIClient;
+  }
+
+  try {
+    cachedOpenAIClient = new OpenAI({ 
+      apiKey: PROVIDERS.openai.apiKey,
+      dangerouslyAllowBrowser: true // Allow in browser for Vite apps
+    });
+    return cachedOpenAIClient;
+  } catch (error) {
+    console.error('Failed to initialise OpenAI client', error);
+    return null;
+  }
+};
+
 type GenerationOverrides = Partial<typeof DEFAULT_GENERATION_CONFIG>;
 
-const callGemini = async (
+interface AIResponse {
+  text: string;
+  model: string;
+  provider: AIProvider;
+  usage?: any;
+}
+
+const callOpenAI = async (
   prompt: string,
   overrides: GenerationOverrides = {},
-): Promise<GenerateContentResponse | null> => {
-  const client = getClient();
+): Promise<AIResponse | null> => {
+  const client = getOpenAIClient();
   if (!client) {
     return null;
   }
 
-  // Check cache first
-  const cacheKey = `ai:${btoa(prompt).slice(0, 50)}:${JSON.stringify(overrides)}`;
-  const cached = apiCache.get<GenerateContentResponse>(cacheKey);
-  if (cached) {
-    return cached;
+  try {
+    const response = await withRetry(
+      async () => {
+        return await client.chat.completions.create({
+          model: PROVIDERS.openai.model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: overrides.temperature ?? DEFAULT_GENERATION_CONFIG.temperature,
+          max_tokens: overrides.maxOutputTokens ?? DEFAULT_GENERATION_CONFIG.maxOutputTokens,
+        });
+      },
+      {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        backoffFactor: 2,
+      }
+    );
+
+    const text = response.choices[0]?.message?.content?.trim();
+    if (text) {
+      return {
+        text,
+        model: response.model,
+        provider: 'openai',
+        usage: response.usage,
+      };
+    }
+  } catch (error) {
+    console.error('OpenAI request failed', error);
+  }
+  
+  return null;
+};
+
+const callGemini = async (
+  prompt: string,
+  overrides: GenerationOverrides = {},
+): Promise<AIResponse | null> => {
+  const client = getGeminiClient();
+  if (!client) {
+    return null;
   }
 
   try {
     const config = { ...DEFAULT_GENERATION_CONFIG, ...overrides };
 
-    // Use retry mechanism for API calls
     const result = await withRetry(
       async () => {
         return await client.models.generateContent({
-          model: MODEL_NAME,
+          model: PROVIDERS.gemini.model,
           contents: prompt,
           config,
         });
       },
       {
         maxAttempts: 3,
-        delay: 1000,
-        backoff: 'exponential',
+        baseDelay: 1000,
+        backoffFactor: 2,
       }
     );
 
-    // Cache successful responses for 10 minutes
-    if (result) {
-      apiCache.set(cacheKey, result, 10 * 60 * 1000);
+    const text = result?.text?.trim();
+    if (text) {
+      return {
+        text,
+        model: result.modelVersion ?? PROVIDERS.gemini.model,
+        provider: 'gemini',
+        usage: result.usageMetadata,
+      };
     }
-
-    return result;
   } catch (error) {
-    const wrappedError = wrapError(error, {
-      operation: 'callGemini',
-      component: 'ai-service',
-      metadata: { prompt: prompt.slice(0, 100), config: overrides },
-    });
-    console.error('Gemini request failed', wrappedError);
-    return null;
+    console.error('Gemini request failed', error);
   }
+  
+  return null;
+};
+
+const callAI = async (
+  prompt: string,
+  overrides: GenerationOverrides = {},
+  providerOrder: AIProvider[] = DEFAULT_PROVIDER_ORDER,
+): Promise<AIResponse | null> => {
+  // Check cache first
+  const cacheKey = `ai:${btoa(prompt).slice(0, 50)}:${JSON.stringify(overrides)}`;
+  const cached = apiCache.get<AIResponse>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  // Try each provider in order
+  for (const provider of providerOrder) {
+    try {
+      let result: AIResponse | null = null;
+      
+      if (provider === 'openai') {
+        result = await callOpenAI(prompt, overrides);
+      } else if (provider === 'gemini') {
+        result = await callGemini(prompt, overrides);
+      }
+
+      if (result) {
+        // Cache successful responses for 10 minutes
+        apiCache.set(cacheKey, result, 10 * 60 * 1000);
+        return result;
+      }
+    } catch (error) {
+      console.warn(`${provider} failed, trying next provider:`, error);
+      continue;
+    }
+  }
+
+  // Log final failure
+  const wrappedError = wrapError(new Error('All AI providers failed'), {
+    operation: 'callAI',
+    component: 'ai-service',
+    timestamp: new Date().toISOString(),
+    metadata: { prompt: prompt.slice(0, 100), config: overrides, providerOrder },
+  });
+  console.error('All AI providers failed', wrappedError);
+  return null;
 };
 
 const formatCurrency = (value: number, currency: string = 'GBP') =>
@@ -254,7 +380,7 @@ ${buildProjectContext(input)}
 
 Respond in Markdown using bullet points as requested.`;
 
-  const response = await callGemini(prompt);
+  const response = await callAI(prompt);
 
   if (response?.text) {
     const text = response.text.trim();
@@ -273,18 +399,16 @@ Respond in Markdown using bullet points as requested.`;
         highSeverityIncidents: incidentSummary.highSeverity,
         expenseTotal: expenseSummary.totalAmount,
         isFallback: false,
+        provider: response.provider,
       };
 
-      if (response.modelVersion) {
-        metadata.modelVersion = response.modelVersion;
-      }
-      if (response.usageMetadata) {
-        metadata.usageMetadata = response.usageMetadata;
+      if (response.usage) {
+        metadata.usageMetadata = response.usage;
       }
 
       return {
         summary: text,
-        model: response.modelVersion ?? MODEL_NAME,
+        model: response.model,
         isFallback: false,
         metadata,
       };
@@ -421,14 +545,14 @@ ${buildSearchContext(input)}
 
 Respond with concise Markdown. Prioritise actionable insights, references to document names, task IDs, or incident statuses when relevant.`;
 
-  const response = await callGemini(prompt, { maxOutputTokens: 512 });
+  const response = await callAI(prompt, { maxOutputTokens: 512 });
 
   if (response?.text) {
     const text = response.text.trim();
     if (text.length > 0) {
       return {
         text,
-        model: response.modelVersion ?? MODEL_NAME,
+        model: response.model,
         isFallback: false,
       };
     }
@@ -619,7 +743,7 @@ ${buildForecastContext({ ...input, horizonMonths }, snapshot)}
 
 Respond in Markdown using bullet points.`;
 
-  const response = await callGemini(prompt, { maxOutputTokens: 768, temperature: 0.3 });
+  const response = await callAI(prompt, { maxOutputTokens: 768, temperature: 0.3 });
 
   if (response?.text) {
     const text = response.text.trim();
@@ -634,18 +758,16 @@ Respond in Markdown using bullet points.`;
         cashFlow: snapshot.cashFlow,
         currency: snapshot.currency,
         isFallback: false,
+        provider: response.provider,
       };
 
-      if (response.modelVersion) {
-        metadata.modelVersion = response.modelVersion;
-      }
-      if (response.usageMetadata) {
-        metadata.usageMetadata = response.usageMetadata;
+      if (response.usage) {
+        metadata.usageMetadata = response.usage;
       }
 
       return {
         summary: text,
-        model: response.modelVersion ?? MODEL_NAME,
+        model: response.model,
         isFallback: false,
         metadata,
       };

@@ -1,52 +1,77 @@
-# 🏗️ FIELD-FIRST CONSTRUCTION APP - IMPLEMENTATION COMPLETE
+# 🏗️ FIELD-FIRST CONSTRUCTION APP - COMPREHENSIVE ROADMAP
 
-## ✅ Status: Phase 0-2 Implemented & Ready for MVP Build
+## ✅ Status: OpenAI Integration Complete + Detailed Implementation Plan
+
+---
+
+# Field‑First Construction App — Roadmap, Mindmap & Wireframes
+
+> **Scope**: Small construction firms (5–100 field staff). Prioritize on‑site capture, offline use, and fast approvals.
 
 ---
 
-## 📋 Implementation Summary
+## 📋 Current Implementation Summary
 
-### What Was Built (3 Major Field Components):
+### ✅ Phase 0-2: Completed & Production-Ready
 
-#### 1. **MyDayFieldView** - Field Worker Home Screen
-**File**: `components/MyDayFieldView.tsx`  
-**Lines**: 11,429  
-**Status**: ✅ Production-Ready
+#### Major Components Built:
 
-**Features Implemented**:
-- ✅ **Clock In/Out with Geofence**
-  - Real-time location tracking
-  - Geofence status indicator (On Site/Off Site)
-  - Cost code selection
-  - Last clock time display
-  - Visual status indicators
+1. **MyDayFieldView** - Field Worker Home Screen (11,429 lines)
+2. **PlansViewer** - PDF plans with pins and markups  
+3. **DailyLogView** - 2-minute daily logging with voice-to-text
 
-- ✅ **Offline Banner**
-  - Automatic detection
-  - "Capturing locally" message
-  - Sync status indicator
-
-- ✅ **Due Today Section**
-  - Daily log reminders
-  - Toolbox talk schedules
-  - Task assignments with counts
-  - One-tap navigation
-
-- ✅ **Quick Capture Hub**
-  - Photo capture (📸)
-  - Task creation (✓)
-  - T&M tickets (📝)
-  - Delivery logging (📦)
-  - RFI submission (❓)
-
-- ✅ **Recent Activity Feed**
-  - Time-stamped entries
-  - Upload confirmations
-  - Delivery notifications
-
-**Tap Count**: 2 taps to clock in (select code + tap button)
+#### AI System Upgrade (JUST COMPLETED):
+- ✅ **Primary AI Provider**: OpenAI (GPT-4o)
+- ✅ **Fallback Provider**: Google Gemini
+- ✅ **Multi-provider Service**: Automatic failover
+- ✅ **Features**: Text generation, JSON responses, streaming support
+- ✅ **Configuration**: Environment-based provider selection
 
 ---
+
+# 1) Product Roadmap (phased, pragmatic)
+
+## Goals (north star)
+
+* Reduce admin time for foremen by **>30%**.
+* Achieve **95%** daily log submission rate by Day 30 of pilot.
+* Cut RFI response cycle by **25%** via capture-at-source.
+* Convert **>80%** of signed T&M tickets into CO drafts automatically.
+
+## Assumptions
+
+* Mixed device fleet (iOS + Android). Patchy connectivity on sites.
+* Accounting in QuickBooks Online or Xero; drawings come from Drive/OneDrive/Dropbox.
+
+## Phase 0 — Foundations ✅ COMPLETE
+
+* ✅ Tech stack: React 19, Vite, TypeScript
+* ✅ Design system: Tailwind CSS with component library
+* ✅ Multi-provider AI: OpenAI (primary) + Gemini (fallback)
+* ✅ Data model v1: Projects, Drawings+Revisions, Tasks, RFIs, T&M, Deliveries, DailyLogs
+* ✅ Offline-first architecture ready
+
+**Deliverables:** ✅ repo + CI, design tokens, clickable shell, AI service
+
+## Phase 1 — Discovery & Field Validation (Weeks 1–2) ✅ IN PROGRESS
+
+* ✅ Validated form templates (Daily Log, T&M, Delivery, Toolbox Talk)
+* ✅ Workflow maps created
+* ⏳ 3–5 ride‑alongs pending
+* ⏳ Time–motion study of daily log + T&M pending
+
+**Next Steps:** Field validation with real users
+
+## Phase 2 — UX/Wireframes & Prototypes (Weeks 2–4) ✅ COMPLETE
+
+* ✅ Low‑fi wireframes for 6 core screens completed
+* ✅ Mid‑fi clickable prototype implemented
+* ✅ Components: MyDayFieldView, PlansViewer, DailyLogView
+* ⏳ Usability tests with 5–7 field users needed
+
+**Deliverables:** ✅ Working prototypes with offline patterns
+
+## Phase 3 — MVP Build (Weeks 4–10) 🔄 IN PROGRESS
 
 #### 2. **DailyLogField** - 2-Minute Daily Log
 **File**: `components/DailyLogField.tsx`  

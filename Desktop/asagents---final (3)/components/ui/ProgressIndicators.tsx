@@ -58,31 +58,37 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
 };
 
 interface ProgressBarProps {
-  progress: number;
+  progress?: number;
+  value?: number;
   color?: string;
   height?: string;
   showLabel?: boolean;
   animated?: boolean;
+  className?: string;
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
   progress,
+  value,
   color = 'bg-blue-500',
   height = 'h-2',
   showLabel = false,
-  animated = true
+  animated = true,
+  className = ''
 }) => {
+  const progressValue = progress ?? value ?? 0;
+  
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       <div className={`w-full ${height} bg-gray-200 rounded-full overflow-hidden`}>
         <div
           className={`${color} ${height} rounded-full ${animated ? 'transition-all duration-500' : ''}`}
-          style={{ width: `${Math.min(progress, 100)}%` }}
+          style={{ width: `${Math.min(progressValue, 100)}%` }}
         />
       </div>
       {showLabel && (
         <div className="flex justify-between mt-1 text-xs text-slate-600">
-          <span>{Math.round(progress)}%</span>
+          <span>{Math.round(progressValue)}%</span>
           <span>Complete</span>
         </div>
       )}

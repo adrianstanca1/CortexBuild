@@ -49,13 +49,10 @@ const sanitizeBaseUrl = (value?: string | null): string | null => {
 };
 
 const detectBaseUrl = (): string | null => {
-<<<<<<< HEAD
     // Ensure tests default to mock mode unless explicitly configured
     if (typeof process !== 'undefined' && ((process as any).env?.VITEST || (process as any).env?.VITEST_WORKER_ID)) {
         return null;
     }
-=======
->>>>>>> origin/codex/create-autonomous-deployment-plan-srvw3l
     if (typeof window !== 'undefined' && typeof (window as any).__ASAGENTS_API_BASE_URL__ === 'string') {
         return sanitizeBaseUrl((window as any).__ASAGENTS_API_BASE_URL__);
     }

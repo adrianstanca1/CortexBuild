@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAgents Final Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .status {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .button:hover { background: #1d4ed8; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 ASAgents Final - Emergency Test</h1>
+        
+        <div class="status">
+            <h3>✅ THIS PAGE IS WORKING!</h3>
+            <p>✓ HTML is loading correctly</p>
+            <p>✓ CSS styles are applied</p>
+            <p>✓ Server is responding</p>
+            <p>✓ Port 5173 is accessible</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="button" onclick="testJS()">Test JavaScript</button>
+            <button class="button" onclick="location.reload()">Reload Page</button>
+            <button class="button" onclick="window.open('/', '_blank')">Open React App</button>
+        </div>
+        
+        <div id="result" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 5px; display: none;">
+            <p id="message"></p>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 14px; opacity: 0.8;">
+            <p><strong>Time:</strong> <span id="time"></span></p>
+            <p><strong>URL:</strong> http://localhost:5173/emergency.html</p>
+            <p><strong>Status:</strong> Emergency test page - React app loading next...</p>
+        </div>
+    </div>
+
+    <script>
+        function testJS() {
+            const result = document.getElementById('result');
+            const message = document.getElementById('message');
+            result.style.display = 'block';
+            message.textContent = '🎉 JavaScript is working perfectly! React should work too.';
+            console.log('Emergency test: JavaScript working');
+        }
+        
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        console.log('ASAgents Final - Emergency test page loaded successfully');
+        
+        // Auto-redirect to main app after 10 seconds
+        setTimeout(() => {
+            if (confirm('Test successful! Load React app now?')) {
+                window.location.href = '/';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

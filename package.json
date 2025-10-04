@@ -25,6 +25,7 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.3",
     "recharts": "^3.2.1",
+    "ssh2": "^1.17.0",
     "vllm": "^0.0.0",
     "vue": "^3.5.21",
     "zustand": "^5.0.8"
@@ -52,7 +53,6 @@
     "final:type-check": "pnpm -C final type-check",
     "final:deploy:staging": "pnpm -C final deploy:staging",
     "final:deploy:production": "pnpm -C final deploy:production",
-
     "asagents:install": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" ci",
     "asagents:dev": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" run dev",
     "asagents:build": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" run build",
@@ -61,6 +61,14 @@
     "asagents:coverage": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" run test:coverage",
     "asagents:type-check": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" run type-check",
     "asagents:deploy:staging": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" run deploy:staging",
-    "asagents:deploy:production": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" run deploy:production"
+    "asagents:deploy:production": "npm --prefix \"$HOME/Desktop/asagents.co.uk-ready\" run deploy:production",
+    "platform:install": "pnpm install",
+    "platform:lint": "pnpm -r --filter @construction/* lint",
+    "platform:test": "pnpm -r --filter @construction/* test",
+    "platform:build": "pnpm -r --filter @construction/* build",
+    "platform:dev": "pnpm --filter @construction/apps-web dev",
+    "platform:dev:gateway": "pnpm --filter @construction/service-api-gateway dev",
+    "platform:token-test": "pnpm --filter @construction/service-api-gateway test",
+    "platform:dev:finance": "pnpm --filter @construction/service-finance dev"
   }
 }

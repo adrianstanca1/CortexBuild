@@ -14,10 +14,7 @@ import {
   InvoiceStatus,
   InvoiceLineItem,
   InvoiceLineItemDraft,
- codex/save-and-push-all-changes-for-preview
   FinancialForecast,
-
- main
 } from '../types';
 import { getDerivedStatus, getInvoiceFinancials } from '../utils/finance';
 import { api } from '../services/mockApi';
@@ -38,7 +35,6 @@ const formatCurrency = (amount: number, currency: string = 'GBP') =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
- codex/save-and-push-all-changes-for-preview
 
 const formatSignedPercentage = (value: number) => {
   if (!Number.isFinite(value)) {
@@ -695,9 +691,9 @@ export const FinancialsView: React.FC<{ user: User; addToast: (message: string, 
         if (!window.confirm('Are you sure you want to cancel this invoice? This action cannot be undone.')) {
           return;
         }
-=======
+      }
 
-  const handleLineItemChange = <Field extends EditableInvoiceLineItemField>(
+      const handleLineItemChange = <Field extends EditableInvoiceLineItemField>(
     index: number,
     field: Field,
     value: InvoiceLineItemDraft[Field],
@@ -1588,8 +1584,6 @@ const DashboardTab = React.memo(
     );
   },
 );
-=======
-}
 
 const DashboardTab = React.memo(({ kpis, monthly, costs }: DashboardTabProps) => (
   <div className="space-y-6">

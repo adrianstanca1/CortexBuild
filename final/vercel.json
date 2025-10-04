@@ -1,19 +1,4 @@
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "version": 2,
-  "framework": "vite",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev -- --host",
-  "outputDirectory": "dist",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
-  ]
-=======
-=======
->>>>>>> origin/codex/create-autonomous-deployment-plan-srvw3l
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "framework": "vite",
@@ -33,9 +18,9 @@
     "env": {
       "VITE_API_BASE_URL": "@production_api_base_url"
     }
-  }
-<<<<<<< HEAD
->>>>>>> e7ec06c (Log sixth autonomous deployment run)
-=======
->>>>>>> origin/codex/create-autonomous-deployment-plan-srvw3l
+  },
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
+  ]
 }

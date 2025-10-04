@@ -176,63 +176,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ user, addToast, onSe
       atRisk,
       pipelineValue,
     };
-
-    };
   }, [fetchData]);
-
-  const filteredProjects = useMemo(() => {
-    const baseProjects = filter === 'ALL' ? projects : projects.filter(p => p.status === filter);
-    const query = searchQuery.trim().toLowerCase();
-
-    const searchedProjects = query
-      ? baseProjects.filter(project => {
-          const fields = [
-            project.name,
-            project.location?.address,
-            project.projectType,
-            project.workClassification,
-          ].filter(Boolean) as string[];
-          return fields.some(field => field.toLowerCase().includes(query));
-        })
-      : baseProjects;
-
-    const direction = sortDirection === 'asc' ? 1 : -1;
-
-    const sortedProjects = [...searchedProjects].sort((a, b) => {
-      let comparison = 0;
-      switch (sortKey) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case 'startDate':
-          comparison = new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-          break;
-        case 'endDate':
-          comparison = new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
-          break;
-        case 'budget':
-          comparison = (a.budget ?? 0) - (b.budget ?? 0);
-          break;
-        case 'progress':
-          comparison = (a.progress ?? 0) - (b.progress ?? 0);
-          break;
-        default:
-          comparison = 0;
-      }
-
-      if (Number.isNaN(comparison)) {
-        comparison = 0;
-      }
-
-      if (comparison === 0 && sortKey !== 'name') {
-        comparison = a.name.localeCompare(b.name);
-      }
-
-      return comparison * direction;
-    });
-
-    return sortedProjects;
-  }, [projects, filter, searchQuery, sortDirection, sortKey]);
 
   const hasActiveFilters =
     filter !== 'ALL' || searchQuery.trim() !== '' || sortKey !== 'startDate' || sortDirection !== 'asc';
@@ -243,29 +187,6 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ user, addToast, onSe
     setSortKey('startDate');
     setSortDirection('asc');
   };
-
-  const portfolioSummary = useMemo(() => {
-    if (projects.length === 0) {
-      return {
-        total: 0,
-        active: 0,
-        atRisk: 0,
-        pipelineValue: 0,
-      };
-    }
-
-    const active = projects.filter(p => p.status === 'ACTIVE').length;
-    const atRisk = projects.filter(p => p.actualCost > p.budget).length;
-    const pipelineValue = projects.reduce((acc, project) => acc + project.budget, 0);
-
-    return {
-      total: projects.length,
-      active,
-      atRisk,
-      pipelineValue,
-    };
- main
-  }, [projects]);
 
   const handleSuccess = (newProject: Project) => {
     setProjects(prev => [...prev, newProject]);

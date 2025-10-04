@@ -9,7 +9,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-<<<<<<< HEAD
     "test:watch": "vitest",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
@@ -17,29 +16,35 @@
     "deploy": "node scripts/deploy.js",
     "deploy:staging": "node scripts/deploy.js staging",
     "deploy:production": "node scripts/deploy.js production",
+    "deploy:ionos": "node ../deploy-webspace.js",
+    "deploy:sftp": "npm run build && node ../deploy-webspace.js",
+    "deploy:webspace": "node ../deploy-webspace.js",
     "deploy:vercel": "node scripts/deploy.js production vercel",
     "deploy:netlify": "node scripts/deploy.js production netlify",
     "deploy:docker": "node scripts/deploy.js production docker",
     "deploy:dry-run": "node scripts/deploy.js production vercel --dry-run",
     "start": "npm run preview",
     "analyze": "ANALYZE_BUNDLE=true npm run build"
-=======
-    "deploy": "npm run build"
->>>>>>> origin/codex/create-autonomous-deployment-plan-srvw3l
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.65.0",
     "@google/genai": "^1.17.0",
     "date-fns": "^4.1.0",
     "leaflet": "1.9.4",
+    "openai": "^6.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-leaflet": "4.2.1",
     "use-supercluster": "0.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.18.8",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.4",
+    "ssh2-sftp-client": "^12.0.1",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0",
+    "vite": "^6.3.6",
     "vitest": "^3.2.4"
   }
 }
