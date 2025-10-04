@@ -1,0 +1,40 @@
+{
+  "name": "asagents-final",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "./deploy.sh ionos",
+    "deploy:ionos": "./deploy.sh ionos",
+    "deploy:vercel": "./deploy.sh vercel",
+    "deploy:netlify": "./deploy.sh netlify",
+    "deploy:docker": "./deploy.sh docker",
+    "deploy:dry-run": "./deploy.sh dry-run",
+    "build:prod": "vite build --mode production"
+  },
+  "dependencies": {
+    "@google/genai": "^1.17.0",
+    "leaflet": "1.9.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-leaflet": "^5.0.0",
+    "socket.io-client": "4.7.2",
+    "supercluster": "^8.0.1",
+    "use-supercluster": "0.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
