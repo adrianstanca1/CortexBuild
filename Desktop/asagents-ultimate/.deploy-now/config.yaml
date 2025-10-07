@@ -1,0 +1,59 @@
+# IONOS Deploy Now Configuration
+# https://docs.ionos.space/
+
+# Project Type: Static (React + Vite)
+project:
+  name: asagents-ultimate
+  type: static
+
+# Build Configuration
+build:
+  # Node.js version
+  runtime:
+    node: v20.x
+
+  # Build steps
+  steps:
+    - name: Install dependencies
+      command: npm ci
+
+    - name: Build production bundle
+      command: npm run build
+      env:
+        NODE_ENV: production
+        CI: true
+
+  # Output directory to deploy
+  publish:
+    directory: dist
+
+# Deployment Configuration
+deployment:
+  # Pre-deployment commands (optional)
+  pre-deploy: []
+
+  # Post-deployment commands (optional)
+  post-deploy: []
+
+  # Files to persist across deployments (optional)
+  persistent-files: []
+
+  # Paths to exclude from deployment (optional)
+  exclude:
+    - node_modules
+    - src
+    - .git
+    - .github
+    - backend
+    - python-services
+    - scripts
+    - tests
+    - "*.md"
+    - .env*
+    - tsconfig.json
+
+# Environment Variables (add sensitive ones via Deploy Now dashboard)
+env:
+  # Public variables (safe to commit)
+  VITE_APP_NAME: ASAgents Ultimate
+  VITE_APP_VERSION: 2.1.0
