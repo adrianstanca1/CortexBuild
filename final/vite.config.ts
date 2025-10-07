@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: ['./tests/setup-simple.ts'],
+      setupFiles: ['./tests/setup.ts'],
       css: true,
       include: ['services/**/*.test.ts', 'utils/**/*.test.ts'],
       exclude: ['**/node_modules/**', '**/dist/**', 'dist-services/**', 'final/**', 'final-1/**', 'final-2/**'],

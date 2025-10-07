@@ -45,6 +45,7 @@
     "ssh2-sftp-client": "^12.0.1",
     "typescript": "~5.8.2",
     "vite": "^6.3.6",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@testing-library/jest-dom": "^6.4.8"
   }
 }
