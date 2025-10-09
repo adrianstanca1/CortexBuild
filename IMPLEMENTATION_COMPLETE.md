@@ -11,13 +11,13 @@
 **Primary OpenAI Key (SDK Developer Users):**
 
 ```
-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
+OPENAI_API_KEY=your-primary-openai-api-key-here
 ```
 
 **Legacy/Backup OpenAI Key:**
 
 ```
-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
+OPENAI_API_KEY_LEGACY=your-legacy-openai-api-key-here
 ```
 
 ### **Features:**
