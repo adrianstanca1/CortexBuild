@@ -6,7 +6,8 @@ import { usePermissions } from '../../hooks/usePermissions.ts';
 import {
     ChevronLeftIcon, BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
     CheckBadgeIcon, DocumentDuplicateIcon, CameraIcon, ClipboardDocumentListIcon,
-    BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon
+    BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
+    WandSparklesIcon
 } from '../Icons.tsx';
 
 interface SidebarProps {
@@ -83,8 +84,11 @@ const RealtimeInfoCard: React.FC = () => {
 const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule, goHome, currentUser, onLogout }) => {
     const { can } = usePermissions(currentUser);
 
+    const isDeveloper = currentUser?.role === 'developer';
+    const isSuperAdmin = currentUser?.role === 'super_admin';
+    const isCompanyAdmin = currentUser?.role === 'company_admin';
     // Check if user has SDK access (super_admin or developer role)
-    const isSdkFullAccess = currentUser?.role === 'super_admin' || currentUser?.role === 'developer';
+    const isSdkFullAccess = currentUser?.role === 'super_admin' || isDeveloper;
 
     const allNavItems = [
         { label: 'My Projects', screen: 'projects', icon: BuildingOfficeIcon, permission: { subject: 'task', action: 'read' } }, // Simplified permission
@@ -115,6 +119,57 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
         }
     ] : [];
 
+    const developerNavItems = [
+        {
+            label: 'Developer Dashboard',
+            screen: 'developer-dashboard',
+            icon: WandSparklesIcon,
+            isModule: true
+        },
+        {
+            label: 'SDK Workspace',
+            screen: 'sdk-developer',
+            icon: DocumentDuplicateIcon,
+            isModule: true
+        },
+        {
+            label: 'AI Tools',
+            screen: 'ai-tools',
+            icon: SunIcon,
+            isModule: true
+        },
+        {
+            label: 'Marketplace',
+            screen: 'ai-agents-marketplace',
+            icon: TicketIcon,
+            isModule: true
+        }
+    ];
+
+    const companySandboxNavItems = isCompanyAdmin ? [
+        {
+            label: 'Sandbox',
+            screen: 'developer-dashboard',
+            icon: WandSparklesIcon,
+            isModule: true
+        }
+    ] : [];
+
+    const superAdminNavItems = [
+        {
+            label: 'Super Admin Home',
+            screen: 'super-admin-dashboard',
+            icon: CheckBadgeIcon,
+            isModule: true
+        },
+        {
+            label: 'Platform Admin',
+            screen: 'platform-admin',
+            icon: DocumentIcon,
+            isModule: true
+        }
+    ];
+
     // In project view, only show project-specific items. In global view, only show global items.
     const isProjectView = !!project.id;
     const itemsToShow = isProjectView
@@ -124,15 +179,23 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
     const visibleNavItems = itemsToShow.filter(item => can(item.permission.action as PermissionAction, item.permission.subject as PermissionSubject));
 
     // Combine regular nav items with SDK items
-    const allVisibleItems = [...visibleNavItems, ...sdkNavItems];
+    const allVisibleItems = isDeveloper
+        ? developerNavItems
+        : isSuperAdmin
+            ? superAdminNavItems
+            : [...visibleNavItems, ...companySandboxNavItems, ...sdkNavItems];
 
 
     return (
         <div className="flex flex-col h-full p-4">
             <div className="mb-6">
                 <button onClick={goHome} className="block text-left">
-                    <h1 className="text-xl font-bold text-white">{project.name}</h1>
-                    <p className="text-sm text-slate-400">{project.location}</p>
+                    <h1 className="text-xl font-bold text-white">
+                        {isDeveloper ? 'Developer Tenant' : isSuperAdmin ? 'Super Admin' : isCompanyAdmin ? 'Company Admin' : project.name}
+                    </h1>
+                    <p className="text-sm text-slate-400">
+                        {isDeveloper ? currentUser.companyId : isSuperAdmin ? currentUser.email : isCompanyAdmin ? currentUser.companyId : project.location}
+                    </p>
                 </button>
             </div>
 

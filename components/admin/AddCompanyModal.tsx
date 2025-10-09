@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { X, Building2, Mail, Phone, MapPin, Globe } from 'lucide-react';
 
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
+
 interface AddCompanyModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,12 +29,12 @@ export const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClos
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/companies`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify(formData)
       });
@@ -206,4 +210,3 @@ export const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClos
     </div>
   );
 };
-

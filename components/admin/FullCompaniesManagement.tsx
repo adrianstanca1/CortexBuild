@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Building2, Search, Edit2, Trash2, Plus, RefreshCw, Mail, Phone, MapPin, Globe } from 'lucide-react';
 import { AddCompanyModal } from './AddCompanyModal';
 
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
+
 interface Company {
   id: string;
   name: string;
@@ -29,9 +33,9 @@ export const FullCompaniesManagement: React.FC = () => {
   const fetchCompanies = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/companies`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -48,10 +52,10 @@ export const FullCompaniesManagement: React.FC = () => {
     if (!confirm('Are you sure you want to delete this company? This will affect all associated users and projects.')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/companies/${companyId}`, {
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/companies/${companyId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -65,8 +69,10 @@ export const FullCompaniesManagement: React.FC = () => {
   };
 
   const filteredCompanies = companies.filter(company => {
-    const matchesSearch = company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         company.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const name = company.name?.toLowerCase() ?? '';
+    const email = company.email?.toLowerCase() ?? '';
+    const searchValue = searchTerm.toLowerCase();
+    const matchesSearch = name.includes(searchValue) || email.includes(searchValue);
     const matchesIndustry = selectedIndustry === 'all' || company.industry === selectedIndustry;
     return matchesSearch && matchesIndustry;
   });
@@ -268,4 +274,3 @@ export const FullCompaniesManagement: React.FC = () => {
     </div>
   );
 };
-

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Users, Search, Edit2, Trash2, UserPlus, RefreshCw, Mail, Shield, Building2 } from 'lucide-react';
 import { AddUserModal } from './AddUserModal';
 
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
+
 interface User {
   id: string;
   name: string;
@@ -27,9 +31,9 @@ export const FullUsersManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/users', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/users`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -46,10 +50,10 @@ export const FullUsersManagement: React.FC = () => {
     if (!confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/users/${userId}`, {
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -267,4 +271,3 @@ export const FullUsersManagement: React.FC = () => {
     </div>
   );
 };
-

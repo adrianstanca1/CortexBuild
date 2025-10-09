@@ -29,7 +29,30 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
         return true;
     };
 
-    const visibleMenuItems = MENU_ITEMS.filter(isVisible);
+    const developerMenuItems: MenuItem[] = [
+        { label: 'Developer Dashboard', screen: 'developer-dashboard' },
+        { label: 'SDK Workspace', screen: 'sdk-developer' },
+        { label: 'Marketplace', screen: 'ai-agents-marketplace' }
+    ];
+
+    const superAdminMenuItems: MenuItem[] = [
+        { label: 'Super Admin Dashboard', screen: 'super-admin-dashboard' },
+        { label: 'Platform Admin', screen: 'platform-admin' }
+    ];
+
+    const companyAdminMenuItems: MenuItem[] = [
+        { label: 'Developer Sandbox', screen: 'developer-dashboard' },
+        { label: 'SDK Workspace', screen: 'sdk-developer' }
+    ];
+
+    const sourceMenu = currentUser.role === 'developer'
+        ? developerMenuItems
+        : currentUser.role === 'super_admin'
+            ? superAdminMenuItems
+            : currentUser.role === 'company_admin'
+                ? companyAdminMenuItems
+                : MENU_ITEMS;
+    const visibleMenuItems = sourceMenu.filter(isVisible);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

@@ -71,6 +71,13 @@ const ROLES: Record<UserRole, { can: Partial<Record<PermissionSubject, Permissio
             timeEntry: ['create', 'read'],
         },
     },
+    developer: {
+        can: {
+            task: ['read'],
+            document: ['read'],
+            user: ['read'],
+        },
+    },
 };
 
 /**

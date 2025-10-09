@@ -30,7 +30,8 @@ import PhotoGalleryScreen from './components/screens/PhotoGalleryScreen.tsx';
 import RFIsScreen from './components/screens/RFIsScreen.tsx';
 import RFIDetailScreen from './components/screens/RFIDetailScreen.tsx';
 import NewRFIScreen from './components/screens/NewRFIScreen.tsx';
-import { SDKDeveloperView } from './components/sdk/SDKDeveloperView';
+import { ProductionSDKDeveloperView } from './components/sdk/ProductionSDKDeveloperView';
+import DeveloperDashboardScreen from './components/screens/developer/DeveloperDashboardScreen.tsx';
 import PunchListScreen from './components/screens/PunchListScreen.tsx';
 import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen.tsx';
 import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen.tsx';
@@ -59,6 +60,7 @@ import { Base44Clone } from './components/base44/Base44Clone.tsx';
 
 // Admin Screens
 import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen.tsx';
+import SuperAdminDashboardScreen from './components/screens/admin/SuperAdminDashboardScreen.tsx';
 
 // ML & Advanced Analytics Screens
 import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard.tsx';
@@ -104,7 +106,9 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'financial-management': FinancialManagementScreen,
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-    'sdk-developer': SDKDeveloperView,
+    'developer-dashboard': DeveloperDashboardScreen,
+    'super-admin-dashboard': SuperAdminDashboardScreen,
+    'sdk-developer': ProductionSDKDeveloperView,
     'my-apps-desktop': Base44Clone,
     // Admin
     'platform-admin': PlatformAdminScreen,
@@ -282,8 +286,13 @@ const App: React.FC = () => {
                 // Navigate to dashboard after successful login
                 console.log('🚀 Navigating to dashboard...');
                 console.log('📍 Current navigation stack before:', navigationStack);
-                navigateToModule('global-dashboard', {});
-                console.log('📍 Navigation stack set to global-dashboard');
+                const defaultScreenForRole: Screen = userProfile.role === 'developer'
+                    ? 'developer-dashboard'
+                    : userProfile.role === 'super_admin'
+                        ? 'super-admin-dashboard'
+                        : 'global-dashboard';
+                navigateToModule(defaultScreenForRole, {});
+                console.log('📍 Navigation stack set to', defaultScreenForRole);
 
                 window.dispatchEvent(new CustomEvent('userLoggedIn'));
                 showSuccess('Welcome back!', `Hello ${userProfile.name}`);
@@ -304,7 +313,12 @@ const App: React.FC = () => {
             };
             console.log('🔄 Using fallback profile:', fallbackProfile);
             setCurrentUser(fallbackProfile);
-            navigateToModule('global-dashboard', {});
+            const fallbackScreen: Screen = fallbackProfile.role === 'developer'
+                ? 'developer-dashboard'
+                : fallbackProfile.role === 'super_admin'
+                    ? 'super-admin-dashboard'
+                    : 'global-dashboard';
+            navigateToModule(fallbackScreen, {});
         }
     };
 
@@ -320,7 +334,12 @@ const App: React.FC = () => {
                     setCurrentUser(user);
                     if (navigationStack.length === 0) {
                         console.log('🔄 Navigating to dashboard from session restore...');
-                        navigateToModule('global-dashboard', {});
+                        const defaultScreenForRole: Screen = user.role === 'developer'
+                            ? 'developer-dashboard'
+                            : user.role === 'super_admin'
+                                ? 'super-admin-dashboard'
+                                : 'global-dashboard';
+                        navigateToModule(defaultScreenForRole, {});
                     }
                     window.dispatchEvent(new CustomEvent('userLoggedIn'));
                 } else {
@@ -341,7 +360,8 @@ const App: React.FC = () => {
         const handleHashChange = () => {
             const hash = window.location.hash;
             if (hash === '#dashboard' && currentUser) {
-                navigateToModule('global-dashboard', {});
+                const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-dashboard' : 'global-dashboard';
+                navigateToModule(targetScreen, {});
                 // Clean up the hash
                 window.history.replaceState(null, '', window.location.pathname);
             }
@@ -370,7 +390,12 @@ const App: React.FC = () => {
             // Ensure user is navigated to dashboard if no navigation exists
             if (navigationStack.length === 0) {
                 console.log('🔄 No navigation stack - navigating to dashboard...');
-                navigateToModule('global-dashboard', {});
+                const defaultScreen: Screen = currentUser.role === 'developer'
+                    ? 'developer-dashboard'
+                    : currentUser.role === 'super_admin'
+                        ? 'super-admin-dashboard'
+                        : 'global-dashboard';
+                navigateToModule(defaultScreen, {});
             }
         } else {
             // User logged out - clear navigation
@@ -479,6 +504,20 @@ const App: React.FC = () => {
     // If no navigation stack, show dashboard directly
     if (!currentNavItem || navigationStack.length === 0) {
         console.log('🏠 No navigation - showing dashboard directly');
+        if (currentUser.role === 'developer') {
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <DeveloperDashboardScreen currentUser={currentUser} navigateTo={navigateTo} />
+                </div>
+            );
+        }
+        if (currentUser.role === 'super_admin') {
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <SuperAdminDashboardScreen />
+                </div>
+            );
+        }
         const dashboardProps = {
             currentUser,
             navigateTo,
@@ -519,18 +558,28 @@ const App: React.FC = () => {
         };
     }, [project, currentUser?.name]);
 
+    const sidebarGoHome = useCallback(() => {
+        if (currentUser.role === 'developer') {
+            navigateToModule('developer-dashboard');
+        } else if (currentUser.role === 'super_admin') {
+            navigateToModule('super-admin-dashboard');
+        } else {
+            goHome();
+        }
+    }, [currentUser.role, navigateToModule, goHome]);
+
     return (
         <div className="bg-slate-50">
             <AppLayout
                 sidebar={
-                    <Sidebar
-                        project={getSidebarProject}
-                        navigateTo={navigateTo}
-                        navigateToModule={navigateToModule}
-                        goHome={goHome}
-                        currentUser={currentUser}
-                        onLogout={handleLogout}
-                    />
+                <Sidebar
+                    project={getSidebarProject}
+                    navigateTo={navigateTo}
+                    navigateToModule={navigateToModule}
+                    goHome={sidebarGoHome}
+                    currentUser={currentUser}
+                    onLogout={handleLogout}
+                />
                 }
                 floatingMenu={<FloatingMenu
                     currentUser={currentUser}
