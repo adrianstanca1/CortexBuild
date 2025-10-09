@@ -19,6 +19,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { MarketplacePage } from './pages/MarketplacePage';
 import { ChatbotWidget } from '../chat/ChatbotWidget';
 import { DashboardAnalytics } from './components/DashboardAnalytics';
+import { MyApplicationsDesktop } from './pages/MyApplicationsDesktop';
 
 interface Base44CloneProps {
     user: User;
@@ -26,7 +27,7 @@ interface Base44CloneProps {
 }
 
 type PageType = 'dashboard' | 'projects' | 'clients' | 'rfis' | 'subcontractors' |
-    'invoices' | 'timetracking' | 'purchaseorders' | 'documents' | 'reports' | 'ledger' | 'marketplace' | 'settings';
+    'invoices' | 'timetracking' | 'purchaseorders' | 'documents' | 'reports' | 'ledger' | 'marketplace' | 'settings' | 'my-apps';
 
 export const Base44Clone: React.FC<Base44CloneProps> = ({ user, onLogout }) => {
     const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
@@ -39,6 +40,7 @@ export const Base44Clone: React.FC<Base44CloneProps> = ({ user, onLogout }) => {
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto">
                 {currentPage === 'dashboard' && <DashboardPage />}
+                {currentPage === 'my-apps' && <MyApplicationsDesktop />}
                 {currentPage === 'projects' && <ProjectsPage />}
                 {currentPage === 'clients' && <ClientsPage />}
                 {currentPage === 'rfis' && <RFIsPage />}
@@ -78,7 +80,8 @@ const Sidebar: React.FC<{
         { id: 'documents' as PageType, label: 'Documents', icon: '📄' },
         { id: 'reports' as PageType, label: 'Reports', icon: '📈' },
         { id: 'ledger' as PageType, label: 'Ledger', icon: '📒' },
-        { id: 'marketplace' as PageType, label: 'Marketplace', icon: '🛒' }
+        { id: 'marketplace' as PageType, label: 'Marketplace', icon: '🛒' },
+        { id: 'my-apps' as PageType, label: 'My Applications', icon: '🖥️' }
     ];
 
     return (

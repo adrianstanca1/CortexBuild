@@ -7,10 +7,12 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import Database from 'better-sqlite3';
+import { createServer } from 'http';
 import { initDatabase } from './database';
 import * as auth from './auth';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
+import { setupWebSocket } from './websocket';
 
 // Import API route creators
 import { createClientsRouter } from './routes/clients';
@@ -31,6 +33,8 @@ import { createSmartToolsRouter } from './routes/smart-tools';
 import { createSDKRouter } from './routes/sdk';
 import adminSDKRouter from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
+import { createAIChatRoutes } from './routes/ai-chat';
+import { createDeveloperRoutes } from './routes/developer';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -329,7 +333,13 @@ const startServer = async () => {
         app.use('/api/admin/enhanced', createEnhancedAdminRoutes(db));
         console.log('  ✓ /api/admin/enhanced');
 
-        console.log('✅ All 18 API routes registered successfully');
+        app.use('/api/ai', createAIChatRoutes(db));
+        console.log('  ✓ /api/ai');
+
+        app.use('/api/developer', createDeveloperRoutes(db));
+        console.log('  ✓ /api/developer');
+
+        console.log('✅ All 20 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
@@ -351,12 +361,19 @@ const startServer = async () => {
             auth.cleanupExpiredSessions();
         }, 60 * 60 * 1000);
 
+        // Create HTTP server for WebSocket support
+        const server = createServer(app);
+
+        // Setup WebSocket
+        setupWebSocket(server, db);
+
         // Start listening
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log('');
             console.log('🚀 CortexBuild AI Platform Server');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log(`✅ Server running on http://localhost:${PORT}`);
+            console.log(`✅ WebSocket server on ws://localhost:${PORT}/ws`);
             console.log(`✅ Database initialized`);
             console.log(`✅ Ready to accept requests`);
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -369,7 +386,7 @@ const startServer = async () => {
             console.log(`  POST   http://localhost:${PORT}/api/auth/logout`);
             console.log(`  GET    http://localhost:${PORT}/api/auth/me`);
             console.log('');
-            console.log('📊 API Routes (64 endpoints):');
+            console.log('📊 API Routes (70+ endpoints):');
             console.log(`  /api/clients - 5 endpoints`);
             console.log(`  /api/projects - 5 endpoints`);
             console.log(`  /api/rfis - 6 endpoints`);
@@ -381,9 +398,15 @@ const startServer = async () => {
             console.log(`  /api/milestones - 5 endpoints`);
             console.log(`  /api/documents - 5 endpoints`);
             console.log(`  /api/modules - 9 endpoints`);
+            console.log(`  /api/ai - 4 endpoints`);
             console.log('');
-            console.log('🤖 AI Chatbot Ready!');
-            console.log(`  POST   http://localhost:${PORT}/api/chat/message`);
+            console.log('🤖 AI Features:');
+            console.log(`  POST   http://localhost:${PORT}/api/ai/chat`);
+            console.log(`  POST   http://localhost:${PORT}/api/ai/suggest`);
+            console.log(`  GET    http://localhost:${PORT}/api/ai/usage`);
+            console.log('');
+            console.log('🔴 Live Collaboration:');
+            console.log(`  WS     ws://localhost:${PORT}/ws`);
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);

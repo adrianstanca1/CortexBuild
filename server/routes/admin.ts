@@ -234,17 +234,39 @@ export function createAdminRouter(db: Database.Database): Router {
   // POST /api/admin/companies - Create new company (Super Admin)
   router.post('/companies', requireSuperAdmin, (req: Request, res: Response) => {
     try {
-      const { name, subscription_plan = 'free', max_users = 5, max_projects = 10 } = req.body;
+      const {
+        name,
+        email,
+        phone,
+        address,
+        website,
+        industry = 'construction',
+        subscription_plan = 'free',
+        max_users = 5,
+        max_projects = 10
+      } = req.body;
 
-      if (!name) {
-        return res.status(400).json({ error: 'Company name is required' });
+      if (!name || !email) {
+        return res.status(400).json({ error: 'Company name and email are required' });
       }
 
       const companyId = `company-${uuidv4()}`;
 
-      db.prepare('INSERT INTO companies (id, name, subscription_plan, max_users, max_projects) VALUES (?, ?, ?, ?, ?)').run(
-        companyId, name, subscription_plan, max_users, max_projects
-      );
+      // Check if companies table has the new columns, if not, use basic insert
+      try {
+        db.prepare(`INSERT INTO companies (
+          id, name, email, phone, address, website, industry,
+          subscription_plan, max_users, max_projects
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+          companyId, name, email, phone || null, address || null,
+          website || null, industry, subscription_plan, max_users, max_projects
+        );
+      } catch (err) {
+        // Fallback to basic insert if columns don't exist
+        db.prepare('INSERT INTO companies (id, name, subscription_plan, max_users, max_projects) VALUES (?, ?, ?, ?, ?)').run(
+          companyId, name, subscription_plan, max_users, max_projects
+        );
+      }
 
       const company = db.prepare('SELECT * FROM companies WHERE id = ?').get(companyId);
 
@@ -311,6 +333,35 @@ export function createAdminRouter(db: Database.Database): Router {
       res.json({ success: true, data: company });
     } catch (error: any) {
       console.error('Update company error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // DELETE /api/admin/companies/:id - Delete company (Super Admin)
+  router.delete('/companies/:id', requireSuperAdmin, (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      // Check if company has users
+      const userCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE company_id = ?').get(id) as any;
+      if (userCount && userCount.count > 0) {
+        return res.status(400).json({
+          error: `Cannot delete company with ${userCount.count} users. Please reassign or delete users first.`
+        });
+      }
+
+      db.prepare('DELETE FROM companies WHERE id = ?').run(id);
+
+      // Log activity
+      db.prepare('INSERT INTO activities (user_id, action, description, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)').run(
+        (req as any).user.id,
+        'delete',
+        `Deleted company: ${id}`
+      );
+
+      res.json({ success: true, message: 'Company deleted successfully' });
+    } catch (error: any) {
+      console.error('Delete company error:', error);
       res.status(500).json({ error: error.message });
     }
   });

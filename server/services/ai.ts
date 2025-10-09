@@ -17,7 +17,7 @@ const legacyOpenAI = new OpenAI({
 // API key rotation for SDK developer users
 let useAlternateKey = false;
 
-function getOpenAIClient(forSDKUser: boolean = false): OpenAI {
+export function getOpenAIClient(forSDKUser: boolean = false): OpenAI {
   if (forSDKUser) {
     // Rotate between keys for SDK users to distribute load
     useAlternateKey = !useAlternateKey;

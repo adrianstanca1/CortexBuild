@@ -4,6 +4,11 @@ import {
   Settings, Zap, Code, BarChart3, AlertCircle, CheckCircle, Clock,
   Package, Cpu, HardDrive, Globe, Lock, UserPlus, RefreshCw, Download
 } from 'lucide-react';
+import { AddUserModal } from '../../admin/AddUserModal';
+import { AddCompanyModal } from '../../admin/AddCompanyModal';
+import { AddProjectModal } from '../../admin/AddProjectModal';
+import { FullUsersManagement } from '../../admin/FullUsersManagement';
+import { FullCompaniesManagement } from '../../admin/FullCompaniesManagement';
 
 interface DashboardStats {
   users: { total: number; active: number; new: number };
@@ -20,6 +25,11 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState<'overview' | 'users' | 'companies' | 'sdk' | 'system'>('overview');
   const [refreshing, setRefreshing] = useState(false);
 
+  // Modal states
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+
   useEffect(() => {
     fetchDashboardStats();
   }, []);
@@ -28,7 +38,7 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
     try {
       setRefreshing(true);
       const token = localStorage.getItem('token');
-      
+
       // Fetch all stats in parallel
       const [usersRes, companiesRes, projectsRes, sdkRes] = await Promise.all([
         fetch('http://localhost:3001/api/admin/users', {
@@ -209,11 +219,10 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveSection(tab.id as any)}
-                className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${
-                  activeSection === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+                className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${activeSection === tab.id
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <tab.icon className="w-5 h-5" />
                 <span className="font-medium">{tab.label}</span>
@@ -355,17 +364,60 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
                 Quick Actions
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <QuickAction icon={UserPlus} label="Add User" onClick={() => {}} color="border-blue-300 text-blue-600" />
-                <QuickAction icon={Building2} label="Add Company" onClick={() => {}} color="border-green-300 text-green-600" />
-                <QuickAction icon={Package} label="New Project" onClick={() => {}} color="border-purple-300 text-purple-600" />
-                <QuickAction icon={Code} label="SDK Access" onClick={() => {}} color="border-orange-300 text-orange-600" />
-                <QuickAction icon={Shield} label="Security" onClick={() => {}} color="border-red-300 text-red-600" />
-                <QuickAction icon={Settings} label="Settings" onClick={() => {}} color="border-gray-300 text-gray-600" />
+                <QuickAction icon={UserPlus} label="Add User" onClick={() => setShowAddUserModal(true)} color="border-blue-300 text-blue-600" />
+                <QuickAction icon={Building2} label="Add Company" onClick={() => setShowAddCompanyModal(true)} color="border-green-300 text-green-600" />
+                <QuickAction icon={Package} label="New Project" onClick={() => setShowAddProjectModal(true)} color="border-purple-300 text-purple-600" />
+                <QuickAction icon={Code} label="SDK Access" onClick={() => setActiveSection('sdk')} color="border-orange-300 text-orange-600" />
+                <QuickAction icon={Shield} label="Security" onClick={() => alert('Security settings coming soon!')} color="border-red-300 text-red-600" />
+                <QuickAction icon={Settings} label="Settings" onClick={() => setActiveSection('system')} color="border-gray-300 text-gray-600" />
               </div>
             </div>
           </div>
         )}
+
+        {/* Users Tab */}
+        {activeSection === 'users' && (
+          <FullUsersManagement />
+        )}
+
+        {/* Companies Tab */}
+        {activeSection === 'companies' && (
+          <FullCompaniesManagement />
+        )}
+
+        {/* SDK Tab */}
+        {activeSection === 'sdk' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">SDK Platform Management</h2>
+            <p className="text-gray-600">SDK management interface coming soon...</p>
+          </div>
+        )}
+
+        {/* System Tab */}
+        {activeSection === 'system' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">System Monitoring</h2>
+            <p className="text-gray-600">Advanced system monitoring coming soon...</p>
+          </div>
+        )}
       </div>
+
+      {/* Modals */}
+      <AddUserModal
+        isOpen={showAddUserModal}
+        onClose={() => setShowAddUserModal(false)}
+        onSuccess={fetchDashboardStats}
+      />
+      <AddCompanyModal
+        isOpen={showAddCompanyModal}
+        onClose={() => setShowAddCompanyModal(false)}
+        onSuccess={fetchDashboardStats}
+      />
+      <AddProjectModal
+        isOpen={showAddProjectModal}
+        onClose={() => setShowAddProjectModal(false)}
+        onSuccess={fetchDashboardStats}
+      />
     </div>
   );
 };
