@@ -1,0 +1,8 @@
+{
+  "name": "ConstructAI",
+  "description": "An interactive showcase for the ConstructAI platform, which unifies project management and accounting for construction SMBs with a suite of powerful AI agents.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

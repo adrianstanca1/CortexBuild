@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexBuild - AI-Powered Construction Intelligence Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with a Deep Blue accent -->
+    <!-- Application Structure Plan: The SPA is structured into four thematic, navigable sections: 'Home' (the value proposition), 'Platform Features' (interactive module explorer), 'The AI Core' (a visual deep-dive into the unique AI agents), and 'Connectivity & Vision' (integrations and future plans). This structure was chosen to transform a dense text document into an engaging, explorable pitch. The primary interaction is a persistent top navigation bar. Key interactions include filterable, clickable cards in the 'Features' section and an interactive HTML/CSS diagram in 'The AI Core' that animates a workflow scenario. This approach allows potential stakeholders to quickly grasp the high-level benefits or delve into the specific aspects that interest them most, which is more effective for a proposal than a linear document. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core Platform Features -> Goal: Organize/Inform -> Viz: Grid of interactive cards with filters -> Interaction: User clicks a filter (e.g., 'Financial') to see relevant feature cards. Clicking a card expands it to show details and the "AI Improvement". -> Justification: Breaks down a long list of features into a manageable, user-driven discovery process. -> Library/Method: Vanilla JS, Tailwind CSS.
+        - Report Info: The Five AI Agents & their interaction -> Goal: Explain a complex system/Wow -> Viz: HTML/CSS-based hub-and-spoke diagram -> Interaction: User clicks an agent's name to view its detailed description. A separate button triggers an animated sequence that highlights each agent in the "Imagine this:" scenario, showing their collaboration. -> Justification: Visually communicates the platform's core differentiator—the multi-agent system—in a way static text cannot. -> Library/Method: Vanilla JS, Tailwind CSS.
+        - Report Info: Connectivity & Challenges -> Goal: Inform -> Viz: Structured text sections with icons -> Interaction: None, static information -> Justification: Simple, clear presentation for foundational information. -> Library/Method: HTML/CSS with Unicode characters for icons.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            /* slate-100 */
+            color: #3d3d3d;
+        }
+
+        .nav-active {
+            color: #2563eb;
+            /* Blue-600 */
+            border-bottom: 2px solid #2563eb;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            transition: color 0.3s ease, border-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card .details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+
+        .feature-card.open .details {
+            max-height: 500px;
+            padding-top: 1rem;
+        }
+
+        .filter-btn.active {
+            border-color: #2563eb !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .filter-btn.active[data-filter="project"] {
+            border-color: #10b981 !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .filter-btn.active[data-filter="financial"] {
+            border-color: #8b5cf6 !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .filter-btn.active[data-filter="business"] {
+            border-color: #f59e0b !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        #ai-hub {
+            z-index: 20;
+            animation: pulse-hub 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse-hub {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 50px rgba(37, 99, 235, 0.5);
+            }
+        }
+
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-slow {
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+
+            50% {
+                opacity: 0.9;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 5px rgba(59, 130, 246, 0.2);
+            }
+        }
+
+        /* Brand Glow Effect */
+        @keyframes brand-glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.4));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.6));
+            }
+        }
+
+        .brand-glow {
+            animation: brand-glow 3s ease-in-out infinite;
+        }
+
+        /* Gradient Shift Animation */
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .gradient-animate {
+            background-size: 200% 200%;
+            animation: gradient-shift 5s ease infinite;
+        }
+
+        .ai-agent-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .ai-agent-node.active,
+        .ai-agent-node:hover {
+            border-color: #2563eb;
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.25);
+        }
+
+        .ai-agent-node.active {
+            background-color: #eff6ff;
+            /* blue-50 */
+        }
+
+        .ai-scenario-path {
+            position: absolute;
+            height: 4px;
+            transform-origin: left center;
+            width: 0;
+            opacity: 0;
+            transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in-out;
+            z-index: 10;
+            border-radius: 2px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            background-size: 200% 100%;
+            animation: flow 0.8s linear infinite;
+        }
+
+        @keyframes flow {
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        .ai-agent-node.highlight {
+            animation: pulse-node 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse-node {
+
+            0%,
+            100% {
+                transform: scale(1.05);
+                box-shadow: 0 0 25px currentColor;
+            }
+
+            50% {
+                transform: scale(1.15);
+                box-shadow: 0 0 40px currentColor;
+            }
+        }
+
+        #ai-agent-title,
+        #ai-agent-description {
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 0.5rem;
+        }
+
+        .modal-close-btn,
+        .modal-nav-btn {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-close-btn:hover,
+        .modal-nav-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-close-btn {
+            top: 1rem;
+            right: 1rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            z-index: 110;
+        }
+
+        .modal-nav-btn {
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .modal-nav-btn.prev {
+            left: 1rem;
+        }
+
+        .modal-nav-btn.next {
+            right: 1rem;
+        }
+
+        .modal-caption {
+            margin-top: 0.5rem;
+            color: white;
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 0.25rem;
+            max-width: 80%;
+        }
+
+        .scenario-btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            /* slate-200 */
+            border-radius: 0.5rem;
+            text-align: left;
+            font-size: 0.875rem;
+            color: #475569;
+            /* slate-600 */
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+        .scenario-btn:hover:not(:disabled) {
+            background-color: #f8fafc;
+            /* slate-50 */
+            border-color: #94a3b8;
+            /* slate-400 */
+            transform: translateY(-1px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .scenario-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .scenario-btn.active-scenario {
+            background-color: #eff6ff;
+            /* blue-50 */
+            border-color: #3b82f6;
+            /* blue-500 */
+            font-weight: 600;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // These would be set by your build/deployment environment.
+        // In a real app, these should be secured.
+        // IMPORTANT: Replace with your actual Supabase project URL and anon key.
+        var __supabase_url = 'https://jkpeuejmhlccnpyorxfz.supabase.co';
+        var __supabase_anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprcGV1ZWptaGxjY25weW9yeGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NjkyNDcsImV4cCI6MjA3NTM0NTI0N30.vPLMIfL5rfWdoNealtviBQRfrPuSLq9siPs23oiV9FE';
+
+        // Firebase config for demo form - replace with your actual Firebase config
+        var __firebase_config = undefined; // Set to valid Firebase config JSON string when needed
+    </script>
+    <script type="importmap">
+{
+  "imports": {
+    "react-dom/client": "https://aistudiocdn.com/react-dom@19.2.0/client",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/+esm"
+  }
+}
+</script>
+    <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="antialiased">
+    <!-- Marketing Site (Hidden after login) -->
+    <div id="marketing-site">
+        <header id="marketing-header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-200">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center gap-3">
+                        <!-- Revolutionary Brand Mark -->
+                        <div class="relative brand-glow">
+                            <!-- Neural Network Icon -->
+                            <div
+                                class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-500 gradient-animate flex items-center justify-center shadow-2xl transform hover:scale-110 hover:rotate-6 transition-all duration-300 cursor-pointer">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                            <!-- Pulse Effect -->
+                            <div
+                                class="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-500 animate-ping opacity-20">
+                            </div>
+                        </div>
+
+                        <!-- Brand Name -->
+                        <div class="flex flex-col">
+                            <span
+                                class="text-3xl font-black tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 bg-clip-text text-transparent hover:from-cyan-500 hover:via-purple-600 hover:to-blue-600 transition-all duration-500">
+                                CortexBuild
+                            </span>
+                            <span class="text-xs font-semibold text-gray-500 tracking-wider -mt-1">
+                                AI INTELLIGENCE PLATFORM
+                            </span>
+                        </div>
+                    </div>
+                    <nav id="desktop-nav" class="hidden md:flex space-x-6">
+                        <!-- Marketing Nav -->
+                        <button data-target="home"
+                            class="nav-item nav-active text-sm font-medium marketing-nav">Home</button>
+                        <button data-target="features" class="nav-item text-sm font-medium marketing-nav">The Neural
+                            Network</button>
+                        <button data-target="ai-core" class="nav-item text-sm font-medium marketing-nav">Platform
+                            Features</button>
+                        <button data-target="connectivity"
+                            class="nav-item text-sm font-medium marketing-nav">Connectivity</button>
+                        <button data-target="developer-platform"
+                            class="nav-item text-sm font-medium marketing-nav">Developer Platform</button>
+                        <button data-target="get-started" class="nav-item text-sm font-medium marketing-nav">Get
+                            Started</button>
+                    </nav>
+                    <div class="flex items-center space-x-3">
+                        <button id="auth-button"
+                            class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center"></button>
+                        <button id="logout-button"
+                            class="hidden bg-red-600 text-white font-bold py-2 px-4 rounded-md hover:bg-red-700 transition-colors text-sm flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-4 h-4 mr-2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                            </svg>
+                            Logout
+                        </button>
+                        <div class="md:hidden ml-4">
+                            <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800">
+                                <span class="sr-only">Open main menu</span>
+                                <div class="w-6 h-6 flex flex-col justify-around">
+                                    <span class="block w-full h-0.5 bg-current"></span>
+                                    <span class="block w-full h-0.5 bg-current"></span>
+                                    <span class="block w-full h-0.5 bg-current"></span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <!-- Marketing Nav -->
+                    <button data-target="home"
+                        class="mobile-nav-item marketing-nav block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Home</button>
+                    <button data-target="features"
+                        class="mobile-nav-item marketing-nav block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">The
+                        Neural
+                        Network</button>
+                    <button data-target="ai-core"
+                        class="mobile-nav-item marketing-nav block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Platform
+                        Features</button>
+                    <button data-target="connectivity"
+                        class="mobile-nav-item marketing-nav block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Connectivity</button>
+                    <button data-target="developer-platform"
+                        class="mobile-nav-item marketing-nav block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Developer
+                        Platform</button>
+                    <button data-target="get-started"
+                        class="mobile-nav-item marketing-nav block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">Get
+                        Started</button>
+                </div>
+            </div>
+        </header>
+
+        <main id="marketing-container" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <section id="home" class="content-section active">
+                <!-- Hero Section with Visual -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                    <!-- Left: Hero Content -->
+                    <div class="text-left">
+                        <div
+                            class="inline-block px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full mb-6 shadow-lg border-2 border-blue-200 animate-pulse-slow">
+                            <span class="text-blue-600 font-bold text-lg flex items-center gap-2">
+                                <span class="text-2xl">🚀</span>
+                                <span>The Future of Construction Intelligence</span>
+                            </span>
+                        </div>
+                        <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6">
+                            Build Smarter,<br />
+                            <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Not
+                                Harder</span>
+                        </h1>
+                        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                            CortexBuild is the all-in-one AI-powered platform that gives construction SMBs the power of
+                            a
+                            large
+                            enterprise.
+                            We unify project management and accounting with a suite of powerful AI agents to boost
+                            profitability and reduce risk.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button data-target="get-started"
+                                class="nav-item-direct bg-blue-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-blue-700 transition-all hover:scale-105 shadow-lg">
+                                Request a Demo
+                            </button>
+                            <button data-target="features"
+                                class="nav-item-direct bg-white text-blue-600 font-bold py-4 px-8 rounded-lg hover:bg-gray-50 transition-all border-2 border-blue-600">
+                                Explore Features
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Visual Representation -->
+                    <div class="relative">
+                        <!-- Animated Background -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 rounded-3xl opacity-50 blur-3xl">
+                        </div>
+
+                        <!-- Main Visual Card -->
+                        <div class="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
+                            <!-- AI Brain Visualization -->
+                            <div class="text-center mb-6">
+                                <div class="inline-block relative">
+                                    <div
+                                        class="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-6xl animate-pulse">
+                                        🧠
+                                    </div>
+                                    <!-- Orbiting Icons -->
+                                    <div class="absolute top-0 left-0 w-full h-full">
+                                        <div
+                                            class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-2xl shadow-lg animate-bounce">
+                                            🏗️
+                                        </div>
+                                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-2xl shadow-lg animate-bounce"
+                                            style="animation-delay: 0.2s;">
+                                            💰
+                                        </div>
+                                        <div class="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-2xl shadow-lg animate-bounce"
+                                            style="animation-delay: 0.4s;">
+                                            📊
+                                        </div>
+                                        <div class="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-2xl shadow-lg animate-bounce"
+                                            style="animation-delay: 0.6s;">
+                                            🤖
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3
+                                class="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                AI-Powered Construction Intelligence
+                            </h3>
+                            <p class="text-gray-600 text-center mb-6">
+                                Integrating artificial intelligence into every aspect of construction management
+                            </p>
+
+                            <!-- Stats Grid -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div
+                                    class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl text-center border border-blue-200">
+                                    <div class="text-3xl font-bold text-blue-600">100+</div>
+                                    <div class="text-xs text-blue-700 mt-1">AI Features</div>
+                                </div>
+                                <div
+                                    class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl text-center border border-green-200">
+                                    <div class="text-3xl font-bold text-green-600">24/7</div>
+                                    <div class="text-xs text-green-700 mt-1">Automation</div>
+                                </div>
+                                <div
+                                    class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl text-center border border-purple-200">
+                                    <div class="text-3xl font-bold text-purple-600">Real-time</div>
+                                    <div class="text-xs text-purple-700 mt-1">Insights</div>
+                                </div>
+                                <div
+                                    class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-xl text-center border border-orange-200">
+                                    <div class="text-3xl font-bold text-orange-600">Smart</div>
+                                    <div class="text-xs text-orange-700 mt-1">Decisions</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vision & Mission Section -->
+                <div class="mb-20">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Vision & Mission</h2>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Transforming the construction industry through intelligent automation and data-driven
+                            insights
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                        <!-- Vision Card -->
+                        <div
+                            class="bg-gradient-to-br from-blue-500 to-purple-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden">
+                            <div
+                                class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2">
+                            </div>
+                            <div class="relative z-10">
+                                <div class="text-6xl mb-6">🎯</div>
+                                <h3 class="text-3xl font-bold mb-4">Our Vision</h3>
+                                <p class="text-lg leading-relaxed opacity-90">
+                                    To revolutionize the construction industry by making enterprise-level AI technology
+                                    accessible to every construction business,
+                                    regardless of size. We envision a future where every project is optimized, every
+                                    decision is data-driven,
+                                    and every construction professional is empowered with intelligent tools.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Mission Card -->
+                        <div
+                            class="bg-gradient-to-br from-green-500 to-teal-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden">
+                            <div
+                                class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2">
+                            </div>
+                            <div class="relative z-10">
+                                <div class="text-6xl mb-6">🚀</div>
+                                <h3 class="text-3xl font-bold mb-4">Our Mission</h3>
+                                <p class="text-lg leading-relaxed opacity-90">
+                                    To empower construction SMBs with a unified, AI-powered platform that eliminates
+                                    inefficiencies,
+                                    reduces risks, and maximizes profitability. We're committed to delivering
+                                    intelligent
+                                    automation
+                                    that learns from your business and continuously improves your operations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Values -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div
+                        class="bg-white p-8 rounded-2xl shadow-lg border-2 border-blue-100 hover:border-blue-500 transition-all hover:scale-105">
+                        <div class="text-5xl mb-4">🔄</div>
+                        <h3 class="text-2xl font-bold text-blue-600 mb-3">Unified Workflow</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            Replace disconnected tools with a single source of truth for project and financial data,
+                            eliminating errors and saving time.
+                        </p>
+                    </div>
+                    <div
+                        class="bg-white p-8 rounded-2xl shadow-lg border-2 border-purple-100 hover:border-purple-500 transition-all hover:scale-105">
+                        <div class="text-5xl mb-4">🔮</div>
+                        <h3 class="text-2xl font-bold text-purple-600 mb-3">Proactive Insights</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            Our AI agents don't just report data—they analyze it to predict delays,
+                            forecast cash flow, and offer strategic advice.
+                        </p>
+                    </div>
+                    <div
+                        class="bg-white p-8 rounded-2xl shadow-lg border-2 border-green-100 hover:border-green-500 transition-all hover:scale-105">
+                        <div class="text-5xl mb-4">📈</div>
+                        <h3 class="text-2xl font-bold text-green-600 mb-3">Increased Profitability</h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            With real-time job costing, AI-powered estimates, and automated compliance,
+                            you can make decisions that directly improve your bottom line.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Developer Ecosystem & Modular Platform Section -->
+                <div class="mt-32 mb-20">
+                    <div class="text-center mb-12">
+                        <div
+                            class="inline-block px-6 py-2 bg-gradient-to-r from-cyan-50 to-indigo-50 rounded-full mb-4">
+                            <span class="text-cyan-600 font-bold text-sm">🚀 INDUSTRY FIRST</span>
+                        </div>
+                        <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                            Developer Ecosystem & <span
+                                class="bg-gradient-to-r from-cyan-600 to-indigo-600 bg-clip-text text-transparent">Modular
+                                Platform</span>
+                        </h2>
+                        <p class="text-xl text-gray-600 max-w-4xl mx-auto">
+                            The first and only construction management platform with an open developer ecosystem.
+                            Build, share, and monetize intelligent modules that transform the industry.
+                        </p>
+                    </div>
+
+                    <!-- Main Features Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                        <!-- 1. Modular Architecture -->
+                        <div
+                            class="bg-gradient-to-br from-cyan-500 to-blue-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden group hover:scale-105 transition-all duration-300">
+                            <div
+                                class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2">
+                            </div>
+                            <div class="relative z-10">
+                                <div class="text-6xl mb-4">🧩</div>
+                                <h3 class="text-2xl font-bold mb-3">Modular Architecture</h3>
+                                <p class="text-sm leading-relaxed opacity-90 mb-4">
+                                    Built on open-source, extensible architecture. Each module is self-contained and
+                                    integrates seamlessly.
+                                </p>
+                                <ul class="text-sm space-y-2 opacity-90">
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Independent development & deployment</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Plug-and-play integration</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Scalable & future-proof</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 2. Developer Sandbox -->
+                        <div
+                            class="bg-gradient-to-br from-indigo-500 to-purple-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden group hover:scale-105 transition-all duration-300">
+                            <div
+                                class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2">
+                            </div>
+                            <div class="relative z-10">
+                                <div class="text-6xl mb-4">👨‍💻</div>
+                                <h3 class="text-2xl font-bold mb-3">Developer Sandbox</h3>
+                                <p class="text-sm leading-relaxed opacity-90 mb-4">
+                                    Dedicated workspace to create, test, and deploy your innovations safely.
+                                </p>
+                                <ul class="text-sm space-y-2 opacity-90">
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Build custom AI agents</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Create API applications</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Real-time testing & debugging</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Comprehensive API docs</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 3. Marketplace -->
+                        <div
+                            class="bg-gradient-to-br from-purple-500 to-pink-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden group hover:scale-105 transition-all duration-300">
+                            <div
+                                class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2">
+                            </div>
+                            <div class="relative z-10">
+                                <div class="text-6xl mb-4">🏪</div>
+                                <h3 class="text-2xl font-bold mb-3">Module Marketplace</h3>
+                                <p class="text-sm leading-relaxed opacity-90 mb-4">
+                                    Publish, share, and monetize your intelligent modules with the community.
+                                </p>
+                                <ul class="text-sm space-y-2 opacity-90">
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Browse community modules</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Publish your innovations</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Revenue sharing model</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Ratings & reviews system</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 4. Innovation & Impact -->
+                        <div
+                            class="bg-gradient-to-br from-orange-500 to-red-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden group hover:scale-105 transition-all duration-300">
+                            <div
+                                class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2">
+                            </div>
+                            <div class="relative z-10">
+                                <div class="text-6xl mb-4">💡</div>
+                                <h3 class="text-2xl font-bold mb-3">Transform the Industry</h3>
+                                <p class="text-sm leading-relaxed opacity-90 mb-4">
+                                    Join a community revolutionizing construction through collaborative innovation.
+                                </p>
+                                <ul class="text-sm space-y-2 opacity-90">
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Democratize advanced tech</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Continuous evolution</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Community-driven growth</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">✓</span>
+                                        <span>Industry transformation</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTA Section -->
+                    <div
+                        class="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 rounded-3xl p-12 text-center text-white shadow-2xl">
+                        <h3 class="text-3xl font-bold mb-4">Ready to Build the Future?</h3>
+                        <p class="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
+                            Join our developer community and start creating intelligent modules that will shape the
+                            future
+                            of construction technology.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button data-target="developer-platform"
+                                class="nav-item-direct bg-white text-indigo-600 font-bold py-4 px-8 rounded-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg">
+                                Explore Developer Platform
+                            </button>
+                            <button
+                                class="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-lg hover:bg-white hover:text-indigo-600 transition-all">
+                                View API Documentation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="features" class="content-section">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">A Comprehensive Toolset for Modern Construction</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto">CortexBuild integrates every facet of your business.
+                        Explore our core features below, each enhanced with intelligent automation to streamline your
+                        operations. Click on any card to see details.</p>
+                </div>
+
+                <!-- Platform Statistics -->
+                <div id="platform-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
+                    <div
+                        class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg text-center border border-blue-200">
+                        <div class="text-3xl font-bold text-blue-600" id="total-features">0</div>
+                        <div class="text-sm text-blue-700 mt-1">Total Features</div>
+                    </div>
+                    <div
+                        class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg text-center border border-green-200">
+                        <div class="text-3xl font-bold text-green-600" id="active-features">0</div>
+                        <div class="text-sm text-green-700 mt-1">Active</div>
+                    </div>
+                    <div
+                        class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-lg text-center border border-yellow-200">
+                        <div class="text-3xl font-bold text-yellow-600" id="inprogress-features">0</div>
+                        <div class="text-sm text-yellow-700 mt-1">In Progress</div>
+                    </div>
+                    <div
+                        class="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg text-center border border-gray-200">
+                        <div class="text-3xl font-bold text-gray-600" id="planned-features">0</div>
+                        <div class="text-sm text-gray-700 mt-1">Planned</div>
+                    </div>
+                </div>
+
+                <!-- Filter Module Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-6xl mx-auto">
+                    <!-- All Features Card -->
+                    <button
+                        class="filter-btn active group bg-white p-6 rounded-2xl shadow-lg border-2 border-blue-500 hover:shadow-2xl hover:scale-105 transition-all duration-300 text-left"
+                        data-filter="all">
+                        <div class="flex items-center mb-3">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xl mr-3 group-hover:scale-110 transition-transform">
+                                🌐
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">All Features</h3>
+                                <p class="text-xs text-gray-500">Complete Platform</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">View all 100+ platform features across all categories</p>
+                    </button>
+
+                    <!-- Project Ops Card -->
+                    <button
+                        class="filter-btn group bg-white p-6 rounded-2xl shadow-lg border-2 border-transparent hover:border-green-500 hover:shadow-2xl hover:scale-105 transition-all duration-300 text-left"
+                        data-filter="project">
+                        <div class="flex items-center mb-3">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-xl mr-3 group-hover:scale-110 transition-transform">
+                                🏗️
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Project Ops</h3>
+                                <p class="text-xs text-gray-500">Construction Management</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Daily logs, RFIs, punch lists, drawings, and more</p>
+                    </button>
+
+                    <!-- Financial Mgt Card -->
+                    <button
+                        class="filter-btn group bg-white p-6 rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 hover:shadow-2xl hover:scale-105 transition-all duration-300 text-left"
+                        data-filter="financial">
+                        <div class="flex items-center mb-3">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-xl mr-3 group-hover:scale-110 transition-transform">
+                                💰
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Financial Mgt</h3>
+                                <p class="text-xs text-gray-500">Accounting & Finance</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Invoicing, budgets, payments, and financial reports</p>
+                    </button>
+
+                    <!-- Business Dev Card -->
+                    <button
+                        class="filter-btn group bg-white p-6 rounded-2xl shadow-lg border-2 border-transparent hover:border-orange-500 hover:shadow-2xl hover:scale-105 transition-all duration-300 text-left"
+                        data-filter="business">
+                        <div class="flex items-center mb-3">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-xl mr-3 group-hover:scale-110 transition-transform">
+                                📈
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Business Dev</h3>
+                                <p class="text-xs text-gray-500">Growth & Strategy</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Lead management, proposals, and business analytics</p>
+                    </button>
+                </div>
+                <div id="features-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+
+            <section id="ai-core" class="content-section">
+                <div class="text-center mb-16">
+                    <h2
+                        class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        The AI Core: Your Digital Team of Experts</h2>
+                    <p class="mt-4 text-gray-600 max-w-4xl mx-auto text-lg">
+                        Powered by advanced AI models, our intelligent agents work 24/7 to optimize your construction
+                        business.
+                        Each agent specializes in a specific domain, collaborating seamlessly to deliver insights and
+                        automation.
+                    </p>
+                </div>
+
+                <!-- AI Agents Grid - Modern Design -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    <!-- Agent 1: Project Intelligence -->
+                    <div
+                        class="ai-agent-card group cursor-pointer bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
+                                🏗️
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-800">Project Intelligence</h3>
+                                <p class="text-sm text-blue-600">AI Project Manager</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Monitors project health, predicts delays, optimizes schedules, and identifies risks before
+                            they
+                            become critical issues.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Schedule
+                                Optimization</span>
+                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Risk
+                                Detection</span>
+                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Resource
+                                Planning</span>
+                        </div>
+                    </div>
+
+                    <!-- Agent 2: Financial Advisor -->
+                    <div
+                        class="ai-agent-card group cursor-pointer bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
+                                💰
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-800">Financial Advisor</h3>
+                                <p class="text-sm text-green-600">AI Accountant</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Analyzes cash flow, forecasts budgets, detects anomalies, and provides real-time financial
+                            insights for better decision-making.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">Cash
+                                Flow
+                                Analysis</span>
+                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">Budget
+                                Forecasting</span>
+                            <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">Cost
+                                Optimization</span>
+                        </div>
+                    </div>
+
+                    <!-- Agent 3: Document Intelligence -->
+                    <div
+                        class="ai-agent-card group cursor-pointer bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
+                                📄
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-800">Document Intelligence</h3>
+                                <p class="text-sm text-purple-600">AI Document Analyst</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Extracts data from contracts, drawings, and RFIs. Answers questions instantly by searching
+                            through your entire document library.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Smart
+                                Search</span>
+                            <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Data
+                                Extraction</span>
+                            <span
+                                class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Auto-Tagging</span>
+                        </div>
+                    </div>
+
+                    <!-- Agent 4: Safety Monitor -->
+                    <div
+                        class="ai-agent-card group cursor-pointer bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
+                                🦺
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-800">Safety Monitor</h3>
+                                <p class="text-sm text-red-600">AI Safety Officer</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Uses computer vision and ML to detect safety violations, predict incidents, and ensure
+                            compliance with regulations.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium">Hazard
+                                Detection</span>
+                            <span class="px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium">Compliance
+                                Checks</span>
+                            <span class="px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium">Incident
+                                Prevention</span>
+                        </div>
+                    </div>
+
+                    <!-- Agent 5: Business Strategist -->
+                    <div
+                        class="ai-agent-card group cursor-pointer bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
+                                📊
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-800">Business Strategist</h3>
+                                <p class="text-sm text-orange-600">AI Business Advisor</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Analyzes market trends, identifies opportunities, scores leads, and provides strategic
+                            recommendations for growth.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">Market
+                                Analysis</span>
+                            <span class="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">Lead
+                                Scoring</span>
+                            <span class="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">Growth
+                                Strategy</span>
+                        </div>
+                    </div>
+
+                    <!-- Agent 6: Conversational Assistant -->
+                    <div
+                        class="ai-agent-card group cursor-pointer bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
+                                🤖
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-800">Conversational Assistant</h3>
+                                <p class="text-sm text-indigo-600">AI Chat Interface</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Your natural language interface to the entire platform. Ask questions, get insights, and
+                            execute
+                            tasks through simple conversation.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium">Natural
+                                Language</span>
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium">Voice
+                                Commands</span>
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium">24/7
+                                Support</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Capabilities Showcase -->
+                <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">How Our AI Agents Collaborate</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">🔄</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Real-Time Sync</h4>
+                            <p class="text-sm text-gray-600">All agents share a unified knowledge base, ensuring
+                                consistent
+                                insights across your entire operation.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">⚡</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Instant Insights</h4>
+                            <p class="text-sm text-gray-600">Get answers in seconds, not hours. Our AI processes
+                                millions of
+                                data points to deliver actionable intelligence.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">🎯</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Proactive Alerts</h4>
+                            <p class="text-sm text-gray-600">Don't wait for problems. Our AI predicts issues and
+                                notifies
+                                you before they impact your projects.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section id="connectivity" class="content-section">
+                <div class="text-center mb-16">
+                    <h2
+                        class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        Seamlessly Connected, Infinitely Scalable
+                    </h2>
+                    <p class="mt-4 text-gray-600 max-w-4xl mx-auto text-lg">
+                        Enterprise-grade integrations that grow with your business. Connect to your existing tools,
+                        ensure
+                        data security, and scale without limits.
+                    </p>
+                </div>
+
+                <!-- Integration Categories -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    <!-- Financial Integrations -->
+                    <div
+                        class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                        <div
+                            class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-2xl mb-4">
+                            🏦
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">Financial Integrations</h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Open Banking APIs
+                            </li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Xero & QuickBooks
+                            </li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Payment Gateways
+                            </li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Tax Authorities
+                                (HMRC,
+                                IRS)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Business Tools -->
+                    <div
+                        class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                        <div
+                            class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl mb-4">
+                            🏢
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">Business Tools</h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-center"><span class="text-blue-500 mr-2">✓</span> Microsoft 365</li>
+                            <li class="flex items-center"><span class="text-blue-500 mr-2">✓</span> Google Workspace
+                            </li>
+                            <li class="flex items-center"><span class="text-blue-500 mr-2">✓</span> Slack & Teams</li>
+                            <li class="flex items-center"><span class="text-blue-500 mr-2">✓</span> Email Integration
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Construction Platforms -->
+                    <div
+                        class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                        <div
+                            class="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-2xl mb-4">
+                            🏗️
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">Construction Platforms</h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-center"><span class="text-orange-500 mr-2">✓</span> BIM Software
+                                (Revit,
+                                AutoCAD)</li>
+                            <li class="flex items-center"><span class="text-orange-500 mr-2">✓</span> Project Management
+                                Tools</li>
+                            <li class="flex items-center"><span class="text-orange-500 mr-2">✓</span> Equipment Tracking
+                            </li>
+                            <li class="flex items-center"><span class="text-orange-500 mr-2">✓</span> Supplier Networks
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- AI & Analytics -->
+                    <div
+                        class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                        <div
+                            class="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-2xl mb-4">
+                            🤖
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">AI & Analytics</h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-center"><span class="text-purple-500 mr-2">✓</span> Google Gemini API
+                            </li>
+                            <li class="flex items-center"><span class="text-purple-500 mr-2">✓</span> Custom ML Models
+                            </li>
+                            <li class="flex items-center"><span class="text-purple-500 mr-2">✓</span> Data Warehouses
+                            </li>
+                            <li class="flex items-center"><span class="text-purple-500 mr-2">✓</span> BI Tools</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Security & Compliance -->
+                <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 border border-gray-200 mb-12">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Enterprise-Grade Security & Compliance
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">🔒</div>
+                            <h4 class="font-bold text-gray-800 mb-2">End-to-End Encryption</h4>
+                            <p class="text-sm text-gray-600">All data encrypted at rest and in transit using
+                                industry-standard AES-256 encryption.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">🛡️</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Multi-Factor Authentication</h4>
+                            <p class="text-sm text-gray-600">Secure access with MFA, SSO, and role-based access control
+                                (RBAC).</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">✅</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Compliance Certified</h4>
+                            <p class="text-sm text-gray-600">SOC 2 Type II, GDPR, ISO 27001 certified with regular
+                                security
+                                audits.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">🔍</div>
+                            <h4 class="font-bold text-gray-800 mb-2">24/7 Monitoring</h4>
+                            <p class="text-sm text-gray-600">Continuous security monitoring with automated threat
+                                detection
+                                and response.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">💾</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Automated Backups</h4>
+                            <p class="text-sm text-gray-600">Daily automated backups with point-in-time recovery and
+                                disaster recovery plans.</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <div class="text-3xl mb-3">🔐</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Data Privacy</h4>
+                            <p class="text-sm text-gray-600">Your data is yours. We never share or sell your information
+                                to
+                                third parties.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scalability Metrics -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 text-center">
+                        <div class="text-4xl font-bold text-blue-600 mb-2">99.9%</div>
+                        <div class="text-sm text-gray-600">Uptime SLA</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 text-center">
+                        <div class="text-4xl font-bold text-green-600 mb-2">&lt;100ms</div>
+                        <div class="text-sm text-gray-600">API Response Time</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2">Unlimited</div>
+                        <div class="text-sm text-gray-600">Projects</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 text-center">
+                        <div class="text-4xl font-bold text-orange-600 mb-2">Petabyte</div>
+                        <div class="text-sm text-gray-600">Scale Storage</div>
+                    </div>
+                </div>
+
+                <!-- API & Developer Tools -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">API & Developer Tools</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">🔌</div>
+                            <h4 class="font-bold text-gray-800 mb-2">RESTful API</h4>
+                            <p class="text-sm text-gray-600">Complete REST API with comprehensive documentation and SDKs
+                                for
+                                popular languages.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">⚡</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Webhooks</h4>
+                            <p class="text-sm text-gray-600">Real-time event notifications to keep your systems in sync
+                                automatically.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">📚</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Developer Portal</h4>
+                            <p class="text-sm text-gray-600">Interactive API documentation, code examples, and sandbox
+                                environment for testing.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <section id="get-started" class="content-section">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">Ready to Build a Better Business?</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto">Choose a plan that fits your needs or contact us for
+                        a
+                        personalized demo to see how CortexBuild can transform your operations.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                        <div class="bg-white p-8 rounded-lg shadow-md border border-gray-100 flex flex-col">
+                            <h3 class="text-2xl font-bold text-center">Starter</h3>
+                            <p class="mt-2 text-gray-500 text-center">For small teams and freelancers.</p>
+                            <p class="my-8 text-center"><span class="text-5xl font-bold">£99</span><span
+                                    class="text-gray-500">/mo</span></p>
+                            <ul class="space-y-3 text-gray-600 mb-8 flex-grow">
+                                <li class="flex items-center"><span class="text-blue-500 mr-2">✓</span> Up to 5 Projects
+                                </li>
+                                <li class="flex items-center"><span class="text-blue-500 mr-2">✓</span> Core Project
+                                    Management</li>
+                                <li class="flex items-center"><span class="text-blue-500 mr-2">✓</span> Basic Accounting
+                                    &
+                                    Invoicing</li>
+                            </ul>
+                            <button
+                                class="w-full bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-md hover:bg-blue-200 transition-colors">Choose
+                                Plan</button>
+                        </div>
+                        <div
+                            class="bg-blue-600 text-white p-8 rounded-lg shadow-xl border border-blue-700 flex flex-col ring-4 ring-blue-200">
+                            <h3 class="text-2xl font-bold text-center">Professional</h3>
+                            <p class="mt-2 text-blue-200 text-center">For growing businesses.</p>
+                            <p class="my-8 text-center"><span class="text-5xl font-bold">£249</span><span
+                                    class="text-blue-200">/mo</span></p>
+                            <ul class="space-y-3 text-blue-100 mb-8 flex-grow">
+                                <li class="flex items-center"><span class="mr-2">✓</span> Unlimited Projects</li>
+                                <li class="flex items-center"><span class="mr-2">✓</span> All Starter Features</li>
+                                <li class="flex items-center"><span class="mr-2">✓</span> Full AI Agent Suite</li>
+                                <li class="flex items-center"><span class="mr-2">✓</span> Third-Party Integrations</li>
+                            </ul>
+                            <button
+                                class="w-full bg-white text-blue-700 font-bold py-3 px-4 rounded-md hover:bg-gray-100 transition-colors">Choose
+                                Plan</button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white p-8 rounded-lg shadow-md border border-gray-100">
+                        <h3 class="text-2xl font-bold text-center mb-4">Request a Demo</h3>
+                        <form id="demo-form">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                    <input type="text" id="name" name="name" required
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email
+                                        Address</label>
+                                    <input type="email" id="email" name="email" required
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label for="company" class="block text-sm font-medium text-gray-700">Company
+                                        Name</label>
+                                    <input type="text" id="company" name="company"
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <button type="submit" id="demo-submit-btn"
+                                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Submit
+                                        Request</button>
+                                </div>
+                            </div>
+                            <p id="form-feedback" class="text-sm text-center mt-4"></p>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Developer Platform Page -->
+            <section id="developer-platform" class="content-section">
+                <div class="text-center mb-16">
+                    <div
+                        class="inline-block px-6 py-3 bg-gradient-to-r from-cyan-50 to-indigo-50 rounded-full mb-6 shadow-lg border-2 border-cyan-200">
+                        <span class="text-cyan-600 font-bold text-lg flex items-center gap-2">
+                            <span class="text-2xl">👨‍💻</span>
+                            <span>Build the Future of Construction Tech</span>
+                        </span>
+                    </div>
+                    <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6">
+                        Developer <span
+                            class="bg-gradient-to-r from-cyan-600 to-indigo-600 bg-clip-text text-transparent">Ecosystem</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                        Join the first open developer platform for construction management. Create, test, and monetize
+                        intelligent modules that transform how the industry works.
+                    </p>
+                </div>
+
+                <!-- Platform Overview -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+                    <!-- Left: Key Features -->
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Why Build on CortexBuild?</h2>
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-2xl flex-shrink-0">
+                                    🧩
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Modular Architecture</h3>
+                                    <p class="text-gray-600">Build self-contained modules that integrate seamlessly. Our
+                                        open-source architecture ensures your innovations work perfectly with the
+                                        platform.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl flex-shrink-0">
+                                    🔧
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Complete Toolset</h3>
+                                    <p class="text-gray-600">Access comprehensive APIs, SDKs, and documentation. Build
+                                        AI
+                                        agents, automation tools, custom integrations, and more.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white text-2xl flex-shrink-0">
+                                    💰
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Monetization</h3>
+                                    <p class="text-gray-600">Publish your modules to our marketplace and earn revenue.
+                                        Fair
+                                        revenue sharing model ensures you're rewarded for your innovations.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-2xl flex-shrink-0">
+                                    🌍
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Global Impact</h3>
+                                    <p class="text-gray-600">Your modules reach thousands of construction professionals
+                                        worldwide. Make a real difference in how the industry operates.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Code Example -->
+                    <div class="bg-gray-900 rounded-3xl p-8 shadow-2xl">
+                        <div class="flex items-center gap-2 mb-6">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="ml-4 text-gray-400 text-sm font-mono">example-module.ts</span>
+                        </div>
+                        <pre class="text-sm text-gray-300 font-mono overflow-x-auto"><code><span class="text-purple-400">import</span> { <span class="text-cyan-400">CortexBuild</span> } <span class="text-purple-400">from</span> <span class="text-green-400">'@cortexbuild/sdk'</span>;
+
+<span class="text-purple-400">export</span> <span class="text-purple-400">class</span> <span class="text-yellow-400">SmartScheduler</span> {
+  <span class="text-purple-400">async</span> <span class="text-blue-400">optimizeSchedule</span>(<span class="text-orange-400">project</span>: <span class="text-cyan-400">Project</span>) {
+    <span class="text-gray-500">// Access project data</span>
+    <span class="text-purple-400">const</span> tasks = <span class="text-purple-400">await</span> project.<span class="text-blue-400">getTasks</span>();
+
+    <span class="text-gray-500">// Run AI optimization</span>
+    <span class="text-purple-400">const</span> optimized = <span class="text-purple-400">await</span> <span class="text-purple-400">this</span>.<span class="text-blue-400">ai</span>.<span class="text-blue-400">optimize</span>(tasks);
+
+    <span class="text-gray-500">// Update schedule</span>
+    <span class="text-purple-400">return</span> project.<span class="text-blue-400">updateSchedule</span>(optimized);
+  }
+}</code></pre>
+                        <div class="mt-6 flex items-center gap-3">
+                            <span class="text-green-400 text-sm">✓ Type-safe APIs</span>
+                            <span class="text-green-400 text-sm">✓ Real-time data</span>
+                            <span class="text-green-400 text-sm">✓ AI-powered</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Developer Sandbox -->
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl p-12 mb-20">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold text-gray-900 mb-4">Developer Sandbox</h2>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Safe environment to build, test, and debug your modules before deploying to production
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="text-5xl mb-4">🛠️</div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Build & Test</h3>
+                            <p class="text-gray-600">Create modules with our comprehensive SDK. Test in real-time with
+                                sample data and debug tools.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="text-5xl mb-4">📊</div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Monitor Performance</h3>
+                            <p class="text-gray-600">Track module performance, API usage, and user engagement with
+                                built-in
+                                analytics.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="text-5xl mb-4">🚀</div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Deploy Instantly</h3>
+                            <p class="text-gray-600">One-click deployment to production. Automatic versioning and
+                                rollback
+                                support.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marketplace -->
+                <div class="mb-20">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold text-gray-900 mb-4">Module Marketplace</h2>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Publish your modules and reach thousands of construction professionals
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div
+                            class="bg-gradient-to-br from-purple-500 to-pink-600 p-10 rounded-3xl shadow-2xl text-white">
+                            <h3 class="text-3xl font-bold mb-4">For Developers</h3>
+                            <ul class="space-y-4 text-lg">
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>Publish unlimited modules</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>70% revenue share</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>Built-in payment processing</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>Marketing & promotion support</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-gradient-to-br from-cyan-500 to-blue-600 p-10 rounded-3xl shadow-2xl text-white">
+                            <h3 class="text-3xl font-bold mb-4">For Users</h3>
+                            <ul class="space-y-4 text-lg">
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>Browse 100+ modules</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>Community ratings & reviews</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>One-click installation</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-3 text-2xl">✓</span>
+                                    <span>Free & premium options</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <div
+                    class="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 rounded-3xl p-12 text-center text-white shadow-2xl">
+                    <h2 class="text-4xl font-bold mb-6">Start Building Today</h2>
+                    <p class="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
+                        Join our growing community of developers transforming the construction industry
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button
+                            class="bg-white text-indigo-600 font-bold py-4 px-8 rounded-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg">
+                            Get API Access
+                        </button>
+                        <button
+                            class="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-lg hover:bg-white hover:text-indigo-600 transition-all">
+                            View Documentation
+                        </button>
+                        <button
+                            class="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-lg hover:bg-white hover:text-indigo-600 transition-all">
+                            Join Community
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <!-- End Marketing Site -->
+
+    <!-- React App Container -->
+    <div id="app-container" class="hidden">
+        <div id="root"></div>
+    </div>
+
+    <script type="module" src="/index.tsx"></script>
+    <script type="module">
+        import { createClient } from "@supabase/supabase-js";
+
+        let supabaseClient;
+
+        async function initializeSupabase() {
+            try {
+                // Check if a Supabase client already exists to avoid multiple instances
+                if (window.supabaseClient) {
+                    supabaseClient = window.supabaseClient;
+                    console.log('Using existing Supabase client for demo form');
+                    return;
+                }
+
+                if (typeof __supabase_url === 'undefined' || !__supabase_url || __supabase_url === 'YOUR_SUPABASE_URL' ||
+                    typeof __supabase_anon_key === 'undefined' || !__supabase_anon_key || __supabase_anon_key === 'YOUR_SUPABASE_ANON_KEY') {
+                    console.warn('Supabase not configured. Demo form submissions will not work.');
+                    return;
+                }
+                supabaseClient = createClient(__supabase_url, __supabase_anon_key);
+                window.supabaseClient = supabaseClient; // Store globally to avoid duplicates
+                console.log('Supabase client initialized for demo form');
+            } catch (error) {
+                console.error("Supabase initialization failed:", error);
+            }
+        }
+
+        const featuresData = [
+            // Core Platform Features
+            { name: 'Project Management', category: 'project', icon: '🏗️', status: 'active', description: 'Complete project lifecycle management with task tracking, milestones, and team collaboration.', improvement: 'AI-powered project insights predict delays and suggest optimizations.' },
+            { name: 'Task Tracking', category: 'project', icon: '✓', status: 'active', description: 'Comprehensive task management with assignments, priorities, and progress tracking.', improvement: 'Smart task prioritization based on project dependencies and deadlines.' },
+            { name: 'Daily Logs', category: 'project', icon: '📝', status: 'active', description: 'Digital daily logs for field activities, weather, and progress notes.', improvement: 'AI extracts key information and flags safety concerns automatically.' },
+            { name: 'Photo Gallery', category: 'project', icon: '📸', status: 'active', description: 'Organized photo documentation with tagging and timeline view.', improvement: 'AI-powered image recognition for automatic categorization and progress tracking.' },
+            { name: 'Document Management', category: 'project', icon: '🗂️', status: 'active', description: 'Centralized repository for all project documents with version control.', improvement: 'AI-driven tagging and search to automatically categorize files and flag compliance issues.' },
+            { name: 'Team Collaboration', category: 'project', icon: '👥', status: 'active', description: 'Real-time messaging, notifications, and team coordination tools.', improvement: 'AI suggests relevant team members for tasks based on skills and availability.' },
+
+            // RFI Management
+            { name: 'RFI Management', category: 'project', icon: '📋', status: 'active', description: 'Request for Information system with tracking and response management.', improvement: 'AI searches project documents to suggest answers and auto-routes to experts.' },
+            { name: 'RFI Tracking', category: 'project', icon: '🔍', status: 'active', description: 'Track RFI status, responses, and resolution timelines.', improvement: 'Predictive analytics identify potential RFI bottlenecks.' },
+
+            // Punch List
+            { name: 'Punch List', category: 'project', icon: '✓', status: 'active', description: 'Quality control and defect tracking with photo documentation.', improvement: 'AI categorizes issues and suggests similar past resolutions.' },
+            { name: 'Quality Control', category: 'project', icon: '🎯', status: 'active', description: 'Systematic quality checks and inspection workflows.', improvement: 'ML models predict quality issues based on historical data.' },
+
+            // Drawings & Plans
+            { name: 'Drawings & Plans', category: 'project', icon: '📐', status: 'active', description: 'Blueprint management with version control and markup tools.', improvement: 'AI detects changes between versions and highlights conflicts.' },
+            { name: 'Drawing Comparison', category: 'project', icon: '🔄', status: 'active', description: 'Side-by-side comparison of drawing versions.', improvement: 'Automated change detection and impact analysis.' },
+
+            // Daywork Sheets
+            { name: 'Daywork Sheets', category: 'project', icon: '📊', status: 'active', description: 'Daily work tracking with labor, equipment, and materials.', improvement: 'AI validates entries and suggests cost optimizations.' },
+            { name: 'Labor Tracking', category: 'project', icon: '⏱️', status: 'active', description: 'Track worker hours and productivity metrics.', improvement: 'Predictive scheduling based on historical productivity data.' },
+
+            // Financial Management
+            { name: 'Invoicing & Billing', category: 'financial', icon: '🧾', status: 'active', description: 'Generate invoices, manage retainers, and track payments.', improvement: 'AI sends automated payment reminders and forecasts cash flow.' },
+            { name: 'Budget Tracking', category: 'financial', icon: '💰', status: 'active', description: 'Real-time budget monitoring and variance analysis.', improvement: 'Predictive budget alerts before overruns occur.' },
+            { name: 'Cost Analysis', category: 'financial', icon: '📈', status: 'active', description: 'Detailed cost breakdowns and profitability analysis.', improvement: 'AI identifies cost-saving opportunities across projects.' },
+            { name: 'Payment Tracking', category: 'financial', icon: '💳', status: 'active', description: 'Track payments, receivables, and payment schedules.', improvement: 'Smart payment reminders and cash flow optimization.' },
+            { name: 'Financial Reports', category: 'financial', icon: '📊', status: 'active', description: 'Comprehensive financial reporting and analytics.', improvement: 'AI generates insights and recommendations from financial data.' },
+            { name: 'Integrated Accounting', category: 'financial', icon: '🏦', status: 'active', description: 'Full accounting service from bookkeeping to tax filing.', improvement: 'AI bookkeeper categorizes transactions from automated bank feeds.' },
+
+            // Subcontractor Management
+            { name: 'Subcontractor Management', category: 'project', icon: '👷', status: 'active', description: 'Manage subcontractors, contracts, and performance.', improvement: 'AI rates subcontractor performance and suggests best matches for new projects.' },
+            { name: 'Contract Management', category: 'project', icon: '📄', status: 'active', description: 'Track contracts, compliance, and insurance.', improvement: 'Automated compliance checks and renewal reminders.' },
+
+            // Time Tracking
+            { name: 'Time Tracking', category: 'project', icon: '⏱️', status: 'active', description: 'Employee time tracking and timesheet management.', improvement: 'AI detects anomalies and optimizes resource allocation.' },
+            { name: 'Payroll Integration', category: 'financial', icon: '💵', status: 'active', description: 'Seamless integration with payroll systems.', improvement: 'Automated payroll calculations and tax compliance.' },
+
+            // AI Tools
+            { name: 'AI Chatbot Assistant', category: 'business', icon: '🤖', status: 'in-progress', description: 'Conversational AI assistant for platform navigation and insights.', improvement: 'Natural language interface for all platform features.' },
+            { name: 'Document Analysis', category: 'business', icon: '📄', status: 'in-progress', description: 'AI-powered document parsing and information extraction.', improvement: 'Automatic extraction of key data from contracts and plans.' },
+            { name: 'Predictive Analytics', category: 'business', icon: '🔮', status: 'in-progress', description: 'ML models for project outcome prediction.', improvement: 'Forecast project success and identify risks early.' },
+            { name: 'Smart Scheduling', category: 'project', icon: '🗓️', status: 'in-progress', description: 'AI-optimized resource scheduling and allocation.', improvement: 'Dynamic schedule optimization based on constraints.' },
+            { name: 'Risk Assessment', category: 'business', icon: '⚠️', status: 'in-progress', description: 'Automated risk identification and mitigation.', improvement: 'Proactive risk alerts with suggested actions.' },
+            { name: 'Cost Estimation', category: 'financial', icon: '🧮', status: 'in-progress', description: 'AI-powered project cost estimation.', improvement: 'Historical data analysis for accurate estimates.' },
+
+            // ML & Analytics
+            { name: 'Performance Metrics', category: 'business', icon: '📊', status: 'in-progress', description: 'Comprehensive KPI tracking and visualization.', improvement: 'Real-time dashboards with predictive insights.' },
+            { name: 'Trend Analysis', category: 'business', icon: '📈', status: 'in-progress', description: 'Identify patterns and trends across projects.', improvement: 'ML-powered trend detection and forecasting.' },
+            { name: 'Custom Dashboards', category: 'business', icon: '📱', status: 'in-progress', description: 'Personalized dashboards for different roles.', improvement: 'AI suggests relevant metrics for each user.' },
+
+            // Business Development
+            { name: 'Lead Management', category: 'business', icon: '🎯', status: 'planned', description: 'Track and nurture sales leads.', improvement: 'AI scores leads and suggests follow-up actions.' },
+            { name: 'Proposal Generation', category: 'business', icon: '📝', status: 'planned', description: 'Automated proposal creation from templates.', improvement: 'AI customizes proposals based on client data.' },
+            { name: 'Client Portal', category: 'business', icon: '🌐', status: 'planned', description: 'Self-service portal for clients.', improvement: 'AI-powered client insights and recommendations.' },
+            { name: 'Bid Management', category: 'business', icon: '💼', status: 'planned', description: 'Manage bids and tender processes.', improvement: 'AI analyzes win probability and suggests pricing.' },
+            { name: 'CRM Integration', category: 'business', icon: '👥', status: 'planned', description: 'Customer relationship management.', improvement: 'Sentiment analysis and client health scoring.' },
+
+            // AI Agents Marketplace
+            { name: 'Agent Library', category: 'business', icon: '🛒', status: 'planned', description: 'Browse and install custom AI agents.', improvement: 'Marketplace for specialized construction AI tools.' },
+            { name: 'Custom Workflows', category: 'business', icon: '⚙️', status: 'planned', description: 'Build custom automation workflows.', improvement: 'No-code workflow builder with AI suggestions.' },
+            { name: 'API Marketplace', category: 'business', icon: '🔌', status: 'planned', description: 'Third-party integrations and APIs.', improvement: 'AI recommends relevant integrations.' },
+
+            // Advanced AI & Automation
+            { name: 'Voice Commands', category: 'business', icon: '🎤', status: 'planned', description: 'Control platform with voice commands in the field.', improvement: 'Hands-free operation for field workers with safety gear.' },
+            { name: 'AR/VR Integration', category: 'project', icon: '🥽', status: 'planned', description: 'Augmented reality for on-site plan visualization.', improvement: 'Overlay digital plans on physical construction sites.' },
+            { name: 'Drone Integration', category: 'project', icon: '🚁', status: 'planned', description: 'Automated drone surveys and progress tracking.', improvement: 'AI analyzes drone footage for progress and safety issues.' },
+            { name: 'IoT Sensors', category: 'project', icon: '📡', status: 'planned', description: 'Real-time monitoring from construction site sensors.', improvement: 'Predictive maintenance and safety alerts from sensor data.' },
+            { name: 'BIM Integration', category: 'project', icon: '🏢', status: 'planned', description: 'Building Information Modeling integration.', improvement: 'AI detects clashes and suggests optimizations in 3D models.' },
+            { name: 'Digital Twin', category: 'project', icon: '👯', status: 'planned', description: 'Create digital replicas of construction projects.', improvement: 'Real-time simulation and what-if scenario analysis.' },
+
+            // Smart Safety & Compliance
+            { name: 'Safety AI Monitor', category: 'project', icon: '🦺', status: 'planned', description: 'Computer vision for real-time safety monitoring.', improvement: 'Detect PPE violations and unsafe conditions automatically.' },
+            { name: 'Compliance Automation', category: 'project', icon: '📜', status: 'planned', description: 'Automated regulatory compliance tracking.', improvement: 'AI keeps up with changing regulations and ensures compliance.' },
+            { name: 'Environmental Monitoring', category: 'project', icon: '🌍', status: 'planned', description: 'Track environmental impact and sustainability.', improvement: 'Carbon footprint tracking and green building recommendations.' },
+            { name: 'Incident Prediction', category: 'project', icon: '⚡', status: 'planned', description: 'Predict and prevent safety incidents.', improvement: 'ML models identify high-risk situations before they occur.' },
+
+            // Advanced Financial Tools
+            { name: 'Dynamic Pricing', category: 'financial', icon: '💎', status: 'planned', description: 'AI-optimized pricing for bids and quotes.', improvement: 'Real-time market analysis for competitive pricing.' },
+            { name: 'Cash Flow Forecasting', category: 'financial', icon: '💸', status: 'planned', description: 'Predictive cash flow modeling.', improvement: 'AI predicts cash flow 6-12 months ahead with high accuracy.' },
+            { name: 'Fraud Detection', category: 'financial', icon: '🔍', status: 'planned', description: 'Automated fraud and anomaly detection.', improvement: 'ML identifies suspicious transactions and billing patterns.' },
+            { name: 'Tax Optimization', category: 'financial', icon: '🧾', status: 'planned', description: 'AI-powered tax planning and optimization.', improvement: 'Maximize deductions and minimize tax liability legally.' },
+            { name: 'Investment Analysis', category: 'financial', icon: '📊', status: 'planned', description: 'ROI analysis for equipment and projects.', improvement: 'AI recommends best investment opportunities.' },
+
+            // Supply Chain & Logistics
+            { name: 'Smart Procurement', category: 'project', icon: '🛍️', status: 'planned', description: 'AI-optimized material procurement.', improvement: 'Predict material needs and optimize ordering timing.' },
+            { name: 'Supplier Network', category: 'project', icon: '🌐', status: 'planned', description: 'Intelligent supplier matching and management.', improvement: 'AI rates suppliers and suggests best matches for each job.' },
+            { name: 'Logistics Optimization', category: 'project', icon: '🚚', status: 'planned', description: 'Optimize delivery routes and schedules.', improvement: 'Reduce transportation costs and delivery delays.' },
+            { name: 'Inventory Prediction', category: 'project', icon: '📦', status: 'planned', description: 'Predictive inventory management.', improvement: 'AI forecasts material usage and prevents shortages.' },
+            { name: 'Waste Reduction', category: 'project', icon: '♻️', status: 'planned', description: 'Minimize material waste through optimization.', improvement: 'AI suggests material reuse and waste reduction strategies.' },
+
+            // Workforce Management
+            { name: 'Skills Matching', category: 'project', icon: '🎯', status: 'planned', description: 'Match workers to tasks based on skills.', improvement: 'AI optimizes team composition for each project phase.' },
+            { name: 'Training Recommendations', category: 'business', icon: '📚', status: 'planned', description: 'Personalized training and upskilling paths.', improvement: 'AI identifies skill gaps and suggests training programs.' },
+            { name: 'Performance Analytics', category: 'business', icon: '📈', status: 'planned', description: 'Detailed workforce performance metrics.', improvement: 'Identify top performers and areas for improvement.' },
+            { name: 'Shift Optimization', category: 'project', icon: '🕐', status: 'planned', description: 'AI-optimized shift scheduling.', improvement: 'Balance workload, skills, and labor costs automatically.' },
+            { name: 'Wellness Monitoring', category: 'project', icon: '💪', status: 'planned', description: 'Worker health and wellness tracking.', improvement: 'Prevent burnout and optimize work-life balance.' },
+
+            // Client Experience
+            { name: 'Client Mobile App', category: 'business', icon: '📱', status: 'planned', description: 'Dedicated mobile app for clients.', improvement: 'Real-time project updates and communication.' },
+            { name: 'Virtual Tours', category: 'business', icon: '🎥', status: 'planned', description: '360° virtual tours of project progress.', improvement: 'AI-generated progress videos and walkthroughs.' },
+            { name: 'Client Sentiment Analysis', category: 'business', icon: '😊', status: 'planned', description: 'Monitor client satisfaction in real-time.', improvement: 'AI detects dissatisfaction early and suggests interventions.' },
+            { name: 'Automated Reporting', category: 'business', icon: '📄', status: 'planned', description: 'Auto-generated client progress reports.', improvement: 'AI creates beautiful, personalized reports automatically.' },
+
+            // Innovation & Future Tech
+            { name: '3D Printing Integration', category: 'project', icon: '🖨️', status: 'planned', description: 'Manage 3D printing for construction components.', improvement: 'AI optimizes print parameters and material usage.' },
+            { name: 'Robotics Coordination', category: 'project', icon: '🤖', status: 'planned', description: 'Coordinate construction robots and automation.', improvement: 'AI schedules and optimizes robotic tasks.' },
+            { name: 'Blockchain Contracts', category: 'business', icon: '⛓️', status: 'planned', description: 'Smart contracts on blockchain for transparency.', improvement: 'Automated, tamper-proof contract execution.' },
+            { name: 'Quantum Computing', category: 'business', icon: '⚛️', status: 'planned', description: 'Quantum algorithms for complex optimization.', improvement: 'Solve previously impossible scheduling and routing problems.' },
+            { name: 'Neural Architecture Search', category: 'business', icon: '🧠', status: 'planned', description: 'Self-improving AI models.', improvement: 'AI that automatically improves its own algorithms.' },
+
+            // Collaboration & Communication
+            { name: 'Real-time Translation', category: 'business', icon: '🌍', status: 'planned', description: 'Instant translation for international teams.', improvement: 'AI translates conversations and documents in real-time.' },
+            { name: 'Meeting Intelligence', category: 'business', icon: '🎙️', status: 'planned', description: 'AI meeting assistant and note-taker.', improvement: 'Automatic transcription, summaries, and action items.' },
+            { name: 'Knowledge Base', category: 'business', icon: '📚', status: 'planned', description: 'Searchable company knowledge repository.', improvement: 'AI suggests relevant past solutions and best practices.' },
+            { name: 'Expert Network', category: 'business', icon: '👨‍🏫', status: 'planned', description: 'Connect with industry experts on-demand.', improvement: 'AI matches problems with the right experts instantly.' },
+
+            // Analytics & Insights
+            { name: 'Predictive Maintenance', category: 'project', icon: '🔧', status: 'planned', description: 'Predict equipment failures before they happen.', improvement: 'Reduce downtime and maintenance costs.' },
+            { name: 'Market Intelligence', category: 'business', icon: '📊', status: 'planned', description: 'Real-time construction market analysis.', improvement: 'AI tracks market trends and competitor activity.' },
+            { name: 'Benchmarking', category: 'business', icon: '📏', status: 'planned', description: 'Compare performance against industry standards.', improvement: 'AI identifies areas where you outperform or lag behind.' },
+            { name: 'Scenario Planning', category: 'business', icon: '🎲', status: 'planned', description: 'What-if analysis for strategic decisions.', improvement: 'AI simulates outcomes of different business strategies.' }
+        ];
+
+        const aiAgentsData = [
+            { id: 'agent-pm', name: 'Project Optimizer', description: 'Uses predictive analytics to foresee project issues, recalculates optimal schedules, and instantly shows the ripple effects of change orders on timelines and budgets.', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0l-3.75 5.25L9 3m0 0l-3.75 5.25M6 16.5h12M9 16.5v3.75m6-3.75v3.75" /></svg>' },
+            { id: 'agent-biz', name: 'Business Advisor', description: 'Acts as a virtual consultant, analyzing performance data and industry benchmarks to give strategic advice, such as identifying new market opportunities or relevant government grants.', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>' },
+            { id: 'agent-doc', name: 'Compliance Analyst', description: 'Scans documents and field logs to extract key obligations, flag safety risks, and check for compliance issues, like ensuring subcontractor insurance is up to date.', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' },
+            { id: 'agent-acc', name: 'Accounting Agent', description: 'Handles the heavy lifting of bookkeeping, classifies transactions, and ensures alignment with accounting standards. It stays up-to-date on tax rules and can produce complex financial documents automatically.', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 7.756a4.5 4.5 0 010 8.488M7.5 10.5h5.25m-5.25 3h5.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' },
+            { id: 'agent-user', name: 'User Assistant', description: 'The user-facing chatbot or voice assistant. Users can ask questions in natural language (“What were our profits last quarter?”) and get instant answers, making the complex system incredibly user-friendly.', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>' }
+        ];
+
+        const navButtons = document.querySelectorAll('.nav-item');
+        const mobileNavButtons = document.querySelectorAll('.mobile-nav-item');
+        const directNavLinks = document.querySelectorAll('.nav-item-direct');
+        const contentSections = document.querySelectorAll('.content-section');
+        const featuresGrid = document.getElementById('features-grid');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        const authButton = document.getElementById('auth-button');
+        const logoutButton = document.getElementById('logout-button');
+        const marketingContainer = document.getElementById('marketing-container');
+        const appContainer = document.getElementById('app-container');
+
+        let state = {
+            loggedIn: false,
+            currentView: 'home',
+        };
+
+        function showAppForLogin() {
+            console.log('🔐 showAppForLogin called - hiding marketing site');
+            // Hide ENTIRE marketing site
+            const marketingSite = document.getElementById('marketing-site');
+            if (marketingSite) {
+                marketingSite.style.display = 'none';
+                console.log('✅ Marketing site hidden');
+            }
+            // Show app container
+            if (appContainer) {
+                appContainer.classList.remove('hidden');
+                appContainer.style.display = 'block';
+                console.log('✅ App container shown');
+            }
+        }
+
+        function handleLogoutUI() {
+            console.log('🚪 handleLogoutUI called');
+            state.loggedIn = false;
+            authButton.textContent = 'Login';
+
+            // Show ENTIRE marketing site again
+            const marketingSite = document.getElementById('marketing-site');
+            if (marketingSite) {
+                marketingSite.style.display = 'block';
+                console.log('✅ Marketing site shown again');
+            }
+
+            // Hide app container
+            if (appContainer) {
+                appContainer.classList.add('hidden');
+                appContainer.style.display = 'none';
+                console.log('✅ App container hidden');
+            }
+
+            // Show auth button
+            authButton.classList.remove('hidden');
+            logoutButton.classList.add('hidden');
+            document.querySelectorAll('.marketing-nav').forEach(el => el.style.display = 'flex');
+            navigateTo('home');
+
+            console.log('✅ handleLogoutUI complete - back to marketing site');
+        }
+
+        function handleLoginUI() {
+            console.log('🔐 handleLoginUI called');
+            state.loggedIn = true;
+
+            // Hide ENTIRE marketing site (header + content)
+            const marketingSite = document.getElementById('marketing-site');
+            console.log('📍 Marketing site element:', marketingSite);
+            if (marketingSite) {
+                marketingSite.style.display = 'none';
+                console.log('✅ ENTIRE marketing site hidden (header + content)');
+            } else {
+                console.error('❌ Marketing site not found!');
+            }
+
+            // Show app container
+            if (appContainer) {
+                appContainer.classList.remove('hidden');
+                appContainer.style.display = 'block';
+                console.log('✅ App container shown');
+            }
+
+            console.log('✅ handleLoginUI complete - marketing site COMPLETELY hidden');
+        }
+
+        window.addEventListener('userLoggedIn', () => {
+            console.log('🔐 userLoggedIn event received - hiding marketing header');
+            handleLoginUI();
+        });
+
+        window.addEventListener('userLoggedOut', () => {
+            console.log('🚪 userLoggedOut event received - showing marketing header');
+            handleLogoutUI();
+        });
+
+        authButton.addEventListener('click', () => {
+            showAppForLogin();
+        });
+
+        logoutButton.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('userLoggedOutTrigger'));
+        });
+
+
+        function navigateTo(targetId) {
+            state.currentView = targetId;
+
+            // Update active state in desktop header
+            const currentActiveButton = document.querySelector('.nav-item.nav-active');
+            if (currentActiveButton) currentActiveButton.classList.remove('nav-active');
+
+            const newActiveButton = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+            if (newActiveButton) newActiveButton.classList.add('nav-active');
+
+            // Show correct main content section
+            contentSections.forEach(section => {
+                section.classList.toggle('active', section.id === targetId);
+                section.classList.toggle('hidden', section.id !== targetId);
+            });
+
+            mobileMenu.classList.add('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        const allNavItems = [...navButtons, ...mobileNavButtons, ...directNavLinks];
+        allNavItems.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = button.dataset.target || (button.getAttribute('href') ? button.getAttribute('href').substring(1) : null);
+                if (targetId) {
+                    navigateTo(targetId);
+                }
+            });
+        });
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        function updatePlatformStats() {
+            const totalFeatures = featuresData.length;
+            const activeFeatures = featuresData.filter(f => f.status === 'active').length;
+            const inProgressFeatures = featuresData.filter(f => f.status === 'in-progress').length;
+            const plannedFeatures = featuresData.filter(f => f.status === 'planned').length;
+
+            const totalEl = document.getElementById('total-features');
+            const activeEl = document.getElementById('active-features');
+            const inProgressEl = document.getElementById('inprogress-features');
+            const plannedEl = document.getElementById('planned-features');
+
+            if (totalEl) totalEl.textContent = totalFeatures;
+            if (activeEl) activeEl.textContent = activeFeatures;
+            if (inProgressEl) inProgressEl.textContent = inProgressFeatures;
+            if (plannedEl) plannedEl.textContent = plannedFeatures;
+        }
+
+        function renderFeatures(filter = 'all') {
+            if (!featuresGrid) return;
+            featuresGrid.innerHTML = '';
+            const filteredData = filter === 'all' ? featuresData : featuresData.filter(f => f.category === filter);
+            filteredData.forEach(feature => {
+                const card = document.createElement('div');
+                card.className = `feature-card bg-white p-6 rounded-lg shadow-md border border-gray-100 feature-category-${feature.category}`;
+
+                // Status badge
+                const statusBadges = {
+                    'active': '<span class="status-dot bg-green-500"></span> <span class="text-xs text-green-700 font-medium">Active</span>',
+                    'in-progress': '<span class="status-dot bg-yellow-500"></span> <span class="text-xs text-yellow-700 font-medium">In Progress</span>',
+                    'planned': '<span class="status-dot bg-gray-400"></span> <span class="text-xs text-gray-600 font-medium">Planned</span>'
+                };
+                const statusBadge = feature.status ? statusBadges[feature.status] || '' : '';
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-3">${feature.icon}</span>
+                            <h3 class="text-xl font-semibold text-gray-800">${feature.name}</h3>
+                        </div>
+                        ${statusBadge ? `<div class="flex items-center gap-1">${statusBadge}</div>` : ''}
+                    </div>
+                    <div class="details">
+                        <p class="text-gray-600 mt-2 text-sm">${feature.description}</p>
+                        <p class="mt-4 text-sm"><span class="font-semibold text-blue-600">AI-Powered Improvement:</span> ${feature.improvement}</p>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('open');
+                });
+                featuresGrid.appendChild(card);
+            });
+
+            // Update stats after rendering
+            updatePlatformStats();
+        }
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderFeatures(button.dataset.filter);
+            });
+        });
+
+        function setupAiCore() {
+            const hub = document.getElementById('ai-hub');
+            if (!hub) return;
+            const container = hub.parentElement;
+            if (!container) return;
+            const agentTitle = document.getElementById('ai-agent-title');
+            const agentDesc = document.getElementById('ai-agent-description');
+
+            const radius = Math.min(container.offsetWidth, container.offsetHeight) / 2 - 70;
+            aiAgentsData.forEach((agent, index) => {
+                const angle = (index / aiAgentsData.length) * 2 * Math.PI - (Math.PI / 2);
+                const x = radius * Math.cos(angle);
+                const y = radius * Math.sin(angle);
+
+                const node = document.createElement('div');
+                node.id = agent.id;
+                node.className = 'ai-agent-node absolute w-32 h-32 rounded-full bg-white border-2 border-slate-200 flex flex-col items-center justify-center text-center p-2 text-sm font-semibold shadow-lg text-slate-700';
+                node.style.left = '50%';
+                node.style.top = '50%';
+                node.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+                node.innerHTML = `
+                    <div class="text-blue-600">${agent.icon}</div>
+                    <span class="mt-1 text-xs font-bold leading-tight">${agent.name}</span>
+                `;
+
+                node.addEventListener('click', () => {
+                    if (document.querySelector('.scenario-btn:disabled')) return;
+                    container.querySelectorAll('.ai-agent-node').forEach(n => n.classList.remove('active'));
+                    node.classList.add('active');
+                    agentTitle.textContent = agent.name;
+                    agentDesc.textContent = agent.description;
+                });
+                container.appendChild(node);
+            });
+
+            const defaultNode = document.querySelector('#agent-user');
+            if (defaultNode) {
+                defaultNode.click();
+            }
+        }
+
+        function createPath(startNode, endNode, container, id, color) {
+            if (document.getElementById(id)) {
+                const path = document.getElementById(id);
+                path.style.color = color;
+                return path;
+            }
+
+            const startRect = {
+                x: startNode.offsetLeft + startNode.offsetWidth / 2,
+                y: startNode.offsetTop + startNode.offsetHeight / 2
+            };
+            const endRect = {
+                x: endNode.offsetLeft + endNode.offsetWidth / 2,
+                y: endNode.offsetTop + endNode.offsetHeight / 2
+            };
+
+            const length = Math.sqrt(Math.pow(endRect.x - startRect.x, 2) + Math.pow(endRect.y - startRect.y, 2));
+            const angle = Math.atan2(endRect.y - startRect.y, endRect.x - startRect.x) * 180 / Math.PI;
+
+            const path = document.createElement('div');
+            path.id = id;
+            path.className = 'ai-scenario-path';
+            path.dataset.length = length;
+            path.style.top = `${startRect.y}px`;
+            path.style.left = `${startRect.x}px`;
+            path.style.transform = `rotate(${angle}deg)`;
+            path.style.width = '0px';
+            path.style.color = color;
+            container.appendChild(path);
+            return path;
+        }
+
+        function runScenario(scenarioId) {
+            const scenarioBtns = document.querySelectorAll('.scenario-btn');
+            const isRunning = Array.from(scenarioBtns).some(btn => btn.disabled);
+            if (isRunning) return;
+
+            scenarioBtns.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('active-scenario');
+            });
+
+            const clickedBtn = document.querySelector(`[data-scenario="${scenarioId}"]`);
+            if (clickedBtn) clickedBtn.classList.add('active-scenario');
+
+            const nodes = {
+                pm: document.getElementById('agent-pm'),
+                user: document.getElementById('agent-user'),
+                biz: document.getElementById('agent-biz'),
+                doc: document.getElementById('agent-doc'),
+                acc: document.getElementById('agent-acc'),
+            };
+
+            for (const key in nodes) {
+                if (!nodes[key]) {
+                    console.error(`Scenario node '${key}' not found!`);
+                    scenarioBtns.forEach(btn => { btn.disabled = false; btn.classList.remove('active-scenario'); });
+                    return;
+                }
+            }
+
+            const container = nodes.pm.parentElement;
+
+            const pathColors = {
+                safetyHazard: '#ef4444', // red-500
+                weatherDelay: '#3b82f6', // blue-500
+                smartRFI: '#22c55e', // green-500
+            };
+
+            const color = pathColors[scenarioId];
+
+            const paths = {
+                doc_pm: createPath(nodes.doc, nodes.pm, container, 'path-doc-pm', color),
+                pm_user: createPath(nodes.pm, nodes.user, container, 'path-pm-user', color),
+                user_biz: createPath(nodes.user, nodes.biz, container, 'path-user-biz', color),
+                user_doc: createPath(nodes.user, nodes.doc, container, 'path-user-doc', color),
+                doc_user: createPath(nodes.doc, nodes.user, container, 'path-doc-user', color),
+            };
+
+            const scenarios = {
+                safetyHazard: [
+                    { node: nodes.doc, duration: 2500, text: "A field operative's daily log mentions 'faulty scaffolding'. The **Compliance Analyst** instantly parses this, flags a critical safety hazard, and escalates the issue." },
+                    { node: nodes.pm, duration: 3000, text: 'The alert triggers the **Project Optimizer**, which automatically freezes tasks near the hazard, notifies teams, and calculates the schedule impact—all within seconds.', path: paths.doc_pm },
+                    { node: nodes.user, duration: 3000, text: 'Finally, the **User Assistant** creates a high-priority inspection task, assigns it to the site supervisor, and attaches the original log, ensuring immediate, documented action.', path: paths.pm_user }
+                ],
+                weatherDelay: [
+                    { node: nodes.pm, duration: 2500, text: "The **Project Optimizer** analyzes an upcoming forecast and predicts that heavy rain will conflict with a critical 'Concrete Pour' activity." },
+                    { node: nodes.user, duration: 3000, text: 'It proactively notifies the **User Assistant**, which drafts an alert for the Project Manager with a smart suggestion to reschedule and pre-notifies the concrete supplier.', path: paths.pm_user },
+                    { node: nodes.biz, duration: 3000, text: 'Simultaneously, the **Business Advisor** models the financial impact of the delay vs. pouring with expensive additives, providing a complete picture for a fast, profitable decision.', path: paths.user_biz }
+                ],
+                smartRFI: [
+                    { node: nodes.user, duration: 2000, text: "An operative on-site asks the **User Assistant** via voice: 'What's the fire rating for the doors on level 3?'" },
+                    { node: nodes.doc, duration: 3000, text: 'The **Compliance Analyst** performs a semantic search across all project documents, understanding the *intent* of the question, not just keywords.', path: paths.user_doc },
+                    { node: nodes.user, duration: 3000, text: "Within seconds, it finds the correct spec sheet and provides the answer directly to the operative's phone, **saving hours of searching** and preventing costly rework.", path: paths.doc_user }
+                ]
+            };
+
+            const sequence = scenarios[scenarioId];
+            if (!sequence) {
+                console.error(`Scenario '${scenarioId}' not found!`);
+                scenarioBtns.forEach(btn => { btn.disabled = false; btn.classList.remove('active-scenario'); });
+                return;
+            }
+
+            const allNodes = document.querySelectorAll('.ai-agent-node');
+            const allPaths = document.querySelectorAll('.ai-scenario-path');
+
+            let previousPath = null;
+
+            const resetState = () => {
+                allNodes.forEach(n => n.classList.remove('highlight', 'active'));
+                allPaths.forEach(p => {
+                    p.style.width = '0px';
+                    p.style.opacity = '0';
+                });
+                scenarioBtns.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('active-scenario');
+                });
+
+                if (nodes.user) {
+                    const agentTitle = document.getElementById('ai-agent-title');
+                    const agentDesc = document.getElementById('ai-agent-description');
+                    const agentData = aiAgentsData.find(a => a.id === nodes.user.id);
+                    nodes.user.classList.add('active');
+                    if (agentData) {
+                        agentTitle.textContent = agentData.name;
+                        agentDesc.innerHTML = agentData.description;
+                    }
+                }
+            };
+
+            let currentIndex = 0;
+
+            function nextStep() {
+                allNodes.forEach(n => n.classList.remove('highlight'));
+
+                if (previousPath) {
+                    previousPath.style.opacity = '0.2';
+                }
+
+                if (currentIndex >= sequence.length) {
+                    setTimeout(() => {
+                        if (previousPath) previousPath.style.opacity = '0';
+                        setTimeout(resetState, 500);
+                    }, 2000);
+                    return;
+                }
+                const step = sequence[currentIndex];
+                const agentTitle = document.getElementById('ai-agent-title');
+                const agentDesc = document.getElementById('ai-agent-description');
+
+                if (step.node) {
+                    allNodes.forEach(n => n.classList.remove('active'));
+                    step.node.classList.add('highlight', 'active');
+                    step.node.style.color = color;
+
+                    const agentData = aiAgentsData.find(a => a.id === step.node.id);
+
+                    agentTitle.classList.add('fade-out');
+                    agentDesc.classList.add('fade-out');
+
+                    setTimeout(() => {
+                        if (agentData) {
+                            agentTitle.textContent = agentData.name;
+                        }
+                        agentDesc.innerHTML = step.text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>');
+                        agentTitle.classList.remove('fade-out');
+                        agentDesc.classList.remove('fade-out');
+                    }, 400);
+                }
+
+                if (step.path) {
+                    step.path.style.opacity = '1';
+                    step.path.style.width = `${step.path.dataset.length}px`;
+                    previousPath = step.path;
+                } else {
+                    previousPath = null;
+                }
+
+                currentIndex++;
+                setTimeout(nextStep, step.duration);
+            }
+
+            allPaths.forEach(p => {
+                p.style.width = '0px';
+                p.style.opacity = '0';
+            });
+            allNodes.forEach(n => {
+                n.classList.remove('highlight', 'active');
+                n.style.color = '';
+            });
+
+            setTimeout(nextStep, 100);
+        }
+
+        async function handleDemoSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const feedbackEl = document.getElementById('form-feedback');
+
+            if (!supabaseClient) {
+                feedbackEl.textContent = 'Database not connected. Please try again later.';
+                feedbackEl.className = 'text-sm text-center mt-4 text-red-600';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            feedbackEl.textContent = '';
+
+            try {
+                const { error } = await supabaseClient
+                    .from('demo_requests')
+                    .insert({
+                        name: form.name.value,
+                        email: form.email.value,
+                        company: form.company.value,
+                        submitted_at: new Date().toISOString()
+                    });
+
+                if (error) throw error;
+
+                feedbackEl.textContent = 'Thank you! We will be in touch shortly.';
+                feedbackEl.className = 'text-sm text-center mt-4 text-green-600';
+                form.reset();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                feedbackEl.textContent = 'An error occurred. Please try again.';
+                feedbackEl.className = 'text-sm text-center mt-4 text-red-600';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Request';
+            }
+        }
+
+        document.getElementById('demo-form')?.addEventListener('submit', handleDemoSubmit);
+        document.querySelectorAll('.scenario-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const scenarioId = e.currentTarget.dataset.scenario;
+                if (scenarioId) {
+                    runScenario(scenarioId);
+                }
+            });
+        });
+
+        renderFeatures();
+
+        const aiCoreSection = document.getElementById('ai-core');
+        const observer = new ResizeObserver(() => {
+            const container = document.querySelector('#ai-hub')?.parentElement;
+            if (container) {
+                // Clear old nodes and paths before redrawing
+                container.querySelectorAll('.ai-agent-node, .ai-scenario-path').forEach(n => n.remove());
+                setupAiCore();
+            }
+        });
+
+        if (aiCoreSection) {
+            observer.observe(aiCoreSection);
+        }
+
+        initializeSupabase();
+        handleLogoutUI(); // Ensure initial state is logged out
+    </script>
+</body>
+
+</html>
