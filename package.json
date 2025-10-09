@@ -33,6 +33,7 @@
     "express": "5.1.0",
     "ftp": "0.3.10",
     "jsonwebtoken": "9.0.2",
+    "lucide-react": "0.545.0",
     "openai": "6.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
