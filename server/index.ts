@@ -30,7 +30,7 @@ import { createAdminRouter } from './routes/admin';
 import { createMarketplaceRouter } from './routes/marketplace';
 import { createWidgetsRouter } from './routes/widgets';
 import { createSmartToolsRouter } from './routes/smart-tools';
-import { createSDKRouter } from './routes/sdk';
+import { createSDKRouter, initSdkTables } from './routes/sdk';
 import adminSDKRouter from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
 import { createAIChatRoutes } from './routes/ai-chat';
@@ -177,6 +177,10 @@ const startServer = async () => {
         // Initialize deployment tables
         console.log('🚀 Initializing Deployment tables...');
         deploymentService.initDeploymentTables(db);
+
+        // Initialize SDK tables
+        console.log('🔧 Initializing SDK Developer tables...');
+        initSdkTables(db);
 
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
