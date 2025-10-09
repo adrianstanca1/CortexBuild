@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.22.0",
+    "@google/generative-ai": "0.24.1",
     "@supabase/supabase-js": "2.44.4",
     "@types/bcryptjs": "2.4.6",
     "@types/cors": "2.8.19",

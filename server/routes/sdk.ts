@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { authenticateToken } from '../auth';
+import { createAICodeGenerator } from '../services/ai-code-generator';
 
 export const createSDKRouter = (db: Database.Database) => {
   const router = Router();
@@ -487,6 +488,99 @@ router.post('/analytics/log', authenticateToken, requireDeveloper, (req: Request
   } catch (error: any) {
     console.error('Log usage error:', error);
     res.status(500).json({ error: 'Failed to log usage' });
+  }
+});
+
+// Generate code with AI
+router.post('/generate', authenticateToken, requireDeveloper, async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { prompt, provider = 'openai', model } = req.body;
+
+    if (!prompt || !prompt.trim()) {
+      return res.status(400).json({ error: 'Prompt is required' });
+    }
+
+    // Check usage limits
+    const profile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(user.id);
+
+    if (profile && profile.api_requests_used >= profile.api_requests_limit) {
+      return res.status(429).json({
+        error: 'API request limit reached. Please upgrade your subscription.'
+      });
+    }
+
+    // Create AI generator
+    const aiGenerator = createAICodeGenerator();
+
+    // Generate code
+    console.log(`🤖 Generating code with ${provider} for user ${user.email}...`);
+    const result = await aiGenerator.generateCode(prompt, provider, model);
+
+    // Log usage
+    const logId = `log-${Date.now()}`;
+    db.prepare(`
+      INSERT INTO api_usage_logs (id, user_id, provider, model, prompt_tokens, completion_tokens, total_tokens, cost)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      logId,
+      user.id,
+      result.provider,
+      result.model,
+      result.tokens.prompt,
+      result.tokens.completion,
+      result.tokens.total,
+      result.cost
+    );
+
+    // Update profile usage count
+    db.prepare(`
+      UPDATE sdk_profiles
+      SET api_requests_used = api_requests_used + 1, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ?
+    `).run(user.id);
+
+    console.log(`✅ Code generated successfully (${result.tokens.total} tokens, $${result.cost.toFixed(4)})`);
+
+    res.json({
+      success: true,
+      code: result.code,
+      explanation: result.explanation,
+      tokens: result.tokens,
+      cost: result.cost,
+      provider: result.provider,
+      model: result.model
+    });
+  } catch (error: any) {
+    console.error('Generate code error:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to generate code',
+      details: error.toString()
+    });
+  }
+});
+
+// Get available AI models
+router.get('/models/:provider', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { provider } = req.params;
+
+    if (provider !== 'gemini' && provider !== 'openai') {
+      return res.status(400).json({ error: 'Invalid provider. Use "gemini" or "openai"' });
+    }
+
+    const { AICodeGenerator } = require('../services/ai-code-generator');
+    const models = AICodeGenerator.getAvailableModels(provider);
+
+    res.json({
+      success: true,
+      provider,
+      models
+    });
+  } catch (error: any) {
+    console.error('Get models error:', error);
+    res.status(500).json({ error: 'Failed to get models' });
   }
 });
 
