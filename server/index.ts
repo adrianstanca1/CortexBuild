@@ -7,7 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
-import { initializeDatabase, seedDatabase } from './init-database';
+import { db, initDatabase } from './database';
 import * as auth from './auth';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
@@ -34,6 +34,10 @@ import adminSDKRouter from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
 import { createAIChatRoutes } from './routes/ai-chat';
 import { createDeveloperRoutes } from './routes/developer';
+import { createIntegrationsRouter } from './routes/integrations';
+import { createAgentKitRouter } from './routes/agentkit';
+import { createWorkflowsRouter } from './routes/workflows';
+import { createAutomationsRouter } from './routes/automations';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -162,8 +166,8 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
 const startServer = async () => {
     try {
         // Initialize database
-        const db = await initializeDatabase();
-        await seedDatabase(db);
+        initDatabase();
+        auth.setDatabase(db);
 
         // Initialize MCP tables
         console.log('🧠 Initializing MCP (Model Context Protocol)...');
@@ -342,7 +346,19 @@ const startServer = async () => {
         app.use('/api/developer', createDeveloperRoutes(db));
         console.log('  ✓ /api/developer');
 
-        console.log('✅ All 20 API routes registered successfully');
+        app.use('/api/integrations', createIntegrationsRouter(db));
+        console.log('  ✓ /api/integrations');
+
+        app.use('/api/agentkit', createAgentKitRouter(db));
+        console.log('  ✓ /api/agentkit');
+
+        app.use('/api/workflows', createWorkflowsRouter(db));
+        console.log('  ✓ /api/workflows');
+
+        app.use('/api/automations', createAutomationsRouter(db));
+        console.log('  ✓ /api/automations');
+
+        console.log('✅ All 24 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {

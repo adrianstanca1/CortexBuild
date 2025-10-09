@@ -30,8 +30,8 @@ export function createTasksRouter(db: Database.Database): Router {
       let query = `
         SELECT t.*, 
                p.name as project_name,
-               m.title as milestone_title,
-               u.first_name || ' ' || u.last_name as assigned_to_name
+               m.name as milestone_title,
+               u.name as assigned_to_name
         FROM tasks t
         LEFT JOIN projects p ON t.project_id = p.id
         LEFT JOIN milestones m ON t.milestone_id = m.id
@@ -71,7 +71,7 @@ export function createTasksRouter(db: Database.Database): Router {
         params.push(searchTerm, searchTerm);
       }
 
-      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM');
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
       const { total } = db.prepare(countQuery).get(...params) as { total: number };
 
       query += ' ORDER BY t.due_date ASC, t.priority DESC LIMIT ? OFFSET ?';
@@ -105,8 +105,8 @@ export function createTasksRouter(db: Database.Database): Router {
       const task = db.prepare(`
         SELECT t.*, 
                p.name as project_name,
-               m.title as milestone_title,
-               u.first_name || ' ' || u.last_name as assigned_to_name,
+               m.name as milestone_title,
+               u.name as assigned_to_name,
                u.email as assigned_to_email
         FROM tasks t
         LEFT JOIN projects p ON t.project_id = p.id
@@ -314,4 +314,3 @@ export function createTasksRouter(db: Database.Database): Router {
 
   return router;
 }
-

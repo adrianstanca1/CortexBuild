@@ -57,7 +57,7 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         params.push(searchTerm, searchTerm);
       }
 
-      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM');
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
       const { total } = db.prepare(countQuery).get(...params) as { total: number };
 
       query += ' ORDER BY po.created_at DESC LIMIT ? OFFSET ?';

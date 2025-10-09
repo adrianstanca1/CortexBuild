@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { Router } from 'express';
 import Database from 'better-sqlite3';
 
@@ -32,6 +33,24 @@ export function createDeveloperRoutes(db: Database.Database) {
 
   // Apply developer check to all routes
   router.use(requireDeveloper);
+
+  const logDeveloperEvent = (user: any, eventType: string, payload: Record<string, unknown>) => {
+    try {
+      db.prepare(
+        `INSERT INTO developer_console_events (id, user_id, company_id, event_type, payload)
+         VALUES (?, ?, ?, ?, ?)`
+      ).run(
+        `dev-${uuidv4()}`,
+        user.id,
+        user.company_id ?? null,
+        eventType,
+        JSON.stringify(payload ?? {})
+      );
+    } catch (error) {
+      console.error('[Developer] log event failed', error);
+    }
+  };
+
 
   // Get developer stats
   router.get('/stats', (req, res) => {
@@ -81,6 +100,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   router.post('/console/execute', (req, res) => {
     try {
       const { command } = req.body;
+      const user = (req as any).user;
       
       // Simulate command execution
       let output = '';
@@ -93,6 +113,7 @@ export function createDeveloperRoutes(db: Database.Database) {
         output = `Command executed: ${command}\n✓ Success`;
       }
 
+      logDeveloperEvent(user, 'console.execute', { command, output });
       res.json({ success: true, output });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -103,11 +124,13 @@ export function createDeveloperRoutes(db: Database.Database) {
   router.post('/code/run', (req, res) => {
     try {
       const { code, language } = req.body;
+      const user = (req as any).user;
       
       // In production, this would use a sandboxed execution environment
       // For now, return simulated output
       const output = `Code executed successfully\nLanguage: ${language}\nOutput: Hello from CortexBuild!`;
       
+      logDeveloperEvent(user, 'code.run', { language, output });
       res.json({ success: true, output });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -118,6 +141,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   router.post('/database/query', (req, res) => {
     try {
       const { query } = req.body;
+      const user = (req as any).user;
       
       // Security: Only allow SELECT queries for safety
       if (!query.trim().toUpperCase().startsWith('SELECT')) {
@@ -128,6 +152,7 @@ export function createDeveloperRoutes(db: Database.Database) {
       }
 
       const results = db.prepare(query).all();
+      logDeveloperEvent(user, 'database.query', { query, rows: results.length });
       res.json({ success: true, results, changes: results.length });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -155,6 +180,31 @@ export function createDeveloperRoutes(db: Database.Database) {
       const { table } = req.params;
       const schema = db.prepare(`PRAGMA table_info(${table})`).all();
       res.json({ success: true, schema });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  router.get('/events', (req, res) => {
+    try {
+      const user = (req as any).user;
+      const limit = parseInt((req.query.limit as string) ?? '50', 10);
+      const rows = db.prepare(`
+        SELECT * FROM developer_console_events
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT ?
+      `).all(user.id, limit);
+
+      res.json({
+        success: true,
+        events: rows.map((row: any) => ({
+          id: row.id,
+          eventType: row.event_type,
+          payload: row.payload ? JSON.parse(row.payload) : {},
+          createdAt: row.created_at
+        }))
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
@@ -318,4 +368,3 @@ export function createDeveloperRoutes(db: Database.Database) {
 
   return router;
 }
-

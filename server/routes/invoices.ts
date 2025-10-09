@@ -58,7 +58,7 @@ export function createInvoicesRouter(db: Database.Database): Router {
       }
 
       // Get total count
-      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM');
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
       const { total } = db.prepare(countQuery).get(...params) as { total: number };
 
       // Add pagination

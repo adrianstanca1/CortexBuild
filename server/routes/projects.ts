@@ -17,6 +17,7 @@ export function createProjectsRouter(db: Database.Database): Router {
         priority,
         client_id,
         project_manager_id,
+        company_id,
         search,
         page = '1',
         limit = '20'
@@ -30,7 +31,7 @@ export function createProjectsRouter(db: Database.Database): Router {
       let query = `
         SELECT p.*, 
                c.name as client_name,
-               u.first_name || ' ' || u.last_name as manager_name
+               u.name as manager_name
         FROM projects p
         LEFT JOIN clients c ON p.client_id = c.id
         LEFT JOIN users u ON p.project_manager_id = u.id
@@ -58,6 +59,14 @@ export function createProjectsRouter(db: Database.Database): Router {
         params.push(parseInt(project_manager_id));
       }
 
+      if (company_id) {
+        const companyIdNum = parseInt(company_id, 10);
+        if (!Number.isNaN(companyIdNum)) {
+          query += ' AND p.company_id = ?';
+          params.push(companyIdNum);
+        }
+      }
+
       if (search) {
         query += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.project_number LIKE ?)';
         const searchTerm = `%${search}%`;
@@ -65,7 +74,7 @@ export function createProjectsRouter(db: Database.Database): Router {
       }
 
       // Get total count
-      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM');
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
       const { total } = db.prepare(countQuery).get(...params) as { total: number };
 
       // Add pagination
@@ -104,7 +113,7 @@ export function createProjectsRouter(db: Database.Database): Router {
                c.name as client_name,
                c.email as client_email,
                c.phone as client_phone,
-               u.first_name || ' ' || u.last_name as manager_name,
+               u.name as manager_name,
                u.email as manager_email
         FROM projects p
         LEFT JOIN clients c ON p.client_id = c.id
@@ -121,7 +130,7 @@ export function createProjectsRouter(db: Database.Database): Router {
 
       // Get project tasks
       const tasks = db.prepare(`
-        SELECT t.*, u.first_name || ' ' || u.last_name as assigned_to_name
+        SELECT t.*, u.name as assigned_to_name
         FROM tasks t
         LEFT JOIN users u ON t.assigned_to = u.id
         WHERE t.project_id = ?
@@ -137,7 +146,7 @@ export function createProjectsRouter(db: Database.Database): Router {
 
       // Get project team
       const team = db.prepare(`
-        SELECT pt.*, u.first_name, u.last_name, u.email, u.avatar_url
+        SELECT pt.*, u.name as full_name, u.email, u.avatar as avatar_url
         FROM project_team pt
         JOIN users u ON pt.user_id = u.id
         WHERE pt.project_id = ? AND pt.left_at IS NULL
@@ -145,7 +154,7 @@ export function createProjectsRouter(db: Database.Database): Router {
 
       // Get recent activities
       const activities = db.prepare(`
-        SELECT a.*, u.first_name || ' ' || u.last_name as user_name
+        SELECT a.*, u.name as user_name
         FROM activities a
         JOIN users u ON a.user_id = u.id
         WHERE a.project_id = ?
@@ -339,4 +348,3 @@ export function createProjectsRouter(db: Database.Database): Router {
 
   return router;
 }
-

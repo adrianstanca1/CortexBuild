@@ -29,7 +29,7 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
 
       let query = `
         SELECT te.*, 
-               u.first_name || ' ' || u.last_name as user_name,
+               u.name as user_name,
                p.name as project_name,
                t.title as task_title
         FROM time_entries te
@@ -71,7 +71,7 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
       }
 
       // Get total count
-      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM');
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
       const { total } = db.prepare(countQuery).get(...params) as { total: number };
 
       // Add pagination
@@ -105,7 +105,7 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
 
       const entry = db.prepare(`
         SELECT te.*, 
-               u.first_name || ' ' || u.last_name as user_name,
+               u.name as user_name,
                u.email as user_email,
                p.name as project_name,
                t.title as task_title

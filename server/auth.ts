@@ -26,9 +26,11 @@ interface DbUserRow {
 }
 
 let globalDb: Database.Database | null = null;
+let userTableInfoCache: { hasPasswordHash: boolean } | null = null;
 
 export const setDatabase = (dbInstance: Database.Database) => {
   globalDb = dbInstance;
+  userTableInfoCache = null;
 };
 
 const requireDb = (): Database.Database => {
@@ -36,6 +38,20 @@ const requireDb = (): Database.Database => {
     throw new Error('Database not initialized');
   }
   return globalDb;
+};
+
+const getUserTableInfo = (db: Database.Database) => {
+  if (!userTableInfoCache) {
+    const columns = db
+      .prepare("PRAGMA table_info('users')")
+      .all() as { name: string }[];
+
+    userTableInfoCache = {
+      hasPasswordHash: columns.some((column) => column.name === 'password_hash'),
+    };
+  }
+
+  return userTableInfoCache;
 };
 
 const mapUserRow = (row: DbUserRow | undefined | null) => {
@@ -180,11 +196,14 @@ export const register = (
   const [firstName, ...rest] = trimmedName.split(' ');
   const lastName = rest.length > 0 ? rest.join(' ') : firstName;
 
+  const { hasPasswordHash } = getUserTableInfo(db);
+  const passwordColumn = hasPasswordHash ? 'password_hash' : 'password';
+
   const insertUser = db
     .prepare(
       `INSERT INTO users (
         email,
-        password_hash,
+        ${passwordColumn},
         first_name,
         last_name,
         role,

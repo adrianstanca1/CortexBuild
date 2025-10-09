@@ -28,7 +28,7 @@ export function createDocumentsRouter(db: Database.Database): Router {
       let query = `
         SELECT d.*, 
                p.name as project_name,
-               u.first_name || ' ' || u.last_name as uploaded_by_name
+               u.name as uploaded_by_name
         FROM documents d
         LEFT JOIN projects p ON d.project_id = p.id
         LEFT JOIN users u ON d.uploaded_by = u.id
@@ -57,7 +57,7 @@ export function createDocumentsRouter(db: Database.Database): Router {
         params.push(searchTerm, searchTerm);
       }
 
-      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM');
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
       const { total } = db.prepare(countQuery).get(...params) as { total: number };
 
       query += ' ORDER BY d.created_at DESC LIMIT ? OFFSET ?';
@@ -91,7 +91,7 @@ export function createDocumentsRouter(db: Database.Database): Router {
       const document = db.prepare(`
         SELECT d.*, 
                p.name as project_name,
-               u.first_name || ' ' || u.last_name as uploaded_by_name,
+               u.name as uploaded_by_name,
                u.email as uploaded_by_email
         FROM documents d
         LEFT JOIN projects p ON d.project_id = p.id

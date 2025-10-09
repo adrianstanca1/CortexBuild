@@ -39,9 +39,23 @@ export async function initializeDatabase(): Promise<Database.Database> {
       }
     }
   }
-  
+
   console.log('✅ Database schema created successfully!');
   
+  // Ensure sessions table exists for auth module
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);');
+
   return db;
 }
 
@@ -189,4 +203,3 @@ export async function seedDatabase(db: Database.Database): Promise<void> {
 }
 
 export default { initializeDatabase, seedDatabase };
-
