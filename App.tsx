@@ -30,6 +30,7 @@ import PhotoGalleryScreen from './components/screens/PhotoGalleryScreen.tsx';
 import RFIsScreen from './components/screens/RFIsScreen.tsx';
 import RFIDetailScreen from './components/screens/RFIDetailScreen.tsx';
 import NewRFIScreen from './components/screens/NewRFIScreen.tsx';
+import { SDKDeveloperView } from './components/sdk/SDKDeveloperView';
 import PunchListScreen from './components/screens/PunchListScreen.tsx';
 import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen.tsx';
 import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen.tsx';
@@ -101,6 +102,7 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'financial-management': FinancialManagementScreen,
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
+    'sdk-developer': SDKDeveloperView,
     // Admin
     'platform-admin': PlatformAdminScreen,
     // ML & Advanced Analytics

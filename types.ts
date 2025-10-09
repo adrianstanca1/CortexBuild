@@ -109,6 +109,7 @@ export type Screen =
     | 'financial-management'
     | 'business-development'
     | 'ai-agents-marketplace'
+    | 'sdk-developer'
     // Admin screens
     | 'platform-admin'
     // ML & Advanced Analytics

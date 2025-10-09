@@ -19,6 +19,7 @@ import { UsageMonitoringDashboard } from '../../admin/UsageMonitoringDashboard';
 import { DatabaseCapabilityManager } from '../../admin/DatabaseCapabilityManager';
 import { AICollaborationHub } from './AICollaborationHub';
 import { DeveloperHub } from '../../developer/DeveloperHub';
+import { DeveloperDashboard } from '../../admin/DeveloperDashboard';
 
 interface DashboardStats {
   totalUsers: { count: number };
@@ -32,7 +33,7 @@ interface DashboardStats {
 export const SuperAdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'companies' | 'system' | 'analytics' | 'logs' | 'developer' | 'marketplace' | 'dashboards' | 'sdk' | 'automation' | 'webhooks' | 'reviews' | 'sdk-env' | 'access-control' | 'usage-monitoring' | 'database-manager' | 'ai-collab' | 'developer-hub'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'companies' | 'system' | 'analytics' | 'logs' | 'developer' | 'marketplace' | 'dashboards' | 'sdk' | 'automation' | 'webhooks' | 'reviews' | 'sdk-env' | 'access-control' | 'usage-monitoring' | 'database-manager' | 'ai-collab' | 'developer-hub' | 'developer-dashboard'>('overview');
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -105,6 +106,7 @@ export const SuperAdminDashboard: React.FC = () => {
             { id: 'overview', label: 'Overview', icon: TrendingUp },
             { id: 'ai-collab', label: '🤖 AI & Collaboration', icon: Sparkles },
             { id: 'developer-hub', label: '💻 Developer Hub', icon: Code },
+            { id: 'developer-dashboard', label: '📊 Developer Dashboard', icon: BarChart3 },
             { id: 'users', label: 'User Management', icon: Users },
             { id: 'companies', label: 'Company Management', icon: Building2 },
             { id: 'marketplace', label: 'Marketplace', icon: Package },
@@ -206,6 +208,9 @@ export const SuperAdminDashboard: React.FC = () => {
 
       {/* Developer Hub Tab */}
       {activeTab === 'developer-hub' && <DeveloperHub />}
+
+      {/* Developer Dashboard Tab */}
+      {activeTab === 'developer-dashboard' && <DeveloperDashboard />}
 
       {/* SDK Developer Environment Tab */}
       {activeTab === 'sdk-env' && currentUser && <SDKDeveloperEnvironment user={currentUser} />}
