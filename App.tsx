@@ -55,6 +55,8 @@ import AIAgentsMarketplaceScreen from './components/screens/modules/AIAgentsMark
 import MyTasksScreen from './components/screens/MyTasksScreen.tsx';
 import PlaceholderToolScreen from './components/screens/tools/PlaceholderToolScreen.tsx';
 
+import { Base44Clone } from './components/base44/Base44Clone.tsx';
+
 // Admin Screens
 import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen.tsx';
 
@@ -103,6 +105,7 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
     'sdk-developer': SDKDeveloperView,
+    'my-apps-desktop': Base44Clone,
     // Admin
     'platform-admin': PlatformAdminScreen,
     // ML & Advanced Analytics
@@ -499,6 +502,10 @@ const App: React.FC = () => {
 
     const { screen, params, project } = currentNavItem;
     const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
+
+    if (screen === 'my-apps-desktop') {
+        return <Base44Clone user={currentUser} onLogout={handleLogout} />;
+    }
 
     const getSidebarProject = useMemo(() => {
         if (project) {

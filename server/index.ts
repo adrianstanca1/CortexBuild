@@ -6,9 +6,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import Database from 'better-sqlite3';
 import { createServer } from 'http';
-import { initDatabase } from './database';
+import { initializeDatabase, seedDatabase } from './init-database';
 import * as auth from './auth';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
@@ -163,16 +162,16 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
 const startServer = async () => {
     try {
         // Initialize database
-        await initDatabase();
-
-        // Connect to database for API routes
-        const db = new Database('cortexbuild.db');
-        db.pragma('journal_mode = WAL');
-        db.pragma('foreign_keys = ON');
+        const db = await initializeDatabase();
+        await seedDatabase(db);
 
         // Initialize MCP tables
         console.log('🧠 Initializing MCP (Model Context Protocol)...');
-        mcp.initializeMCPTables(db);
+        try {
+            mcp.initializeMCPTables(db);
+        } catch (error) {
+            console.warn('⚠️ MCP initialization failed, continuing without MCP:', error.message);
+        }
 
         // Initialize deployment tables
         console.log('🚀 Initializing Deployment tables...');
@@ -263,7 +262,7 @@ const startServer = async () => {
                     return res.status(401).json({ error: 'Token is required' });
                 }
 
-                const user = auth.getCurrentUser(db, token);
+                const user = auth.getCurrentUserByToken(db, token);
 
                 res.json({
                     success: true,
@@ -419,4 +418,3 @@ const startServer = async () => {
 };
 
 startServer();
-

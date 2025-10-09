@@ -3,25 +3,21 @@
  * Real database with tables for users, sessions, etc.
  */
 
-import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
+import Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
 
-const db = new sqlite3.Database('./cortexbuild.db');
-
-// Promisify database methods
-const dbRun = promisify(db.run.bind(db));
-const dbGet = promisify(db.get.bind(db));
-const dbAll = promisify(db.all.bind(db));
+const db = new Database('./cortexbuild.db');
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
 /**
  * Initialize database tables
  */
-export const initDatabase = async () => {
+export const initDatabase = () => {
     console.log('📊 Initializing database...');
 
     // Users table
-    await dbRun(`
+    db.exec(`
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
@@ -36,7 +32,7 @@ export const initDatabase = async () => {
     `);
 
     // Companies table
-    await dbRun(`
+    db.exec(`
         CREATE TABLE IF NOT EXISTS companies (
             id TEXT PRIMARY KEY,
             name TEXT UNIQUE NOT NULL,
@@ -46,7 +42,7 @@ export const initDatabase = async () => {
     `);
 
     // Sessions table
-    await dbRun(`
+    db.exec(`
         CREATE TABLE IF NOT EXISTS sessions (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL,
@@ -58,41 +54,47 @@ export const initDatabase = async () => {
     `);
 
     // Create indexes
-    await dbRun('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
-    await dbRun('CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)');
-    await dbRun('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)');
 
     console.log('✅ Database initialized');
 
     // Seed initial data
-    await seedInitialData();
+    seedInitialData();
 };
 
 /**
  * Seed initial data
  */
-const seedInitialData = async () => {
+const seedInitialData = () => {
     // Check if company exists
-    const company = await dbGet('SELECT id FROM companies WHERE id = ?', ['company-1']);
-    
+    const company = db.prepare('SELECT id FROM companies WHERE id = ?').get('company-1');
+
     if (!company) {
         console.log('🌱 Seeding initial data...');
-        
+
         // Create company
-        await dbRun(
-            'INSERT INTO companies (id, name) VALUES (?, ?)',
-            ['company-1', 'ConstructCo']
-        );
+        db.prepare('INSERT INTO companies (id, name) VALUES (?, ?)').run('company-1', 'ConstructCo');
+        db.prepare('INSERT INTO companies (id, name) VALUES (?, ?)').run('company-2', 'AS CLADDING AND ROOFING LTD');
 
         // Create users
         const users = [
             {
                 id: 'user-1',
                 email: 'adrian.stanca1@gmail.com',
-                password: 'Cumparavinde1',
+                password: 'password123',
                 name: 'Adrian Stanca',
                 role: 'super_admin',
                 companyId: 'company-1'
+            },
+            {
+                id: 'user-4',
+                email: 'adrian@ascladdingltd.co.uk',
+                password: 'Lolozania1',
+                name: 'Adrian Stanca',
+                role: 'company_admin',
+                companyId: 'company-2'
             },
             {
                 id: 'user-2',
@@ -109,14 +111,21 @@ const seedInitialData = async () => {
                 name: 'Mike Wilson',
                 role: 'supervisor',
                 companyId: 'company-1'
+            },
+            {
+                id: 'user-5',
+                email: 'dev@constructco.com',
+                password: 'password123',
+                name: 'Dev User',
+                role: 'developer',
+                companyId: 'company-1'
             }
         ];
 
         for (const user of users) {
-            const passwordHash = await bcrypt.hash(user.password, 10);
-            await dbRun(
-                'INSERT INTO users (id, email, password_hash, name, role, company_id) VALUES (?, ?, ?, ?, ?, ?)',
-                [user.id, user.email, passwordHash, user.name, user.role, user.companyId]
+            const passwordHash = bcrypt.hashSync(user.password, 10);
+            db.prepare('INSERT INTO users (id, email, password_hash, name, role, company_id) VALUES (?, ?, ?, ?, ?, ?)').run(
+                user.id, user.email, passwordHash, user.name, user.role, user.companyId
             );
         }
 
@@ -127,15 +136,15 @@ const seedInitialData = async () => {
 /**
  * User operations
  */
-export const findUserByEmail = async (email: string) => {
-    return dbGet('SELECT * FROM users WHERE email = ?', [email]);
+export const findUserByEmail = (email: string) => {
+    return db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 };
 
-export const findUserById = async (id: string) => {
-    return dbGet('SELECT * FROM users WHERE id = ?', [id]);
+export const findUserById = (id: string) => {
+    return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
 };
 
-export const createUser = async (user: {
+export const createUser = (user: {
     id: string;
     email: string;
     passwordHash: string;
@@ -143,9 +152,8 @@ export const createUser = async (user: {
     role: string;
     companyId: string;
 }) => {
-    await dbRun(
-        'INSERT INTO users (id, email, password_hash, name, role, company_id) VALUES (?, ?, ?, ?, ?, ?)',
-        [user.id, user.email, user.passwordHash, user.name, user.role, user.companyId]
+    db.prepare('INSERT INTO users (id, email, password_hash, name, role, company_id) VALUES (?, ?, ?, ?, ?, ?)').run(
+        user.id, user.email, user.passwordHash, user.name, user.role, user.companyId
     );
     return findUserById(user.id);
 };
@@ -153,39 +161,38 @@ export const createUser = async (user: {
 /**
  * Session operations
  */
-export const createSession = async (session: {
+export const createSession = (session: {
     id: string;
     userId: string;
     token: string;
     expiresAt: Date;
 }) => {
-    await dbRun(
-        'INSERT INTO sessions (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)',
-        [session.id, session.userId, session.token, session.expiresAt.toISOString()]
+    db.prepare('INSERT INTO sessions (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)').run(
+        session.id, session.userId, session.token, session.expiresAt.toISOString()
     );
 };
 
-export const findSessionByToken = async (token: string) => {
-    return dbGet('SELECT * FROM sessions WHERE token = ?', [token]);
+export const findSessionByToken = (token: string) => {
+    return db.prepare('SELECT * FROM sessions WHERE token = ?').get(token);
 };
 
-export const deleteSession = async (token: string) => {
-    await dbRun('DELETE FROM sessions WHERE token = ?', [token]);
+export const deleteSession = (token: string) => {
+    db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
 };
 
-export const deleteExpiredSessions = async () => {
-    await dbRun('DELETE FROM sessions WHERE expires_at < datetime("now")');
+export const deleteExpiredSessions = () => {
+    db.prepare('DELETE FROM sessions WHERE expires_at < datetime("now")').run();
 };
 
 /**
  * Company operations
  */
-export const findCompanyByName = async (name: string) => {
-    return dbGet('SELECT * FROM companies WHERE name = ?', [name]);
+export const findCompanyByName = (name: string) => {
+    return db.prepare('SELECT * FROM companies WHERE name = ?').get(name);
 };
 
-export const createCompany = async (company: { id: string; name: string }) => {
-    await dbRun('INSERT INTO companies (id, name) VALUES (?, ?)', [company.id, company.name]);
+export const createCompany = (company: { id: string; name: string }) => {
+    db.prepare('INSERT INTO companies (id, name) VALUES (?, ?)').run(company.id, company.name);
     return findCompanyByName(company.name);
 };
 

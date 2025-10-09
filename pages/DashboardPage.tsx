@@ -1,6 +1,6 @@
 /**
  * Dashboard Page
- * Main dashboard page with React Router integration
+ * Main dashboard page
  */
 
 import React from 'react';
@@ -16,4 +16,3 @@ export const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
-
