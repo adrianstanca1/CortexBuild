@@ -3,15 +3,6 @@ import Database from 'better-sqlite3';
 import { authenticateToken } from '../auth';
 import { createAICodeGenerator } from '../services/ai-code-generator';
 
-export const createSDKRouter = (db: Database.Database) => {
-  const router = Router();
-
-  // Attach db to request
-  router.use((req, res, next) => {
-    (req as any).db = db;
-    next();
-  });
-
 // Middleware to check if user is a developer
 const requireDeveloper = (req: Request, res: Response, next: any) => {
   const user = (req as any).user;
@@ -105,6 +96,15 @@ export const initSdkTables = (db: Database.Database) => {
     )
   `);
 };
+
+export const createSDKRouter = (db: Database.Database) => {
+  const router = Router();
+
+  // Attach db to request
+  router.use((req, res, next) => {
+    (req as any).db = db;
+    next();
+  });
 
 // Get or create SDK profile
 router.get('/profile', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
