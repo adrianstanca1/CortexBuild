@@ -35,6 +35,7 @@ import NewRFIScreen from './components/screens/NewRFIScreen';
 import { ProductionSDKDeveloperView } from './components/sdk/ProductionSDKDeveloperView';
 import DeveloperWorkspaceScreen from './components/screens/developer/DeveloperWorkspaceScreen';
 import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
+import ModernDeveloperDashboard from './components/screens/developer/ModernDeveloperDashboard';
 import CompanyAdminDashboardScreen from './components/screens/company/CompanyAdminDashboardScreen';
 import PunchListScreen from './components/screens/PunchListScreen';
 import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen';
@@ -112,7 +113,8 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'financial-management': FinancialManagementScreen,
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-    'developer-dashboard': DeveloperWorkspaceScreen,
+    'developer-dashboard': ModernDeveloperDashboard,
+    'developer-workspace': DeveloperWorkspaceScreen,
     'developer-console': EnhancedDeveloperConsole,
     'super-admin-dashboard': SuperAdminDashboardScreen,
     'sdk-developer': ProductionSDKDeveloperView,
