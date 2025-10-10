@@ -34,7 +34,8 @@ import {
     Globe,
     Package,
     Folder,
-    GitBranch
+    GitBranch,
+    BarChart3
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import FileExplorer from '../../developer/FileExplorer';
@@ -44,6 +45,13 @@ import APITester from '../../developer/APITester';
 import Marketplace from '../../apps/Marketplace';
 import AppContainer, { MiniApp } from '../../apps/AppContainer';
 import { APP_REGISTRY, installApp as installAppInRegistry } from '../../apps/appRegistry';
+
+// Advanced Development Platform Components
+import AdvancedCodeEditor from '../../development/AdvancedCodeEditor';
+import GitIntegration from '../../development/GitIntegration';
+import APIBuilder from '../../development/APIBuilder';
+import TestingFramework from '../../development/TestingFramework';
+import AnalyticsDashboard from '../../development/AnalyticsDashboard';
 
 interface ConsoleLog {
     id: string;
@@ -193,7 +201,7 @@ console.log(user);`
 
 const EnhancedDeveloperConsole: React.FC<EnhancedDeveloperConsoleProps> = ({ onLogout }) => {
     // State
-    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps'>('console');
+    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps' | 'code-editor' | 'git-integration' | 'api-builder' | 'testing' | 'analytics'>('console');
     const [apps, setApps] = useState<MiniApp[]>(APP_REGISTRY);
     const [runningApp, setRunningApp] = useState<MiniApp | null>(null);
     const [code, setCode] = useState<string>('// Write your code here\nconsole.log("Hello, Developer!");');
@@ -678,6 +686,93 @@ Could you be more specific about what you need?`;
                             )}
                         </button>
                     </div>
+
+                    {/* Advanced Development Platform Tabs */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                        <div className={`px-4 py-2 rounded-lg ${isDarkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'} text-xs font-semibold`}>
+                            ADVANCED PLATFORM
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('code-editor')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'code-editor'
+                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <FileCode className={`h-4 w-4 ${activeTab === 'code-editor' ? 'animate-pulse' : ''}`} />
+                                Monaco Editor
+                            </div>
+                            {activeTab === 'code-editor' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('git-integration')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'git-integration'
+                                ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <GitBranch className={`h-4 w-4 ${activeTab === 'git-integration' ? 'animate-pulse' : ''}`} />
+                                Git Integration
+                            </div>
+                            {activeTab === 'git-integration' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-orange-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('api-builder')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'api-builder'
+                                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Globe className={`h-4 w-4 ${activeTab === 'api-builder' ? 'animate-pulse' : ''}`} />
+                                API Builder
+                            </div>
+                            {activeTab === 'api-builder' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('testing')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'testing'
+                                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <CheckCircle className={`h-4 w-4 ${activeTab === 'testing' ? 'animate-pulse' : ''}`} />
+                                Testing
+                            </div>
+                            {activeTab === 'testing' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('analytics')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'analytics'
+                                ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <BarChart3 className={`h-4 w-4 ${activeTab === 'analytics' ? 'animate-pulse' : ''}`} />
+                                Analytics
+                            </div>
+                            {activeTab === 'analytics' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full"></div>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -981,6 +1076,41 @@ Could you be more specific about what you need?`;
                             }}
                             isDarkMode={isDarkMode}
                         />
+                    </div>
+                )}
+
+                {/* Advanced Code Editor Tab */}
+                {activeTab === 'code-editor' && (
+                    <div className="h-[700px]">
+                        <AdvancedCodeEditor isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
+                {/* Git Integration Tab */}
+                {activeTab === 'git-integration' && (
+                    <div className="h-[700px]">
+                        <GitIntegration isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
+                {/* API Builder Tab */}
+                {activeTab === 'api-builder' && (
+                    <div className="h-[700px]">
+                        <APIBuilder isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
+                {/* Testing Framework Tab */}
+                {activeTab === 'testing' && (
+                    <div className="h-[700px]">
+                        <TestingFramework isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
+                {/* Analytics Dashboard Tab */}
+                {activeTab === 'analytics' && (
+                    <div className="h-[700px]">
+                        <AnalyticsDashboard isDarkMode={isDarkMode} />
                     </div>
                 )}
 
