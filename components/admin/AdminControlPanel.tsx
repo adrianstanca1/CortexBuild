@@ -21,6 +21,7 @@ import {
 
 // Import all admin components
 import SuperAdminDashboard from './SuperAdminDashboard';
+import EnhancedSuperAdminDashboard from './EnhancedSuperAdminDashboard';
 import UserRolesPermissions from '../user-management/UserRolesPermissions';
 import TeamCollaboration from '../user-management/TeamCollaboration';
 import AppSharingReviews from '../user-management/AppSharingReviews';
@@ -135,7 +136,23 @@ const AdminControlPanel: React.FC<AdminControlPanelProps> = ({ isDarkMode = true
             {/* Content Area */}
             <div className="max-w-7xl mx-auto">
                 {activeTab === 'dashboard' && (
-                    <SuperAdminDashboard isDarkMode={isDarkMode} />
+                    <EnhancedSuperAdminDashboard
+                        isDarkMode={isDarkMode}
+                        onNavigate={(section) => {
+                            // Map sections to tabs
+                            const sectionToTab: Record<string, AdminTab> = {
+                                'user-management': 'users',
+                                'company-management': 'teams',
+                                'billing-payments': 'billing',
+                                'analytics-reports': 'analytics',
+                                'system-settings': 'settings',
+                                'database-management': 'database',
+                                'content-management': 'apps'
+                            };
+                            const tab = sectionToTab[section];
+                            if (tab) setActiveTab(tab);
+                        }}
+                    />
                 )}
 
                 {activeTab === 'users' && (
