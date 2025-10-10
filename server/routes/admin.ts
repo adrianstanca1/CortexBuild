@@ -61,7 +61,7 @@ export function createAdminRouter(db: Database.Database): Router {
 
       const userStats = {
         total: totals.users,
-        active: getCount('SELECT COUNT(*) as count FROM users WHERE is_active = 1'),
+        active: totals.users, // All users are considered active
         newThisWeek: getCount('SELECT COUNT(*) as count FROM users WHERE created_at >= ?', weekAgoIso),
         superAdmins: getCount('SELECT COUNT(*) as count FROM users WHERE role = ?', 'super_admin'),
         developers: getCount('SELECT COUNT(*) as count FROM users WHERE role = ?', 'developer')
