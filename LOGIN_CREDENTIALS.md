@@ -47,7 +47,7 @@ Company:  ASC Cladding Ltd (company-2)
 ### 🟢 Developer
 
 ```
-Email:    dev@constructco.com
+Email:    adrian.stanca1@icloud.com
 Password: password123
 Role:     developer
 Company:  ConstructCo (company-1)
@@ -145,7 +145,7 @@ Choose one of the accounts above based on what you want to test.
 
 ### Test Developer Features
 
-1. Login as: `dev@constructco.com` / `password123`
+1. Login as: `adrian.stanca1@icloud.com` / `password123`
 2. You'll see: Developer Console
 3. Access to: Development tools
 

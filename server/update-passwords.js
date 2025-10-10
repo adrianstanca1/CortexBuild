@@ -30,10 +30,10 @@ const users = [
         name: 'Adrian ASC'
     },
     {
-        email: 'dev@constructco.com',
+        email: 'adrian.stanca1@icloud.com',
         password: 'password123',
         role: 'developer',
-        name: 'Developer User'
+        name: 'Adrian Stanca Dev'
     }
 ];
 
@@ -93,7 +93,7 @@ console.log('  Email:    adrian@ascladdingltd.co.uk');
 console.log('  Password: lolozania1');
 console.log('');
 console.log('Developer:');
-console.log('  Email:    dev@constructco.com');
+console.log('  Email:    adrian.stanca1@icloud.com');
 console.log('  Password: password123');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
