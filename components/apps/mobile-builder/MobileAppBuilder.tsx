@@ -28,6 +28,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DatabaseConfig from './DatabaseConfig';
+import UIBuilder from './UIBuilder';
+import LogicEditor from './LogicEditor';
+import AppPreview from './AppPreview';
+import PublishApp from './PublishApp';
 
 interface MobileAppBuilderProps {
     isDarkMode?: boolean;
@@ -319,13 +323,40 @@ const MobileAppBuilder: React.FC<MobileAppBuilderProps> = ({ isDarkMode = true }
                         </div>
                     )}
 
-                    {/* Other steps will be added in next files */}
+                    {/* Step 3: UI Builder */}
                     {currentStep === 'ui' && (
-                        <div className="text-center py-12">
-                            <Layers className={`h-16 w-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                            <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                UI Builder - Coming in next update
-                            </p>
+                        <div className="h-[600px]">
+                            <UIBuilder isDarkMode={isDarkMode} />
+                        </div>
+                    )}
+
+                    {/* Step 4: Logic Editor */}
+                    {currentStep === 'logic' && (
+                        <div className="h-[600px]">
+                            <LogicEditor isDarkMode={isDarkMode} />
+                        </div>
+                    )}
+
+                    {/* Step 5: Preview */}
+                    {currentStep === 'preview' && (
+                        <div className="h-[600px]">
+                            <AppPreview
+                                isDarkMode={isDarkMode}
+                                appName={appName}
+                                appIcon={appIcon}
+                            />
+                        </div>
+                    )}
+
+                    {/* Step 6: Publish */}
+                    {currentStep === 'publish' && (
+                        <div className="h-[600px] overflow-y-auto">
+                            <PublishApp
+                                isDarkMode={isDarkMode}
+                                appName={appName}
+                                appIcon={appIcon}
+                                appDescription={appDescription}
+                            />
                         </div>
                     )}
                 </div>
