@@ -19,7 +19,7 @@ console.log('🔐 Updating user passwords...\n');
 const users = [
     {
         email: 'adrian.stanca1@gmail.com',
-        password: '123',
+        password: 'parola123',
         role: 'super_admin',
         name: 'Adrian Stanca'
     },
@@ -86,7 +86,7 @@ console.log('🔐 Login credentials:');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('Super Admin:');
 console.log('  Email:    adrian.stanca1@gmail.com');
-console.log('  Password: 123');
+console.log('  Password: parola123');
 console.log('');
 console.log('Company Admin:');
 console.log('  Email:    adrian@ascladdingltd.co.uk');
