@@ -72,6 +72,8 @@ import DeveloperSubmissionInterface from './components/marketplace/DeveloperSubm
 
 // Zapier-Style Workflow Builder
 import ZapierStyleWorkflowBuilder from './components/sdk/ZapierStyleWorkflowBuilder';
+// N8N + Procore + Zapier Combined Builder
+import N8nProcoreWorkflowBuilder from './components/sdk/N8nProcoreWorkflowBuilder';
 
 import { Base44Clone } from './components/base44/Base44Clone';
 
@@ -140,6 +142,8 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'developer-submissions': DeveloperSubmissionInterface,
     // Zapier-Style Workflow Builder
     'zapier-workflow': ZapierStyleWorkflowBuilder,
+    // N8N + Procore + Zapier Combined Builder
+    'n8n-procore-builder': N8nProcoreWorkflowBuilder,
     // Admin
     'platform-admin': PlatformAdminScreen,
     'admin-control-panel': AdminControlPanel,
