@@ -88,6 +88,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
         { id: 'terminal', title: 'Terminal', icon: Terminal, color: 'green', description: 'Integrated terminal', action: () => toast.info('Terminal opening...') },
         { id: 'git', title: 'Git Integration', icon: GitBranch, color: 'orange', description: 'Version control', action: () => toast.info('Git tools opening...') },
         { id: 'package-manager', title: 'Package Manager', icon: Package, color: 'purple', description: 'Dependency management', action: () => toast.info('Package manager opening...') },
+        { id: 'marketplace', title: 'App Marketplace', icon: Package, color: 'purple', description: 'Browse & publish apps', action: () => navigateTo('marketplace') },
         { id: 'api-builder', title: 'API Builder', icon: Zap, color: 'yellow', description: 'REST API testing', action: () => toast.info('API builder opening...') },
         { id: 'database-tools', title: 'Database Tools', icon: Database, color: 'cyan', description: 'Query & manage data', action: () => toast.info('Database tools opening...') },
         { id: 'testing', title: 'Testing Framework', icon: TestTube, color: 'pink', description: 'Unit & integration tests', action: () => toast.info('Testing framework opening...') },
@@ -149,7 +150,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                     {quickStats.map((stat, index) => {
                         const Icon = stat.icon;
                         const TrendIcon = stat.trend === 'up' ? ArrowUpRight : ArrowDownRight;
-                        
+
                         return (
                             <div
                                 key={stat.title}
@@ -157,7 +158,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                                 style={{ transitionDelay: `${index * 100}ms` }}
                             >
                                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.bgGradient} opacity-10 rounded-full -mr-16 -mt-16`} />
-                                
+
                                 <div className="relative">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.bgGradient}`}>
@@ -168,7 +169,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                                             <span className="text-xs font-medium">{stat.change}</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>{stat.title}</p>
                                         <p className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
@@ -192,11 +193,10 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                                    activeTab === tab.id
+                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
                                         ? 'bg-green-600 text-white shadow-lg'
                                         : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                                }`}
+                                    }`}
                             >
                                 <TabIcon className="w-5 h-5" />
                                 <span>{tab.label}</span>
@@ -210,7 +210,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                     {developmentTools.map((tool, index) => {
                         const Icon = tool.icon;
                         const colors = getColorClasses(tool.color);
-                        
+
                         return (
                             <button
                                 key={tool.id}
@@ -224,14 +224,14 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                                         <Icon className={`w-6 h-6 ${colors.text}`} />
                                     </div>
                                 </div>
-                                
+
                                 <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                     {tool.title}
                                 </h3>
                                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
                                     {tool.description}
                                 </p>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <span className={`text-sm font-medium ${colors.text}`}>Launch</span>
                                     <ChevronRight className={`w-5 h-5 ${colors.text} transform group-hover:translate-x-1 transition-transform`} />

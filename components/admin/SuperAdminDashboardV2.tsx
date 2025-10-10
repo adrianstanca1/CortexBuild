@@ -86,6 +86,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
         { id: 'user-management', title: 'User Management', icon: Users, color: 'blue', count: stats.totalUsers, description: 'Manage all platform users' },
         { id: 'company-management', title: 'Company Management', icon: Building2, color: 'purple', count: stats.totalCompanies, description: 'Oversee all companies' },
         { id: 'billing-payments', title: 'Billing & Payments', icon: CreditCard, color: 'green', count: stats.activeSubscriptions, description: 'Revenue & subscriptions' },
+        { id: 'marketplace', title: 'App Marketplace', icon: Package, color: 'purple', count: 0, description: 'Browse & manage apps' },
         { id: 'analytics-reports', title: 'Analytics & Reports', icon: BarChart3, color: 'orange', count: 0, description: 'Platform insights' },
         { id: 'system-settings', title: 'System Settings', icon: Settings, color: 'gray', count: 0, description: 'Platform configuration' },
         { id: 'security-audit', title: 'Security & Audit', icon: Shield, color: 'red', count: 0, description: 'Security monitoring' },
@@ -153,7 +154,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                     {quickStats.map((stat, index) => {
                         const Icon = stat.icon;
                         const TrendIcon = stat.trend === 'up' ? ArrowUpRight : ArrowDownRight;
-                        
+
                         return (
                             <div
                                 key={stat.title}
@@ -161,7 +162,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                                 style={{ transitionDelay: `${index * 100}ms` }}
                             >
                                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.bgGradient} opacity-10 rounded-full -mr-16 -mt-16`} />
-                                
+
                                 <div className="relative">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.bgGradient}`}>
@@ -172,7 +173,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                                             <span className="text-sm font-medium">{stat.change}</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>{stat.title}</p>
                                         <p className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
@@ -196,11 +197,10 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                                    activeTab === tab.id
+                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
                                         ? 'bg-blue-600 text-white shadow-lg'
                                         : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                                }`}
+                                    }`}
                             >
                                 <TabIcon className="w-5 h-5" />
                                 <span>{tab.label}</span>
@@ -214,7 +214,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                     {adminSections.map((section, index) => {
                         const Icon = section.icon;
                         const colors = getColorClasses(section.color);
-                        
+
                         return (
                             <button
                                 key={section.id}
@@ -236,14 +236,14 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                     {section.title}
                                 </h3>
                                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
                                     {section.description}
                                 </p>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <span className={`text-sm font-medium ${colors.text}`}>Manage</span>
                                     <ChevronRight className={`w-5 h-5 ${colors.text} transform group-hover:translate-x-1 transition-transform`} />
