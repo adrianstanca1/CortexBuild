@@ -37,7 +37,7 @@ async function createSuperAdmin() {
     console.log('📧 Registering user account...');
 
     // First, try to sign up the user
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email: 'adrian.stanca1@gmail.com',
       password: 'Cumparavinde1',
     });
@@ -70,7 +70,7 @@ async function createSuperAdmin() {
 
     // Step 2: Create or update the platform company
     console.log('🏢 Creating platform company...');
-    const { data: company, error: companyError } = await supabase
+    const { error: companyError } = await supabase
       .from('companies')
       .upsert({
         id: '00000000-0000-0000-0000-000000000000',

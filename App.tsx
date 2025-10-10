@@ -16,6 +16,7 @@ import { useToast } from './hooks/useToast.ts';
 import { useNavigation } from './hooks/useNavigation.ts';
 import { logger } from './utils/logger.ts';
 import { ChatbotWidget } from './components/chat/ChatbotWidget.tsx';
+import { supabase } from './supabaseClient.ts';
 
 // Screen Components
 import UnifiedDashboardScreen from './components/screens/UnifiedDashboardScreen.tsx';

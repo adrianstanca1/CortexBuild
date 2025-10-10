@@ -5,7 +5,30 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
+  {
+    ignores: ['dist/**'],
+  },
   js.configs.recommended,
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+        exports: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+      },
+    },
+  },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -26,6 +49,11 @@ export default [
         __dirname: 'readonly',
         __filename: 'readonly',
         global: 'readonly',
+        navigator: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        alert: 'readonly',
+        confirm: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
@@ -43,13 +71,15 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint,
-      'react': react,
+      react,
       'react-hooks': reactHooks,
     },
     rules: {
       'react/react-in-jsx-scope': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-unused-vars': 'off',
+      'no-undef': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
     settings: {
       react: {

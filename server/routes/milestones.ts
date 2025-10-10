@@ -147,7 +147,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
         INSERT INTO milestones (
           project_id, name, description, due_date, status
         ) VALUES (?, ?, ?, ?, ?)
-      `).run(project_id, name, description, due_date, status);
+      `).run(project_id, title, description, due_date, status);
 
       const milestone = db.prepare('SELECT * FROM milestones WHERE id = ?').get(result.lastInsertRowid);
 

@@ -115,18 +115,24 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
             filteredTasks = filteredTasks.filter(t => new Date(t.dueDate) <= endDate);
         }
 
-        // Apply sorting
+        const selectedSort = sortBy;
         filteredTasks.sort((a, b) => {
-            switch (sortBy) {
-                case 'dueDate-desc':
-                    return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
-                case 'status':
-                    const statusOrder = { 'To Do': 1, 'In Progress': 2, 'Done': 3 };
-                    return (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99);
-                case 'dueDate-asc':
-                default:
-                    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            if (selectedSort === 'dueDate-desc') {
+                return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
             }
+
+            if (selectedSort === 'status') {
+                const statusOrder: Record<Task['status'], number> = {
+                    'To Do': 1,
+                    'In Progress': 2,
+                    Done: 3,
+                };
+                const aRank = statusOrder[a.status] ?? 99;
+                const bRank = statusOrder[b.status] ?? 99;
+                return aRank - bRank;
+            }
+
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         });
 
         return filteredTasks;

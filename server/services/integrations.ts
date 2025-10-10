@@ -280,15 +280,18 @@ export class GoogleDriveIntegration {
 
   async uploadDocument(fileName: string, fileData: Buffer, folderId?: string): Promise<string> {
     const tokens = getOAuthTokens(this.db, this.integrationId);
+    let fileId = 'file-id';
 
     try {
-      // Implementation for Google Drive upload
-      // Return file ID
-      return 'file-id';
+      // Implementation for Google Drive upload would go here using the tokens and provided data.
+      // For now we return a placeholder ID to keep downstream flows working in demos.
+      fileId = 'file-id';
     } catch (error) {
       console.error('Google Drive upload error:', error);
       throw error;
     }
+
+    return fileId;
   }
 
   async syncDocuments(): Promise<void> {

@@ -20,6 +20,7 @@ import { APIError, withErrorHandling } from './utils/errorHandling.ts';
 import { getMLPredictor } from './utils/mlPredictor.ts';
 import { PredictionResult } from './utils/neuralNetwork.ts';
 import * as authService from './auth/authService.ts';
+import { supabase } from './supabaseClient.ts';
 
 // Simulate API latency
 const LATENCY = 200;
@@ -1533,7 +1534,7 @@ export const fetchCompanyAgents = async (): Promise<{ agents: AgentCatalogItem[]
     };
 };
 
-export const subscribeToAgent = async (agentId: string, options: { companyId?: string } = {}): Promise<AgentCatalogItem> => {
+export const subscribeAgentViaApi = async (agentId: string, options: { companyId?: string } = {}): Promise<AgentCatalogItem> => {
     const response = await apiRequest<{ success?: boolean; agent?: unknown }>(
         `/agentkit/agents/${agentId}/subscribe`,
         {

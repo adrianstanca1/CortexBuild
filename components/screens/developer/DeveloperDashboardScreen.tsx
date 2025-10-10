@@ -207,7 +207,7 @@ const formatCurrency = (value: number) =>
 const maskUrl = (url: string) => {
   try {
     const parsed = new URL(url);
-    return `${parsed.origin}${parsed.pathname.replace(/(.{10}).*(.{5})/, '$1…$2')}`;
+    return `${parsed.origin}${parsed.pathname.replace(/(.{10}).*(.{5})/, '$1...$2')}`;
   } catch {
     return url;
   }
@@ -808,7 +808,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
       <div className="min-h-[60vh] flex items-center justify-center bg-slate-50 rounded-xl border border-slate-200">
         <div className="text-center space-y-3">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-full border-4 border-emerald-100 border-t-emerald-500 animate-spin" />
-          <p className="text-sm text-slate-500">Preparing developer control center…</p>
+          <p className="text-sm text-slate-500">Preparing developer control center...</p>
         </div>
       </div>
     );
@@ -1310,7 +1310,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                 defaultValue=""
               >
                 <option value="" disabled>
-                  Start from template…
+                  Start from template...
                 </option>
                 {builderTemplates.map((template) => (
                   <option key={template.id} value={template.id}>
@@ -1455,7 +1455,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                         onChange={(event) => handleNodeChange(index, 'configText', event.target.value)}
                         className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         rows={3}
-                        placeholder="{\"key\":\"value\"}"
+                        placeholder='{"key":"value"}'
                       />
                     </div>
                   ))
@@ -1479,7 +1479,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   disabled={builderSaving}
                   className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors disabled:opacity-60"
                 >
-                  {builderSaving ? 'Saving…' : 'Save Module'}
+                  {builderSaving ? 'Saving...' : 'Save Module'}
                 </button>
                 <button
                   type="button"
@@ -1513,7 +1513,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
               className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-700 transition-colors disabled:opacity-60"
             >
               <Rocket className={`h-4 w-4 ${sandboxRunning ? 'animate-spin' : ''}`} />
-              {sandboxRunning ? 'Running Simulation…' : sandboxLimitReached ? 'Limit Reached' : 'Run Simulation'}
+              {sandboxRunning ? 'Running Simulation...' : sandboxLimitReached ? 'Limit Reached' : 'Run Simulation'}
             </button>
             <button
               type="button"
