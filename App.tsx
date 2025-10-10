@@ -36,8 +36,10 @@ import { ProductionSDKDeveloperView } from './components/sdk/ProductionSDKDevelo
 import DeveloperWorkspaceScreen from './components/screens/developer/DeveloperWorkspaceScreen';
 import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
 import ModernDeveloperDashboard from './components/screens/developer/ModernDeveloperDashboard';
+import DeveloperDashboardV2 from './components/screens/developer/DeveloperDashboardV2';
 import CompanyAdminDashboardScreen from './components/screens/company/CompanyAdminDashboardScreen';
 import CompanyAdminDashboard from './components/screens/company/CompanyAdminDashboard';
+import CompanyAdminDashboardV2 from './components/screens/company/CompanyAdminDashboardV2';
 import PunchListScreen from './components/screens/PunchListScreen';
 import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen';
 import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen';
@@ -68,6 +70,7 @@ import { Base44Clone } from './components/base44/Base44Clone';
 import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen';
 import SuperAdminDashboardScreen from './components/screens/admin/SuperAdminDashboardScreen';
 import AdminControlPanel from './components/admin/AdminControlPanel';
+import SuperAdminDashboardV2 from './components/admin/SuperAdminDashboardV2';
 
 // ML & Advanced Analytics Screens
 import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard';
@@ -537,15 +540,20 @@ const App: React.FC = () => {
         };
 
         if (currentUser.role === 'developer') {
-            console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Enhanced Developer Console Pro');
+            console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Developer Dashboard V2');
             console.log('👤 Current user:', currentUser);
-            return <EnhancedDeveloperConsole onLogout={handleLogout} />;
+            return <DeveloperDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />;
         }
         if (currentUser.role === 'super_admin') {
-            return <AdminControlPanel isDarkMode={true} onLogout={handleLogout} />;
+            console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
+            return <SuperAdminDashboardV2 isDarkMode={true} onNavigate={(section) => {
+                console.log('Navigating to section:', section);
+                toast.info(`Opening ${section}...`);
+            }} />;
         }
         if (currentUser.role === 'company_admin') {
-            return <CompanyAdminDashboard currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />;
+            console.log('🎯 COMPANY ADMIN ROLE DETECTED - Rendering Company Admin Dashboard V2');
+            return <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />;
         }
         return (
             <div className="min-h-screen bg-gray-50">

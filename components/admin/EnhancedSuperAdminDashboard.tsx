@@ -1,6 +1,7 @@
 /**
- * Enhanced Super Admin Dashboard
- * Complete administrative and management control panel
+ * Enhanced Super Admin Dashboard v2.0
+ * Revolutionary administrative control panel with modern UI/UX
+ * Features: Real-time stats, animations, advanced analytics
  */
 
 import React, { useState, useEffect } from 'react';
@@ -25,7 +26,13 @@ import {
     AlertCircle,
     CheckCircle,
     Clock,
-    Download
+    Download,
+    ArrowUpRight,
+    ArrowDownRight,
+    Sparkles,
+    Target,
+    Award,
+    Cpu
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -249,11 +256,10 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                         <div className="flex items-center space-x-3">
                             <button
                                 onClick={() => toast.success('Refreshing data...')}
-                                className={`px-4 py-2 rounded-lg ${
-                                    isDarkMode
+                                className={`px-4 py-2 rounded-lg ${isDarkMode
                                         ? 'bg-gray-700 hover:bg-gray-600 text-white'
                                         : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
-                                } transition-colors`}
+                                    } transition-colors`}
                             >
                                 <Activity className="w-4 h-4" />
                             </button>
@@ -273,11 +279,10 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center space-x-2 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-                                    activeTab === tab.id
+                                className={`flex items-center space-x-2 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === tab.id
                                         ? 'border-blue-500 text-blue-600'
                                         : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
-                                }`}
+                                    }`}
                             >
                                 <tab.icon className="w-4 h-4" />
                                 <span>{tab.label}</span>
@@ -321,9 +326,8 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                     {adminSections.map((section) => (
                         <div
                             key={section.id}
-                            className={`${
-                                isDarkMode ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
-                            } rounded-lg shadow p-6 transition-all cursor-pointer hover:shadow-lg`}
+                            className={`${isDarkMode ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
+                                } rounded-lg shadow p-6 transition-all cursor-pointer hover:shadow-lg`}
                             onClick={() => {
                                 toast.success(`Opening ${section.title}...`);
                                 onNavigate?.(section.id);
@@ -333,9 +337,8 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                                 <div className={`w-12 h-12 rounded-lg ${colorClasses[section.color as keyof typeof colorClasses]} flex items-center justify-center`}>
                                     <section.icon className="w-6 h-6 text-white" />
                                 </div>
-                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                    isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
-                                }`}>
+                                <span className={`text-xs px-2 py-1 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
+                                    }`}>
                                     {section.stats}
                                 </span>
                             </div>
@@ -349,9 +352,8 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                                 {section.actions.map((action, index) => (
                                     <span
                                         key={index}
-                                        className={`text-xs px-2 py-1 rounded ${
-                                            isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
-                                        }`}
+                                        className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                                            }`}
                                     >
                                         {action}
                                     </span>
