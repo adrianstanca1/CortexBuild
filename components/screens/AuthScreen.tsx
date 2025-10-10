@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { User } from '../../types.ts';
-import LoginForm from '../auth/LoginForm.tsx';
-import RegisterForm from '../auth/RegisterForm.tsx';
+import { User } from '../../types';
+import LoginForm from '../auth/LoginForm';
+import RegisterForm from '../auth/RegisterForm';
 
 interface AuthScreenProps {
     onLoginSuccess: (user: User) => void;
@@ -26,9 +26,9 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
                     <RegisterForm onLoginSuccess={onLoginSuccess} />
                 )}
 
-                 <p className="text-center text-sm text-gray-600 mt-8">
+                <p className="text-center text-sm text-gray-600 mt-8">
                     {isLoginView ? "Don't have an account?" : "Already have an account?"}
-                    <button 
+                    <button
                         onClick={() => setIsLoginView(!isLoginView)}
                         className="font-semibold text-blue-600 hover:text-blue-500 ml-1"
                     >

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Project, Task, Screen, User } from '../../types.ts';
-import * as api from '../../api.ts';
-import { usePermissions } from '../../hooks/usePermissions.ts';
-import { ChevronLeftIcon, PlusIcon, PaperClipIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, ChevronDownIcon } from '../Icons.tsx';
+import { Project, Task, Screen, User } from '../../types';
+import * as api from '../../api';
+import { usePermissions } from '../../hooks/usePermissions';
+import { ChevronLeftIcon, PlusIcon, PaperClipIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, ChevronDownIcon } from '../Icons';
 
 interface TasksScreenProps {
     project: Project;

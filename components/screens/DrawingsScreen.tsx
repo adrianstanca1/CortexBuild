@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Project, Drawing, Screen, User } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, PlusIcon, DocumentDuplicateIcon, MagnifyingGlassIcon, SparklesIcon, ChevronDownIcon } from '../Icons.tsx';
-import NewDrawingModal from '../modals/NewDrawingModal.tsx';
+import { Project, Drawing, Screen, User } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon, PlusIcon, DocumentDuplicateIcon, MagnifyingGlassIcon, SparklesIcon, ChevronDownIcon } from '../Icons';
+import NewDrawingModal from '../modals/NewDrawingModal';
 // Fix: Imported the 'usePermissions' hook.
-import { usePermissions } from '../../hooks/usePermissions.ts';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface DrawingsScreenProps {
     project: Project;

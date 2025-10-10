@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { User, Screen, Project, Task } from '../../../types.ts';
-import * as api from '../../../api.ts';
-import { processDashboardData, DashboardData } from '../../../utils/dashboardLogic.ts';
+import { User, Screen, Project, Task } from '../../../types';
+import * as api from '../../../api';
+import { processDashboardData, DashboardData } from '../../../utils/dashboardLogic';
 import { DashboardLayout } from '../../layout/DashboardLayout';
 import { MetricCard } from '../../cards/MetricCard';
 import { ProjectCard } from '../../cards/ProjectCard';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Project } from '../../types.ts';
-import { XMarkIcon, DocumentPlusIcon, SparklesIcon } from '../Icons.tsx';
+import { Project } from '../../types';
+import { XMarkIcon, DocumentPlusIcon, SparklesIcon } from '../Icons';
 
 interface NewDrawingModalProps {
     project: Project;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { Project, Screen, Task, SiteInstruction, User, AIInsight } from '../../types.ts';
+import { Project, Screen, Task, SiteInstruction, User, AIInsight } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Use WandSparklesIcon for AI suggestions and move it to the main content area for prominence.
-import { ChevronLeftIcon, CheckBadgeIcon, AlertTriangleIcon, SunIcon, ClipboardDocumentListIcon, WandSparklesIcon, ArrowPathIcon } from '../Icons.tsx';
-import TaskList from '../shared/TaskList.tsx';
+import { ChevronLeftIcon, CheckBadgeIcon, AlertTriangleIcon, SunIcon, ClipboardDocumentListIcon, WandSparklesIcon, ArrowPathIcon } from '../Icons';
+import TaskList from '../shared/TaskList';
 
 interface MyDayScreenProps {
     project: Project;

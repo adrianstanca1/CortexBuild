@@ -1,4 +1,4 @@
-import { UserRole, PermissionAction, PermissionSubject } from './types.ts';
+import { UserRole, PermissionAction, PermissionSubject } from './types';
 
 // Define what actions are permitted for each role on each subject.
 // 'all' means all actions (create, read, update, delete).

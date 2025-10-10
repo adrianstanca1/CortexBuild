@@ -1,70 +1,73 @@
+// CortexBuild Main App Component
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types.ts';
-import * as api from './api.ts';
-import AuthScreen from './components/screens/AuthScreen.tsx';
-import AppLayout from './components/layout/AppLayout.tsx';
-import Sidebar from './components/layout/Sidebar.tsx';
-import { MOCK_PROJECT } from './constants.ts';
-import AISuggestionModal from './components/modals/AISuggestionModal.tsx';
-import ProjectSelectorModal from './components/modals/ProjectSelectorModal.tsx';
-import FloatingMenu from './components/layout/FloatingMenu.tsx';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
-import ToastContainer from './components/ToastContainer.tsx';
-import { usePermissions } from './hooks/usePermissions.ts';
-import * as authService from './auth/authService.ts';
-import { useToast } from './hooks/useToast.ts';
-import { useNavigation } from './hooks/useNavigation.ts';
-import { logger } from './utils/logger.ts';
-import { ChatbotWidget } from './components/chat/ChatbotWidget.tsx';
-import { supabase } from './supabaseClient.ts';
+import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
+import * as api from './api';
+import AuthScreen from './components/screens/AuthScreen';
+import AppLayout from './components/layout/AppLayout';
+import Sidebar from './components/layout/Sidebar';
+import { MOCK_PROJECT } from './constants';
+import AISuggestionModal from './components/modals/AISuggestionModal';
+import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
+import FloatingMenu from './components/layout/FloatingMenu';
+import ErrorBoundary from './components/ErrorBoundary';
+import ToastContainer from './components/ToastContainer';
+import { usePermissions } from './hooks/usePermissions';
+import * as authService from './auth/authService';
+import { useToast } from './hooks/useToast';
+import { useNavigation } from './hooks/useNavigation';
+import { logger } from './utils/logger';
+import { ChatbotWidget } from './components/chat/ChatbotWidget';
+import { supabase } from './supabaseClient';
 
 // Screen Components
-import UnifiedDashboardScreen from './components/screens/UnifiedDashboardScreen.tsx';
-import ProjectsListScreen from './components/screens/ProjectsListScreen.tsx';
-import ProjectHomeScreen from './components/screens/ProjectHomeScreen.tsx';
-import MyDayScreen from './components/screens/MyDayScreen.tsx';
-import TasksScreen from './components/screens/TasksScreen.tsx';
-import TaskDetailScreen from './components/screens/TaskDetailScreen.tsx';
-import NewTaskScreen from './components/screens/NewTaskScreen.tsx';
-import DailyLogScreen from './components/screens/DailyLogScreen.tsx';
-import PhotoGalleryScreen from './components/screens/PhotoGalleryScreen.tsx';
-import RFIsScreen from './components/screens/RFIsScreen.tsx';
-import RFIDetailScreen from './components/screens/RFIDetailScreen.tsx';
-import NewRFIScreen from './components/screens/NewRFIScreen.tsx';
+import UnifiedDashboardScreen from './components/screens/UnifiedDashboardScreen';
+import ProjectsListScreen from './components/screens/ProjectsListScreen';
+import ProjectHomeScreen from './components/screens/ProjectHomeScreen';
+import MyDayScreen from './components/screens/MyDayScreen';
+import TasksScreen from './components/screens/TasksScreen';
+import TaskDetailScreen from './components/screens/TaskDetailScreen';
+import NewTaskScreen from './components/screens/NewTaskScreen';
+import DailyLogScreen from './components/screens/DailyLogScreen';
+import PhotoGalleryScreen from './components/screens/PhotoGalleryScreen';
+import RFIsScreen from './components/screens/RFIsScreen';
+import RFIDetailScreen from './components/screens/RFIDetailScreen';
+import NewRFIScreen from './components/screens/NewRFIScreen';
 import { ProductionSDKDeveloperView } from './components/sdk/ProductionSDKDeveloperView';
-import DeveloperDashboardScreen from './components/screens/developer/DeveloperDashboardScreen.tsx';
-import PunchListScreen from './components/screens/PunchListScreen.tsx';
-import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen.tsx';
-import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen.tsx';
-import DrawingsScreen from './components/screens/DrawingsScreen.tsx';
-import PlansViewerScreen from './components/screens/PlansViewerScreen.tsx';
-import DayworkSheetsListScreen from './components/screens/DayworkSheetsListScreen.tsx';
-import DayworkSheetDetailScreen from './components/screens/DayworkSheetDetailScreen.tsx';
-import NewDayworkSheetScreen from './components/screens/NewDayworkSheetScreen.tsx';
-import DocumentsScreen from './components/screens/DocumentsScreen.tsx';
-import DeliveryScreen from './components/screens/DeliveryScreen.tsx';
-import DrawingComparisonScreen from './components/screens/DrawingComparisonScreen.tsx';
+import DeveloperWorkspaceScreen from './components/screens/developer/DeveloperWorkspaceScreen';
+import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
+import CompanyAdminDashboardScreen from './components/screens/company/CompanyAdminDashboardScreen';
+import PunchListScreen from './components/screens/PunchListScreen';
+import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen';
+import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen';
+import DrawingsScreen from './components/screens/DrawingsScreen';
+import PlansViewerScreen from './components/screens/PlansViewerScreen';
+import DayworkSheetsListScreen from './components/screens/DayworkSheetsListScreen';
+import DayworkSheetDetailScreen from './components/screens/DayworkSheetDetailScreen';
+import NewDayworkSheetScreen from './components/screens/NewDayworkSheetScreen';
+import DocumentsScreen from './components/screens/DocumentsScreen';
+import DeliveryScreen from './components/screens/DeliveryScreen';
+import DrawingComparisonScreen from './components/screens/DrawingComparisonScreen';
 
 // Module Screens
-import AccountingScreen from './components/screens/modules/AccountingScreen.tsx';
-import AIToolsScreen from './components/screens/modules/AIToolsScreen.tsx';
-import DocumentManagementScreen from './components/screens/modules/DocumentManagementScreen.tsx';
-import TimeTrackingScreen from './components/screens/modules/TimeTrackingScreen.tsx';
-import ProjectOperationsScreen from './components/screens/modules/ProjectOperationsScreen.tsx';
-import FinancialManagementScreen from './components/screens/modules/FinancialManagementScreen.tsx';
-import BusinessDevelopmentScreen from './components/screens/modules/BusinessDevelopmentScreen.tsx';
-import AIAgentsMarketplaceScreen from './components/screens/modules/AIAgentsMarketplaceScreen.tsx';
-import MyTasksScreen from './components/screens/MyTasksScreen.tsx';
-import PlaceholderToolScreen from './components/screens/tools/PlaceholderToolScreen.tsx';
+import AccountingScreen from './components/screens/modules/AccountingScreen';
+import AIToolsScreen from './components/screens/modules/AIToolsScreen';
+import DocumentManagementScreen from './components/screens/modules/DocumentManagementScreen';
+import TimeTrackingScreen from './components/screens/modules/TimeTrackingScreen';
+import ProjectOperationsScreen from './components/screens/modules/ProjectOperationsScreen';
+import FinancialManagementScreen from './components/screens/modules/FinancialManagementScreen';
+import BusinessDevelopmentScreen from './components/screens/modules/BusinessDevelopmentScreen';
+import AIAgentsMarketplaceScreen from './components/screens/modules/AIAgentsMarketplaceScreen';
+import MyTasksScreen from './components/screens/MyTasksScreen';
+import PlaceholderToolScreen from './components/screens/tools/PlaceholderToolScreen';
 
-import { Base44Clone } from './components/base44/Base44Clone.tsx';
+import { Base44Clone } from './components/base44/Base44Clone';
 
 // Admin Screens
-import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen.tsx';
-import SuperAdminDashboardScreen from './components/screens/admin/SuperAdminDashboardScreen.tsx';
+import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen';
+import SuperAdminDashboardScreen from './components/screens/admin/SuperAdminDashboardScreen';
 
 // ML & Advanced Analytics Screens
-import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard.tsx';
+import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard';
 
 
 type NavigationItem = {
@@ -75,6 +78,7 @@ type NavigationItem = {
 
 const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'global-dashboard': UnifiedDashboardScreen,
+    'company-admin-dashboard': CompanyAdminDashboardScreen,
     'projects': ProjectsListScreen,
     'project-home': ProjectHomeScreen,
     'my-day': MyDayScreen,
@@ -107,7 +111,8 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'financial-management': FinancialManagementScreen,
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-    'developer-dashboard': DeveloperDashboardScreen,
+    'developer-dashboard': DeveloperWorkspaceScreen,
+    'developer-console': EnhancedDeveloperConsole,
     'super-admin-dashboard': SuperAdminDashboardScreen,
     'sdk-developer': ProductionSDKDeveloperView,
     'my-apps-desktop': Base44Clone,
@@ -279,6 +284,8 @@ const App: React.FC = () => {
             } : null;
 
             console.log('👤 Final user profile:', userProfile);
+            console.log('🎯 User role from profile:', userProfile?.role);
+            console.log('🎯 Is developer?', userProfile?.role === 'developer');
 
             console.log('📝 Setting currentUser state:', userProfile);
             setCurrentUser(userProfile);
@@ -288,9 +295,9 @@ const App: React.FC = () => {
                 console.log('🚀 Navigating to dashboard...');
                 console.log('📍 Current navigation stack before:', navigationStack);
                 const defaultScreenForRole: Screen = userProfile.role === 'developer'
-                    ? 'developer-dashboard'
+                    ? 'developer-console'
                     : userProfile.role === 'super_admin'
-                        ? 'super-admin-dashboard'
+                        ? 'developer-dashboard'
                         : 'global-dashboard';
                 navigateToModule(defaultScreenForRole, {});
                 console.log('📍 Navigation stack set to', defaultScreenForRole);
@@ -315,9 +322,9 @@ const App: React.FC = () => {
             console.log('🔄 Using fallback profile:', fallbackProfile);
             setCurrentUser(fallbackProfile);
             const fallbackScreen: Screen = fallbackProfile.role === 'developer'
-                ? 'developer-dashboard'
+                ? 'developer-console'
                 : fallbackProfile.role === 'super_admin'
-                    ? 'super-admin-dashboard'
+                    ? 'developer-dashboard'
                     : 'global-dashboard';
             navigateToModule(fallbackScreen, {});
         }
@@ -336,9 +343,9 @@ const App: React.FC = () => {
                     if (navigationStack.length === 0) {
                         console.log('🔄 Navigating to dashboard from session restore...');
                         const defaultScreenForRole: Screen = user.role === 'developer'
-                            ? 'developer-dashboard'
+                            ? 'developer-console'
                             : user.role === 'super_admin'
-                                ? 'super-admin-dashboard'
+                                ? 'developer-dashboard'
                                 : 'global-dashboard';
                         navigateToModule(defaultScreenForRole, {});
                     }
@@ -361,7 +368,7 @@ const App: React.FC = () => {
         const handleHashChange = () => {
             const hash = window.location.hash;
             if (hash === '#dashboard' && currentUser) {
-                const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-dashboard' : 'global-dashboard';
+                const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-console' : currentUser.role === 'super_admin' ? 'developer-dashboard' : 'global-dashboard';
                 navigateToModule(targetScreen, {});
                 // Clean up the hash
                 window.history.replaceState(null, '', window.location.pathname);
@@ -392,9 +399,9 @@ const App: React.FC = () => {
             if (navigationStack.length === 0) {
                 console.log('🔄 No navigation stack - navigating to dashboard...');
                 const defaultScreen: Screen = currentUser.role === 'developer'
-                    ? 'developer-dashboard'
+                    ? 'developer-console'
                     : currentUser.role === 'super_admin'
-                        ? 'super-admin-dashboard'
+                        ? 'developer-dashboard'
                         : 'global-dashboard';
                 navigateToModule(defaultScreen, {});
             }
@@ -488,9 +495,11 @@ const App: React.FC = () => {
     }
 
     if (!currentUser) {
-        console.log('🚫 No currentUser - showing AuthScreen');
+        console.log('🚫 No currentUser - waiting for login from landing page');
         console.log('📊 Session checked:', sessionChecked);
         console.log('📊 Navigation stack:', navigationStack);
+        // Don't render anything - let the landing page in index.html show
+        // The landing page will trigger login via the Login button
         return (
             <div className="bg-slate-100 min-h-screen flex items-center justify-center">
                 <AuthScreen onLoginSuccess={handleLoginSuccess} />
@@ -505,20 +514,8 @@ const App: React.FC = () => {
     // If no navigation stack, show dashboard directly
     if (!currentNavItem || navigationStack.length === 0) {
         console.log('🏠 No navigation - showing dashboard directly');
-        if (currentUser.role === 'developer') {
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    <DeveloperDashboardScreen currentUser={currentUser} navigateTo={navigateTo} />
-                </div>
-            );
-        }
-        if (currentUser.role === 'super_admin') {
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    <SuperAdminDashboardScreen />
-                </div>
-            );
-        }
+        console.log('🎯 Current user role at render:', currentUser?.role);
+        console.log('🎯 Is developer at render?', currentUser?.role === 'developer');
         const dashboardProps = {
             currentUser,
             navigateTo,
@@ -533,6 +530,25 @@ const App: React.FC = () => {
             goBack
         };
 
+        if (currentUser.role === 'developer') {
+            console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Enhanced Developer Console Pro');
+            console.log('👤 Current user:', currentUser);
+            return <EnhancedDeveloperConsole onLogout={handleLogout} />;
+        }
+        if (currentUser.role === 'super_admin') {
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <SuperAdminDashboardScreen />
+                </div>
+            );
+        }
+        if (currentUser.role === 'company_admin') {
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <CompanyAdminDashboardScreen {...dashboardProps} />
+                </div>
+            );
+        }
         return (
             <div className="min-h-screen bg-gray-50">
                 <UnifiedDashboardScreen {...dashboardProps} />
@@ -541,7 +557,11 @@ const App: React.FC = () => {
     }
 
     const { screen, params, project } = currentNavItem;
+    console.log('📺 Rendering screen:', screen);
+    console.log('📺 Current user role:', currentUser?.role);
+    console.log('📺 Navigation stack:', navigationStack);
     const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
+    console.log('📺 Screen component:', ScreenComponent.name);
 
     if (screen === 'my-apps-desktop') {
         return <Base44Clone user={currentUser} onLogout={handleLogout} />;
@@ -561,26 +581,32 @@ const App: React.FC = () => {
 
     const sidebarGoHome = useCallback(() => {
         if (currentUser.role === 'developer') {
-            navigateToModule('developer-dashboard');
-        } else if (currentUser.role === 'super_admin') {
-            navigateToModule('super-admin-dashboard');
-        } else {
-            goHome();
+            navigateToModule('developer-console');
+            return;
         }
+        if (currentUser.role === 'super_admin') {
+            navigateToModule('developer-dashboard');
+            return;
+        }
+        if (currentUser.role === 'company_admin') {
+            navigateToModule('company-admin-dashboard');
+            return;
+        }
+        goHome();
     }, [currentUser.role, navigateToModule, goHome]);
 
     return (
         <div className="bg-slate-50">
             <AppLayout
                 sidebar={
-                <Sidebar
-                    project={getSidebarProject}
-                    navigateTo={navigateTo}
-                    navigateToModule={navigateToModule}
-                    goHome={sidebarGoHome}
-                    currentUser={currentUser}
-                    onLogout={handleLogout}
-                />
+                    <Sidebar
+                        project={getSidebarProject}
+                        navigateTo={navigateTo}
+                        navigateToModule={navigateToModule}
+                        goHome={sidebarGoHome}
+                        currentUser={currentUser}
+                        onLogout={handleLogout}
+                    />
                 }
                 floatingMenu={<FloatingMenu
                     currentUser={currentUser}

@@ -1,4 +1,4 @@
-import { Screen, PermissionSubject, PermissionAction } from './types.ts';
+import { Screen, PermissionSubject, PermissionAction } from './types';
 
 export interface MenuItem {
     label: string;

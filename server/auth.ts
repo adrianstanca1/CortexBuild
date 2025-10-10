@@ -307,7 +307,7 @@ export const cleanupExpiredSessions = () => {
   console.log('🧹 [Auth] Cleaning up expired sessions');
   const db = requireDb();
   ensureSessionsTable(db);
-  db.prepare('DELETE FROM sessions WHERE expires_at < datetime("now")').run();
+  db.prepare("DELETE FROM sessions WHERE expires_at < datetime('now')").run();
 };
 
 export const getCurrentUser = async (req: any, res: any, next: any) => {

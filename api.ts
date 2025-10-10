@@ -13,14 +13,14 @@ import {
     AutomationRule,
     AutomationEvent
 } from './types';
-import * as db from './db.ts';
-import { can } from './permissions.ts';
-import { validateName, validateEmail, validatePassword, validateCompanyName } from './utils/validation.ts';
-import { APIError, withErrorHandling } from './utils/errorHandling.ts';
-import { getMLPredictor } from './utils/mlPredictor.ts';
-import { PredictionResult } from './utils/neuralNetwork.ts';
-import * as authService from './auth/authService.ts';
-import { supabase } from './supabaseClient.ts';
+import * as db from './db';
+import { can } from './permissions';
+import { validateName, validateEmail, validatePassword, validateCompanyName } from './utils/validation';
+import { APIError, withErrorHandling } from './utils/errorHandling';
+import { getMLPredictor } from './utils/mlPredictor';
+import { PredictionResult } from './utils/neuralNetwork';
+import * as authService from './auth/authService';
+import { supabase } from './supabaseClient';
 
 // Simulate API latency
 const LATENCY = 200;

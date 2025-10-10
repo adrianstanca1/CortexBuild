@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { User, Screen, Company, Project } from '../../../types.ts';
+import { User, Screen, Company, Project } from '../../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../../api.ts';
-import GlobalStatsWidget from '../../widgets/GlobalStatsWidget.tsx';
-import { BuildingOfficeIcon, UsersIcon } from '../../Icons.tsx';
+import * as api from '../../../api';
+import GlobalStatsWidget from '../../widgets/GlobalStatsWidget';
+import { BuildingOfficeIcon, UsersIcon } from '../../Icons';
 
 interface SuperAdminDashboardProps {
     currentUser: User;

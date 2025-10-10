@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { Project, User } from '../../types.ts';
+import { Project, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
-import { MapPinIcon } from '../Icons.tsx';
+import * as api from '../../api';
+import { MapPinIcon } from '../Icons';
 
 interface ProjectsListScreenProps {
     selectProject: (projectId: string) => void;

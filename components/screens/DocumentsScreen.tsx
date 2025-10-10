@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { Project, Document, User } from '../../types.ts';
+import { Project, Document, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Fix: Added .tsx extension to icon import
-import { ChevronLeftIcon, PlusIcon, FileIcon } from '../Icons.tsx';
+import { ChevronLeftIcon, PlusIcon, FileIcon } from '../Icons';
 
 interface DocumentsScreenProps {
     project: Project;

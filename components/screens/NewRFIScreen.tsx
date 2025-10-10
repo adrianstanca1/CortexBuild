@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 // Fix: Added .ts extension to import
-import { Project, User, Attachment } from '../../types.ts';
+import { Project, User, Attachment } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Fix: Added .tsx extension to import
-import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, PaperClipIcon, SparklesIcon, ArrowPathIcon, TrashIcon } from '../Icons.tsx';
+import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, PaperClipIcon, SparklesIcon, ArrowPathIcon, TrashIcon } from '../Icons';
 
 interface NewRFIScreenProps {
     project: Project;

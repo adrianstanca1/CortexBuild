@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Project, RFI, User, Comment, Attachment } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, ClockIcon, TrashIcon } from '../Icons.tsx';
-import DiffViewer from '../shared/DiffViewer.tsx';
+import { Project, RFI, User, Comment, Attachment } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, ClockIcon, TrashIcon } from '../Icons';
+import DiffViewer from '../shared/DiffViewer';
 
 interface RFIDetailScreenProps {
     rfiId: string;

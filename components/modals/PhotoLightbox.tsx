@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '../Icons.tsx';
+import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '../Icons';
 
 // A generic photo object that the lightbox can use
 export interface LightboxPhoto {

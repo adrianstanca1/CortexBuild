@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 // Fix: Added .ts extension to import
-import { Project, Screen, User, PermissionAction, PermissionSubject } from '../../types.ts';
-import { usePermissions } from '../../hooks/usePermissions.ts';
+import { Project, Screen, User, PermissionAction, PermissionSubject } from '../../types';
+import { usePermissions } from '../../hooks/usePermissions';
 // Fix: Added .tsx extension to import
 import {
     ChevronLeftIcon, BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
     CheckBadgeIcon, DocumentDuplicateIcon, CameraIcon, ClipboardDocumentListIcon,
     BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
     WandSparklesIcon
-} from '../Icons.tsx';
+} from '../Icons';
 
 interface SidebarProps {
     project: Project;
@@ -121,8 +121,8 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
 
     const developerNavItems = [
         {
-            label: 'Developer Dashboard',
-            screen: 'developer-dashboard',
+            label: 'Developer Console',
+            screen: 'developer-console',
             icon: WandSparklesIcon,
             isModule: true
         },
@@ -146,9 +146,15 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
         }
     ];
 
-    const companySandboxNavItems = isCompanyAdmin ? [
+    const companyAdminNavItems = isCompanyAdmin ? [
         {
-            label: 'Sandbox',
+            label: 'Company Dashboard',
+            screen: 'company-admin-dashboard',
+            icon: BuildingOfficeIcon,
+            isModule: true
+        },
+        {
+            label: 'Innovation Sandbox',
             screen: 'developer-dashboard',
             icon: WandSparklesIcon,
             isModule: true
@@ -183,7 +189,7 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
         ? developerNavItems
         : isSuperAdmin
             ? superAdminNavItems
-            : [...visibleNavItems, ...companySandboxNavItems, ...sdkNavItems];
+            : [...visibleNavItems, ...companyAdminNavItems, ...sdkNavItems];
 
 
     return (

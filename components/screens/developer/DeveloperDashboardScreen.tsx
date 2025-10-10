@@ -28,6 +28,10 @@ import {
 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { Screen, User } from '../../../types';
+import DeveloperMetricsWidget from '../../widgets/DeveloperMetricsWidget';
+import DeveloperInsightsWidget from '../../widgets/DeveloperInsightsWidget';
+import DeveloperFocusWidget from '../../widgets/DeveloperFocusWidget';
+import { processDeveloperDashboardData } from '../../../utils/developerDashboardLogic';
 
 interface DeveloperDashboardScreenProps {
   currentUser: User;
@@ -292,6 +296,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
   const [capabilities, setCapabilities] = useState<any | null>(null);
   const [roleExperience, setRoleExperience] = useState<RoleExperience | null>(null);
   const [builderModules, setBuilderModules] = useState<BuilderModule[]>([]);
+  const [dashboardData, setDashboardData] = useState<any | null>(null);
   const [builderEditor, setBuilderEditor] = useState<{
     id?: string;
     name: string;
@@ -377,10 +382,10 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     const connections = nodes.length <= 1
       ? []
       : nodes.slice(0, -1).map((node, index) => ({
-          id: `conn-${index + 1}`,
-          source: node.id,
-          target: nodes[index + 1].id
-        }));
+        id: `conn-${index + 1}`,
+        source: node.id,
+        target: nodes[index + 1].id
+      }));
 
     let payload: any = {};
     try {
@@ -615,6 +620,25 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
         setCapabilities(summary.capabilities || null);
         setRoleExperience(summary.roleExperience || null);
         await loadCommunityModules();
+
+        // Process dashboard data with ML logic
+        try {
+          const processedData = processDeveloperDashboardData({
+            profile: summary.profile,
+            apps: summary.apps || [],
+            workflows: summary.workflows || [],
+            webhooks: summary.webhooks || [],
+            usage: summary.usageSummary || [],
+            agents: summary.agents || [],
+            stats: summary.stats,
+            sandboxRuns: summary.sandboxRuns || [],
+            capabilities: summary.capabilities
+          });
+          setDashboardData(processedData);
+        } catch (mlError) {
+          console.error('Failed to process dashboard data with ML', mlError);
+          setDashboardData(null);
+        }
       } else {
         await loadFallback();
       }
@@ -816,282 +840,212 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600 uppercase tracking-wide">
-            <ShieldCheck className="h-4 w-4" />
-            Multi-tenant Developer Environment
-          </div>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">Developer Control Center</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Company Scope: <span className="font-semibold text-slate-700">{currentUser.companyId}</span> · Sandbox linked to{' '}
-            <span className="font-semibold text-slate-700">{currentUser.email}</span>
-          </p>
-          {roleExperience && (
-            <p className="mt-2 text-xs text-slate-500 max-w-2xl">{roleExperience.subheading}</p>
-          )}
-          {capabilitySummary && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700 uppercase">
-                {capabilitySummary.role.replace('_', ' ')} Access
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
-                {capabilitySummary.runsLimit < 0
-                  ? 'Unlimited sandbox simulations'
-                  : `${capabilitySummary.runsRemaining} of ${capabilitySummary.runsLimit} sandbox runs remaining today`}
-              </span>
-              {capabilitySummary.maxApps >= 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
-                  App slots {activeApps}/{capabilitySummary.maxApps}
-                </span>
-              )}
-              {capabilitySummary.maxWorkflows >= 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
-                  Workflows {activeWorkflows}/{capabilitySummary.maxWorkflows}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => navigateTo('sdk-developer')}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors"
-          >
-            <Rocket className="h-4 w-4" />
-            Open SDK Workspace
-          </button>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh Data
-          </button>
-        </div>
-      </div>
+      {/* Developer Focus Widget - Replaces header */}
+      {!loading && dashboardData && (
+        <DeveloperFocusWidget
+          priorityTask={dashboardData.priorityTask}
+          metrics={dashboardData.focusMetrics}
+          userName={currentUser.name}
+        />
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-4">
-        <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-wide text-emerald-100">Subscription</p>
-              <h2 className="mt-2 text-2xl font-bold">
-                {subscriptionInfo?.label || 'Free'} Tier
-              </h2>
-              <p className="mt-2 text-sm text-emerald-100">
-                {profile?.apiRequestsUsed ?? 0}
-                {subscriptionInfo?.limit !== 'unlimited' && profile
-                  ? ` / ${profile.apiRequestsLimit} requests`
-                  : ' requests (unmetered)'}
-              </p>
-            </div>
-            <div className="rounded-full bg-white/15 p-3 backdrop-blur">
-              <Zap className="h-6 w-6" />
-            </div>
-          </div>
-          {subscriptionInfo?.limit !== 'unlimited' && (
-            <div className="mt-4">
-              <div className="h-2 rounded-full bg-emerald-400/40">
-                <div className="h-2 rounded-full bg-white transition-all" style={{ width: `${usagePercent}%` }} />
-              </div>
-              <p className="mt-2 text-xs text-emerald-100">Usage this month</p>
-            </div>
-          )}
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-600">Active Applications</p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{activeApps}</p>
-              <p className="mt-1 text-xs text-slate-500">{pendingApps} pending review</p>
-            </div>
-            <div className="rounded-full bg-blue-100 p-3">
-              <Code className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-600">Automation Pipelines</p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{workflows.length}</p>
-              <p className="mt-1 text-xs text-slate-500">{activeWorkflows} running live</p>
-            </div>
-            <div className="rounded-full bg-purple-100 p-3">
-              <Workflow className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-600">Integrations</p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{webhooks.length}</p>
-              <p className="mt-1 text-xs text-slate-500">{activeWebhooks} webhooks active</p>
-            </div>
-            <div className="rounded-full bg-orange-100 p-3">
-              <PlugZap className="h-6 w-6 text-orange-600" />
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-slate-900">Usage by Provider</h3>
-            <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-              {usageStats.activeProviders} providers connected
-            </div>
-          </div>
-          <div className="mt-4 space-y-3">
-            {usage.length === 0 && (
-              <p className="text-sm text-slate-500">Generate code via the SDK to populate usage analytics.</p>
-            )}
-            {usage.map((item) => (
-              <div key={item.provider} className="flex items-center justify-between rounded-lg border border-slate-100 p-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-800 capitalize">{item.provider}</p>
-                  <p className="text-xs text-slate-500">
-                    {item.requestsThisMonth.toLocaleString()} requests · {(item.totalTokens ?? 0).toLocaleString()} tokens
-                  </p>
-                </div>
-                <div className="text-sm font-semibold text-emerald-600">
-                  {formatCurrency(item.monthToDateCost)}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex items-center justify-between rounded-lg bg-slate-50 p-3">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Month to Date</p>
-              <p className="text-sm font-semibold text-slate-800">
-                {usageStats.totalRequests.toLocaleString()} requests · {(usageStats.totalTokens).toLocaleString()} tokens
-              </p>
-            </div>
-            <div className="text-sm font-semibold text-slate-500">
-              {formatCurrency(usageStats.totalCost)}
-            </div>
-          </div>
-      </Card>
-
-      <Card className="p-6 space-y-5">
-        <div className="flex items-center justify-between">
+      {!dashboardData && (
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Quick Actions</h3>
-            <p className="text-sm text-slate-500">
-              {roleExperience ? 'Tailored to your role and current guardrails.' : 'Jump straight into the workflows you manage most.'}
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600 uppercase tracking-wide">
+              <ShieldCheck className="h-4 w-4" />
+              Multi-tenant Developer Environment
+            </div>
+            <h1 className="mt-2 text-3xl font-bold text-slate-900">Developer Control Center</h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Company Scope: <span className="font-semibold text-slate-700">{currentUser.companyId}</span> · Sandbox linked to{' '}
+              <span className="font-semibold text-slate-700">{currentUser.email}</span>
             </p>
+            {roleExperience && (
+              <p className="mt-2 text-xs text-slate-500 max-w-2xl">{roleExperience.subheading}</p>
+            )}
+            {capabilitySummary && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700 uppercase">
+                  {capabilitySummary.role.replace('_', ' ')} Access
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
+                  {capabilitySummary.runsLimit < 0
+                    ? 'Unlimited sandbox simulations'
+                    : `${capabilitySummary.runsRemaining} of ${capabilitySummary.runsLimit} sandbox runs remaining today`}
+                </span>
+                {capabilitySummary.maxApps >= 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
+                    App slots {activeApps}/{capabilitySummary.maxApps}
+                  </span>
+                )}
+                {capabilitySummary.maxWorkflows >= 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
+                    Workflows {activeWorkflows}/{capabilitySummary.maxWorkflows}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-          {roleExperience && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
-              <Sparkles className="h-3 w-3" />
-              Role-aware
-            </span>
-          )}
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => navigateTo('sdk-developer')}
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+            >
+              <Rocket className="h-4 w-4" />
+              Open SDK Workspace
+            </button>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh Data
+            </button>
+          </div>
         </div>
-        <div className={`grid gap-3 ${roleExperience ? 'sm:grid-cols-2' : 'sm:grid-cols-2'}`}>
-          {roleExperience ? (
-            roleExperience.quickActions.length > 0 ? (
-              roleExperience.quickActions.map((action) => {
-                const Icon = ROLE_ICON_MAP[action.icon] ?? Sparkles;
-                const intentClass = QUICK_ACTION_INTENT_CLASSES[action.intent] ?? QUICK_ACTION_INTENT_CLASSES.secondary;
-                const iconTone = QUICK_ACTION_ICON_TONES[action.intent] ?? 'text-slate-500';
-                const helper = action.enabled ? action.description : action.disabledReason ?? action.description;
+      )}
 
-                return (
-                  <button
-                    key={action.id}
-                    type="button"
-                    onClick={() => handleQuickAction(action)}
-                    disabled={!action.enabled}
-                    className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${intentClass}`}
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800">{action.label}</p>
-                      <p className={`text-xs ${action.enabled ? 'text-slate-500' : 'text-slate-400'}`}>{helper}</p>
-                    </div>
-                    <Icon className={`h-5 w-5 ${action.enabled ? iconTone : 'text-slate-400'}`} />
-                  </button>
-                );
-              })
+      {/* Developer Metrics Widget - ML-Powered */}
+      {dashboardData && (
+        <DeveloperMetricsWidget
+          metrics={dashboardData.metrics}
+          trends={dashboardData.trends}
+        />
+      )}
+
+      {/* Developer Insights Widget - AI-Powered */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {dashboardData && (
+          <DeveloperInsightsWidget
+            insights={dashboardData.insights}
+            onAction={(insightId) => {
+              console.log('Insight action:', insightId);
+              // Handle insight actions
+              if (insightId.includes('quota')) {
+                navigateTo('sdk-developer', { startTab: 'settings' });
+              } else if (insightId.includes('cost')) {
+                navigateTo('sdk-developer', { startTab: 'analytics' });
+              } else if (insightId.includes('performance')) {
+                navigateTo('sdk-developer', { startTab: 'analytics' });
+              }
+            }}
+          />
+        )}
+
+        <Card className="p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Quick Actions</h3>
+              <p className="text-sm text-slate-500">
+                {roleExperience ? 'Tailored to your role and current guardrails.' : 'Jump straight into the workflows you manage most.'}
+              </p>
+            </div>
+            {roleExperience && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
+                <Sparkles className="h-3 w-3" />
+                Role-aware
+              </span>
+            )}
+          </div>
+          <div className={`grid gap-3 ${roleExperience ? 'sm:grid-cols-2' : 'sm:grid-cols-2'}`}>
+            {roleExperience ? (
+              roleExperience.quickActions.length > 0 ? (
+                roleExperience.quickActions.map((action) => {
+                  const Icon = ROLE_ICON_MAP[action.icon] ?? Sparkles;
+                  const intentClass = QUICK_ACTION_INTENT_CLASSES[action.intent] ?? QUICK_ACTION_INTENT_CLASSES.secondary;
+                  const iconTone = QUICK_ACTION_ICON_TONES[action.intent] ?? 'text-slate-500';
+                  const helper = action.enabled ? action.description : action.disabledReason ?? action.description;
+
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      onClick={() => handleQuickAction(action)}
+                      disabled={!action.enabled}
+                      className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${intentClass}`}
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{action.label}</p>
+                        <p className={`text-xs ${action.enabled ? 'text-slate-500' : 'text-slate-400'}`}>{helper}</p>
+                      </div>
+                      <Icon className={`h-5 w-5 ${action.enabled ? iconTone : 'text-slate-400'}`} />
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="sm:col-span-2 text-sm text-slate-500">No quick actions available for this role.</p>
+              )
             ) : (
-              <p className="sm:col-span-2 text-sm text-slate-500">No quick actions available for this role.</p>
-            )
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => handleSandboxRun()}
-                disabled={sandboxRunning || sandboxLimitReached}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-purple-400 hover:bg-purple-50 transition-colors disabled:opacity-60"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">Run Sandbox Test</p>
-                  <p className="text-xs text-slate-500">
-                    {sandboxLimitReached ? 'Daily sandbox quota reached for your role' : 'Validate modules in isolation'}
-                  </p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-purple-500" />
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateTo('sdk-developer', { startTab: 'builder' })}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-emerald-400 hover:bg-emerald-50 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">Generate Module</p>
-                  <p className="text-xs text-slate-500">AI builder with live preview</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-emerald-500" />
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateTo('sdk-developer', { startTab: 'workflows' })}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">Automate Workflow</p>
-                  <p className="text-xs text-slate-500">Design and activate pipelines</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-blue-500" />
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateTo('sdk-developer', { startTab: 'marketplace' })}
-                disabled={!canPublishModules}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-amber-400 hover:bg-amber-50 transition-colors disabled:opacity-60"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">Publish to Marketplace</p>
-                  <p className="text-xs text-slate-500">
-                    {canPublishModules ? 'Promote modules to clients' : 'Publishing restricted for this role'}
-                  </p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-amber-500" />
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateTo('sdk-developer', { startTab: 'settings' })}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-slate-400 hover:bg-slate-100 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">Manage API Keys</p>
-                  <p className="text-xs text-slate-500">Rotate secrets and limits</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-slate-500" />
-              </button>
-            </>
-          )}
-        </div>
-      </Card>
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleSandboxRun()}
+                  disabled={sandboxRunning || sandboxLimitReached}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-purple-400 hover:bg-purple-50 transition-colors disabled:opacity-60"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Run Sandbox Test</p>
+                    <p className="text-xs text-slate-500">
+                      {sandboxLimitReached ? 'Daily sandbox quota reached for your role' : 'Validate modules in isolation'}
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-purple-500" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('sdk-developer', { startTab: 'builder' })}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-emerald-400 hover:bg-emerald-50 transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Generate Module</p>
+                    <p className="text-xs text-slate-500">AI builder with live preview</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-emerald-500" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('sdk-developer', { startTab: 'workflows' })}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Automate Workflow</p>
+                    <p className="text-xs text-slate-500">Design and activate pipelines</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-blue-500" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('sdk-developer', { startTab: 'marketplace' })}
+                  disabled={!canPublishModules}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-amber-400 hover:bg-amber-50 transition-colors disabled:opacity-60"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Publish to Marketplace</p>
+                    <p className="text-xs text-slate-500">
+                      {canPublishModules ? 'Promote modules to clients' : 'Publishing restricted for this role'}
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-amber-500" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('sdk-developer', { startTab: 'settings' })}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-slate-400 hover:bg-slate-100 transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Manage API Keys</p>
+                    <p className="text-xs text-slate-500">Rotate secrets and limits</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-slate-500" />
+                </button>
+              </>
+            )}
+          </div>
+        </Card>
       </div>
 
       {roleExperience && (
@@ -1177,11 +1131,10 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                     type="button"
                     onClick={() => handleQuickAction(derivedAction)}
                     disabled={program.locked}
-                    className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                      program.locked
-                        ? 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400'
-                        : 'border border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
+                    className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${program.locked
+                      ? 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400'
+                      : 'border border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
                   >
                     {program.ctaLabel}
                     <ArrowRight className="h-4 w-4" />
@@ -1592,15 +1545,14 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-slate-800">{app.name}</p>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      app.status === 'approved'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : app.status === 'pending_review'
-                          ? 'bg-amber-100 text-amber-700'
-                          : app.status === 'rejected'
-                            ? 'bg-rose-100 text-rose-700'
-                            : 'bg-slate-100 text-slate-600'
-                    }`}
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${app.status === 'approved'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : app.status === 'pending_review'
+                        ? 'bg-amber-100 text-amber-700'
+                        : app.status === 'rejected'
+                          ? 'bg-rose-100 text-rose-700'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
                   >
                     {app.status.replace('_', ' ')}
                   </span>
@@ -1698,27 +1650,27 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
             <Activity className="h-5 w-5 text-slate-400" />
           </div>
           <div className="mt-4 space-y-3">
-              {builderRuns.length === 0 ? (
-                <p className="text-sm text-slate-500">No sandbox runs yet. Launch a simulation to see results here.</p>
-              ) : (
-                builderRuns.slice(0, 6).map((run) => (
-                  <button
-                    key={run.id}
-                    type="button"
-                    onClick={() => setSelectedRun(run)}
-                    className="w-full rounded-lg border border-slate-100 p-3 text-left hover:border-emerald-300 hover:bg-emerald-50"
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-slate-800">{run.name}</p>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${run.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                        {run.status}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-500">{new Date(run.createdAt).toLocaleString()}</p>
-                    <p className="text-xs text-slate-400">Duration {(run.durationMs / 1000).toFixed(2)}s</p>
-                  </button>
-                ))
-              )}
+            {builderRuns.length === 0 ? (
+              <p className="text-sm text-slate-500">No sandbox runs yet. Launch a simulation to see results here.</p>
+            ) : (
+              builderRuns.slice(0, 6).map((run) => (
+                <button
+                  key={run.id}
+                  type="button"
+                  onClick={() => setSelectedRun(run)}
+                  className="w-full rounded-lg border border-slate-100 p-3 text-left hover:border-emerald-300 hover:bg-emerald-50"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-800">{run.name}</p>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${run.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                      {run.status}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">{new Date(run.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-slate-400">Duration {(run.durationMs / 1000).toFixed(2)}s</p>
+                </button>
+              ))
+            )}
           </div>
         </Card>
       </div>
@@ -1742,13 +1694,13 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
             <div>
               <h4 className="text-xs font-semibold text-slate-500 uppercase">Definition</h4>
               <pre className="mt-2 max-h-48 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-{JSON.stringify(selectedRun.definition, null, 2)}
+                {JSON.stringify(selectedRun.definition, null, 2)}
               </pre>
             </div>
             <div>
               <h4 className="text-xs font-semibold text-slate-500 uppercase">Result</h4>
               <pre className="mt-2 max-h-48 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-{JSON.stringify(selectedRun.result, null, 2)}
+                {JSON.stringify(selectedRun.result, null, 2)}
               </pre>
             </div>
           </div>
@@ -1775,13 +1727,12 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   <p className="text-sm font-semibold text-slate-800">{agent.id}</p>
                   <p className="text-xs text-slate-500 uppercase">{agent.status}</p>
                 </div>
-                <div className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                  agent.status === 'running'
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : agent.status === 'paused'
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-slate-100 text-slate-600'
-                }`}>
+                <div className={`rounded-full px-2 py-1 text-xs font-semibold ${agent.status === 'running'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : agent.status === 'paused'
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-slate-100 text-slate-600'
+                  }`}>
                   {agent.status}
                 </div>
               </div>

@@ -1,8 +1,8 @@
 // Fix: Created the DayworkSheetDetailScreen component to resolve "not a module" error.
 import React, { useState, useEffect } from 'react';
-import { Project, DayworkSheet, User, PermissionAction, PermissionSubject } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, CheckCircleIcon, XMarkIcon } from '../Icons.tsx';
+import { Project, DayworkSheet, User, PermissionAction, PermissionSubject } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, CheckCircleIcon, XMarkIcon } from '../Icons';
 
 interface DayworkSheetDetailScreenProps {
     sheetId: string;

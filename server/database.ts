@@ -751,7 +751,7 @@ const seedInitialData = () => {
             {
                 id: 'user-1',
                 email: 'adrian.stanca1@gmail.com',
-                password: 'password123',
+                password: 'Cumparavinde1',
                 name: 'Adrian Stanca',
                 role: 'super_admin',
                 companyId: 'company-1'
@@ -759,7 +759,7 @@ const seedInitialData = () => {
             {
                 id: 'user-4',
                 email: 'adrian@ascladdingltd.co.uk',
-                password: 'Lolozania1',
+                password: 'lolozania1',
                 name: 'Adrian Stanca',
                 role: 'company_admin',
                 companyId: 'company-2'

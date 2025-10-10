@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { User, Screen, Task, SiteInstruction, DailyLog, Project } from '../../../types.ts';
-import * as api from '../../../api.ts';
-import { ListBulletIcon, ClipboardDocumentListIcon, AlertTriangleIcon } from '../../Icons.tsx';
-import DailyFocusWidget from '../../widgets/DailyFocusWidget.tsx';
-import { calculateDashboardMetrics } from '../../../utils/dashboardLogic.ts';
+import { User, Screen, Task, SiteInstruction, DailyLog, Project } from '../../../types';
+import * as api from '../../../api';
+import { ListBulletIcon, ClipboardDocumentListIcon, AlertTriangleIcon } from '../../Icons';
+import DailyFocusWidget from '../../widgets/DailyFocusWidget';
+import { calculateDashboardMetrics } from '../../../utils/dashboardLogic';
 
 interface OperativeDashboardProps {
     currentUser: User;

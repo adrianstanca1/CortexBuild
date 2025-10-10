@@ -1,4 +1,4 @@
-import { User, Company, Project, Task, RFI, PunchListItem, Drawing, Document, SiteInstruction, DeliveryItem, DayworkSheet, Comment, Notification, ActivityEvent, AIFeedback, DailyLog, TimeEntry } from './types.ts';
+import { User, Company, Project, Task, RFI, PunchListItem, Drawing, Document, SiteInstruction, DeliveryItem, DayworkSheet, Comment, Notification, ActivityEvent, AIFeedback, DailyLog, TimeEntry } from './types';
 
 // Helper to create date strings
 const d = (daysAgo: number): string => {

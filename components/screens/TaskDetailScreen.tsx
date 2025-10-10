@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 // Fix: Added .ts extension to import
-import { Project, Task, User, Comment, Attachment, PermissionAction, PermissionSubject } from '../../types.ts';
+import { Project, Task, User, Comment, Attachment, PermissionAction, PermissionSubject } from '../../types';
 // Fix: Added .ts extension to import
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Fix: Added .tsx extension to import
-import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, AlertTriangleIcon, TrashIcon, ClockIcon } from '../Icons.tsx';
-import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox.tsx';
+import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, AlertTriangleIcon, TrashIcon, ClockIcon } from '../Icons';
+import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
 
 
 interface TaskDetailScreenProps {

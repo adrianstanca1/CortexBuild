@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Screen, User } from '../../types.ts';
-import { MENU_ITEMS, MenuItem } from '../../navigation.ts';
-import { usePermissions } from '../../hooks/usePermissions.ts';
-import { ChevronDownIcon } from '../Icons.tsx';
+import { Screen, User } from '../../types';
+import { MENU_ITEMS, MenuItem } from '../../navigation';
+import { usePermissions } from '../../hooks/usePermissions';
+import { ChevronDownIcon } from '../Icons';
 
 interface FloatingMenuProps {
     currentUser: User;
@@ -30,7 +30,7 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
     };
 
     const developerMenuItems: MenuItem[] = [
-        { label: 'Developer Dashboard', screen: 'developer-dashboard' },
+        { label: 'Developer Console', screen: 'developer-console' },
         { label: 'SDK Workspace', screen: 'sdk-developer' },
         { label: 'Marketplace', screen: 'ai-agents-marketplace' }
     ];
@@ -41,7 +41,7 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
     ];
 
     const companyAdminMenuItems: MenuItem[] = [
-        { label: 'Developer Sandbox', screen: 'developer-dashboard' },
+        { label: 'Developer Tools', screen: 'developer-dashboard' },
         { label: 'SDK Workspace', screen: 'sdk-developer' }
     ];
 

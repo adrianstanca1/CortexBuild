@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { User } from '../../types.ts';
-import * as authService from '../../auth/authService.ts';
-import { ArrowPathIcon } from '../Icons.tsx';
-import { supabase } from '../../supabaseClient.ts';
-import { validateEmail, validatePassword, combineValidations } from '../../utils/validation.ts';
+import { User } from '../../types';
+import * as authService from '../../auth/authService';
+import { ArrowPathIcon } from '../Icons';
+import { supabase } from '../../supabaseClient';
+import { validateEmail, validatePassword, combineValidations } from '../../utils/validation';
 
 interface LoginFormProps {
     onLoginSuccess: (user: User) => void;

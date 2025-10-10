@@ -1,13 +1,14 @@
 import React from 'react';
-import { User, Screen, PermissionAction, PermissionSubject } from '../../types.ts';
-import PlatformAdminScreen from './admin/PlatformAdminScreen.tsx';
-import SuperAdminDashboardScreen from './admin/SuperAdminDashboardScreen.tsx';
-import CompanyAdminDashboard from './dashboards/CompanyAdminDashboard.tsx';
-import CompanyAdminDashboardNew from './dashboards/CompanyAdminDashboardNew.tsx';
-import SupervisorDashboard from './dashboards/SupervisorDashboard.tsx';
-import OperativeDashboard from './dashboards/OperativeDashboard.tsx';
-import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard.tsx';
-import DeveloperDashboardScreen from './developer/DeveloperDashboardScreen.tsx';
+import { User, Screen, PermissionAction, PermissionSubject } from '../../types';
+import PlatformAdminScreen from './admin/PlatformAdminScreen';
+import SuperAdminDashboardScreen from './admin/SuperAdminDashboardScreen';
+import CompanyAdminDashboard from './dashboards/CompanyAdminDashboard';
+import CompanyAdminDashboardNew from './dashboards/CompanyAdminDashboardNew';
+import SupervisorDashboard from './dashboards/SupervisorDashboard';
+import OperativeDashboard from './dashboards/OperativeDashboard';
+import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard';
+import DeveloperWorkspaceScreen from './developer/DeveloperWorkspaceScreen';
+import CompanyAdminDashboardScreen from './company/CompanyAdminDashboardScreen';
 
 
 interface UnifiedDashboardScreenProps {
@@ -60,9 +61,10 @@ const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) =>
             );
 
         case 'developer':
-            return <DeveloperDashboardScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
+            return <DeveloperWorkspaceScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
 
         case 'company_admin':
+            return <CompanyAdminDashboardScreen {...props} />;
         case 'Project Manager':
         case 'Accounting Clerk':
             return <EnhancedDashboard />;

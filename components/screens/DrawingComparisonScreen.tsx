@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Drawing } from '../../types.ts';
-import { ChevronLeftIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '../Icons.tsx';
+import { Drawing } from '../../types';
+import { ChevronLeftIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '../Icons';
 
 declare const pdfjsLib: any;
 

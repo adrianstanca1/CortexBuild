@@ -1,10 +1,10 @@
 import React from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { Project, Screen } from '../../types.ts';
+import { Project, Screen } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
-import { ChevronRightIcon, QuestionMarkCircleIcon, AlertTriangleIcon } from '../Icons.tsx';
+import * as api from '../../api';
+import { ChevronRightIcon, QuestionMarkCircleIcon, AlertTriangleIcon } from '../Icons';
 
 interface ProjectsOverviewWidgetProps {
     projects: Project[];

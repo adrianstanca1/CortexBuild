@@ -1,5 +1,5 @@
 // Fix: Corrected import path to include file extension.
-import { Project, ProjectSnapshot } from './types.ts';
+import { Project, ProjectSnapshot } from './types';
 
 // Fix: Added missing description, contacts, companyId, and snapshot properties to MOCK_PROJECT to match the Project type definition.
 export const MOCK_PROJECT: Project = {

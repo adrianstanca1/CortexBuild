@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Task, Screen, User, Project } from '../../types.ts';
-import * as api from '../../api.ts';
-import { CalendarDaysIcon } from '../Icons.tsx';
+import { Task, Screen, User, Project } from '../../types';
+import * as api from '../../api';
+import { CalendarDaysIcon } from '../Icons';
 
 interface MyProjectDeadlinesWidgetProps {
     currentUser: User;

@@ -8,6 +8,7 @@ import { User } from './types';
 import { Base44Clone } from './components/base44/Base44Clone';
 import { SuperAdminDashboard } from './components/base44/pages/SuperAdminDashboard';
 import { CompanyAdminDashboard } from './components/base44/pages/CompanyAdminDashboard';
+import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
 
 // Simple Login Component
 const SimpleLogin: React.FC<{ onLoginSuccess: (user: User) => void }> = ({ onLoginSuccess }) => {
@@ -264,11 +265,29 @@ export const SimpleApp: React.FC = () => {
     const handleLogout = async () => {
         try {
             console.log('👋 Logging out...');
+
+            // Call logout service FIRST (clears localStorage, sessionStorage, cookies, dispatches event)
             await authService.logout();
+
+            console.log('✅ Logout successful - All session data cleared');
+
+            // Clear user state
             setCurrentUser(null);
-            console.log('✅ Logout successful');
+
+            // Small delay to ensure all cleanup is done
+            setTimeout(() => {
+                // Force page reload to ensure clean state
+                window.location.reload();
+            }, 100);
         } catch (error) {
             console.error('Logout error:', error);
+            // Even if logout fails, clear everything and reload
+            localStorage.clear();
+            sessionStorage.clear();
+            setCurrentUser(null);
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
         }
     };
 
@@ -286,6 +305,12 @@ export const SimpleApp: React.FC = () => {
     // Role-based routing: show appropriate dashboard based on user role
     if (currentUser) {
         console.log('✅ Rendering dashboard for:', currentUser.name, 'Role:', currentUser.role);
+
+        // Developer gets the Enhanced Developer Console
+        if (currentUser.role === 'developer') {
+            console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Enhanced Developer Console Pro');
+            return <EnhancedDeveloperConsole onLogout={handleLogout} />;
+        }
 
         // Super Admin gets the Super Admin Dashboard
         if (currentUser.role === 'super_admin') {

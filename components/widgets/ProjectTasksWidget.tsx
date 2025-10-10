@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 // Fix: Added User type import.
 // Fix: Corrected import paths to include file extensions.
-import { Task, Project, Screen, User } from '../../types.ts';
+import { Task, Project, Screen, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Fix: Added .tsx extension to icon import
-import { ListBulletIcon, ChevronRightIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, PaperClipIcon } from '../Icons.tsx';
+import { ListBulletIcon, ChevronRightIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, PaperClipIcon } from '../Icons';
 
 interface ProjectTasksWidgetProps {
     project: Project;

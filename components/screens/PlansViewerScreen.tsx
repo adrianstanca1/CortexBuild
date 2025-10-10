@@ -3,12 +3,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 // Fix: Added .ts extension to import
-import { Project } from '../../types.ts';
+import { Project } from '../../types';
 // Fix: Added .tsx extension to import
 import {
     ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon,
     MapPinIcon, LineIcon, RectangleIcon, CursorArrowRaysIcon, TrashIcon
-} from '../Icons.tsx';
+} from '../Icons';
 
 declare const pdfjsLib: any;
 
