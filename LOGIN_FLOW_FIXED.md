@@ -74,7 +74,7 @@ default:
 
 1. **User enters credentials** in `LoginForm.tsx`
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `parola123`
+   - Password: `Cumparavinde1`
 
 2. **Authentication** via `api.loginUser()`
    - Supabase auth or mock auth
@@ -190,7 +190,7 @@ default:
 
 2. **Enter credentials**
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `parola123`
+   - Password: `Cumparavinde1`
 
 3. **Click "Sign In"**
 
@@ -283,7 +283,7 @@ default:
 
 **Test credentials:**
 - Email: `adrian.stanca1@gmail.com`
-- Password: `parola123`
+- Password: `Cumparavinde1`
 
 **Expected result:** Beautiful Base44 dashboard with sidebar, metrics, and all features! 🚀
 

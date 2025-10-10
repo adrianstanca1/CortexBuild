@@ -108,7 +108,7 @@ Test the API:
 curl https://constructai-xyz123.vercel.app/api/auth/login \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}'
+  -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}'
 ```
 
 Expected response:
@@ -204,7 +204,7 @@ created_at  TIMESTAMP
 ### **Super Admin**
 ```
 Email: adrian.stanca1@gmail.com
-Password: parola123
+Password: Cumparavinde1
 Role: super_admin
 ```
 
@@ -233,7 +233,7 @@ Login with email and password
 ```json
 {
   "email": "adrian.stanca1@gmail.com",
-  "password": "parola123"
+  "password": "Cumparavinde1"
 }
 ```
 

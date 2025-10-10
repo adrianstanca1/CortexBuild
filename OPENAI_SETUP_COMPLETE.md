@@ -11,10 +11,9 @@ OpenAI SDK este instalat și configurat complet în aplicația CortexBuild cu to
 - **Locație**: `node_modules/openai`
 
 ### ✅ API Key Configuration
-- **Locație**: `.env.local` / `.env`
-- **Cheie demo**: `sk-demo-openai-key` (seed automat dacă `OPENAI_API_KEY` nu este setat)
-- **Status**: Preconfigurat pentru demo – setează `OPENAI_API_KEY` cu cheia ta reală înainte de producție
-- **SDK**: intrare implicită în `api_keys` pentru utilizatorul developer (`dev@constructco.com`)
+- **Locație**: `.env.local`
+- **Key**: `OPENAI_API_KEY=sk-proj-8CFgjfVVAQnGEvOTLWDr...`
+- **Status**: Activ și funcțional
 
 ### ✅ Database Tables
 Tabele create pentru tracking AI:
@@ -147,8 +146,8 @@ Prețuri per 1000 tokens:
 
 ```bash
 # OpenAI Configuration
-OPENAI_API_KEY=sk-demo-openai-key            # Înlocuiește cu cheia reală în .env
-OPENAI_API_KEY_LEGACY=sk-demo-openai-key     # Opțional pentru rotație
+OPENAI_API_KEY=sk-proj-8CFgjfVVAQnGEvOTLWDr...
+OPENAI_API_KEY_LEGACY=sk-proj-...  # Optional for load balancing
 
 # Gemini Configuration (Optional)
 GEMINI_API_KEY=your-gemini-api-key
@@ -199,7 +198,7 @@ console.log(response.response);
 # Login
 TOKEN=$(curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}' \
+  -d '{"email":"adrian.stanca1@gmail.com","password":"password123"}' \
   | jq -r '.token')
 
 # Generate Code

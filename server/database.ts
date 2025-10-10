@@ -751,7 +751,7 @@ const seedInitialData = () => {
             {
                 id: 'user-1',
                 email: 'adrian.stanca1@gmail.com',
-                password: 'parola123',
+                password: 'password123',
                 name: 'Adrian Stanca',
                 role: 'super_admin',
                 companyId: 'company-1'
@@ -759,7 +759,7 @@ const seedInitialData = () => {
             {
                 id: 'user-4',
                 email: 'adrian@ascladdingltd.co.uk',
-                password: 'lolozania1',
+                password: 'Lolozania1',
                 name: 'Adrian Stanca',
                 role: 'company_admin',
                 companyId: 'company-2'
@@ -795,44 +795,6 @@ const seedInitialData = () => {
             db.prepare('INSERT INTO users (id, email, password_hash, name, role, company_id) VALUES (?, ?, ?, ?, ?, ?)').run(
                 user.id, user.email, passwordHash, user.name, user.role, user.companyId
             );
-        }
-
-        // Ensure developer has SDK profile provisioned
-        const existingSdkProfile = db.prepare('SELECT id FROM sdk_developers WHERE user_id = ?').get('user-5');
-        if (!existingSdkProfile) {
-            db.prepare(`
-                INSERT INTO sdk_developers (user_id, tier, api_requests_limit, is_verified)
-                VALUES (?, ?, ?, ?)
-            `).run('user-5', 'starter', 1000, 1);
-        }
-
-        // Seed an API key entry for OpenAI usage (hash stored, full key shown in logs when using demo default)
-        const openAiSeedKey = process.env.OPENAI_API_KEY || 'sk-demo-openai-key';
-        const openAiKeyLabel = process.env.OPENAI_API_KEY ? 'Project OpenAI Key' : 'Demo OpenAI Key';
-        const openAiKeyPrefix = openAiSeedKey.slice(0, 12);
-        const openAiKeyHash = bcrypt.hashSync(openAiSeedKey, 10);
-
-        const existingApiKey = db
-            .prepare('SELECT id FROM api_keys WHERE user_id = ? AND name = ?')
-            .get('user-5', openAiKeyLabel);
-
-        if (!existingApiKey) {
-            db.prepare(`
-                INSERT INTO api_keys (user_id, name, key_hash, key_prefix, scopes)
-                VALUES (?, ?, ?, ?, ?)
-            `).run(
-                'user-5',
-                openAiKeyLabel,
-                openAiKeyHash,
-                openAiKeyPrefix,
-                'openai:chat,openai:agents'
-            );
-
-            console.log(`🔑 Seeded SDK API key "${openAiKeyLabel}" (prefix ${openAiKeyPrefix}).`);
-            if (!process.env.OPENAI_API_KEY) {
-                console.log(`   Demo OpenAI key for local testing: ${openAiSeedKey}`);
-                console.log('   Replace OPENAI_API_KEY in your environment when supplying a real key.');
-            }
         }
 
         // Seed clients

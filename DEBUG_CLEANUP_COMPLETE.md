@@ -296,7 +296,7 @@ components/dashboard/PerformanceCharts.tsx
 
 **🌐 Test Now: http://localhost:3000**
 
-**📚 Login: adrian.stanca1@gmail.com / parola123**
+**📚 Login: adrian.stanca1@gmail.com / Cumparavinde1**
 
 **🎯 Dashboard complet funcțional cu toate fix-urile!** ✨
 

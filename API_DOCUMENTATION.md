@@ -15,7 +15,7 @@ Authenticate a user and receive a JWT token.
 ```json
 {
   "email": "adrian.stanca1@gmail.com",
-  "password": "parola123"
+  "password": "Cumparavinde1"
 }
 ```
 
@@ -328,7 +328,7 @@ curl -X POST https://api.example.com/api/auth/logout \
 ### **Test Credentials**
 ```
 Email: adrian.stanca1@gmail.com
-Password: parola123
+Password: Cumparavinde1
 Role: super_admin
 ```
 
@@ -349,7 +349,7 @@ Role: supervisor
 # 1. Login
 TOKEN=$(curl -X POST https://api.example.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}' \
+  -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}' \
   | jq -r '.token')
 
 # 2. Get current user

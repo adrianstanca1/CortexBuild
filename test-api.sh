@@ -31,7 +31,7 @@ echo ""
 echo "🔐 Test 2: Login"
 LOGIN_RESPONSE=$(curl -s -X POST $API_URL/auth/login \
     -H "Content-Type: application/json" \
-    -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}')
+    -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}')
 
 if echo $LOGIN_RESPONSE | grep -q "success"; then
     TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.token')

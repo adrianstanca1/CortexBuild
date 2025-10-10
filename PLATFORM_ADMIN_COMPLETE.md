@@ -10,7 +10,7 @@
 ### **1. Super Admin User Created** ✅
 
 **Email**: `adrian.stanca1@gmail.com`  
-**Password**: `parola123`  
+**Password**: `Cumparavinde1`  
 **Role**: `super_admin`  
 **Company**: `ConstructAI Platform` (comp_platform_admin)
 
@@ -108,7 +108,7 @@
 
 ```
 Email: adrian.stanca1@gmail.com
-Password: parola123
+Password: Cumparavinde1
 ```
 
 Or use Google OAuth with this email.
@@ -217,7 +217,7 @@ if (currentUser.role !== 'super_admin') {
 ## ✅ **Testing Checklist**
 
 ### **Login Flow**
-- [ ] Login with adrian.stanca1@gmail.com / parola123
+- [ ] Login with adrian.stanca1@gmail.com / Cumparavinde1
 - [ ] Login with Google OAuth (adrian.stanca1@gmail.com)
 - [ ] Verify redirect to Platform Admin Dashboard
 - [ ] Check loading states during login
@@ -311,7 +311,7 @@ if (currentUser.role !== 'super_admin') {
 ```bash
 # 1. Login to app
 Email: adrian.stanca1@gmail.com
-Password: parola123
+Password: Cumparavinde1
 
 # 2. You'll see Platform Admin Dashboard automatically
 

@@ -347,7 +347,7 @@ http://localhost:3000
 **Super Admin:**
 ```
 Email: adrian.stanca1@gmail.com
-Password: parola123
+Password: Cumparavinde1
 ```
 
 **Demo User:**
@@ -461,7 +461,7 @@ Password: password123
 
 **Login credentials:**
 - Email: `adrian.stanca1@gmail.com`
-- Password: `parola123`
+- Password: `Cumparavinde1`
 
 **Enjoy your modern, secure, and scalable construction management platform!** ✨
 

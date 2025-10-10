@@ -164,7 +164,7 @@ Login → currentUser set → navigateToModule called
 
 ### **Test Steps**:
 1. ✅ Open http://localhost:3000
-2. ✅ Login with adrian.stanca1@gmail.com / parola123
+2. ✅ Login with adrian.stanca1@gmail.com / Cumparavinde1
 3. ✅ Click "Sign In"
 4. ✅ **Dashboard appears immediately!**
 5. ✅ Statistics load
@@ -325,7 +325,7 @@ export const useNavigation = () => {
 
 **🌐 Test it now at: http://localhost:3000**
 
-**📚 Login with: adrian.stanca1@gmail.com / parola123**
+**📚 Login with: adrian.stanca1@gmail.com / Cumparavinde1**
 
 **🎯 Dashboard will appear immediately!** ✨
 

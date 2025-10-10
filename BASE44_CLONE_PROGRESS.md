@@ -241,7 +241,7 @@ UI/UX:        100%  (Complete)
 
 ### **Test Flow**
 ```
-1. Login: adrian.stanca1@gmail.com / parola123
+1. Login: adrian.stanca1@gmail.com / Cumparavinde1
 2. ✅ Dashboard appears with all data
 3. Click Projects → ✅ See 7 projects
 4. Click Clients → ✅ See 6 clients
@@ -273,7 +273,7 @@ UI/UX:        100%  (Complete)
 
 **🌐 Testează ACUM: http://localhost:3000**
 
-**📚 Login: adrian.stanca1@gmail.com / parola123**
+**📚 Login: adrian.stanca1@gmail.com / Cumparavinde1**
 
 **🎯 3 pagini complete, 9 în curs de implementare!** ✨
 

@@ -31,7 +31,7 @@ location.reload();
 
 - URL: <http://localhost:3000>
 - Email: `adrian.stanca1@gmail.com`
-- Password: `parola123`
+- Password: `password123`
 - Role: `super_admin`
 
 ---

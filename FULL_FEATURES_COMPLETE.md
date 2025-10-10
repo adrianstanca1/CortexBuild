@@ -356,7 +356,7 @@ components/simple/FullDashboard.tsx (395 lines)
 
 **🌐 Testează ACUM: http://localhost:3000**
 
-**📚 Login: adrian.stanca1@gmail.com / parola123**
+**📚 Login: adrian.stanca1@gmail.com / Cumparavinde1**
 
 **🎯 Toate funcționalitățile în formă simplă!** ✨
 

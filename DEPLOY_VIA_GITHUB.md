@@ -126,7 +126,7 @@ git push -u origin main
 
 2. **Test Login**
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `parola123`
+   - Password: `Cumparavinde1`
 
 3. **Verify Features**
    - Dashboard loads

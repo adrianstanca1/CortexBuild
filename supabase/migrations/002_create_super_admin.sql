@@ -4,7 +4,7 @@
 -- This migration creates the principal super admin user for ConstructAI
 --
 -- Email: adrian.stanca1@gmail.com
--- Password: parola123
+-- Password: Cumparavinde1
 -- Role: super_admin
 --
 -- Author: ConstructAI Team
@@ -266,7 +266,7 @@ CREATE POLICY audit_logs_company_admin ON audit_logs
 --
 -- 1. Create the auth user in Supabase Dashboard or via API:
 --    - Email: adrian.stanca1@gmail.com
---    - Password: parola123
+--    - Password: Cumparavinde1
 --    - Or enable Google OAuth for this email
 --
 -- 2. Get the user ID from auth.users table
