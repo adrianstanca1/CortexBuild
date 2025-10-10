@@ -10,6 +10,13 @@ import NotesApp from './mini-apps/NotesApp';
 import HabitTrackerApp from './mini-apps/HabitTrackerApp';
 import MobileAppBuilder from './mobile-builder/MobileAppBuilder';
 
+// Construction Industry Apps
+import DailySiteInspector from './construction/DailySiteInspector';
+import SmartProcurementAssistant from './construction/SmartProcurementAssistant';
+import SafetyIncidentReporter from './construction/SafetyIncidentReporter';
+import CrewTimeTracker from './construction/CrewTimeTracker';
+import QualityControlChecklist from './construction/QualityControlChecklist';
+
 export const APP_REGISTRY: MiniApp[] = [
     {
         id: 'todo-list',
@@ -81,6 +88,68 @@ export const APP_REGISTRY: MiniApp[] = [
         category: 'utilities',
         component: MobileAppBuilder,
         installed: true, // Pre-installed as core tool
+        free: true
+    },
+
+    // Construction Industry Apps - FREE
+    {
+        id: 'daily-site-inspector',
+        name: 'Daily Site Inspector',
+        description: 'Photo documentation, site inspection checklists, weather tracking, and automated PDF reports for construction sites',
+        icon: '📸',
+        version: '1.0.0',
+        author: 'CortexBuild',
+        category: 'construction',
+        component: DailySiteInspector,
+        installed: true, // Pre-installed for demo
+        free: true
+    },
+    {
+        id: 'smart-procurement',
+        name: 'Smart Procurement Assistant',
+        description: 'Material ordering, vendor price comparison, inventory monitoring, and automated purchase order generation',
+        icon: '📦',
+        version: '1.0.0',
+        author: 'CortexBuild',
+        category: 'construction',
+        component: SmartProcurementAssistant,
+        installed: true, // Pre-installed for demo
+        free: true
+    },
+    {
+        id: 'safety-incident-reporter',
+        name: 'Safety Incident Reporter',
+        description: 'Quick incident logging, photo/video evidence, OSHA compliance tracking, and real-time safety notifications',
+        icon: '⚠️',
+        version: '1.0.0',
+        author: 'CortexBuild',
+        category: 'construction',
+        component: SafetyIncidentReporter,
+        installed: true, // Pre-installed for demo
+        free: true
+    },
+    {
+        id: 'crew-time-tracker',
+        name: 'Crew Time Tracker',
+        description: 'GPS-verified clock in/out, labor hours calculation, overtime alerts, and payroll integration for construction crews',
+        icon: '👷',
+        version: '1.0.0',
+        author: 'CortexBuild',
+        category: 'construction',
+        component: CrewTimeTracker,
+        installed: true, // Pre-installed for demo
+        free: true
+    },
+    {
+        id: 'quality-control-checklist',
+        name: 'Quality Control Checklist',
+        description: 'Customizable inspection forms, pass/fail criteria, defect tracking, and compliance reporting with digital signatures',
+        icon: '✅',
+        version: '1.0.0',
+        author: 'CortexBuild',
+        category: 'construction',
+        component: QualityControlChecklist,
+        installed: true, // Pre-installed for demo
         free: true
     }
 ];
