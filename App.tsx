@@ -64,6 +64,12 @@ import AIAgentsMarketplaceScreen from './components/screens/modules/AIAgentsMark
 import MyTasksScreen from './components/screens/MyTasksScreen';
 import PlaceholderToolScreen from './components/screens/tools/PlaceholderToolScreen';
 
+// Global Marketplace Components
+import GlobalMarketplace from './components/marketplace/GlobalMarketplace';
+import MyApplicationsDesktop from './components/desktop/MyApplicationsDesktop';
+import AdminReviewInterface from './components/marketplace/AdminReviewInterface';
+import DeveloperSubmissionInterface from './components/marketplace/DeveloperSubmissionInterface';
+
 import { Base44Clone } from './components/base44/Base44Clone';
 
 // Admin Screens
@@ -124,6 +130,11 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'super-admin-dashboard': SuperAdminDashboardScreen,
     'sdk-developer': ProductionSDKDeveloperView,
     'my-apps-desktop': Base44Clone,
+    // Global Marketplace
+    'marketplace': GlobalMarketplace,
+    'my-applications': MyApplicationsDesktop,
+    'admin-review': AdminReviewInterface,
+    'developer-submissions': DeveloperSubmissionInterface,
     // Admin
     'platform-admin': PlatformAdminScreen,
     'admin-control-panel': AdminControlPanel,
