@@ -39,6 +39,7 @@ import {
     DollarSign
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getSystemMetrics } from '../../lib/services/database-integration';
 
 interface SuperAdminDashboardProps {
     isDarkMode?: boolean;
@@ -125,22 +126,41 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
 
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    // Load real metrics from database
+    useEffect(() => {
+        loadMetrics();
+    }, []);
+
+    const loadMetrics = async () => {
+        try {
+            const dbMetrics = await getSystemMetrics();
+            setMetrics(prev => ({
+                ...prev,
+                totalUsers: dbMetrics.total_users,
+                activeUsers: dbMetrics.active_users,
+                totalApps: dbMetrics.total_apps,
+                totalDownloads: dbMetrics.total_downloads,
+                totalRevenue: dbMetrics.total_revenue
+            }));
+        } catch (error) {
+            console.error('Error loading metrics:', error);
+        }
+    };
+
     const refreshMetrics = async () => {
         setIsRefreshing(true);
         toast.loading('Refreshing metrics...');
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Update metrics with random variations
+
+        await loadMetrics();
+
+        // Update system resources with random variations (simulated)
         setMetrics(prev => ({
             ...prev,
-            activeUsers: prev.activeUsers + Math.floor(Math.random() * 10) - 5,
             cpuUsage: Math.min(100, Math.max(0, prev.cpuUsage + Math.floor(Math.random() * 20) - 10)),
             memoryUsage: Math.min(100, Math.max(0, prev.memoryUsage + Math.floor(Math.random() * 10) - 5)),
             apiCalls: prev.apiCalls + Math.floor(Math.random() * 1000)
         }));
-        
+
         setIsRefreshing(false);
         toast.dismiss();
         toast.success('Metrics refreshed!');
@@ -260,11 +280,10 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
                         </div>
                         <div className={`h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
                             <div
-                                className={`h-full transition-all ${
-                                    metrics.cpuUsage > 80 ? 'bg-red-500' :
+                                className={`h-full transition-all ${metrics.cpuUsage > 80 ? 'bg-red-500' :
                                     metrics.cpuUsage > 60 ? 'bg-yellow-500' :
-                                    'bg-blue-500'
-                                }`}
+                                        'bg-blue-500'
+                                    }`}
                                 style={{ width: `${metrics.cpuUsage}%` }}
                             />
                         </div>
@@ -286,11 +305,10 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
                         </div>
                         <div className={`h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
                             <div
-                                className={`h-full transition-all ${
-                                    metrics.memoryUsage > 80 ? 'bg-red-500' :
+                                className={`h-full transition-all ${metrics.memoryUsage > 80 ? 'bg-red-500' :
                                     metrics.memoryUsage > 60 ? 'bg-yellow-500' :
-                                    'bg-purple-500'
-                                }`}
+                                        'bg-purple-500'
+                                    }`}
                                 style={{ width: `${metrics.memoryUsage}%` }}
                             />
                         </div>
@@ -331,12 +349,11 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
                                 className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-lg ${
-                                        activity.type === 'user' ? 'bg-blue-500/20' :
+                                    <div className={`w-10 h-10 rounded-lg ${activity.type === 'user' ? 'bg-blue-500/20' :
                                         activity.type === 'app' ? 'bg-purple-500/20' :
-                                        activity.type === 'payment' ? 'bg-green-500/20' :
-                                        'bg-orange-500/20'
-                                    } flex items-center justify-center ${getStatusColor(activity.status)}`}>
+                                            activity.type === 'payment' ? 'bg-green-500/20' :
+                                                'bg-orange-500/20'
+                                        } flex items-center justify-center ${getStatusColor(activity.status)}`}>
                                         {getActivityIcon(activity.type)}
                                     </div>
                                     <div className="flex-1">
@@ -347,11 +364,10 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
                                             {activity.user} • {activity.timestamp.toLocaleTimeString()}
                                         </div>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                        activity.status === 'success' ? 'bg-green-500/20 text-green-500' :
+                                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${activity.status === 'success' ? 'bg-green-500/20 text-green-500' :
                                         activity.status === 'warning' ? 'bg-yellow-500/20 text-yellow-500' :
-                                        'bg-red-500/20 text-red-500'
-                                    }`}>
+                                            'bg-red-500/20 text-red-500'
+                                        }`}>
                                         {activity.status.toUpperCase()}
                                     </div>
                                 </div>
