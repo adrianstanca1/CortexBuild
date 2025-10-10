@@ -32,9 +32,15 @@ import {
     Cpu,
     Database,
     Globe,
-    Package
+    Package,
+    Folder,
+    GitBranch
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import FileExplorer from '../../developer/FileExplorer';
+import GitPanel from '../../developer/GitPanel';
+import DatabaseViewer from '../../developer/DatabaseViewer';
+import APITester from '../../developer/APITester';
 
 interface ConsoleLog {
     id: string;
@@ -184,7 +190,7 @@ console.log(user);`
 
 const EnhancedDeveloperConsole: React.FC<EnhancedDeveloperConsoleProps> = ({ onLogout }) => {
     // State
-    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal'>('console');
+    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api'>('console');
     const [code, setCode] = useState<string>('// Write your code here\nconsole.log("Hello, Developer!");');
     const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([]);
     const [isExecuting, setIsExecuting] = useState(false);
@@ -586,6 +592,70 @@ Could you be more specific about what you need?`;
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-orange-500 rounded-full"></div>
                             )}
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('files')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'files'
+                                ? 'bg-gradient-to-r from-yellow-600 to-amber-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Folder className={`h-4 w-4 ${activeTab === 'files' ? 'animate-pulse' : ''}`} />
+                                Files
+                            </div>
+                            {activeTab === 'files' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('git')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'git'
+                                ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <GitBranch className={`h-4 w-4 ${activeTab === 'git' ? 'animate-pulse' : ''}`} />
+                                Git
+                            </div>
+                            {activeTab === 'git' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('database')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'database'
+                                ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Database className={`h-4 w-4 ${activeTab === 'database' ? 'animate-pulse' : ''}`} />
+                                Database
+                            </div>
+                            {activeTab === 'database' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-teal-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('api')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'api'
+                                ? 'bg-gradient-to-r from-lime-600 to-green-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Globe className={`h-4 w-4 ${activeTab === 'api' ? 'animate-pulse' : ''}`} />
+                                API Tester
+                            </div>
+                            {activeTab === 'api' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-lime-500 rounded-full"></div>
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -842,6 +912,34 @@ Could you be more specific about what you need?`;
                                 />
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* File Explorer Tab */}
+                {activeTab === 'files' && (
+                    <div className="h-[600px]">
+                        <FileExplorer isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
+                {/* Git Panel Tab */}
+                {activeTab === 'git' && (
+                    <div className="h-[600px]">
+                        <GitPanel isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
+                {/* Database Viewer Tab */}
+                {activeTab === 'database' && (
+                    <div className="h-[600px]">
+                        <DatabaseViewer isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
+                {/* API Tester Tab */}
+                {activeTab === 'api' && (
+                    <div className="h-[600px]">
+                        <APITester isDarkMode={isDarkMode} />
                     </div>
                 )}
 
