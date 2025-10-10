@@ -115,8 +115,10 @@ export type Screen =
     | 'company-admin-dashboard'
     | 'super-admin-dashboard'
     | 'sdk-developer'
+    | 'my-apps-desktop'
     // Admin screens
     | 'platform-admin'
+    | 'admin-control-panel'
     // ML & Advanced Analytics
     | 'ml-analytics'
     // Tool screens

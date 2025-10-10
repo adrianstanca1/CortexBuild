@@ -65,6 +65,7 @@ import { Base44Clone } from './components/base44/Base44Clone';
 // Admin Screens
 import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen';
 import SuperAdminDashboardScreen from './components/screens/admin/SuperAdminDashboardScreen';
+import AdminControlPanel from './components/admin/AdminControlPanel';
 
 // ML & Advanced Analytics Screens
 import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard';
@@ -118,6 +119,7 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'my-apps-desktop': Base44Clone,
     // Admin
     'platform-admin': PlatformAdminScreen,
+    'admin-control-panel': AdminControlPanel,
     // ML & Advanced Analytics
     'ml-analytics': AdvancedMLDashboard,
     // Tools
@@ -536,11 +538,7 @@ const App: React.FC = () => {
             return <EnhancedDeveloperConsole onLogout={handleLogout} />;
         }
         if (currentUser.role === 'super_admin') {
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    <SuperAdminDashboardScreen />
-                </div>
-            );
+            return <AdminControlPanel isDarkMode={true} onLogout={handleLogout} />;
         }
         if (currentUser.role === 'company_admin') {
             return (
