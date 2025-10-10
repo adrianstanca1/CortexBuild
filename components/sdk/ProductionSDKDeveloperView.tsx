@@ -1774,6 +1774,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'builder' && renderBuilderTab()}
+        {activeTab === 'zapier' && <ZapierStyleWorkflowBuilder />}
         {activeTab === 'workflows' && renderWorkflowsTab()}
         {activeTab === 'agents' && renderAgentsTab()}
         {activeTab === 'marketplace' && renderMarketplaceTab()}

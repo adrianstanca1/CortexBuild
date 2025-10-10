@@ -70,10 +70,8 @@ import MyApplicationsDesktop from './components/desktop/MyApplicationsDesktop';
 import AdminReviewInterface from './components/marketplace/AdminReviewInterface';
 import DeveloperSubmissionInterface from './components/marketplace/DeveloperSubmissionInterface';
 
-// Zapier-Style Workflow Builder
-import ZapierStyleWorkflowBuilder from './components/sdk/ZapierStyleWorkflowBuilder';
-// N8N + Procore + Zapier Combined Builder
-import N8nProcoreWorkflowBuilder from './components/sdk/N8nProcoreWorkflowBuilder';
+// Zapier-Style Workflow Builder (integrated in ProductionSDKDeveloperView)
+// import ZapierStyleWorkflowBuilder from './components/sdk/ZapierStyleWorkflowBuilder';
 
 import { Base44Clone } from './components/base44/Base44Clone';
 
@@ -140,10 +138,8 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'my-applications': MyApplicationsDesktop,
     'admin-review': AdminReviewInterface,
     'developer-submissions': DeveloperSubmissionInterface,
-    // Zapier-Style Workflow Builder
-    'zapier-workflow': ZapierStyleWorkflowBuilder,
-    // N8N + Procore + Zapier Combined Builder
-    'n8n-procore-builder': N8nProcoreWorkflowBuilder,
+    // Zapier-Style Workflow Builder (now integrated in SDK Developer)
+    // 'zapier-workflow': ZapierStyleWorkflowBuilder,
     // Admin
     'platform-admin': PlatformAdminScreen,
     'admin-control-panel': AdminControlPanel,
