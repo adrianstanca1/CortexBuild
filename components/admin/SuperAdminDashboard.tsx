@@ -39,7 +39,8 @@ import {
     DollarSign
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getSystemMetrics } from '../../lib/services/database-integration';
+import { fetchSystemMetrics, fetchRecentActivity } from '../../lib/services/admin-api';
+import { subscribeToActivityLog, subscribeToMetrics, unsubscribeAll } from '../../lib/services/realtime-sync';
 
 interface SuperAdminDashboardProps {
     isDarkMode?: boolean;
@@ -126,24 +127,50 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
 
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // Load real metrics from database
+    // Load real metrics from database and setup real-time sync
     useEffect(() => {
         loadMetrics();
+        loadActivity();
+
+        // Setup real-time subscriptions
+        const metricsChannel = subscribeToMetrics('', (payload) => {
+            console.log('Metrics updated:', payload);
+            loadMetrics();
+        });
+
+        const activityChannel = subscribeToActivityLog('', (payload) => {
+            console.log('New activity:', payload);
+            loadActivity();
+        });
+
+        // Cleanup on unmount
+        return () => {
+            unsubscribeAll();
+        };
     }, []);
 
     const loadMetrics = async () => {
         try {
-            const dbMetrics = await getSystemMetrics();
+            const dbMetrics = await fetchSystemMetrics();
             setMetrics(prev => ({
                 ...prev,
-                totalUsers: dbMetrics.total_users,
-                activeUsers: dbMetrics.active_users,
-                totalApps: dbMetrics.total_apps,
-                totalDownloads: dbMetrics.total_downloads,
-                totalRevenue: dbMetrics.total_revenue
+                totalUsers: dbMetrics.totalUsers,
+                activeUsers: dbMetrics.activeUsers,
+                totalApps: dbMetrics.totalApps,
+                totalDownloads: dbMetrics.totalDownloads,
+                totalRevenue: dbMetrics.totalRevenue
             }));
         } catch (error) {
             console.error('Error loading metrics:', error);
+        }
+    };
+
+    const loadActivity = async () => {
+        try {
+            const activities = await fetchRecentActivity();
+            setRecentActivity(activities);
+        } catch (error) {
+            console.error('Error loading activity:', error);
         }
     };
 

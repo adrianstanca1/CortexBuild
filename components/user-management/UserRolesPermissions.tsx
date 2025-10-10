@@ -8,7 +8,7 @@
  * - Access control lists
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Shield,
     Users,
@@ -22,6 +22,7 @@ import {
     X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAllUsers, updateUserRole, updateUserPermissions } from '../../lib/services/database-integration';
 
 interface UserRolesPermissionsProps {
     isDarkMode?: boolean;
@@ -119,8 +120,8 @@ const UserRolesPermissions: React.FC<UserRolesPermissionsProps> = ({ isDarkMode 
         const role = roles.find(r => r.id === newRole);
         if (!role) return;
 
-        setUsers(users.map(u => 
-            u.id === userId 
+        setUsers(users.map(u =>
+            u.id === userId
                 ? { ...u, role: newRole, permissions: role.permissions }
                 : u
         ));
@@ -222,9 +223,8 @@ const UserRolesPermissions: React.FC<UserRolesPermissionsProps> = ({ isDarkMode 
                                         <select
                                             value={user.role}
                                             onChange={(e) => updateUserRole(user.id, e.target.value as any)}
-                                            className={`px-3 py-1 rounded-lg border text-sm font-semibold ${
-                                                isDarkMode ? 'bg-gray-600 text-white border-gray-500' : 'bg-white text-gray-900 border-gray-300'
-                                            }`}
+                                            className={`px-3 py-1 rounded-lg border text-sm font-semibold ${isDarkMode ? 'bg-gray-600 text-white border-gray-500' : 'bg-white text-gray-900 border-gray-300'
+                                                }`}
                                         >
                                             <option value="admin">Admin</option>
                                             <option value="developer">Developer</option>
@@ -259,11 +259,10 @@ const UserRolesPermissions: React.FC<UserRolesPermissionsProps> = ({ isDarkMode 
                                                 key={permission.id}
                                                 type="button"
                                                 onClick={() => togglePermission(user.id, permission.id)}
-                                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                                                    hasPermission
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${hasPermission
                                                         ? 'bg-green-500/20 text-green-500 border border-green-500/30'
                                                         : isDarkMode ? 'bg-gray-600 text-gray-400 border border-gray-500' : 'bg-gray-200 text-gray-600 border border-gray-300'
-                                                }`}
+                                                    }`}
                                             >
                                                 {hasPermission ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                                                 {permission.name}
@@ -306,11 +305,10 @@ const UserRolesPermissions: React.FC<UserRolesPermissionsProps> = ({ isDarkMode 
                                                             key={permission.id}
                                                             type="button"
                                                             onClick={() => togglePermission(selectedUser.id, permission.id)}
-                                                            className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
-                                                                hasPermission
+                                                            className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${hasPermission
                                                                     ? 'bg-green-500/20 text-green-500 border border-green-500/30'
                                                                     : isDarkMode ? 'bg-gray-700 text-gray-400 border border-gray-600' : 'bg-gray-100 text-gray-600 border border-gray-300'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {hasPermission ? <Check className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                                                             {permission.name}
