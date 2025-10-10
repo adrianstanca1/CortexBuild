@@ -5,6 +5,7 @@
 import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { Project, ApiResponse, PaginatedResponse, ProjectFilters } from '../types';
+import { logProjectActivity } from '../utils/activity-logger';
 
 export function createProjectsRouter(db: Database.Database): Router {
   const router = Router();
@@ -233,13 +234,9 @@ export function createProjectsRouter(db: Database.Database): Router {
       const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(result.lastInsertRowid);
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        result.lastInsertRowid,
-        'project',
+      logProjectActivity(
+        db,
+        req.user?.id || 'user-1',
         result.lastInsertRowid,
         'created',
         `Created project: ${name}`
