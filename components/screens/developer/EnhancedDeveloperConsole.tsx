@@ -88,6 +88,7 @@ interface CodeSnippet {
 
 interface EnhancedDeveloperConsoleProps {
     onLogout?: () => void;
+    navigateTo?: (screen: string, params?: any) => void;
 }
 
 let logIdCounter = 0;
@@ -209,7 +210,7 @@ console.log(user);`
     }
 ];
 
-const EnhancedDeveloperConsole: React.FC<EnhancedDeveloperConsoleProps> = ({ onLogout }) => {
+const EnhancedDeveloperConsole: React.FC<EnhancedDeveloperConsoleProps> = ({ onLogout, navigateTo }) => {
     // State
     const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps' | 'code-editor' | 'git-integration' | 'api-builder' | 'testing' | 'analytics' | 'user-roles' | 'teams' | 'app-sharing' | 'billing'>('console');
     const [apps, setApps] = useState<MiniApp[]>(APP_REGISTRY);
@@ -531,6 +532,17 @@ Could you be more specific about what you need?`;
                             <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
                                 Developer Mode
                             </span>
+                            {navigateTo && (
+                                <button
+                                    type="button"
+                                    onClick={() => navigateTo('sdk-developer')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 rounded-lg transition-colors border border-yellow-500/30"
+                                    title="Open SDK Workspace with Zapier Builder"
+                                >
+                                    <Zap className="h-4 w-4" />
+                                    <span className="text-sm font-medium">SDK Workspace</span>
+                                </button>
+                            )}
                             {onLogout && (
                                 <button
                                     type="button"
