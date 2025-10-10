@@ -465,9 +465,14 @@ Could you be more specific about what you need?`;
 
     return (
         <div className={`min-h-screen ${bgClass} ${textClass} transition-colors duration-300`}>
-            {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {/* Modern Animated Header */}
+            <div className="relative bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white shadow-2xl overflow-hidden">
+                {/* Animated Background Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
+                </div>
+
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Terminal className="h-8 w-8" />
@@ -513,57 +518,73 @@ Could you be more specific about what you need?`;
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className={`${cardClass} border-b`}>
+            {/* Modern Tabs with Gradient */}
+            <div className={`${cardClass} border-b backdrop-blur-sm`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                         <button
+                            type="button"
                             onClick={() => setActiveTab('console')}
-                            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'console'
-                                ? 'text-purple-600 border-b-2 border-purple-600'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'console'
+                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
-                                <Code className="h-4 w-4" />
+                                <Code className={`h-4 w-4 ${activeTab === 'console' ? 'animate-pulse' : ''}`} />
                                 Code Editor
                             </div>
+                            {activeTab === 'console' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 rounded-full"></div>
+                            )}
                         </button>
                         <button
+                            type="button"
                             onClick={() => setActiveTab('ai')}
-                            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'ai'
-                                ? 'text-purple-600 border-b-2 border-purple-600'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'ai'
+                                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
-                                <Sparkles className="h-4 w-4" />
+                                <Sparkles className={`h-4 w-4 ${activeTab === 'ai' ? 'animate-pulse' : ''}`} />
                                 AI Assistant
                             </div>
+                            {activeTab === 'ai' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"></div>
+                            )}
                         </button>
                         <button
+                            type="button"
                             onClick={() => setActiveTab('snippets')}
-                            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'snippets'
-                                ? 'text-purple-600 border-b-2 border-purple-600'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'snippets'
+                                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
-                                <FileCode className="h-4 w-4" />
+                                <FileCode className={`h-4 w-4 ${activeTab === 'snippets' ? 'animate-pulse' : ''}`} />
                                 Code Snippets
                             </div>
+                            {activeTab === 'snippets' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full"></div>
+                            )}
                         </button>
                         <button
+                            type="button"
                             onClick={() => setActiveTab('terminal')}
-                            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'terminal'
-                                ? 'text-purple-600 border-b-2 border-purple-600'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'terminal'
+                                ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
-                                <Terminal className="h-4 w-4" />
+                                <Terminal className={`h-4 w-4 ${activeTab === 'terminal' ? 'animate-pulse' : ''}`} />
                                 Terminal
                             </div>
+                            {activeTab === 'terminal' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-orange-500 rounded-full"></div>
+                            )}
                         </button>
                     </div>
                 </div>

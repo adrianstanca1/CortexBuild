@@ -28,6 +28,108 @@
             color: #3d3d3d;
         }
 
+        /* Modern Animated Gradient Background */
+        .gradient-bg-modern {
+            background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradient-modern 15s ease infinite;
+        }
+
+        @keyframes gradient-modern {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Glassmorphism Effects */
+        .glass-modern {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-dark-modern {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Floating Animation */
+        @keyframes float-modern {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .float-modern {
+            animation: float-modern 6s ease-in-out infinite;
+        }
+
+        /* Pulse Glow Effect */
+        @keyframes pulse-glow-modern {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+            }
+        }
+
+        .pulse-glow-modern {
+            animation: pulse-glow-modern 2s ease-in-out infinite;
+        }
+
+        /* Particle Background */
+        .particles-modern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle-modern {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: rise-modern 10s infinite ease-in;
+        }
+
+        @keyframes rise-modern {
+            0% {
+                bottom: -10%;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                bottom: 110%;
+                opacity: 0;
+            }
+        }
+
         .nav-active {
             color: #2563eb;
             /* Blue-600 */
@@ -494,52 +596,62 @@
         </header>
 
         <main id="marketing-container" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <section id="home" class="content-section active">
+            <section id="home"
+                class="content-section active relative gradient-bg-modern overflow-hidden rounded-3xl p-12 mb-12">
+                <!-- Particles Background -->
+                <div class="particles-modern">
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 10%; animation-delay: 0s;"></div>
+                    <div class="particle-modern" style="width: 6px; height: 6px; left: 20%; animation-delay: 2s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 30%; animation-delay: 4s;"></div>
+                    <div class="particle-modern" style="width: 8px; height: 8px; left: 40%; animation-delay: 1s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 50%; animation-delay: 3s;"></div>
+                    <div class="particle-modern" style="width: 6px; height: 6px; left: 60%; animation-delay: 5s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 70%; animation-delay: 2s;"></div>
+                    <div class="particle-modern" style="width: 8px; height: 8px; left: 80%; animation-delay: 4s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 90%; animation-delay: 1s;"></div>
+                </div>
+
                 <!-- Hero Section with Visual -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20 relative z-10">
                     <!-- Left: Hero Content -->
                     <div class="text-left">
-                        <div
-                            class="inline-block px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full mb-6 shadow-lg border-2 border-blue-200 animate-pulse-slow">
-                            <span class="text-blue-600 font-bold text-lg flex items-center gap-2">
+                        <div class="inline-block px-6 py-3 glass-modern rounded-full mb-6 shadow-lg animate-pulse-slow">
+                            <span class="text-white font-bold text-lg flex items-center gap-2">
                                 <span class="text-2xl">🚀</span>
                                 <span>The Future of Construction Intelligence</span>
                             </span>
                         </div>
-                        <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6">
+                        <h1 class="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 leading-tight">
                             Build Smarter,<br />
-                            <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Not
-                                Harder</span>
+                            <span class="text-yellow-300">Not Harder</span>
                         </h1>
-                        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                            CortexBuild is the all-in-one AI-powered platform that gives construction SMBs the power of
-                            a
-                            large
-                            enterprise.
-                            We unify project management and accounting with a suite of powerful AI agents to boost
-                            profitability and reduce risk.
+                        <p class="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+                            AI-powered construction intelligence platform that gives SMBs the power of enterprise-level
+                            tools
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4">
-                            <button data-target="get-started"
-                                class="nav-item-direct bg-blue-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-blue-700 transition-all hover:scale-105 shadow-lg">
-                                Request a Demo
+                            <button onclick="showAppForLogin()" type="button"
+                                class="glass-dark-modern text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-white/30 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-2">
+                                <span>Start Free Trial</span>
+                                <span>→</span>
                             </button>
-                            <button data-target="features"
-                                class="nav-item-direct bg-white text-blue-600 font-bold py-4 px-8 rounded-lg hover:bg-gray-50 transition-all border-2 border-blue-600">
-                                Explore Features
+                            <button data-target="features" type="button"
+                                class="glass-modern text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-white/30 transition-all transform hover:scale-105 shadow-2xl">
+                                Watch Demo
                             </button>
                         </div>
                     </div>
 
                     <!-- Right: Visual Representation -->
-                    <div class="relative">
+                    <div class="relative float-modern">
                         <!-- Animated Background -->
                         <div
-                            class="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 rounded-3xl opacity-50 blur-3xl">
+                            class="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-white/5 rounded-3xl opacity-50 blur-3xl">
                         </div>
 
                         <!-- Main Visual Card -->
-                        <div class="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
+                        <div
+                            class="relative glass-modern rounded-3xl shadow-2xl p-8 border border-white/30 pulse-glow-modern">
                             <!-- AI Brain Visualization -->
                             <div class="text-center mb-6">
                                 <div class="inline-block relative">
@@ -569,11 +681,10 @@
                                 </div>
                             </div>
 
-                            <h3
-                                class="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <h3 class="text-2xl font-bold text-center mb-4 text-white">
                                 AI-Powered Construction Intelligence
                             </h3>
-                            <p class="text-gray-600 text-center mb-6">
+                            <p class="text-white/80 text-center mb-6">
                                 Integrating artificial intelligence into every aspect of construction management
                             </p>
 
