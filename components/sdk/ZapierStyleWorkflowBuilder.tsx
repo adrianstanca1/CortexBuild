@@ -68,8 +68,9 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
     const [showPublishModal, setShowPublishModal] = useState(false);
     const [showVariables, setShowVariables] = useState(false);
 
-    // Marketplace Apps
+    // Marketplace Apps - Complete Construction Industry Integrations
     const [marketplaceApps] = useState<MarketplaceApp[]>([
+        // Project Management
         {
             id: 'procore-rfi',
             name: 'Procore: Create RFI',
@@ -86,6 +87,37 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
             }
         },
         {
+            id: 'procore-submittal',
+            name: 'Procore: Create Submittal',
+            icon: '🏗️',
+            description: 'Create submittals in Procore',
+            category: 'Project Management',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://api.procore.com/rest/v1.0/submittals',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        {
+            id: 'procore-daily-log',
+            name: 'Procore: Create Daily Log',
+            icon: '🏗️',
+            description: 'Create daily construction logs',
+            category: 'Project Management',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://api.procore.com/rest/v1.0/daily_logs',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        // Field Management
+        {
             id: 'fieldwire-task',
             name: 'Fieldwire: Update Task',
             icon: '📋',
@@ -100,6 +132,37 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
                 headers: { 'Content-Type': 'application/json' }
             }
         },
+        {
+            id: 'fieldwire-punch',
+            name: 'Fieldwire: Create Punch Item',
+            icon: '📋',
+            description: 'Create punch list items',
+            category: 'Field Management',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://api.fieldwire.com/api/v3/punch_items',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        {
+            id: 'plangrid-photos',
+            name: 'PlanGrid: Upload Photos',
+            icon: '📸',
+            description: 'Upload photos to PlanGrid',
+            category: 'Field Management',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://api.plangrid.com/api/v1/photos',
+                method: 'POST',
+                headers: { 'Content-Type': 'multipart/form-data' }
+            }
+        },
+        // Document Management
         {
             id: 'aconex-document',
             name: 'Aconex: Fetch Document',
@@ -116,6 +179,22 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
             }
         },
         {
+            id: 'aconex-upload',
+            name: 'Aconex: Upload Document',
+            icon: '📄',
+            description: 'Upload documents to Aconex',
+            category: 'Document Management',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://api.aconex.com/api/documents/upload',
+                method: 'POST',
+                headers: { 'Content-Type': 'multipart/form-data' }
+            }
+        },
+        // BIM & Design
+        {
             id: 'bim360-issues',
             name: 'BIM 360: Sync Issues',
             icon: '🏢',
@@ -123,27 +202,181 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
             category: 'BIM',
             version: '1.0.0',
             author: 'CortexBuild',
-            installed: false
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://developer.api.autodesk.com/issues/v1/containers',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
         },
         {
-            id: 'plangrid-photos',
-            name: 'PlanGrid: Upload Photos',
-            icon: '📸',
-            description: 'Upload photos to PlanGrid',
-            category: 'Field Management',
+            id: 'bim360-models',
+            name: 'BIM 360: Get Models',
+            icon: '🏢',
+            description: 'Retrieve BIM models and metadata',
+            category: 'BIM',
             version: '1.0.0',
             author: 'CortexBuild',
-            installed: false
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://developer.api.autodesk.com/data/v1/projects',
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        // Communication
+        {
+            id: 'slack-message',
+            name: 'Slack: Send Message',
+            icon: '💬',
+            description: 'Send messages to Slack channels',
+            category: 'Communication',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://slack.com/api/chat.postMessage',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        {
+            id: 'teams-notification',
+            name: 'Microsoft Teams: Send Notification',
+            icon: '💬',
+            description: 'Send notifications to Teams channels',
+            category: 'Communication',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://graph.microsoft.com/v1.0/teams',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        // Email
+        {
+            id: 'gmail-send',
+            name: 'Gmail: Send Email',
+            icon: '📧',
+            description: 'Send emails via Gmail',
+            category: 'Email',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        // Storage
+        {
+            id: 'dropbox-upload',
+            name: 'Dropbox: Upload File',
+            icon: '📦',
+            description: 'Upload files to Dropbox',
+            category: 'Storage',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://content.dropboxapi.com/2/files/upload',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/octet-stream' }
+            }
+        },
+        {
+            id: 'google-drive-upload',
+            name: 'Google Drive: Upload File',
+            icon: '📦',
+            description: 'Upload files to Google Drive',
+            category: 'Storage',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://www.googleapis.com/upload/drive/v3/files',
+                method: 'POST',
+                headers: { 'Content-Type': 'multipart/related' }
+            }
+        },
+        // Scheduling
+        {
+            id: 'google-calendar-event',
+            name: 'Google Calendar: Create Event',
+            icon: '📅',
+            description: 'Create calendar events',
+            category: 'Scheduling',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        // Database
+        {
+            id: 'airtable-create',
+            name: 'Airtable: Create Record',
+            icon: '🗄️',
+            description: 'Create records in Airtable',
+            category: 'Database',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: 'https://api.airtable.com/v0',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        },
+        // Webhooks
+        {
+            id: 'webhook-post',
+            name: 'Webhook: POST Data',
+            icon: '🔗',
+            description: 'Send data to any webhook',
+            category: 'Webhooks',
+            version: '1.0.0',
+            author: 'CortexBuild',
+            installed: true,
+            preConfigured: {
+                endpoint: '',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }
         }
     ]);
 
-    // Core Logic Modules
+    // Core Logic Modules - Complete Zapier-like functionality
     const coreModules = [
-        { id: 'trigger-schedule', name: 'Schedule Trigger', icon: '⏰', description: 'Run on schedule', category: 'trigger' },
-        { id: 'trigger-webhook', name: 'Webhook Trigger', icon: '🔗', description: 'Trigger via webhook', category: 'trigger' },
-        { id: 'condition-if', name: 'If/Else Condition', icon: '🔀', description: 'Conditional logic', category: 'condition' },
+        // Triggers
+        { id: 'trigger-schedule', name: 'Schedule Trigger', icon: '⏰', description: 'Run on schedule (cron)', category: 'trigger' },
+        { id: 'trigger-webhook', name: 'Webhook Trigger', icon: '🔗', description: 'Trigger via HTTP webhook', category: 'trigger' },
+        { id: 'trigger-email', name: 'Email Trigger', icon: '📧', description: 'Trigger on new email', category: 'trigger' },
+        { id: 'trigger-form', name: 'Form Submission', icon: '📋', description: 'Trigger on form submit', category: 'trigger' },
+        { id: 'trigger-database', name: 'Database Change', icon: '🗄️', description: 'Trigger on DB update', category: 'trigger' },
+
+        // Conditions
+        { id: 'condition-if', name: 'If/Else Condition', icon: '🔀', description: 'Conditional branching', category: 'condition' },
+        { id: 'condition-filter', name: 'Filter', icon: '🔍', description: 'Filter data by criteria', category: 'condition' },
+        { id: 'condition-exists', name: 'Only Continue If', icon: '✓', description: 'Continue only if exists', category: 'condition' },
+
+        // Actions
         { id: 'action-log', name: 'Log Message', icon: '📝', description: 'Log to console', category: 'action' },
-        { id: 'action-delay', name: 'Delay', icon: '⏱️', description: 'Wait for duration', category: 'action' }
+        { id: 'action-delay', name: 'Delay', icon: '⏱️', description: 'Wait for duration', category: 'action' },
+        { id: 'action-transform', name: 'Transform Data', icon: '🔄', description: 'Transform/format data', category: 'action' },
+        { id: 'action-loop', name: 'Loop', icon: '🔁', description: 'Loop through items', category: 'action' },
+        { id: 'action-split', name: 'Split Text', icon: '✂️', description: 'Split text by delimiter', category: 'action' },
+        { id: 'action-merge', name: 'Merge Data', icon: '🔗', description: 'Merge multiple data sources', category: 'action' },
+        { id: 'action-math', name: 'Math Operation', icon: '🔢', description: 'Perform calculations', category: 'action' },
+        { id: 'action-date', name: 'Date/Time', icon: '📅', description: 'Format dates and times', category: 'action' },
+        { id: 'action-code', name: 'Run JavaScript', icon: '💻', description: 'Execute custom code', category: 'action' },
+        { id: 'action-error', name: 'Error Handler', icon: '⚠️', description: 'Handle errors', category: 'action' }
     ];
 
     // Connector Modules
@@ -419,8 +652,8 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
                                 <button
                                     onClick={() => addModule({ id: app.id, name: app.name, icon: app.icon, description: app.description, category: 'marketplace' }, 'marketplace', app)}
                                     className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors ${app.installed
-                                            ? 'bg-green-600 text-white hover:bg-green-700'
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        ? 'bg-green-600 text-white hover:bg-green-700'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
                                     {app.installed ? 'Add to Workflow' : 'Install & Add'}

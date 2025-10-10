@@ -21,11 +21,13 @@ import {
   ShieldCheck,
   Trash2,
   Globe,
-  Activity
+  Activity,
+  Workflow
 } from 'lucide-react';
+import ZapierStyleWorkflowBuilder from './ZapierStyleWorkflowBuilder';
 
 type Provider = 'openai' | 'gemini';
-type TabKey = 'builder' | 'workflows' | 'agents' | 'marketplace' | 'analytics' | 'settings' | 'management';
+type TabKey = 'builder' | 'workflows' | 'agents' | 'marketplace' | 'analytics' | 'settings' | 'management' | 'zapier';
 
 interface ModelOption {
   id: string;
@@ -186,7 +188,8 @@ const TEMPLATE_LIBRARY = [
 
 const NAV_TABS: Array<{ id: TabKey; label: string; icon: React.ComponentType<any> }> = [
   { id: 'builder', label: 'AI Builder', icon: Code },
-  { id: 'workflows', label: 'Workflows', icon: Zap },
+  { id: 'zapier', label: 'Zapier Builder', icon: Zap },
+  { id: 'workflows', label: 'Workflows', icon: Workflow },
   { id: 'agents', label: 'AI Agents', icon: Package },
   { id: 'marketplace', label: 'Marketplace', icon: TrendingUp },
   { id: 'management', label: 'Platform', icon: ShieldCheck },
@@ -1756,8 +1759,8 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  ? 'border-emerald-500 text-emerald-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}
               >
                 <tab.icon className="w-5 h-5" />
