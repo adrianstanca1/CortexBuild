@@ -8,6 +8,7 @@ import ExpenseTrackerApp from './mini-apps/ExpenseTrackerApp';
 import PomodoroTimerApp from './mini-apps/PomodoroTimerApp';
 import NotesApp from './mini-apps/NotesApp';
 import HabitTrackerApp from './mini-apps/HabitTrackerApp';
+import MobileAppBuilder from './mobile-builder/MobileAppBuilder';
 
 export const APP_REGISTRY: MiniApp[] = [
     {
@@ -68,6 +69,18 @@ export const APP_REGISTRY: MiniApp[] = [
         category: 'health',
         component: HabitTrackerApp,
         installed: false,
+        free: true
+    },
+    {
+        id: 'mobile-app-builder',
+        name: 'Mobile App Builder',
+        description: 'Create custom mobile applications with flexible database options - Free Built-in, Company DB, or Custom',
+        icon: '📱',
+        version: '1.0.0',
+        author: 'CortexBuild',
+        category: 'utilities',
+        component: MobileAppBuilder,
+        installed: true, // Pre-installed as core tool
         free: true
     }
 ];
