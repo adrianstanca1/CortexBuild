@@ -41,6 +41,9 @@ import FileExplorer from '../../developer/FileExplorer';
 import GitPanel from '../../developer/GitPanel';
 import DatabaseViewer from '../../developer/DatabaseViewer';
 import APITester from '../../developer/APITester';
+import Marketplace from '../../apps/Marketplace';
+import AppContainer, { MiniApp } from '../../apps/AppContainer';
+import { APP_REGISTRY, installApp as installAppInRegistry } from '../../apps/appRegistry';
 
 interface ConsoleLog {
     id: string;
@@ -190,7 +193,9 @@ console.log(user);`
 
 const EnhancedDeveloperConsole: React.FC<EnhancedDeveloperConsoleProps> = ({ onLogout }) => {
     // State
-    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api'>('console');
+    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps'>('console');
+    const [apps, setApps] = useState<MiniApp[]>(APP_REGISTRY);
+    const [runningApp, setRunningApp] = useState<MiniApp | null>(null);
     const [code, setCode] = useState<string>('// Write your code here\nconsole.log("Hello, Developer!");');
     const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([]);
     const [isExecuting, setIsExecuting] = useState(false);
@@ -656,6 +661,22 @@ Could you be more specific about what you need?`;
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-lime-500 rounded-full"></div>
                             )}
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('apps')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'apps'
+                                ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Package className={`h-4 w-4 ${activeTab === 'apps' ? 'animate-pulse' : ''}`} />
+                                Apps
+                            </div>
+                            {activeTab === 'apps' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-400 to-fuchsia-500 rounded-full"></div>
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -941,6 +962,35 @@ Could you be more specific about what you need?`;
                     <div className="h-[600px]">
                         <APITester isDarkMode={isDarkMode} />
                     </div>
+                )}
+
+                {/* Apps Marketplace Tab */}
+                {activeTab === 'apps' && (
+                    <div className="h-[600px]">
+                        <Marketplace
+                            apps={apps}
+                            onInstall={(appId) => {
+                                installAppInRegistry(appId);
+                                setApps([...APP_REGISTRY]);
+                            }}
+                            onLaunch={(appId) => {
+                                const app = apps.find(a => a.id === appId);
+                                if (app) {
+                                    setRunningApp(app);
+                                }
+                            }}
+                            isDarkMode={isDarkMode}
+                        />
+                    </div>
+                )}
+
+                {/* Running App Container */}
+                {runningApp && (
+                    <AppContainer
+                        app={runningApp}
+                        onClose={() => setRunningApp(null)}
+                        isDarkMode={isDarkMode}
+                    />
                 )}
 
                 {/* Command Palette Modal */}
