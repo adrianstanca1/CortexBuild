@@ -4,7 +4,8 @@ import Database from 'better-sqlite3';
 import {
   getCapabilitiesForRole,
   enforceSandboxRunQuota,
-  getSandboxUsageCounts
+  getSandboxUsageCounts,
+  buildRoleExperience
 } from '../utils/capabilities';
 
 export function createDeveloperRoutes(db: Database.Database) {
@@ -301,9 +302,11 @@ export function createDeveloperRoutes(db: Database.Database) {
         stats,
         sandboxRuns,
         capabilities: {
+          role: user.role,
           ...capabilities,
           usage: usageCounts
         },
+        roleExperience: buildRoleExperience(user.role, capabilities, usageCounts),
         builderModules
       });
     } catch (error: any) {
@@ -363,7 +366,8 @@ export function createDeveloperRoutes(db: Database.Database) {
           role: user.role,
           ...capabilities,
           usage
-        }
+        },
+        roleExperience: buildRoleExperience(user.role, capabilities, usage)
       });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });

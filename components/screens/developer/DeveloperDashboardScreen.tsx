@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
   AppWindow,
@@ -8,6 +9,7 @@ import {
   Brain,
   Code,
   Globe,
+  Key,
   Layers,
   ListChecks,
   MessageCircle,
@@ -15,10 +17,14 @@ import {
   PlugZap,
   RefreshCw,
   Rocket,
+  Shield,
   ShieldCheck,
+  Sparkles,
   Smartphone,
+  Store,
   Workflow,
-  Zap
+  Zap,
+  BookOpen
 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { Screen, User } from '../../../types';
@@ -127,6 +133,52 @@ interface BuilderTemplate {
   connections: Array<{ id: string; source: string; target: string }>;
 }
 
+type RoleExperienceAction = 'sandbox' | 'builder' | 'workflows' | 'publish' | 'apiKeys' | 'marketplace' | 'docs';
+type RoleExperienceIntent = 'primary' | 'secondary' | 'warning';
+type RoleExperienceStatus = 'clear' | 'warning' | 'blocked';
+type RoleExperienceIcon = 'rocket' | 'sparkles' | 'workflow' | 'shield' | 'store' | 'key' | 'book' | 'zap';
+
+interface RoleExperienceQuickAction {
+  id: string;
+  label: string;
+  description: string;
+  action: RoleExperienceAction;
+  icon: RoleExperienceIcon;
+  intent: RoleExperienceIntent;
+  enabled: boolean;
+  disabledReason?: string;
+}
+
+interface RoleExperienceGuardrail {
+  id: string;
+  title: string;
+  status: RoleExperienceStatus;
+  message: string;
+  helper?: string;
+  icon: RoleExperienceIcon;
+}
+
+interface RoleExperienceProgram {
+  id: string;
+  title: string;
+  summary: string;
+  action: RoleExperienceAction;
+  ctaLabel: string;
+  locked: boolean;
+  lockedReason?: string;
+  stat?: string;
+  icon: RoleExperienceIcon;
+}
+
+interface RoleExperience {
+  role: string;
+  headline: string;
+  subheading: string;
+  quickActions: RoleExperienceQuickAction[];
+  guardrails: RoleExperienceGuardrail[];
+  programs: RoleExperienceProgram[];
+}
+
 const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 const api = axios.create({
@@ -161,6 +213,53 @@ const maskUrl = (url: string) => {
   }
 };
 
+const ROLE_ICON_MAP: Record<RoleExperienceIcon, LucideIcon> = {
+  rocket: Rocket,
+  sparkles: Sparkles,
+  workflow: Workflow,
+  shield: Shield,
+  store: Store,
+  key: Key,
+  book: BookOpen,
+  zap: Zap
+};
+
+const QUICK_ACTION_INTENT_CLASSES: Record<RoleExperienceIntent, string> = {
+  primary: 'border-emerald-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-900',
+  secondary: 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800',
+  warning: 'border-amber-200 hover:border-amber-400 hover:bg-amber-50 text-slate-800'
+};
+
+const QUICK_ACTION_ICON_TONES: Record<RoleExperienceIntent, string> = {
+  primary: 'text-emerald-500',
+  secondary: 'text-slate-500',
+  warning: 'text-amber-500'
+};
+
+const GUARDRAIL_STATUS_CLASSES: Record<
+  RoleExperienceStatus,
+  { badge: string; border: string; icon: string; label: string }
+> = {
+  clear: {
+    badge: 'bg-emerald-100 text-emerald-700',
+    border: 'border-emerald-100',
+    icon: 'text-emerald-500',
+    label: 'Clear'
+  },
+  warning: {
+    badge: 'bg-amber-100 text-amber-700',
+    border: 'border-amber-100',
+    icon: 'text-amber-500',
+    label: 'Warning'
+  },
+  blocked: {
+    badge: 'bg-rose-100 text-rose-700',
+    border: 'border-rose-100',
+    icon: 'text-rose-500',
+    label: 'Blocked'
+  }
+};
+
 const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ currentUser, navigateTo }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -191,6 +290,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
   const [sandboxRunning, setSandboxRunning] = useState(false);
   const [publishBusy, setPublishBusy] = useState<string | null>(null);
   const [capabilities, setCapabilities] = useState<any | null>(null);
+  const [roleExperience, setRoleExperience] = useState<RoleExperience | null>(null);
   const [builderModules, setBuilderModules] = useState<BuilderModule[]>([]);
   const [builderEditor, setBuilderEditor] = useState<{
     id?: string;
@@ -481,12 +581,14 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
           setBuilderRuns([]);
         }
         setSummaryStats(null);
+        setRoleExperience(null);
         await loadCommunityModules();
         await loadBuilderModules();
         try {
           const capabilitiesRes = await api.get('/developer/capabilities');
           if (capabilitiesRes.data?.success) {
             setCapabilities(capabilitiesRes.data.capabilities || null);
+            setRoleExperience(capabilitiesRes.data.roleExperience || null);
           }
         } catch (capError) {
           console.error('Failed to load capabilities', capError);
@@ -511,6 +613,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
         setBuilderRuns(summary.sandboxRuns || []);
         setBuilderModules(summary.builderModules || []);
         setCapabilities(summary.capabilities || null);
+        setRoleExperience(summary.roleExperience || null);
         await loadCommunityModules();
       } else {
         await loadFallback();
@@ -557,6 +660,42 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
       setSandboxRunning(false);
     }
   }, [sandboxRunning, loadDashboardData]);
+
+  const handleQuickAction = useCallback(
+    async (action: RoleExperienceQuickAction) => {
+      if (!action.enabled) {
+        if (action.disabledReason) {
+          toast.error(action.disabledReason);
+        }
+        return;
+      }
+
+      switch (action.action) {
+        case 'sandbox':
+          await handleSandboxRun();
+          break;
+        case 'builder':
+          navigateTo('sdk-developer', { startTab: 'builder' });
+          break;
+        case 'workflows':
+          navigateTo('sdk-developer', { startTab: 'workflows' });
+          break;
+        case 'publish':
+        case 'marketplace':
+          navigateTo('sdk-developer', { startTab: 'marketplace' });
+          break;
+        case 'apiKeys':
+          navigateTo('sdk-developer', { startTab: 'settings' });
+          break;
+        case 'docs':
+          toast('Program guide coming soon — contact your Super Admin for access.');
+          break;
+        default:
+          console.info('Unhandled quick action', action);
+      }
+    },
+    [handleSandboxRun, navigateTo]
+  );
 
   const handlePublishApp = useCallback(async (appId: string, nextStatus: 'pending_review' | 'approved' = 'pending_review') => {
     if (!canPublishModules) {
@@ -688,6 +827,9 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
             Company Scope: <span className="font-semibold text-slate-700">{currentUser.companyId}</span> · Sandbox linked to{' '}
             <span className="font-semibold text-slate-700">{currentUser.email}</span>
           </p>
+          {roleExperience && (
+            <p className="mt-2 text-xs text-slate-500 max-w-2xl">{roleExperience.subheading}</p>
+          )}
           {capabilitySummary && (
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700 uppercase">
@@ -840,116 +982,257 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
           </div>
       </Card>
 
-      <Card className="p-6 space-y-4">
+      <Card className="p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div>
-              <h3 className="text-lg font-semibold text-slate-900">Quick Actions</h3>
-              <p className="text-sm text-slate-500">Jump straight into the workflows you manage most.</p>
-            </div>
+            <h3 className="text-lg font-semibold text-slate-900">Quick Actions</h3>
+            <p className="text-sm text-slate-500">
+              {roleExperience ? 'Tailored to your role and current guardrails.' : 'Jump straight into the workflows you manage most.'}
+            </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => handleSandboxRun()}
-              disabled={sandboxRunning || sandboxLimitReached}
-              className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-purple-400 hover:bg-purple-50 transition-colors disabled:opacity-60"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Run Sandbox Test</p>
-                <p className="text-xs text-slate-500">
-                  {sandboxLimitReached ? 'Daily sandbox quota reached for your role' : 'Validate modules in isolation'}
-                </p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-purple-500" />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigateTo('sdk-developer', { startTab: 'builder' })}
-              className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-emerald-400 hover:bg-emerald-50 transition-colors"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Generate Module</p>
-                <p className="text-xs text-slate-500">AI builder with live preview</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-emerald-500" />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigateTo('sdk-developer', { startTab: 'workflows' })}
-              className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 transition-colors"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Automate Workflow</p>
-                <p className="text-xs text-slate-500">Design and activate pipelines</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-blue-500" />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigateTo('sdk-developer', { startTab: 'marketplace' })}
-              disabled={!canPublishModules}
-              className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-amber-400 hover:bg-amber-50 transition-colors disabled:opacity-60"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Publish to Marketplace</p>
-                <p className="text-xs text-slate-500">
-                  {canPublishModules ? 'Promote modules to clients' : 'Publishing restricted for this role'}
-                </p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-amber-500" />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigateTo('sdk-developer', { startTab: 'settings' })}
-              className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-slate-400 hover:bg-slate-100 transition-colors"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Manage API Keys</p>
-                <p className="text-xs text-slate-500">Rotate secrets and limits</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-slate-500" />
-            </button>
-          </div>
-        </Card>
+          {roleExperience && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
+              <Sparkles className="h-3 w-3" />
+              Role-aware
+            </span>
+          )}
+        </div>
+        <div className={`grid gap-3 ${roleExperience ? 'sm:grid-cols-2' : 'sm:grid-cols-2'}`}>
+          {roleExperience ? (
+            roleExperience.quickActions.length > 0 ? (
+              roleExperience.quickActions.map((action) => {
+                const Icon = ROLE_ICON_MAP[action.icon] ?? Sparkles;
+                const intentClass = QUICK_ACTION_INTENT_CLASSES[action.intent] ?? QUICK_ACTION_INTENT_CLASSES.secondary;
+                const iconTone = QUICK_ACTION_ICON_TONES[action.intent] ?? 'text-slate-500';
+                const helper = action.enabled ? action.description : action.disabledReason ?? action.description;
+
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={() => handleQuickAction(action)}
+                    disabled={!action.enabled}
+                    className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${intentClass}`}
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">{action.label}</p>
+                      <p className={`text-xs ${action.enabled ? 'text-slate-500' : 'text-slate-400'}`}>{helper}</p>
+                    </div>
+                    <Icon className={`h-5 w-5 ${action.enabled ? iconTone : 'text-slate-400'}`} />
+                  </button>
+                );
+              })
+            ) : (
+              <p className="sm:col-span-2 text-sm text-slate-500">No quick actions available for this role.</p>
+            )
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => handleSandboxRun()}
+                disabled={sandboxRunning || sandboxLimitReached}
+                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-purple-400 hover:bg-purple-50 transition-colors disabled:opacity-60"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Run Sandbox Test</p>
+                  <p className="text-xs text-slate-500">
+                    {sandboxLimitReached ? 'Daily sandbox quota reached for your role' : 'Validate modules in isolation'}
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-purple-500" />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo('sdk-developer', { startTab: 'builder' })}
+                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-emerald-400 hover:bg-emerald-50 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Generate Module</p>
+                  <p className="text-xs text-slate-500">AI builder with live preview</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-emerald-500" />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo('sdk-developer', { startTab: 'workflows' })}
+                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-blue-400 hover:bg-blue-50 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Automate Workflow</p>
+                  <p className="text-xs text-slate-500">Design and activate pipelines</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-blue-500" />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo('sdk-developer', { startTab: 'marketplace' })}
+                disabled={!canPublishModules}
+                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-amber-400 hover:bg-amber-50 transition-colors disabled:opacity-60"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Publish to Marketplace</p>
+                  <p className="text-xs text-slate-500">
+                    {canPublishModules ? 'Promote modules to clients' : 'Publishing restricted for this role'}
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-amber-500" />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo('sdk-developer', { startTab: 'settings' })}
+                className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 text-left hover:border-slate-400 hover:bg-slate-100 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Manage API Keys</p>
+                  <p className="text-xs text-slate-500">Rotate secrets and limits</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-slate-500" />
+              </button>
+            </>
+          )}
+        </div>
+      </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          {
-            title: 'Modular Architecture',
-            description: 'Independent modules that snap into any tenant in minutes.',
-            points: ['Open-source patterns', 'Versioned releases', 'Continuous delivery']
-          },
-          {
-            title: 'Developer Sandbox',
-            description: 'Dedicated environment to create, debug, and iterate safely.',
-            points: ['AI agent toolkit', 'API blueprinting', 'Realtime logs']
-          },
-          {
-            title: 'Module Marketplace',
-            description: 'Share innovations, monetise your expertise, and grow the ecosystem.',
-            points: ['Revenue share', 'Community ratings', 'Launch campaigns']
-          },
-          {
-            title: 'Industry Transformation',
-            description: 'Contribute to the first open construction developer ecosystem.',
-            points: ['Democratise advanced tech', 'Collaborative growth', 'Continuous evolution']
-          }
-        ].map((highlight) => (
-          <Card key={highlight.title} className="p-5 space-y-2">
-            <h3 className="text-lg font-semibold text-slate-900">{highlight.title}</h3>
-            <p className="text-sm text-slate-600">{highlight.description}</p>
-            <ul className="text-xs text-slate-500 space-y-1">
-              {highlight.points.map((point) => (
-                <li key={point} className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  {point}
-                </li>
-              ))}
-            </ul>
-          </Card>
-        ))}
-      </div>
+      {roleExperience && (
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Access Guardrails</h3>
+              <p className="text-sm text-slate-500">Track sandbox capacity, publishing rights, and quota thresholds.</p>
+            </div>
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+              <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              Guardrails
+            </span>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {roleExperience.guardrails.length === 0 ? (
+              <p className="text-sm text-slate-500 md:col-span-2">No guardrails detected for this role.</p>
+            ) : (
+              roleExperience.guardrails.map((guardrail) => {
+                const Icon = ROLE_ICON_MAP[guardrail.icon] ?? Shield;
+                const statusStyle = GUARDRAIL_STATUS_CLASSES[guardrail.status] ?? GUARDRAIL_STATUS_CLASSES.clear;
+
+                return (
+                  <div
+                    key={guardrail.id}
+                    className={`rounded-lg border ${statusStyle.border} bg-white/70 p-4`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`h-4 w-4 ${statusStyle.icon}`} />
+                        <p className="text-sm font-semibold text-slate-900">{guardrail.title}</p>
+                      </div>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusStyle.badge}`}>
+                        {statusStyle.label}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs text-slate-600">{guardrail.message}</p>
+                    {guardrail.helper && (
+                      <p className="mt-1 text-xs text-slate-400">{guardrail.helper}</p>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </Card>
+      )}
+
+      {roleExperience ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {roleExperience.programs.map((program) => {
+            const Icon = ROLE_ICON_MAP[program.icon] ?? Sparkles;
+            const derivedAction: RoleExperienceQuickAction = {
+              id: program.id,
+              label: program.title,
+              description: program.summary,
+              action: program.action,
+              icon: program.icon,
+              intent: 'secondary',
+              enabled: !program.locked,
+              disabledReason: program.lockedReason
+            };
+
+            return (
+              <Card
+                key={program.id}
+                className={`p-5 space-y-3 border ${program.locked ? 'border-slate-200 bg-slate-50' : 'border-slate-200'}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
+                      <Icon className="h-4 w-4 text-emerald-500" />
+                    </span>
+                    <p className="text-base font-semibold text-slate-900">{program.title}</p>
+                  </div>
+                  {program.stat && (
+                    <span className="text-xs font-semibold text-slate-500">{program.stat}</span>
+                  )}
+                </div>
+                <p className="text-sm text-slate-600">{program.summary}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAction(derivedAction)}
+                    disabled={program.locked}
+                    className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                      program.locked
+                        ? 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400'
+                        : 'border border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    {program.ctaLabel}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                  {program.locked && program.lockedReason && (
+                    <span className="text-xs text-slate-400">{program.lockedReason}</span>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            {
+              title: 'Modular Architecture',
+              description: 'Independent modules that snap into any tenant in minutes.',
+              points: ['Open-source patterns', 'Versioned releases', 'Continuous delivery']
+            },
+            {
+              title: 'Developer Sandbox',
+              description: 'Dedicated environment to create, debug, and iterate safely.',
+              points: ['AI agent toolkit', 'API blueprinting', 'Realtime logs']
+            },
+            {
+              title: 'Module Marketplace',
+              description: 'Share innovations, monetise your expertise, and grow the ecosystem.',
+              points: ['Revenue share', 'Community ratings', 'Launch campaigns']
+            },
+            {
+              title: 'Industry Transformation',
+              description: 'Contribute to the first open construction developer ecosystem.',
+              points: ['Democratise advanced tech', 'Collaborative growth', 'Continuous evolution']
+            }
+          ].map((highlight) => (
+            <Card key={highlight.title} className="p-5 space-y-2">
+              <h3 className="text-lg font-semibold text-slate-900">{highlight.title}</h3>
+              <p className="text-sm text-slate-600">{highlight.description}</p>
+              <ul className="text-xs text-slate-500 space-y-1">
+                {highlight.points.map((point) => (
+                  <li key={point} className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
