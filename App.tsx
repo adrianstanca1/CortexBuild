@@ -37,6 +37,7 @@ import DeveloperWorkspaceScreen from './components/screens/developer/DeveloperWo
 import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
 import ModernDeveloperDashboard from './components/screens/developer/ModernDeveloperDashboard';
 import CompanyAdminDashboardScreen from './components/screens/company/CompanyAdminDashboardScreen';
+import CompanyAdminDashboard from './components/screens/company/CompanyAdminDashboard';
 import PunchListScreen from './components/screens/PunchListScreen';
 import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen';
 import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen';
@@ -80,7 +81,8 @@ type NavigationItem = {
 
 const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'global-dashboard': UnifiedDashboardScreen,
-    'company-admin-dashboard': CompanyAdminDashboardScreen,
+    'company-admin-dashboard': CompanyAdminDashboard,
+    'company-admin-legacy': CompanyAdminDashboardScreen,
     'projects': ProjectsListScreen,
     'project-home': ProjectHomeScreen,
     'my-day': MyDayScreen,
@@ -543,11 +545,7 @@ const App: React.FC = () => {
             return <AdminControlPanel isDarkMode={true} onLogout={handleLogout} />;
         }
         if (currentUser.role === 'company_admin') {
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    <CompanyAdminDashboardScreen {...dashboardProps} />
-                </div>
-            );
+            return <CompanyAdminDashboard currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />;
         }
         return (
             <div className="min-h-screen bg-gray-50">
