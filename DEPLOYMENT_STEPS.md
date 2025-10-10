@@ -128,7 +128,7 @@ This will:
 
 2. **Test Login**
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `Cumparavinde1`
+   - Password: `parola123`
 
 3. **Verify Dashboard**
    - Check that dashboard loads
@@ -140,7 +140,7 @@ This will:
    curl https://your-app.vercel.app/api/auth/login \
      -X POST \
      -H "Content-Type: application/json" \
-     -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}'
+     -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}'
    ```
 
 ---

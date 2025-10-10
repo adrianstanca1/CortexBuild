@@ -364,7 +364,7 @@ curl http://localhost:3001/api/health
 
 **🌐 Testează ACUM: http://localhost:3000**
 
-**📚 Login: adrian.stanca1@gmail.com / Cumparavinde1**
+**📚 Login: adrian.stanca1@gmail.com / parola123**
 
 **🎯 Aplicație SIMPLĂ și FUNCȚIONALĂ!** ✨
 

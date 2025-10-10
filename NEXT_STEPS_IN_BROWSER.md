@@ -131,7 +131,7 @@
 
 2. **Test Login**
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `Cumparavinde1`
+   - Password: `parola123`
 
 3. **Verify Features**
    - ✅ Dashboard loads

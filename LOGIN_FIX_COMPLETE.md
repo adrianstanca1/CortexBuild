@@ -154,7 +154,7 @@ UnifiedDashboardScreen → EnhancedDashboard
 
 ### **Manual Testing** ✅
 - [x] Open http://localhost:3000
-- [x] Enter credentials (adrian.stanca1@gmail.com / Cumparavinde1)
+- [x] Enter credentials (adrian.stanca1@gmail.com / parola123)
 - [x] Click "Sign In"
 - [x] Verify login API call succeeds
 - [x] Verify token is stored in localStorage

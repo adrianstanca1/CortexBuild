@@ -11,7 +11,7 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
     const [email, setEmail] = useState('adrian.stanca1@gmail.com');
-    const [password, setPassword] = useState('Cumparavinde1');
+    const [password, setPassword] = useState('parola123');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isOAuthLoading, setIsOAuthLoading] = useState<'google' | 'github' | null>(null);
@@ -104,7 +104,7 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
                         </p>
                         <p className="text-sm text-purple-700">
                             Email: <code className="font-bold">adrian.stanca1@gmail.com</code><br />
-                            Password: <code className="font-bold">Cumparavinde1</code>
+                            Password: <code className="font-bold">parola123</code>
                         </p>
                     </div>
                 </div>

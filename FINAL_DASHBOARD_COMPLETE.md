@@ -269,7 +269,7 @@ Errors:        ✅ None
 
 **🌐 Testează ACUM la: http://localhost:3000**
 
-**📚 Login: adrian.stanca1@gmail.com / Cumparavinde1**
+**📚 Login: adrian.stanca1@gmail.com / parola123**
 
 **🎯 Dashboard complet cu toate funcționalitățile!** ✨
 

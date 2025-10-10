@@ -197,7 +197,7 @@ const fallbackProfile: User = {
 ### **1. Login with Existing User**
 ```
 Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 
 Expected:
 ✅ Instant login
@@ -338,7 +338,7 @@ console.log('🔄 Using fallback profile:', fallbackProfile);
 
 **Test with:**
 - Email: `adrian.stanca1@gmail.com`
-- Password: `Cumparavinde1`
+- Password: `parola123`
 
 **Expected:** Instant login → Dashboard displays → No errors! 🚀
 

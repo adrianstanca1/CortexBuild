@@ -87,7 +87,7 @@ CREATE TABLE sessions (
 #### **Users**
 1. **Adrian Stanca** (Super Admin)
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `Cumparavinde1`
+   - Password: `parola123`
    - Role: `super_admin`
 
 2. **Casey Johnson** (Company Admin)
@@ -113,7 +113,7 @@ Login with email and password
 ```json
 {
   "email": "adrian.stanca1@gmail.com",
-  "password": "Cumparavinde1"
+  "password": "parola123"
 }
 ```
 
@@ -270,7 +270,7 @@ http://localhost:3000
 ### **3. Login**
 ```
 Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 ```
 
 ### **4. Expected Result**

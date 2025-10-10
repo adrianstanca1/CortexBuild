@@ -110,7 +110,7 @@
 1. Open production URL
 2. Test login:
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `Cumparavinde1`
+   - Password: `parola123`
 3. Verify dashboard loads
 4. Check console for errors
 

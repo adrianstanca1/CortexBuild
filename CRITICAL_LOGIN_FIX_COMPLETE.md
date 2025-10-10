@@ -142,7 +142,7 @@ useEffect(() => {
 ```bash
 1. Deschide http://localhost:3000
 2. Introdu email: adrian.stanca1@gmail.com
-3. Introdu password: Cumparavinde1
+3. Introdu password: parola123
 4. Click "Sign In"
 5. ✅ Dashboard apare IMEDIAT
 6. ✅ Toate widget-urile se încarcă
@@ -280,7 +280,7 @@ useEffect populates navigation →
 
 **🌐 Testează ACUM: http://localhost:3000**
 
-**📚 Login: adrian.stanca1@gmail.com / Cumparavinde1**
+**📚 Login: adrian.stanca1@gmail.com / parola123**
 
 **🎯 Dashboard apare IMEDIAT după login!** ✨
 

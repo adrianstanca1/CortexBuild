@@ -82,7 +82,7 @@ npx vercel --prod
 ### **Super Admin**
 ```
 Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 Hash: $2b$10$p7jaaXZGYNdCWghK1RFr4uaA3C29RjxHxdk2L/X8jQd4zO7BRqJr2
 ```
 
@@ -159,7 +159,7 @@ After deployment, test the API:
 curl https://your-app.vercel.app/api/auth/login \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}'
+  -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}'
 ```
 
 Expected response:

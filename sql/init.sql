@@ -46,7 +46,7 @@ VALUES ('company-1', 'ConstructCo')
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert initial users
--- Password for adrian.stanca1@gmail.com: Cumparavinde1
+-- Password for adrian.stanca1@gmail.com: parola123
 -- Password for others: password123
 
 INSERT INTO users (id, email, password_hash, name, role, company_id)
@@ -54,7 +54,7 @@ VALUES
     (
         'user-1',
         'adrian.stanca1@gmail.com',
-        '$2b$10$p7jaaXZGYNdCWghK1RFr4uaA3C29RjxHxdk2L/X8jQd4zO7BRqJr2',
+        '$2b$10$lZRNAe7gI1D3Fq30Chb3JeyXaMes0bSWmGVDnI8NReNgWzuEA1B5S',
         'Adrian Stanca',
         'super_admin',
         'company-1'
@@ -76,4 +76,3 @@ VALUES
         'company-1'
     )
 ON CONFLICT (id) DO NOTHING;
-

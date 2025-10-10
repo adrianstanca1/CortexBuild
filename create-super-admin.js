@@ -3,7 +3,7 @@
 /**
  * Script to create the super admin user for ConstructAI
  * User: adrian.stanca1@gmail.com
- * Password: Cumparavinde1
+ * Password: parola123
  */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -30,7 +30,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 async function createSuperAdmin() {
   console.log('🚀 Creating Super Admin User...');
   console.log('Email: adrian.stanca1@gmail.com');
-  console.log('Password: Cumparavinde1');
+  console.log('Password: parola123');
 
   try {
     // Step 1: Register the user through the app's registration flow
@@ -39,7 +39,7 @@ async function createSuperAdmin() {
     // First, try to sign up the user
     const { error: signUpError } = await supabase.auth.signUp({
       email: 'adrian.stanca1@gmail.com',
-      password: 'Cumparavinde1',
+      password: 'parola123',
     });
 
     if (signUpError) {
@@ -56,7 +56,7 @@ async function createSuperAdmin() {
     console.log('🔐 Signing in...');
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email: 'adrian.stanca1@gmail.com',
-      password: 'Cumparavinde1',
+      password: 'parola123',
     });
 
     if (signInError) throw signInError;
@@ -212,7 +212,7 @@ async function createSuperAdmin() {
 
     console.log('\n🎉 SUPER ADMIN SETUP COMPLETE!');
     console.log('👤 Super Admin: adrian.stanca1@gmail.com');
-    console.log('🔑 Password: Cumparavinde1');
+    console.log('🔑 Password: parola123');
     console.log('🏢 Platform Company: ConstructAI Platform');
     console.log('📊 Dashboard: Ready with sample data');
     console.log('\n🚀 You can now login at http://localhost:3000');

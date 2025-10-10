@@ -175,7 +175,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 curl https://YOUR_URL.vercel.app/api/auth/login \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}'
+  -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}'
 
 # Expected response:
 {
@@ -212,7 +212,7 @@ curl https://YOUR_URL.vercel.app/api/auth/login \
 ### **Test Credentials**
 ```
 Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 ```
 
 ### **How to Test**

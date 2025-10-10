@@ -244,7 +244,7 @@ curl https://constructai-5-5ngg87gpl-adrian-b7e84541.vercel.app/api/health
 ```bash
 curl -X POST https://constructai-5-5ngg87gpl-adrian-b7e84541.vercel.app/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}'
+  -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}'
 ```
 
 ### **3. Get Current User**

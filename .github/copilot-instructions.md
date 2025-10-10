@@ -262,7 +262,7 @@ npm run dev:all
 ```
 Super Admin:
 - Email: adrian.stanca1@gmail.com
-- Password: Cumparavinde1
+- Password: parola123
 
 Company Admin:
 - Email: casey@constructco.com

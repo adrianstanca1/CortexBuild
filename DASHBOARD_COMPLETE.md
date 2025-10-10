@@ -198,7 +198,7 @@ POST   http://localhost:3001/api/auth/refresh
 ### **Test Credentials**
 ```
 Email:    adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 Role:     super_admin
 ```
 

@@ -67,10 +67,22 @@ npm run dev:all
 **Super Admin:**
 ```
 Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 ```
 
-**Company Admin:**
+**Developer (SDK):**
+```
+Email: dev@constructco.com
+Password: password123
+```
+
+**AS Cladding Admin:**
+```
+Email: adrian@ascladdingltd.co.uk
+Password: lolozania1
+```
+
+**Company Admin (Demo Extras):**
 ```
 Email: casey@constructco.com
 Password: password123
@@ -133,4 +145,3 @@ npm run build            # Build for production
 ---
 
 **🚀 That's it! You're ready to go!** 🎉
-

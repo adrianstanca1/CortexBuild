@@ -165,7 +165,7 @@ console.log('✅ Current user exists - showing app:', currentUser.name);
 
 1. **User enters credentials**
    - Email: `adrian.stanca1@gmail.com`
-   - Password: `Cumparavinde1`
+   - Password: `parola123`
 
 2. **Supabase authenticates**
    - `onAuthStateChange` event fires
@@ -238,7 +238,7 @@ console.log('✅ Current user exists - showing app:', currentUser.name);
 ### **2. Login**
 ```
 Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 ```
 
 ### **3. Watch Console**
@@ -313,7 +313,7 @@ Should see:
 
 **Test credentials:**
 - Email: `adrian.stanca1@gmail.com`
-- Password: `Cumparavinde1`
+- Password: `parola123`
 
 **Expected result:** Login → Dashboard (NO redirect back to login)! 🚀
 

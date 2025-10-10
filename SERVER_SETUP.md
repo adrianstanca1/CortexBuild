@@ -71,7 +71,7 @@ npm run dev:all
 ### Default Users:
 1. **Super Admin**
    - Email: adrian.stanca1@gmail.com
-   - Password: Cumparavinde1
+   - Password: parola123
    - Role: super_admin
 
 2. **Company Admin**
