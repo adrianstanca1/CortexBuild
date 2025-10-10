@@ -27,6 +27,7 @@ import { createDocumentsRouter } from './routes/documents';
 import { createModulesRouter } from './routes/modules';
 import { createAdminRouter } from './routes/admin';
 import { createMarketplaceRouter } from './routes/marketplace';
+import { createGlobalMarketplaceRouter } from './routes/global-marketplace';
 import { createWidgetsRouter } from './routes/widgets';
 import { createSmartToolsRouter } from './routes/smart-tools';
 import { createSDKRouter, initSdkTables } from './routes/sdk';
@@ -324,6 +325,9 @@ const startServer = async () => {
 
         app.use('/api/marketplace', createMarketplaceRouter(db));
         console.log('  ✓ /api/marketplace');
+
+        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(db));
+        console.log('  ✓ /api/global-marketplace');
 
         app.use('/api/widgets', createWidgetsRouter(db));
         console.log('  ✓ /api/widgets');
