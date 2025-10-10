@@ -77,7 +77,8 @@ export const FullCompaniesManagement: React.FC = () => {
     return matchesSearch && matchesIndustry;
   });
 
-  const getIndustryBadgeColor = (industry: string) => {
+  const getIndustryBadgeColor = (industry?: string) => {
+    if (!industry) return 'bg-gray-100 text-gray-800';
     switch (industry) {
       case 'construction': return 'bg-orange-100 text-orange-800';
       case 'real_estate': return 'bg-blue-100 text-blue-800';
@@ -86,6 +87,11 @@ export const FullCompaniesManagement: React.FC = () => {
       case 'property_management': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const formatIndustry = (industry?: string) => {
+    if (!industry) return 'Unknown';
+    return industry.replace('_', ' ');
   };
 
   if (loading) {
@@ -190,7 +196,7 @@ export const FullCompaniesManagement: React.FC = () => {
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-gray-900 mb-1">{company.name}</h3>
                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getIndustryBadgeColor(company.industry)}`}>
-                      {company.industry.replace('_', ' ')}
+                      {formatIndustry(company.industry)}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -235,9 +241,9 @@ export const FullCompaniesManagement: React.FC = () => {
                 {company.website && (
                   <div className="flex items-center text-sm text-gray-600">
                     <Globe className="w-4 h-4 mr-2 text-gray-400" />
-                    <a 
-                      href={company.website} 
-                      target="_blank" 
+                    <a
+                      href={company.website}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline truncate"
                     >
