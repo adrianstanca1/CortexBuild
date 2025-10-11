@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Screen, User, Task, TimeEntry, Project } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, ClockIcon } from '../Icons';
 
 interface TimeTrackingScreenProps {
@@ -47,9 +47,9 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
         const loadData = async () => {
             setIsLoading(true);
             const [userTasks, userProjects, userTimeEntries] = await Promise.all([
-                api.fetchTasksForUser(currentUser),
-                api.fetchAllProjects(currentUser),
-                api.fetchTimeEntriesForUser(currentUser.id)
+                apiClient.fetchTasksForUser(currentUser.id),
+                apiClient.fetchProjects(),
+                apiClient.fetchTimeEntriesForUser(currentUser.id)
             ]);
             setTasks(userTasks.filter(t => t.status !== 'Done'));
             setProjects(userProjects);
@@ -78,18 +78,18 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
             return;
         }
         try {
-            const newEntry = await api.startTimeEntry(task.id, task.projectId, currentUser.id);
+            const newEntry = await apiClient.startTimeEntry(task.id, task.projectId, currentUser.id);
             setTimeEntries(prev => [...prev, newEntry]);
         } catch (error) {
             console.error(error);
             alert('Failed to clock in.');
         }
     };
-    
+
     const handleClockOut = async () => {
         if (!activeEntry) return;
         try {
-            const updatedEntry = await api.stopTimeEntry(activeEntry.id);
+            const updatedEntry = await apiClient.stopTimeEntry(activeEntry.id);
             setTimeEntries(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
         } catch (error) {
             console.error(error);
@@ -133,7 +133,7 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
                                                             <ClockIcon className="w-6 h-6" />
                                                             <TimeDuration startTime={activeEntry!.startTime} />
                                                         </div>
-                                                        <button 
+                                                        <button
                                                             onClick={handleClockOut}
                                                             className="px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 transition-colors"
                                                         >
@@ -141,7 +141,7 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleClockIn(task)}
                                                         disabled={!!activeEntry}
                                                         className="px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed w-full sm:w-auto"
@@ -157,9 +157,9 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
                         );
                     })
                 )}
-                 {Object.keys(tasksByProject).length === 0 && !isLoading && (
+                {Object.keys(tasksByProject).length === 0 && !isLoading && (
                     <div className="text-center text-gray-500 p-8 bg-white rounded-lg shadow-md border">You have no open tasks assigned to you.</div>
-                 )}
+                )}
             </main>
         </div>
     );

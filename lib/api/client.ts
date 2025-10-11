@@ -141,6 +141,13 @@ export const apiClient = {
         });
     },
 
+    /**
+     * Fetch tasks for a user
+     */
+    async fetchTasksForUser(userId: string): Promise<Task[]> {
+        return apiRequest<Task[]>(`/tasks?userId=${userId}`);
+    },
+
     // ==================== NOTIFICATIONS ====================
 
     /**
@@ -242,6 +249,256 @@ export const apiClient = {
     async launchApplication(appId: string): Promise<any> {
         return apiRequest<any>(`/my-applications/${appId}/launch`, {
             method: 'POST',
+        });
+    },
+
+    // ==================== DOCUMENTS ====================
+
+    /**
+     * Fetch documents for a project
+     */
+    async fetchDocuments(projectId: string): Promise<any[]> {
+        return apiRequest<any[]>(`/documents?projectId=${projectId}`);
+    },
+
+    /**
+     * Upload a document
+     */
+    async uploadDocument(projectId: string, formData: FormData): Promise<any> {
+        const token = getAuthToken();
+        const response = await fetch(`${API_BASE}/documents`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        });
+        if (!response.ok) throw new Error('Upload failed');
+        return response.json();
+    },
+
+    /**
+     * Delete a document
+     */
+    async deleteDocument(documentId: string): Promise<void> {
+        return apiRequest<void>(`/documents/${documentId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    // ==================== RFIs ====================
+
+    /**
+     * Fetch RFIs for a project
+     */
+    async fetchRFIs(projectId: string): Promise<any[]> {
+        return apiRequest<any[]>(`/rfis?projectId=${projectId}`);
+    },
+
+    /**
+     * Fetch a single RFI
+     */
+    async fetchRFI(rfiId: string): Promise<any> {
+        return apiRequest<any>(`/rfis/${rfiId}`);
+    },
+
+    /**
+     * Create a new RFI
+     */
+    async createRFI(rfi: any): Promise<any> {
+        return apiRequest<any>('/rfis', {
+            method: 'POST',
+            body: JSON.stringify(rfi),
+        });
+    },
+
+    /**
+     * Update an RFI
+     */
+    async updateRFI(rfiId: string, updates: any): Promise<any> {
+        return apiRequest<any>(`/rfis/${rfiId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    /**
+     * Delete an RFI
+     */
+    async deleteRFI(rfiId: string): Promise<void> {
+        return apiRequest<void>(`/rfis/${rfiId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    // ==================== TIME ENTRIES ====================
+
+    /**
+     * Fetch time entries
+     */
+    async fetchTimeEntries(params?: any): Promise<any[]> {
+        const query = params ? `?${new URLSearchParams(params).toString()}` : '';
+        return apiRequest<any[]>(`/time-entries${query}`);
+    },
+
+    /**
+     * Create a time entry
+     */
+    async createTimeEntry(entry: any): Promise<any> {
+        return apiRequest<any>('/time-entries', {
+            method: 'POST',
+            body: JSON.stringify(entry),
+        });
+    },
+
+    /**
+     * Update a time entry
+     */
+    async updateTimeEntry(entryId: string, updates: any): Promise<any> {
+        return apiRequest<any>(`/time-entries/${entryId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    /**
+     * Delete a time entry
+     */
+    async deleteTimeEntry(entryId: string): Promise<void> {
+        return apiRequest<void>(`/time-entries/${entryId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    /**
+     * Fetch time entries for a user
+     */
+    async fetchTimeEntriesForUser(userId: string): Promise<any[]> {
+        return apiRequest<any[]>(`/time-entries?userId=${userId}`);
+    },
+
+    /**
+     * Start a time entry
+     */
+    async startTimeEntry(taskId: string, projectId: string, userId: string): Promise<any> {
+        return apiRequest<any>('/time-entries', {
+            method: 'POST',
+            body: JSON.stringify({ taskId, projectId, userId, startTime: new Date().toISOString() }),
+        });
+    },
+
+    /**
+     * Stop a time entry
+     */
+    async stopTimeEntry(entryId: string): Promise<any> {
+        return apiRequest<any>(`/time-entries/${entryId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ endTime: new Date().toISOString() }),
+        });
+    },
+
+    // ==================== INVOICES ====================
+
+    /**
+     * Fetch invoices
+     */
+    async fetchInvoices(projectId?: string): Promise<any[]> {
+        const query = projectId ? `?projectId=${projectId}` : '';
+        return apiRequest<any[]>(`/invoices${query}`);
+    },
+
+    /**
+     * Fetch a single invoice
+     */
+    async fetchInvoice(invoiceId: string): Promise<any> {
+        return apiRequest<any>(`/invoices/${invoiceId}`);
+    },
+
+    /**
+     * Create an invoice
+     */
+    async createInvoice(invoice: any): Promise<any> {
+        return apiRequest<any>('/invoices', {
+            method: 'POST',
+            body: JSON.stringify(invoice),
+        });
+    },
+
+    /**
+     * Update an invoice
+     */
+    async updateInvoice(invoiceId: string, updates: any): Promise<any> {
+        return apiRequest<any>(`/invoices/${invoiceId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    /**
+     * Delete an invoice
+     */
+    async deleteInvoice(invoiceId: string): Promise<void> {
+        return apiRequest<void>(`/invoices/${invoiceId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    // ==================== SUBCONTRACTORS ====================
+
+    /**
+     * Fetch subcontractors
+     */
+    async fetchSubcontractors(projectId?: string): Promise<any[]> {
+        const query = projectId ? `?projectId=${projectId}` : '';
+        return apiRequest<any[]>(`/subcontractors${query}`);
+    },
+
+    /**
+     * Create a subcontractor
+     */
+    async createSubcontractor(subcontractor: any): Promise<any> {
+        return apiRequest<any>('/subcontractors', {
+            method: 'POST',
+            body: JSON.stringify(subcontractor),
+        });
+    },
+
+    /**
+     * Update a subcontractor
+     */
+    async updateSubcontractor(subcontractorId: string, updates: any): Promise<any> {
+        return apiRequest<any>(`/subcontractors/${subcontractorId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updates),
+        });
+    },
+
+    /**
+     * Delete a subcontractor
+     */
+    async deleteSubcontractor(subcontractorId: string): Promise<void> {
+        return apiRequest<void>(`/subcontractors/${subcontractorId}`, {
+            method: 'DELETE',
+        });
+    },
+
+    // ==================== PURCHASE ORDERS ====================
+
+    /**
+     * Fetch purchase orders
+     */
+    async fetchPurchaseOrders(projectId?: string): Promise<any[]> {
+        const query = projectId ? `?projectId=${projectId}` : '';
+        return apiRequest<any[]>(`/purchase-orders${query}`);
+    },
+
+    /**
+     * Create a purchase order
+     */
+    async createPurchaseOrder(po: any): Promise<any> {
+        return apiRequest<any>('/purchase-orders', {
+            method: 'POST',
+            body: JSON.stringify(po),
         });
     },
 
