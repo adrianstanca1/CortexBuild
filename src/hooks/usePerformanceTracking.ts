@@ -3,7 +3,7 @@
  * React hook for tracking component performance
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { performanceMonitor } from '../utils/performanceMonitor';
 
 /**
@@ -33,11 +33,9 @@ export function usePerformanceTracking(options: UsePerformanceTrackingOptions) {
     const renderCount = useRef<number>(0);
 
     /**
-     * Track render start
+     * Track render start - MUST be inside useEffect or after all hooks
      */
-    if (trackRenders) {
-        renderStartTime.current = performance.now();
-    }
+    // Moved to useEffect below to comply with React Hooks rules
 
     /**
      * Track mount
@@ -59,8 +57,15 @@ export function usePerformanceTracking(options: UsePerformanceTrackingOptions) {
     }, [componentName, trackMounts]);
 
     /**
-     * Track render end
+     * Track render start and end
      */
+    useEffect(() => {
+        // Track render start
+        if (trackRenders) {
+            renderStartTime.current = performance.now();
+        }
+    });
+
     useEffect(() => {
         if (trackRenders) {
             const renderDuration = performance.now() - renderStartTime.current;
@@ -189,7 +194,7 @@ export function withPerformanceTracking<P extends object>(
             trackMounts: true
         });
 
-        return <Component {...props} />;
+        return React.createElement(Component, props);
     };
 
     WrappedComponent.displayName = `withPerformanceTracking(${componentName || Component.displayName || Component.name})`;
