@@ -12,6 +12,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChatMessage, ToolResultMessage } from './ChatMessage';
 import { v4 as uuidv4 } from 'uuid';
+import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
 
 interface Message {
     id: string;
@@ -303,4 +304,23 @@ export const ChatbotWidget: React.FC = React.memo(() => {
 
 // Display name for debugging
 ChatbotWidget.displayName = 'ChatbotWidget';
+
+// Wrap with LightErrorBoundary
+const WrappedChatbotWidget: React.FC = () => {
+    return (
+        <LightErrorBoundary
+            fallback={
+                <div className="fixed bottom-6 right-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg shadow-lg max-w-sm">
+                    <p className="text-red-800 dark:text-red-300 text-sm">
+                        ⚠️ Chat temporarily unavailable. Please refresh the page.
+                    </p>
+                </div>
+            }
+        >
+            <ChatbotWidget />
+        </LightErrorBoundary>
+    );
+};
+
+export default WrappedChatbotWidget;
 

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { User } from '../../../types';
 import toast from 'react-hot-toast';
+import { DashboardErrorBoundary } from '../../../src/components/ErrorBoundaries';
 
 interface CompanyAdminDashboardV2Props {
     currentUser: User;
@@ -309,5 +310,21 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = React.me
 // Display name for debugging
 CompanyAdminDashboardV2.displayName = 'CompanyAdminDashboardV2';
 
-export default CompanyAdminDashboardV2;
+// Wrap with DashboardErrorBoundary
+const WrappedCompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = (props) => {
+    return (
+        <DashboardErrorBoundary
+            componentName="CompanyAdminDashboardV2"
+            fallbackStats={{
+                projects: 0,
+                tasks: 0,
+                users: 0
+            }}
+        >
+            <CompanyAdminDashboardV2 {...props} />
+        </DashboardErrorBoundary>
+    );
+};
+
+export default WrappedCompanyAdminDashboardV2;
 

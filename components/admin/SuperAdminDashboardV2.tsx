@@ -17,6 +17,7 @@ import {
     Sparkles, Cpu, ChevronRight, LayoutDashboard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DashboardErrorBoundary } from '../../src/components/ErrorBoundaries';
 
 interface SuperAdminDashboardV2Props {
     isDarkMode?: boolean;
@@ -285,5 +286,21 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo((
 // Display name for debugging
 SuperAdminDashboardV2.displayName = 'SuperAdminDashboardV2';
 
-export default SuperAdminDashboardV2;
+// Wrap with DashboardErrorBoundary
+const WrappedSuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = (props) => {
+    return (
+        <DashboardErrorBoundary
+            componentName="SuperAdminDashboardV2"
+            fallbackStats={{
+                users: 0,
+                projects: 0,
+                tasks: 0
+            }}
+        >
+            <SuperAdminDashboardV2 {...props} />
+        </DashboardErrorBoundary>
+    );
+};
+
+export default WrappedSuperAdminDashboardV2;
 
