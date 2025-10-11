@@ -220,14 +220,12 @@ class MetricsCollector {
         const longTasks = performanceObserverManager.getLongTasks();
         const layoutShifts = performanceObserverManager.getLayoutShifts();
         const resources = performanceObserverManager.getResources();
-        
-        // Component performance
-        const componentStats = performanceMonitor.getStatistics();
-        const avgComponentRenderTime = componentStats.avgRenderTime || 0;
-        
-        // API performance
-        const apiStats = performanceMonitor.getApiStatistics();
-        const avgApiResponseTime = apiStats.avgResponseTime || 0;
+
+        // Component performance - use default values since we don't track individual components here
+        const avgComponentRenderTime = 0;
+
+        // API performance - use default values since we don't track individual APIs here
+        const avgApiResponseTime = 0;
         
         // Session
         const session = sessionTracker.getSession();
