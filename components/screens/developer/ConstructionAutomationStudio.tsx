@@ -879,17 +879,17 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                             </div>
                             <Shield className="h-5 w-5 text-emerald-500" />
                         </div>
-                        <dl className="mt-4 space-y-3 text-sm">
+                        <ul className="mt-4 space-y-3 text-sm">
                             {environmentForConsole.connectors.map((connector) => (
-                                <div key={connector} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                                <li key={connector} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
                                     <div className="flex items-center gap-2">
                                         <ClipboardList className="h-4 w-4 text-slate-500" />
                                         <span className="font-medium text-slate-800">{connector}</span>
                                     </div>
                                     <span className="text-xs font-medium text-emerald-600">Healthy</span>
-                                </div>
+                                </li>
                             ))}
-                        </dl>
+                        </ul>
                     </div>
                 </div>
 

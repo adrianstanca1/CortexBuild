@@ -6,10 +6,11 @@
 import axios from 'axios';
 import { User } from '../types';
 
-// Use Vercel API in production, localhost in development
-const API_URL = import.meta.env.PROD
-    ? '/api'  // Vercel will handle this
-    : 'http://localhost:3001/api';  // Local development
+// Use environment variable for API URL, fallback to localhost in development
+const API_URL = import.meta.env.VITE_API_URL
+    || (import.meta.env.PROD
+        ? '/api'  // Vercel will handle this (if backend is deployed)
+        : 'http://localhost:3001/api');  // Local development
 
 const TOKEN_KEY = 'constructai_token';
 
