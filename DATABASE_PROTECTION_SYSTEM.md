@@ -160,6 +160,7 @@ http://localhost:3001/api/health/database
 ### Script: `scripts/backup-database.sh`
 
 **Funcționalități:**
+
 - ✅ WAL checkpoint automat înainte de backup
 - ✅ Verificare integritate backup
 - ✅ Compresie automată (gzip)
@@ -243,6 +244,7 @@ gsutil cp "$BACKUP_DIR/${BACKUP_NAME}.gz" \
 ### Script: `scripts/restore-database.sh`
 
 **Funcționalități:**
+
 - ✅ Listare toate backupurile disponibile
 - ✅ Selecție interactivă
 - ✅ Backup automat înainte de restore
@@ -331,6 +333,7 @@ npm run dev:all
 ```
 
 **Ce se întâmplă:**
+
 - Database se deschide în WAL mode
 - Graceful shutdown handlers active
 - Periodic checkpoints (30 min)
@@ -338,6 +341,7 @@ npm run dev:all
 #### 2. Stop Server (Safe)
 
 **✅ CORECT:**
+
 ```bash
 # Ctrl+C în terminal (recomandant)
 # Sau:
@@ -345,6 +349,7 @@ kill $(lsof -ti:3001)
 ```
 
 **❌ GREȘIT:**
+
 ```bash
 kill -9 $(lsof -ti:3001)  # Force kill, no cleanup!
 ```
@@ -392,12 +397,14 @@ sqlite3 cortexbuild.db "PRAGMA integrity_check;"
 ### Problem: WAL File Getting Too Large
 
 **Symptoms:**
+
 ```bash
 ls -lh cortexbuild.db-wal
 # -rw-r--r--  50M  cortexbuild.db-wal  # TOO LARGE!
 ```
 
 **Solution:**
+
 ```bash
 # Stop server
 lsof -ti:3001 | xargs kill
@@ -410,17 +417,20 @@ npm run dev:all
 ```
 
 **Prevention:**
+
 - Ensure periodic checkpoint is running
 - Check server logs pentru errors
 
 ### Problem: Database Locked
 
 **Symptoms:**
+
 ```
 Error: database is locked
 ```
 
 **Solution:**
+
 ```bash
 # Find process holding lock
 lsof cortexbuild.db
@@ -438,11 +448,13 @@ sqlite3 cortexbuild.db "PRAGMA wal_checkpoint(TRUNCATE);"
 ### Problem: Corrupted Database
 
 **Symptoms:**
+
 ```
 Error: database disk image is malformed
 ```
 
 **Solution:**
+
 ```bash
 # Check integrity
 sqlite3 cortexbuild.db "PRAGMA integrity_check;"
@@ -456,6 +468,7 @@ sqlite3 cortexbuild.db "PRAGMA integrity_check;"
 ### Problem: Backup Failed
 
 **Check:**
+
 ```bash
 # Disk space
 df -h
@@ -518,12 +531,14 @@ lsof cortexbuild.db
 ## 📞 SUPPORT
 
 **Issue?** Check logs:
+
 ```bash
 tail -f logs/backup.log
 tail -f server/logs/database.log
 ```
 
 **Emergency Restore:**
+
 ```bash
 ./scripts/restore-database.sh
 ```
@@ -535,6 +550,7 @@ tail -f server/logs/database.log
 **Testare:** Completă  
 
 **Contributors:**
+
 - GitHub Copilot (Implementation)
 - Augment Agent (Verification)
 

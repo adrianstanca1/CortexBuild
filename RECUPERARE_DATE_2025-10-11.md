@@ -9,6 +9,7 @@
 ## 🚨 PROBLEMA INIȚIALĂ
 
 Utilizatorul a raportat că aplicația s-a resetat la starea inițială:
+
 - ❌ Pierduți useri multiple (avea mai mulți decât cei 3 default)
 - ❌ Pierdute 3 dashboarduri configurate
 - ❌ Pierdută configurația avansată
@@ -27,7 +28,8 @@ Utilizatorul a raportat că aplicația s-a resetat la starea inițială:
 -rw-r--r--   32K  cortexbuild.db-shm     (Shared memory)
 ```
 
-**Descoperire Critică:** 
+**Descoperire Critică:**
+
 - Database principală: 4KB (resetată)
 - WAL file: 2.3MB (conține TOATE datele!)
 - **Cauză:** Database nu a făcut checkpoint, datele rămaseră în WAL
@@ -37,22 +39,28 @@ Utilizatorul a raportat că aplicația s-a resetat la starea inițială:
 ## 🛠️ PROCEDURA DE RECUPERARE
 
 ### Pasul 1: Oprire Server
+
 ```bash
 lsof -ti:3001 | xargs kill -9
 sleep 2
 ```
+
 **Motiv:** Serverul ține database locked, trebuie închis pentru checkpoint
 
 ### Pasul 2: Force WAL Checkpoint
+
 ```bash
 sqlite3 cortexbuild.db "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
-**Rezultat:** 
+
+**Rezultat:**
+
 - WAL data migrated → cortexbuild.db
 - Database creștere: 4KB → 572KB
 - ✅ Toate datele recuperate!
 
 ### Pasul 3: Verificare Date
+
 ```bash
 sqlite3 cortexbuild.db "SELECT id, email, name, role FROM users;"
 ```
@@ -65,12 +73,12 @@ sqlite3 cortexbuild.db "SELECT id, email, name, role FROM users;"
 
 | ID | Email | Nume | Rol |
 |----|-------|------|-----|
-| user-1 | adrian.stanca1@gmail.com | Adrian Stanca | super_admin |
-| user-2 | casey@constructco.com | Casey Johnson | company_admin |
-| user-3 | mike@constructco.com | Mike Wilson | supervisor |
-| user-4 | adrian@ascladdingltd.co.uk | Adrian Stanca | company_admin |
-| user-5 | adrian.stanca1@icloud.com | Adrian Stanca | developer |
-| user-6 | dev@constructco.com | Dev User | developer |
+| user-1 | <adrian.stanca1@gmail.com> | Adrian Stanca | super_admin |
+| user-2 | <casey@constructco.com> | Casey Johnson | company_admin |
+| user-3 | <mike@constructco.com> | Mike Wilson | supervisor |
+| user-4 | <adrian@ascladdingltd.co.uk> | Adrian Stanca | company_admin |
+| user-5 | <adrian.stanca1@icloud.com> | Adrian Stanca | developer |
+| user-6 | <dev@constructco.com> | Dev User | developer |
 
 ### 📊 Statistici Database
 
@@ -124,6 +132,7 @@ mcp_messages               users
 ## 🔐 CREDENȚIALE ACTIVE
 
 ### Super Admin
+
 ```
 Email: adrian.stanca1@gmail.com
 Password: Cumparavinde1
@@ -131,6 +140,7 @@ Acces: Toate feature-urile platformei
 ```
 
 ### Company Admin (ConstructCo)
+
 ```
 Email: casey@constructco.com
 Password: password123
@@ -138,6 +148,7 @@ Acces: Management complet companie
 ```
 
 ### Company Admin (ASC Ladding Ltd)
+
 ```
 Email: adrian@ascladdingltd.co.uk
 Password: password123
@@ -145,6 +156,7 @@ Acces: Management complet companie
 ```
 
 ### Developer (SDK Platform)
+
 ```
 Email: adrian.stanca1@icloud.com
 Password: password123
@@ -152,6 +164,7 @@ Acces: SDK Developer Platform
 ```
 
 ### Developer 2
+
 ```
 Email: dev@constructco.com
 Password: password123
@@ -159,6 +172,7 @@ Acces: SDK Developer Platform
 ```
 
 ### Supervisor
+
 ```
 Email: mike@constructco.com
 Password: password123
@@ -170,6 +184,7 @@ Acces: Supervizare proiecte
 ## 🚀 SERVER STATUS DUPĂ RECUPERARE
 
 ### Frontend
+
 ```
 ✅ Vite Development Server
 📍 http://localhost:3000
@@ -178,6 +193,7 @@ Acces: Supervizare proiecte
 ```
 
 ### Backend
+
 ```
 ✅ Express Server
 📍 http://localhost:3001
@@ -187,6 +203,7 @@ Acces: Supervizare proiecte
 ```
 
 ### API Routes Active (25)
+
 ```
 /api/clients              /api/admin
 /api/projects             /api/marketplace
@@ -210,11 +227,13 @@ Acces: Supervizare proiecte
 ## 🎯 FEATURE-URI RECUPERATE
 
 ### ✅ Multi-Tenant Architecture
+
 - Row Level Security (RLS) activ
 - Data isolation prin company_id
 - 2 companii funcționale
 
 ### ✅ Dashboards Configurate
+
 - Super Admin Dashboard
 - Company Admin Dashboard  
 - Developer Dashboard
@@ -222,18 +241,21 @@ Acces: Supervizare proiecte
 - Project Manager Dashboard
 
 ### ✅ SDK Developer Platform
+
 - API Keys management
 - Webhook system
 - Sandbox environments
 - Third-party integrations
 
 ### ✅ AI Integrations
+
 - Google Gemini Chat
 - AI Agents system
 - Smart Tools
 - Automated workflows
 
 ### ✅ Real-time Features
+
 - WebSocket server active
 - Live collaboration
 - Real-time notifications
@@ -245,16 +267,19 @@ Acces: Supervizare proiecte
 ### Despre SQLite WAL Mode
 
 **Ce este WAL (Write-Ahead Logging)?**
+
 - SQLite scrie modificările mai întâi în WAL file
 - Database principală se actualizează periodic la "checkpoint"
 - Îmbunătățește performance-ul și concurrency
 
 **Când se face checkpoint?**
+
 - Automat când WAL file devine prea mare (default 1000 pages)
 - La închidere normală a database connection
 - Manual cu `PRAGMA wal_checkpoint(TRUNCATE)`
 
 **Problema în cazul nostru:**
+
 - Serverul a fost oprit forțat (kill -9)
 - Nu s-a făcut checkpoint automat
 - Datele au rămas "blocate" în WAL
@@ -262,11 +287,13 @@ Acces: Supervizare proiecte
 ### Procedura Corectă de Shutdown
 
 ❌ **Greșit:**
+
 ```bash
 kill -9 <server_pid>  # Force kill, no cleanup!
 ```
 
 ✅ **Corect:**
+
 ```bash
 # Trimite SIGTERM pentru graceful shutdown
 kill <server_pid>
@@ -305,12 +332,14 @@ process.on('SIGINT', () => {
 ## 🔧 ÎMBUNĂTĂȚIRI RECOMANDATE
 
 ### 1. Backup Automat Daily
+
 ```bash
 # Adaugă în crontab
 0 2 * * * cd /path/to/project && sqlite3 cortexbuild.db ".backup backup_$(date +%Y%m%d).db"
 ```
 
 ### 2. WAL Checkpoint Periodic
+
 ```typescript
 // În server/index.ts
 setInterval(() => {
@@ -319,9 +348,11 @@ setInterval(() => {
 ```
 
 ### 3. Graceful Shutdown Handler
+
 Deja implementat în recomandările de mai sus.
 
 ### 4. Database Health Monitoring
+
 ```typescript
 // Adaugă endpoint pentru monitoring
 app.get('/api/health/database', (req, res) => {
@@ -343,6 +374,7 @@ app.get('/api/health/database', (req, res) => {
 ### ✅ SUCCES COMPLET
 
 **Date Recuperate:**
+
 - ✅ 6 useri (toate cu parole funcționale)
 - ✅ 2 companii cu configurații complete
 - ✅ 3 proiecte active
@@ -352,11 +384,13 @@ app.get('/api/health/database', (req, res) => {
 - ✅ AI integrations funcționale
 
 **Metoda de Recuperare:**
+
 - SQLite WAL checkpoint forțat
 - Migrare date din WAL → database principală
 - Zero pierdere de date!
 
 **Status Final:**
+
 - 🟢 Database: 572KB (complet funcțională)
 - 🟢 Toate serverele: ACTIVE
 - 🟢 Toate API routes: FUNCȚIONALE
@@ -369,24 +403,27 @@ app.get('/api/health/database', (req, res) => {
 ### URL-uri Active
 
 **Frontend:**
+
 ```
 http://localhost:3000
 ```
 
 **Backend API:**
+
 ```
 http://localhost:3001
 ```
 
 **WebSocket:**
+
 ```
 ws://localhost:3001/ws
 ```
 
 ### Quick Start
 
-1. **Deschide browser:** http://localhost:3000
-2. **Login cu:** adrian.stanca1@gmail.com / Cumparavinde1
+1. **Deschide browser:** <http://localhost:3000>
+2. **Login cu:** <adrian.stanca1@gmail.com> / Cumparavinde1
 3. **Explorează:** Toate feature-urile sunt funcționale!
 
 ---
@@ -394,10 +431,12 @@ ws://localhost:3001/ws
 ## 🤝 COLABORARE
 
 **Lucrat în echipă:**
+
 - **GitHub Copilot:** Diagnostic, proceduri recuperare, documentare
 - **Augment Agent:** Verificare cod, build, testing
 
-**Rezultat:** 
+**Rezultat:**
+
 - ✅ 100% date recuperate
 - ✅ Zero downtime
 - ✅ Aplicație complet funcțională

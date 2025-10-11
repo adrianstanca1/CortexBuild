@@ -111,7 +111,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
         { id: 'database-tools', title: 'Database Tools', icon: Database, color: 'cyan', description: 'Query & manage data', action: () => toast.info('Database tools opening...') },
         { id: 'testing', title: 'Testing Framework', icon: TestTube, color: 'pink', description: 'Unit & integration tests', action: () => toast.info('Testing framework opening...') },
         { id: 'docs', title: 'Documentation', icon: BookOpen, color: 'indigo', description: 'API documentation', action: () => toast.info('Documentation opening...') }
-    ];
+    ], [handleTabChange, navigateTo]);
 
     const getColorClasses = (color: string) => {
         const colors: Record<string, { bg: string; text: string; border: string; hover: string }> = {

@@ -140,16 +140,16 @@ export const ChatbotWidget: React.FC = React.memo(() => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [inputValue, isLoading, getAuthHeaders, sessionId]);
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
+    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
-    };
+    }, [sendMessage]);
 
-    const clearChat = async () => {
+    const clearChat = useCallback(async () => {
         if (confirm('Ești sigur că vrei să ștergi conversația?')) {
             try {
                 await fetch(`/api/chat/message?sessionId=${sessionId}`, {
@@ -160,7 +160,7 @@ export const ChatbotWidget: React.FC = React.memo(() => {
                 console.error('Failed to clear chat:', error);
             }
         }
-    };
+    }, [sessionId]);
 
     // Don't render if user is not authenticated
     if (!isAuthenticated) {

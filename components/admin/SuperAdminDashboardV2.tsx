@@ -133,7 +133,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo((
             gray: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20', hover: 'hover:bg-gray-500/20' }
         };
         return colors[color] || colors.blue;
-    };
+    }, []);
 
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>

@@ -98,7 +98,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = React.me
             color: 'cyan',
             bgGradient: 'from-cyan-500 to-cyan-600'
         }
-    ];
+    ], [stats]);
 
     // Office Operations
     const officeOperations = [

@@ -4,7 +4,6 @@
  */
 
 const Database = require('better-sqlite3');
-http://localhost:3000
 const db = new Database('database.db');
 
 // Revolutionary Magic Apps
