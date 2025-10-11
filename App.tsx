@@ -1,5 +1,5 @@
 // CortexBuild Main App Component
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
 import * as api from './api';
 import AuthScreen from './components/screens/AuthScreen';
@@ -19,71 +19,73 @@ import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { supabase } from './supabaseClient';
 
-// Screen Components
-import UnifiedDashboardScreen from './components/screens/UnifiedDashboardScreen';
-import ProjectsListScreen from './components/screens/ProjectsListScreen';
-import ProjectHomeScreen from './components/screens/ProjectHomeScreen';
-import MyDayScreen from './components/screens/MyDayScreen';
-import TasksScreen from './components/screens/TasksScreen';
-import TaskDetailScreen from './components/screens/TaskDetailScreen';
-import NewTaskScreen from './components/screens/NewTaskScreen';
-import DailyLogScreen from './components/screens/DailyLogScreen';
-import PhotoGalleryScreen from './components/screens/PhotoGalleryScreen';
-import RFIsScreen from './components/screens/RFIsScreen';
-import RFIDetailScreen from './components/screens/RFIDetailScreen';
-import NewRFIScreen from './components/screens/NewRFIScreen';
-import { ProductionSDKDeveloperView } from './components/sdk/ProductionSDKDeveloperView';
-import DeveloperWorkspaceScreen from './components/screens/developer/DeveloperWorkspaceScreen';
-import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
-import ModernDeveloperDashboard from './components/screens/developer/ModernDeveloperDashboard';
-import DeveloperDashboardV2 from './components/screens/developer/DeveloperDashboardV2';
-import ConstructionAutomationStudio from './components/screens/developer/ConstructionAutomationStudio';
-import CompanyAdminDashboardScreen from './components/screens/company/CompanyAdminDashboardScreen';
-import CompanyAdminDashboard from './components/screens/company/CompanyAdminDashboard';
-import CompanyAdminDashboardV2 from './components/screens/company/CompanyAdminDashboardV2';
-import PunchListScreen from './components/screens/PunchListScreen';
-import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen';
-import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen';
-import DrawingsScreen from './components/screens/DrawingsScreen';
-import PlansViewerScreen from './components/screens/PlansViewerScreen';
-import DayworkSheetsListScreen from './components/screens/DayworkSheetsListScreen';
-import DayworkSheetDetailScreen from './components/screens/DayworkSheetDetailScreen';
-import NewDayworkSheetScreen from './components/screens/NewDayworkSheetScreen';
-import DocumentsScreen from './components/screens/DocumentsScreen';
-import DeliveryScreen from './components/screens/DeliveryScreen';
-import DrawingComparisonScreen from './components/screens/DrawingComparisonScreen';
+// Lazily loaded screens and feature modules
+const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
+const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
+const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
+const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
+const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
+const TaskDetailScreen = lazy(() => import('./components/screens/TaskDetailScreen'));
+const NewTaskScreen = lazy(() => import('./components/screens/NewTaskScreen'));
+const DailyLogScreen = lazy(() => import('./components/screens/DailyLogScreen'));
+const PhotoGalleryScreen = lazy(() => import('./components/screens/PhotoGalleryScreen'));
+const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
+const RFIDetailScreen = lazy(() => import('./components/screens/RFIDetailScreen'));
+const NewRFIScreen = lazy(() => import('./components/screens/NewRFIScreen'));
+const ProductionSDKDeveloperView = lazy(() =>
+    import('./components/sdk/ProductionSDKDeveloperView').then(module => ({
+        default: module.ProductionSDKDeveloperView
+    }))
+);
+const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
+const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
+const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
+const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
+const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
+const CompanyAdminDashboardScreen = lazy(() => import('./components/screens/company/CompanyAdminDashboardScreen'));
+const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
+const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
+const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
+const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
+const NewPunchListItemScreen = lazy(() => import('./components/screens/NewPunchListItemScreen'));
+const DrawingsScreen = lazy(() => import('./components/screens/DrawingsScreen'));
+const PlansViewerScreen = lazy(() => import('./components/screens/PlansViewerScreen'));
+const DayworkSheetsListScreen = lazy(() => import('./components/screens/DayworkSheetsListScreen'));
+const DayworkSheetDetailScreen = lazy(() => import('./components/screens/DayworkSheetDetailScreen'));
+const NewDayworkSheetScreen = lazy(() => import('./components/screens/NewDayworkSheetScreen'));
+const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
+const DeliveryScreen = lazy(() => import('./components/screens/DeliveryScreen'));
+const DrawingComparisonScreen = lazy(() => import('./components/screens/DrawingComparisonScreen'));
+const AccountingScreen = lazy(() => import('./components/screens/modules/AccountingScreen'));
+const AIToolsScreen = lazy(() => import('./components/screens/modules/AIToolsScreen'));
+const DocumentManagementScreen = lazy(() => import('./components/screens/modules/DocumentManagementScreen'));
+const TimeTrackingScreen = lazy(() => import('./components/screens/modules/TimeTrackingScreen'));
+const ProjectOperationsScreen = lazy(() => import('./components/screens/modules/ProjectOperationsScreen'));
+const FinancialManagementScreen = lazy(() => import('./components/screens/modules/FinancialManagementScreen'));
+const BusinessDevelopmentScreen = lazy(() => import('./components/screens/modules/BusinessDevelopmentScreen'));
+const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/modules/AIAgentsMarketplaceScreen'));
+const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
+const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
+const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
+const MyApplicationsDesktop = lazy(() => import('./components/desktop/MyApplicationsDesktop'));
+const AdminReviewInterface = lazy(() => import('./components/marketplace/AdminReviewInterface'));
+const DeveloperSubmissionInterface = lazy(() => import('./components/marketplace/DeveloperSubmissionInterface'));
+const Base44Clone = lazy(() =>
+    import('./components/base44/Base44Clone').then(module => ({
+        default: module.Base44Clone
+    }))
+);
+const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
+const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
+const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
+const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
+const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 
-// Module Screens
-import AccountingScreen from './components/screens/modules/AccountingScreen';
-import AIToolsScreen from './components/screens/modules/AIToolsScreen';
-import DocumentManagementScreen from './components/screens/modules/DocumentManagementScreen';
-import TimeTrackingScreen from './components/screens/modules/TimeTrackingScreen';
-import ProjectOperationsScreen from './components/screens/modules/ProjectOperationsScreen';
-import FinancialManagementScreen from './components/screens/modules/FinancialManagementScreen';
-import BusinessDevelopmentScreen from './components/screens/modules/BusinessDevelopmentScreen';
-import AIAgentsMarketplaceScreen from './components/screens/modules/AIAgentsMarketplaceScreen';
-import MyTasksScreen from './components/screens/MyTasksScreen';
-import PlaceholderToolScreen from './components/screens/tools/PlaceholderToolScreen';
-
-// Global Marketplace Components
-import GlobalMarketplace from './components/marketplace/GlobalMarketplace';
-import MyApplicationsDesktop from './components/desktop/MyApplicationsDesktop';
-import AdminReviewInterface from './components/marketplace/AdminReviewInterface';
-import DeveloperSubmissionInterface from './components/marketplace/DeveloperSubmissionInterface';
-
-// Zapier-Style Workflow Builder (integrated in ProductionSDKDeveloperView)
-// import ZapierStyleWorkflowBuilder from './components/sdk/ZapierStyleWorkflowBuilder';
-
-import { Base44Clone } from './components/base44/Base44Clone';
-
-// Admin Screens
-import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen';
-import SuperAdminDashboardScreen from './components/screens/admin/SuperAdminDashboardScreen';
-import AdminControlPanel from './components/admin/AdminControlPanel';
-import SuperAdminDashboardV2 from './components/admin/SuperAdminDashboardV2';
-
-// ML & Advanced Analytics Screens
-import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard';
+const ScreenLoader: React.FC = () => (
+    <div className="py-16 text-center text-slate-500">
+        Loading experience...
+    </div>
+);
 
 
 type NavigationItem = {
@@ -92,7 +94,7 @@ type NavigationItem = {
     project?: Project;
 };
 
-const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
+const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'global-dashboard': UnifiedDashboardScreen,
     'company-admin-dashboard': CompanyAdminDashboard,
     'company-admin-legacy': CompanyAdminDashboardScreen,
@@ -560,22 +562,39 @@ const App: React.FC = () => {
         if (currentUser.role === 'developer') {
             console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Developer Dashboard V2');
             console.log('👤 Current user:', currentUser);
-            return <DeveloperDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />;
+            return (
+                <Suspense fallback={<ScreenLoader />}>
+                    <DeveloperDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
+                </Suspense>
+            );
         }
         if (currentUser.role === 'super_admin') {
             console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
-            return <SuperAdminDashboardV2 isDarkMode={true} onNavigate={(section) => {
-                console.log('Navigating to section:', section);
-                toast.info(`Opening ${section}...`);
-            }} />;
+            return (
+                <Suspense fallback={<ScreenLoader />}>
+                    <SuperAdminDashboardV2
+                        isDarkMode={true}
+                        onNavigate={(section) => {
+                            console.log('Navigating to section:', section);
+                            toast.info(`Opening ${section}...`);
+                        }}
+                    />
+                </Suspense>
+            );
         }
         if (currentUser.role === 'company_admin') {
             console.log('🎯 COMPANY ADMIN ROLE DETECTED - Rendering Company Admin Dashboard V2');
-            return <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />;
+            return (
+                <Suspense fallback={<ScreenLoader />}>
+                    <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
+                </Suspense>
+            );
         }
         return (
             <div className="min-h-screen bg-gray-50">
-                <UnifiedDashboardScreen {...dashboardProps} />
+                <Suspense fallback={<ScreenLoader />}>
+                    <UnifiedDashboardScreen {...dashboardProps} />
+                </Suspense>
             </div>
         );
     }
@@ -588,7 +607,11 @@ const App: React.FC = () => {
     console.log('📺 Screen component:', ScreenComponent.name);
 
     if (screen === 'my-apps-desktop') {
-        return <Base44Clone user={currentUser} onLogout={handleLogout} />;
+        return (
+            <Suspense fallback={<ScreenLoader />}>
+                <Base44Clone user={currentUser} onLogout={handleLogout} />
+            </Suspense>
+        );
     }
 
     const getSidebarProject = useMemo(() => {
@@ -640,19 +663,21 @@ const App: React.FC = () => {
                 />}
             >
                 <div className="p-8">
-                    <ScreenComponent
-                        currentUser={currentUser}
-                        selectProject={selectProject}
-                        navigateTo={navigateTo}
-                        onDeepLink={handleDeepLink}
-                        onQuickAction={handleQuickAction}
-                        onSuggestAction={handleSuggestAction}
-                        openProjectSelector={openProjectSelector}
-                        project={project}
-                        goBack={goBack}
-                        can={can}
-                        {...params}
-                    />
+                    <Suspense fallback={<ScreenLoader />}>
+                        <ScreenComponent
+                            currentUser={currentUser}
+                            selectProject={selectProject}
+                            navigateTo={navigateTo}
+                            onDeepLink={handleDeepLink}
+                            onQuickAction={handleQuickAction}
+                            onSuggestAction={handleSuggestAction}
+                            openProjectSelector={openProjectSelector}
+                            project={project}
+                            goBack={goBack}
+                            can={can}
+                            {...params}
+                        />
+                    </Suspense>
                 </div>
             </AppLayout>
 
