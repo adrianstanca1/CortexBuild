@@ -41,9 +41,23 @@ import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
 import { createMyApplicationsRouter } from './routes/my-applications';
 
+// Import error handling middleware
+import {
+  globalErrorHandler,
+  notFoundHandler,
+  handleUncaughtException,
+  handleUnhandledRejection,
+  handleShutdown,
+} from './middleware/errorHandler';
+import { logger } from './utils/logger';
+
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
 dotenv.config();
+
+// Setup process-level error handlers (MUST be before any other code)
+handleUncaughtException();
+handleUnhandledRejection();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -55,7 +69,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Request logging
+// HTTP Request logging middleware
+app.use(logger.httpLogger());
+
+// Request logging (keep for debugging)
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
@@ -384,20 +401,17 @@ const startServer = async () => {
 
         console.log('✅ All 25 API routes registered successfully');
 
-        // Register 404 handler AFTER all routes
-        app.use((req, res) => {
-            console.log(`❌ 404 Not Found: ${req.method} ${req.path}`);
-            res.status(404).json({ error: 'Not found' });
-        });
+        // ==================================================
+        // ERROR HANDLING MIDDLEWARE (MUST BE LAST!)
+        // ==================================================
+        
+        // 1. 404 Not Found Handler (catches unmatched routes)
+        app.use(notFoundHandler);
+        console.log('  ✓ 404 handler registered');
 
-        // Register error handler LAST
-        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-            console.error('Server error:', err);
-            res.status(500).json({
-                error: 'Internal server error',
-                message: err.message
-            });
-        });
+        // 2. Global Error Handler (catches all errors)
+        app.use(globalErrorHandler);
+        console.log('  ✓ Global error handler registered');
 
         // Clean up expired sessions every hour
         setInterval(() => {
@@ -450,7 +464,18 @@ const startServer = async () => {
             console.log('');
             console.log('🔴 Live Collaboration:');
             console.log(`  WS     ws://localhost:${PORT}/ws`);
+            console.log('');
+            console.log('✅ Error Handling:');
+            console.log('  - Global error handler: ACTIVE');
+            console.log('  - 404 handler: ACTIVE');
+            console.log('  - Uncaught exception handler: ACTIVE');
+            console.log('  - Unhandled rejection handler: ACTIVE');
+            console.log('  - Graceful shutdown: ACTIVE');
+            console.log('  - Logging: ./logs/cortexbuild-YYYY-MM-DD.log');
         });
+
+        // Setup graceful shutdown handlers
+        handleShutdown(httpServer);
     } catch (error) {
         console.error('❌ Failed to start server:', error);
         process.exit(1);

@@ -1,4 +1,5 @@
 // CortexBuild Main App Component
+// Task 2.1: Error Handling & Resilience - ErrorBoundary Applied
 import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Screen, User, Project, NotificationLink, AISuggestion } from './types';
 import AuthScreen from './components/screens/AuthScreen';
@@ -15,6 +16,7 @@ import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { apiClient } from './lib/api/client';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazily loaded screens and feature modules
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
@@ -471,67 +473,69 @@ const App: React.FC = () => {
     }, [navigateToModule]);
 
     return (
-        <div className="bg-slate-50">
-            <AppLayout
-                sidebar={
-                    <Sidebar
-                        project={getSidebarProject}
-                        navigateTo={navigateTo}
-                        navigateToModule={navigateToModule}
-                        goHome={sidebarGoHome}
-                        currentUser={currentUser}
-                        onLogout={handleLogout}
-                    />
-                }
-                floatingMenu={<FloatingMenu
-                    currentUser={currentUser}
-                    navigateToModule={navigateToModule}
-                    openProjectSelector={openProjectSelector}
-                    onDeepLink={handleDeepLinkWrapper}
-                />}
-            >
-                <div className="p-8">
-                    <Suspense fallback={<ScreenLoader />}>
-                        <ScreenComponent
-                            currentUser={currentUser}
-                            selectProject={selectProject}
+        <ErrorBoundary componentName="App">
+            <div className="bg-slate-50">
+                <AppLayout
+                    sidebar={
+                        <Sidebar
+                            project={getSidebarProject}
                             navigateTo={navigateTo}
-                            onDeepLink={handleDeepLink}
-                            onQuickAction={handleQuickAction}
-                            onSuggestAction={handleSuggestAction}
-                            openProjectSelector={openProjectSelector}
-                            project={project}
-                            goBack={goBack}
-                            can={can}
-                            onLaunchApp={handleLaunchApp}
-                            {...params}
+                            navigateToModule={navigateToModule}
+                            goHome={sidebarGoHome}
+                            currentUser={currentUser}
+                            onLogout={handleLogout}
                         />
-                    </Suspense>
-                </div>
-            </AppLayout>
+                    }
+                    floatingMenu={<FloatingMenu
+                        currentUser={currentUser}
+                        navigateToModule={navigateToModule}
+                        openProjectSelector={openProjectSelector}
+                        onDeepLink={handleDeepLinkWrapper}
+                    />}
+                >
+                    <div className="p-8">
+                        <Suspense fallback={<ScreenLoader />}>
+                            <ScreenComponent
+                                currentUser={currentUser}
+                                selectProject={selectProject}
+                                navigateTo={navigateTo}
+                                onDeepLink={handleDeepLink}
+                                onQuickAction={handleQuickAction}
+                                onSuggestAction={handleSuggestAction}
+                                openProjectSelector={openProjectSelector}
+                                project={project}
+                                goBack={goBack}
+                                can={can}
+                                onLaunchApp={handleLaunchApp}
+                                {...params}
+                            />
+                        </Suspense>
+                    </div>
+                </AppLayout>
 
-            <AISuggestionModal
-                isOpen={isAISuggestionModalOpen}
-                isLoading={isAISuggestionLoading}
-                suggestion={aiSuggestion}
-                onClose={() => setIsAISuggestionModalOpen(false)}
-                onAction={handleAISuggestionAction}
-                currentUser={currentUser}
-            />
-            {isProjectSelectorOpen && (
-                <ProjectSelectorModal
-                    title={projectSelectorTitle}
-                    onClose={() => setIsProjectSelectorOpen(false)}
-                    onSelectProject={projectSelectorCallback}
+                <AISuggestionModal
+                    isOpen={isAISuggestionModalOpen}
+                    isLoading={isAISuggestionLoading}
+                    suggestion={aiSuggestion}
+                    onClose={() => setIsAISuggestionModalOpen(false)}
+                    onAction={handleAISuggestionAction}
                     currentUser={currentUser}
                 />
-            )}
+                {isProjectSelectorOpen && (
+                    <ProjectSelectorModal
+                        title={projectSelectorTitle}
+                        onClose={() => setIsProjectSelectorOpen(false)}
+                        onSelectProject={projectSelectorCallback}
+                        currentUser={currentUser}
+                    />
+                )}
 
-            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+                <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
 
-            {/* Global AI Chatbot - Available on all pages when user is logged in */}
-            <ChatbotWidget />
-        </div>
+                {/* Global AI Chatbot - Available on all pages when user is logged in */}
+                <ChatbotWidget />
+            </div>
+        </ErrorBoundary>
     );
 }
 
