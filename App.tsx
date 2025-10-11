@@ -20,6 +20,7 @@ import OfflineIndicator from './src/components/OfflineIndicator';
 import { initWebVitals } from './src/monitoring/webVitals';
 import { initPerformanceObservers } from './src/monitoring/performanceObserver';
 import { initMetricsCollector } from './src/monitoring/metricsCollector';
+import { initPerformanceAlerting } from './src/monitoring/alerting';
 
 // Lazily loaded screens and feature modules
 const ChatbotWidget = lazy(() =>
@@ -222,6 +223,7 @@ const App: React.FC = () => {
         initWebVitals();
         initPerformanceObservers();
         initMetricsCollector();
+        initPerformanceAlerting();
 
     }, []); // Only run on mount
 

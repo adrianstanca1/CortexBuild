@@ -5,7 +5,7 @@
  * Tracks Core Web Vitals and reports to analytics
  */
 
-import { onCLS, onFID, onLCP, onFCP, onTTFB, onINP, Metric } from 'web-vitals';
+import { onCLS, onLCP, onFCP, onTTFB, onINP, Metric } from 'web-vitals';
 import { advancedErrorLogger } from '../utils/advancedErrorLogger';
 import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
 
@@ -14,11 +14,10 @@ import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
  */
 export const WEB_VITALS_THRESHOLDS = {
     LCP: { good: 2500, needsImprovement: 4000 },      // Largest Contentful Paint
-    FID: { good: 100, needsImprovement: 300 },        // First Input Delay
+    INP: { good: 200, needsImprovement: 500 },        // Interaction to Next Paint (replaces FID)
     CLS: { good: 0.1, needsImprovement: 0.25 },       // Cumulative Layout Shift
     FCP: { good: 1800, needsImprovement: 3000 },      // First Contentful Paint
-    TTFB: { good: 600, needsImprovement: 1500 },      // Time to First Byte
-    INP: { good: 200, needsImprovement: 500 }         // Interaction to Next Paint
+    TTFB: { good: 600, needsImprovement: 1500 }       // Time to First Byte
 };
 
 /**
@@ -44,7 +43,7 @@ export interface WebVitalsMetric {
  */
 export interface WebVitalsSummary {
     LCP: WebVitalsMetric | null;
-    FID: WebVitalsMetric | null;
+    INP: WebVitalsMetric | null;
     CLS: WebVitalsMetric | null;
     FCP: WebVitalsMetric | null;
     TTFB: WebVitalsMetric | null;
@@ -68,11 +67,10 @@ class WebVitalsCollector {
 
         // Track Core Web Vitals
         onLCP(this.handleMetric.bind(this));
-        onFID(this.handleMetric.bind(this));
+        onINP(this.handleMetric.bind(this));
         onCLS(this.handleMetric.bind(this));
         onFCP(this.handleMetric.bind(this));
         onTTFB(this.handleMetric.bind(this));
-        onINP(this.handleMetric.bind(this));
 
         console.log('✅ Web Vitals monitoring initialized');
     }
@@ -211,11 +209,10 @@ class WebVitalsCollector {
 
         return {
             LCP,
-            FID,
+            INP,
             CLS,
             FCP,
             TTFB,
-            INP,
             score,
             rating
         };
