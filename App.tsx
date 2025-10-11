@@ -353,18 +353,6 @@ const App: React.FC = () => {
         setIsAISuggestionModalOpen(false);
     };
 
-    if (!sessionChecked) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                <div className="bg-white p-8 rounded-xl shadow-2xl text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-700 font-medium">Loading session...</p>
-                    <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
-                </div>
-            </div>
-        );
-    }
-
     // All hooks must be called before any conditional returns
     const getSidebarProject = useMemo(() => {
         if (project) {
@@ -391,6 +379,18 @@ const App: React.FC = () => {
             }
         };
     }, [project, currentUser?.name, currentUser?.companyId]);
+
+    if (!sessionChecked) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                <div className="bg-white p-8 rounded-xl shadow-2xl text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-700 font-medium">Loading session...</p>
+                    <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!sessionChecked) {
         return (
