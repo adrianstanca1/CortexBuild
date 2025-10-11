@@ -1,7 +1,6 @@
 // CortexBuild Main App Component
 import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
-import * as api from './api';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
 import Sidebar from './components/layout/Sidebar';
@@ -423,8 +422,22 @@ const App: React.FC = () => {
     useEffect(() => {
         if (currentUser) {
             const loadProjects = async () => {
-                const projects = await api.fetchAllProjects(currentUser);
-                setAllProjects(projects);
+                try {
+                    const token = localStorage.getItem('token') || localStorage.getItem('constructai_token');
+                    const response = await fetch('http://localhost:3001/api/projects', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        const projects = await response.json();
+                        setAllProjects(projects);
+                    }
+                } catch (error) {
+                    console.error('Error loading projects:', error);
+                    setAllProjects([]);
+                }
             };
             loadProjects();
 
@@ -503,8 +516,23 @@ const App: React.FC = () => {
         setIsAISuggestionModalOpen(true);
         setIsAISuggestionLoading(true);
         setAiSuggestion(null);
-        const suggestion = await api.getAISuggestedAction(currentUser);
-        setAiSuggestion(suggestion);
+        try {
+            const token = localStorage.getItem('token') || localStorage.getItem('constructai_token');
+            const response = await fetch('http://localhost:3001/api/ai/suggest', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: currentUser.id })
+            });
+            if (response.ok) {
+                const suggestion = await response.json();
+                setAiSuggestion(suggestion);
+            }
+        } catch (error) {
+            console.error('Error getting AI suggestion:', error);
+        }
         setIsAISuggestionLoading(false);
     };
 
