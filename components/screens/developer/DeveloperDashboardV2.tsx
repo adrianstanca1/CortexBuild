@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { User, Screen } from '../../../types';
 import toast from 'react-hot-toast';
+import { DashboardErrorBoundary } from '../../../src/components/ErrorBoundaries';
 
 // Lazy load CodexAgent to prevent blocking the main app
 const CodexAgent = lazy(() => import('../../CodexAgent').then(module => ({
@@ -353,5 +354,21 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
 // Display name for debugging
 DeveloperDashboardV2.displayName = 'DeveloperDashboardV2';
 
-export default DeveloperDashboardV2;
+// Wrap with DashboardErrorBoundary
+const WrappedDeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = (props) => {
+    return (
+        <DashboardErrorBoundary
+            componentName="DeveloperDashboardV2"
+            fallbackStats={{
+                projects: 0,
+                tasks: 0,
+                users: 1
+            }}
+        >
+            <DeveloperDashboardV2 {...props} />
+        </DashboardErrorBoundary>
+    );
+};
+
+export default WrappedDeveloperDashboardV2;
 

@@ -29,6 +29,7 @@ import {
     Bug
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { EditorErrorBoundary } from '../../src/components/ErrorBoundaries';
 
 interface AdvancedCodeEditorProps {
     isDarkMode?: boolean;
@@ -123,7 +124,7 @@ h1 {
 
     const handleEditorChange = (value: string | undefined) => {
         if (value !== undefined) {
-            setFiles(files.map(f => 
+            setFiles(files.map(f =>
                 f.id === activeFileId ? { ...f, content: value } : f
             ));
         }
@@ -212,9 +213,8 @@ h1 {
     return (
         <div className={`h-full flex flex-col ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {/* Header */}
-            <div className={`flex items-center justify-between px-6 py-4 border-b ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
+            <div className={`flex items-center justify-between px-6 py-4 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                }`}>
                 <div className="flex items-center gap-4">
                     <FileCode className={`h-6 w-6 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
                     <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -250,27 +250,24 @@ h1 {
                     <button
                         type="button"
                         onClick={formatCode}
-                        className={`p-2 rounded-lg transition-all ${
-                            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-                        }`}
+                        className={`p-2 rounded-lg transition-all ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
+                            }`}
                     >
                         <Bug className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                     </button>
                     <button
                         type="button"
                         onClick={downloadFile}
-                        className={`p-2 rounded-lg transition-all ${
-                            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-                        }`}
+                        className={`p-2 rounded-lg transition-all ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
+                            }`}
                     >
                         <Download className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                     </button>
                     <button
                         type="button"
                         onClick={() => setShowSettings(!showSettings)}
-                        className={`p-2 rounded-lg transition-all ${
-                            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-                        }`}
+                        className={`p-2 rounded-lg transition-all ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
+                            }`}
                     >
                         <Settings className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                     </button>
@@ -278,17 +275,15 @@ h1 {
             </div>
 
             {/* File Tabs */}
-            <div className={`flex items-center gap-1 px-4 py-2 border-b overflow-x-auto ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
-            }`}>
+            <div className={`flex items-center gap-1 px-4 py-2 border-b overflow-x-auto ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
+                }`}>
                 {files.map(file => (
                     <div
                         key={file.id}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-t-lg cursor-pointer transition-all ${
-                            activeFileId === file.id
-                                ? isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
-                                : isDarkMode ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-t-lg cursor-pointer transition-all ${activeFileId === file.id
+                            ? isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+                            : isDarkMode ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                            }`}
                         onClick={() => setActiveFileId(file.id)}
                     >
                         <span className="text-sm font-medium">{file.name}</span>
@@ -340,9 +335,8 @@ h1 {
 
             {/* Console Output */}
             {consoleOutput.length > 0 && (
-                <div className={`h-48 border-t overflow-y-auto ${
-                    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
-                }`}>
+                <div className={`h-48 border-t overflow-y-auto ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
+                    }`}>
                     <div className="flex items-center gap-2 px-4 py-2 border-b">
                         <Terminal className={`h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                         <span className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -361,9 +355,8 @@ h1 {
 
             {/* Settings Panel */}
             {showSettings && (
-                <div className={`absolute top-16 right-4 w-80 p-6 rounded-2xl border shadow-2xl z-50 ${
-                    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                }`}>
+                <div className={`absolute top-16 right-4 w-80 p-6 rounded-2xl border shadow-2xl z-50 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                    }`}>
                     <h3 className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         Editor Settings
                     </h3>
@@ -376,9 +369,8 @@ h1 {
                             <select
                                 value={editorTheme}
                                 onChange={(e) => setEditorTheme(e.target.value as any)}
-                                className={`w-full px-3 py-2 rounded-lg border ${
-                                    isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'
-                                }`}
+                                className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'
+                                    }`}
                             >
                                 <option value="vs-dark">Dark</option>
                                 <option value="light">Light</option>
@@ -405,5 +397,18 @@ h1 {
     );
 };
 
-export default AdvancedCodeEditor;
+// Wrap with EditorErrorBoundary
+const WrappedAdvancedCodeEditor: React.FC<AdvancedCodeEditorProps> = (props) => {
+    return (
+        <EditorErrorBoundary
+            componentName="AdvancedCodeEditor"
+            initialValue={props.isDarkMode ? '// Start coding...' : '// Start coding...'}
+            language="typescript"
+        >
+            <AdvancedCodeEditor {...props} />
+        </EditorErrorBoundary>
+    );
+};
+
+export default WrappedAdvancedCodeEditor;
 
