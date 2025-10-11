@@ -794,6 +794,220 @@ const logs = logger.getRecentLogs(100);
 
 ---
 
+## Error Boundaries (React Component-Level)
+
+### Overview
+
+Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of crashing the entire application.
+
+### Specialized Error Boundaries
+
+**Created in Task 2.2** - 5 specialized error boundaries for different component types:
+
+#### 1. **EditorErrorBoundary** - Monaco Editor Components
+**Location:** `src/components/ErrorBoundaries/EditorErrorBoundary.tsx`
+
+**Best For:** Code editors, Monaco Editor instances
+**Fallback UI:** Textarea with copy/paste functionality
+
+#### 2. **DashboardErrorBoundary** - Dashboard Components
+**Location:** `src/components/ErrorBoundaries/DashboardErrorBoundary.tsx`
+
+**Best For:** Admin dashboards, analytics components
+**Fallback UI:** Basic stats + recovery options
+
+#### 3. **ChartErrorBoundary** - Chart/Graph Components
+**Location:** `src/components/ErrorBoundaries/ChartErrorBoundary.tsx`
+
+**Best For:** Data visualization, charts, graphs
+**Fallback UI:** Table view + CSV download
+
+#### 4. **FormErrorBoundary** - Form Components
+**Location:** `src/components/ErrorBoundaries/FormErrorBoundary.tsx`
+
+**Best For:** Complex forms, multi-step forms
+**Fallback UI:** Data preservation + save draft
+
+#### 5. **NavigationErrorBoundary** - Navigation Components
+**Location:** `src/components/ErrorBoundaries/NavigationErrorBoundary.tsx`
+
+**Best For:** Navigation menus, sidebars, headers
+**Fallback UI:** Essential menu items (Home, Logout)
+
+#### 6. **LightErrorBoundary** - Lightweight Components
+**Location:** `src/components/ErrorBoundary.tsx` (LightErrorBoundary export)
+
+**Best For:** Simple components, tools, utilities
+**Fallback UI:** Simple error message + retry
+
+### Components Currently Protected
+
+#### **Priority 1 (Critical Components):**
+- ✅ **AdvancedCodeEditor.tsx** → EditorErrorBoundary
+- ✅ **DeveloperDashboardV2.tsx** → DashboardErrorBoundary
+- ✅ **CompanyAdminDashboardV2.tsx** → DashboardErrorBoundary
+- ✅ **SuperAdminDashboardV2.tsx** → DashboardErrorBoundary
+- ✅ **ChatbotWidget.tsx** → LightErrorBoundary
+
+#### **Priority 2 (Important Components):**
+- ✅ **Sidebar.tsx** → NavigationErrorBoundary
+- ✅ **FileExplorer.tsx** → LightErrorBoundary
+- ✅ **GitPanel.tsx** → LightErrorBoundary
+- ✅ **DatabaseViewer.tsx** → LightErrorBoundary
+- ✅ **APITester.tsx** → LightErrorBoundary
+
+### Usage Examples
+
+#### **Basic Usage:**
+```tsx
+import { DashboardErrorBoundary } from './components/ErrorBoundaries';
+
+function AdminDashboard() {
+  return (
+    <DashboardErrorBoundary componentName="AdminDashboard">
+      <ComplexDashboardContent />
+    </DashboardErrorBoundary>
+  );
+}
+```
+
+#### **With Custom Props:**
+```tsx
+<EditorErrorBoundary
+  componentName="CodeEditor"
+  showDetails={process.env.NODE_ENV === 'development'}
+  onError={(error, errorInfo) => {
+    console.log('Editor error:', error);
+  }}
+>
+  <MonacoEditor />
+</EditorErrorBoundary>
+```
+
+### Integration with Error Handling System
+
+#### **Task 2.1 (Global Error Handler)**
+- ✅ API errors handled consistently
+- ✅ Error logging integrated
+- ✅ Recovery mechanisms aligned
+
+#### **Task 2.3 (Advanced Logging)**
+- ✅ Rich error context collected
+- ✅ Performance metrics integrated
+- ✅ Session tracking enabled
+
+#### **Task 3.2 (Performance Monitoring)**
+- ✅ Component performance tracked
+- ✅ Error impact measured
+- ✅ Recovery performance monitored
+
+### Error Boundary Limitations
+
+**What Error Boundaries DON'T Catch:**
+1. Event handlers
+2. Asynchronous code (useEffect, timeouts)
+3. Server-side rendering errors
+4. Errors in the error boundary itself
+
+**Solutions:**
+```tsx
+// Event handlers - use try-catch
+const handleClick = () => {
+  try {
+    riskyOperation();
+  } catch (error) {
+    console.error('Event error:', error);
+  }
+};
+
+// Async code - handle in the async function
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      await fetch('/api/data');
+    } catch (error) {
+      console.error('Async error:', error);
+    }
+  };
+  loadData();
+}, []);
+```
+
+### Testing Error Boundaries
+
+#### **Method 1: Manual Testing**
+```tsx
+// Add to any protected component for testing
+const TestError = () => {
+  const [shouldError, setShouldError] = useState(false);
+
+  if (shouldError) {
+    throw new Error('Test error for boundary testing');
+  }
+
+  return (
+    <button onClick={() => setShouldError(true)}>
+      Trigger Error
+    </button>
+  );
+};
+```
+
+#### **Method 2: Console Testing**
+```javascript
+// In browser console
+window.testErrorBoundary = (componentName) => {
+  const event = new CustomEvent('triggerError', {
+    detail: { componentName }
+  });
+  window.dispatchEvent(event);
+};
+```
+
+### Best Practices
+
+#### **1. Component Naming**
+```tsx
+// ✅ Good
+<DashboardErrorBoundary componentName="SalesAnalyticsDashboard">
+
+// ❌ Bad
+<DashboardErrorBoundary componentName="Dashboard">
+```
+
+#### **2. Error Boundary Placement**
+```tsx
+// ✅ Good - Wrap at logical boundaries
+<PageLayout>
+  <NavigationErrorBoundary>
+    <Sidebar />
+  </NavigationErrorBoundary>
+
+  <DashboardErrorBoundary>
+    <MainDashboard />
+  </DashboardErrorBoundary>
+</PageLayout>
+```
+
+#### **3. Error Information**
+```tsx
+// ✅ Good - Provide context
+<ErrorBoundary
+  componentName="UserManagementTable"
+  showDetails={process.env.NODE_ENV === 'development'}
+/>
+```
+
+### Documentation
+
+**Complete Usage Guide:** `ERROR_BOUNDARIES_USAGE_GUIDE.md`
+- Detailed examples for each boundary type
+- Implementation patterns
+- Testing strategies
+- Integration examples
+
+---
+
 ## Summary
 
 ✅ **Backend Error Handling:** Complete
