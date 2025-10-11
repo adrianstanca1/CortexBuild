@@ -18,42 +18,48 @@ interface UnifiedDashboardScreenProps {
     goBack: () => void;
 }
 
-const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) => {
-    const { currentUser } = props;
+// Separate component for super_admin to handle useState properly
+const SuperAdminDashboardWrapper: React.FC<UnifiedDashboardScreenProps> = (props) => {
     const [showEnhancedDashboard, setShowEnhancedDashboard] = React.useState(true);
 
-    // Route to the correct dashboard based on the user's role
-    if (currentUser.role === 'super_admin') {
-        if (showEnhancedDashboard) {
-            return (
-                <div>
-                    <div className="mb-4 flex justify-end">
-                        <button
-                            type="button"
-                            onClick={() => setShowEnhancedDashboard(false)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            Switch to Platform Admin
-                        </button>
-                    </div>
-                    <SuperAdminDashboardScreen />
-                </div>
-            );
-        }
+    if (showEnhancedDashboard) {
         return (
             <div>
                 <div className="mb-4 flex justify-end">
                     <button
                         type="button"
-                        onClick={() => setShowEnhancedDashboard(true)}
+                        onClick={() => setShowEnhancedDashboard(false)}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        Back to Super Admin Dashboard
+                        Switch to Platform Admin
                     </button>
                 </div>
-                <PlatformAdminScreen {...props} />
+                <SuperAdminDashboardScreen />
             </div>
         );
+    }
+    return (
+        <div>
+            <div className="mb-4 flex justify-end">
+                <button
+                    type="button"
+                    onClick={() => setShowEnhancedDashboard(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Back to Super Admin Dashboard
+                </button>
+            </div>
+            <PlatformAdminScreen {...props} />
+        </div>
+    );
+};
+
+const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) => {
+    const { currentUser } = props;
+
+    // Route to the correct dashboard based on the user's role
+    if (currentUser.role === 'super_admin') {
+        return <SuperAdminDashboardWrapper {...props} />;
     }
 
     if (currentUser.role === 'developer') {
