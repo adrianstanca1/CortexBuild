@@ -36,10 +36,8 @@ const ProductionSDKDeveloperView = lazy(() =>
 );
 const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
 const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
-const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
-const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
 const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
 const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
 const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
@@ -100,7 +98,7 @@ const getDefaultScreenForRole = (role: string): Screen => {
 
 const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'global-dashboard': UnifiedDashboardScreen,
-    'company-admin-dashboard': CompanyAdminDashboard,
+    'company-admin-dashboard': CompanyAdminDashboardV2,
     'projects': ProjectsListScreen,
     'project-home': ProjectHomeScreen,
     'my-day': MyDayScreen,
@@ -133,7 +131,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'financial-management': FinancialManagementScreen,
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-    'developer-dashboard': ModernDeveloperDashboard,
+    'developer-dashboard': DeveloperDashboardV2,
     'automation-studio': ConstructionAutomationStudio,
     'developer-workspace': DeveloperWorkspaceScreen,
     'developer-console': EnhancedDeveloperConsole,

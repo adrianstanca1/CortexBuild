@@ -2,9 +2,9 @@ import React from 'react';
 import { User, Screen, PermissionAction, PermissionSubject } from '../../types';
 import PlatformAdminScreen from './admin/PlatformAdminScreen';
 import SuperAdminDashboardScreen from './admin/SuperAdminDashboardScreen';
-import CompanyAdminDashboard from './company/CompanyAdminDashboard';
-import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard';
+import CompanyAdminDashboardV2 from './company/CompanyAdminDashboardV2';
 import DeveloperWorkspaceScreen from './developer/DeveloperWorkspaceScreen';
+import DeveloperDashboardV2 from './developer/DeveloperDashboardV2';
 
 
 interface UnifiedDashboardScreenProps {
@@ -57,11 +57,11 @@ const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) =>
     }
 
     if (currentUser.role === 'developer') {
-        return <DeveloperWorkspaceScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
+        return <DeveloperDashboardV2 currentUser={currentUser} navigateTo={props.navigateTo} isDarkMode={true} />;
     }
 
     // Default for all other roles
-    return <CompanyAdminDashboard {...props} />;
+    return <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={props.navigateTo} isDarkMode={true} />;
 };
 
 export default UnifiedDashboardScreen;

@@ -1,8 +1,8 @@
 import React from 'react';
-import EnhancedSuperAdminDashboard from '../../base44/pages/EnhancedSuperAdminDashboard';
+import SuperAdminDashboardV2 from '../../admin/SuperAdminDashboardV2';
 
 const SuperAdminDashboardScreen: React.FC = () => {
-  return <EnhancedSuperAdminDashboard />;
+  return <SuperAdminDashboardV2 isDarkMode={true} onNavigate={() => { }} />;
 };
 
 export default SuperAdminDashboardScreen;
