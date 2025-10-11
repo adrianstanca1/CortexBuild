@@ -9,7 +9,7 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && node deploy-ionos.js",
+    "deploy": "npm run build && node deploy-ionos.cjs",
     "vercel:dev": "vercel dev",
     "vercel:deploy": "vercel",
     "vercel:prod": "vercel --prod",
