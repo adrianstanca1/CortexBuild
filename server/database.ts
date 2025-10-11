@@ -726,6 +726,92 @@ export const initDatabase = () => {
     db.exec('CREATE INDEX IF NOT EXISTS idx_agent_executions_agent ON agent_executions(agent_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_developer_events_user ON developer_console_events(user_id)');
 
+    // Global Marketplace Tables
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS sdk_apps (
+            id TEXT PRIMARY KEY,
+            developer_id TEXT NOT NULL,
+            company_id TEXT,
+            name TEXT NOT NULL,
+            description TEXT,
+            icon TEXT DEFAULT '📦',
+            category TEXT DEFAULT 'productivity',
+            code TEXT,
+            version TEXT DEFAULT '1.0.0',
+            status TEXT DEFAULT 'draft',
+            review_status TEXT DEFAULT 'draft',
+            is_public INTEGER DEFAULT 0,
+            published_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (developer_id) REFERENCES users(id),
+            FOREIGN KEY (company_id) REFERENCES companies(id)
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS user_app_installations (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            app_id TEXT NOT NULL,
+            is_active INTEGER DEFAULT 1,
+            installed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (app_id) REFERENCES sdk_apps(id),
+            UNIQUE(user_id, app_id)
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS company_app_installations (
+            id TEXT PRIMARY KEY,
+            company_id TEXT NOT NULL,
+            app_id TEXT NOT NULL,
+            installed_by TEXT NOT NULL,
+            is_active INTEGER DEFAULT 1,
+            installed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (company_id) REFERENCES companies(id),
+            FOREIGN KEY (app_id) REFERENCES sdk_apps(id),
+            FOREIGN KEY (installed_by) REFERENCES users(id),
+            UNIQUE(company_id, app_id)
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS app_review_history (
+            id TEXT PRIMARY KEY,
+            app_id TEXT NOT NULL,
+            reviewer_id TEXT NOT NULL,
+            previous_status TEXT,
+            new_status TEXT NOT NULL,
+            feedback TEXT,
+            reviewed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (app_id) REFERENCES sdk_apps(id),
+            FOREIGN KEY (reviewer_id) REFERENCES users(id)
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS app_analytics (
+            id TEXT PRIMARY KEY,
+            app_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            user_id TEXT,
+            company_id TEXT,
+            metadata TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (app_id) REFERENCES sdk_apps(id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (company_id) REFERENCES companies(id)
+        )
+    `);
+
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_apps_developer ON sdk_apps(developer_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_apps_status ON sdk_apps(review_status, is_public)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_user_installations_user ON user_app_installations(user_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_company_installations_company ON company_app_installations(company_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_app_analytics_app ON app_analytics(app_id)');
+
     console.log('✅ Database initialized');
 
     // Seed initial data
@@ -1510,7 +1596,76 @@ const seedInitialData = () => {
         subscribeAgent('agent-commercial-guardian', 'company-1', 'user-2');
         subscribeAgent('agent-hse-sentinel', 'company-2', 'user-4');
 
-        console.log('✅ Initial data seeded');
+        // Seed Global Marketplace Apps (6 pre-approved apps)
+        const marketplaceApps = [
+            {
+                id: 'app-sample-dashboard',
+                name: 'Project Dashboard',
+                description: 'Real-time project monitoring and analytics dashboard with charts and KPIs',
+                icon: '📊',
+                category: 'analytics'
+            },
+            {
+                id: 'app-sample-chat',
+                name: 'Team Chat',
+                description: 'Instant messaging and collaboration tool for teams with file sharing',
+                icon: '💬',
+                category: 'communication'
+            },
+            {
+                id: 'app-sample-timetracker',
+                name: 'Time Tracker',
+                description: 'Track time spent on projects and tasks with detailed reports',
+                icon: '⏱️',
+                category: 'productivity'
+            },
+            {
+                id: 'app-sample-calendar',
+                name: 'Team Calendar',
+                description: 'Shared calendar for scheduling meetings and events',
+                icon: '📅',
+                category: 'productivity'
+            },
+            {
+                id: 'app-sample-tasks',
+                name: 'Task Manager',
+                description: 'Organize and track tasks with kanban boards and lists',
+                icon: '✅',
+                category: 'productivity'
+            },
+            {
+                id: 'app-sample-expenses',
+                name: 'Expense Tracker',
+                description: 'Track project expenses and generate financial reports',
+                icon: '💰',
+                category: 'finance'
+            }
+        ];
+
+        const appStmt = db.prepare(`
+            INSERT INTO sdk_apps (
+                id, developer_id, company_id, name, description, icon, category,
+                version, status, review_status, is_public, published_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        `);
+
+        for (const app of marketplaceApps) {
+            appStmt.run(
+                app.id,
+                'user-1', // System/Platform developer
+                null, // Global apps don't belong to a specific company
+                app.name,
+                app.description,
+                app.icon,
+                app.category,
+                '1.0.0',
+                'approved',
+                'approved',
+                1 // is_public = true
+            );
+        }
+
+        console.log('✅ Initial data seeded (including 6 marketplace apps)');
     }
 };
 
