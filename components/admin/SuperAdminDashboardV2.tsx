@@ -1,9 +1,15 @@
 /**
  * Super Admin Dashboard V2.0 - Revolutionary Design
  * Modern, animated, feature-rich administrative control panel
+ *
+ * OPTIMIZATIONS (Copilot + Augment):
+ * - React.memo for performance
+ * - useMemo for statistics calculations
+ * - useCallback for event handlers
+ * - Memoized admin sections
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     Users, Building2, CreditCard, BarChart3, Settings, Shield,
     Database, Activity, FileText, Bell, Lock, Globe, Package,
@@ -17,7 +23,8 @@ interface SuperAdminDashboardV2Props {
     onNavigate?: (section: string) => void;
 }
 
-const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
+// Memoized component for better performance
+const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo(({
     isDarkMode = true,
     onNavigate
 }) => {
@@ -40,13 +47,27 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
         return () => clearTimeout(timer);
     }, []);
 
-    // Quick Stats Cards with animations
-    const quickStats = [
+    // Memoize tab change handler
+    const handleTabChange = useCallback((tab: 'overview' | 'analytics' | 'system') => {
+        setActiveTab(tab);
+    }, []);
+
+    // Memoize section navigation handler
+    const handleSectionClick = useCallback((sectionId: string) => {
+        if (onNavigate) {
+            onNavigate(sectionId);
+        } else {
+            toast.info(`Opening ${sectionId}...`);
+        }
+    }, [onNavigate]);
+
+    // Memoize quick stats to prevent recalculation on every render
+    const quickStats = useMemo(() => [
         {
             title: 'Total Users',
             value: stats.totalUsers.toLocaleString(),
             change: '+12.5%',
-            trend: 'up',
+            trend: 'up' as const,
             icon: Users,
             color: 'blue',
             bgGradient: 'from-blue-500 to-blue-600'
@@ -55,7 +76,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             title: 'Active Companies',
             value: stats.activeCompanies.toLocaleString(),
             change: '+8.3%',
-            trend: 'up',
+            trend: 'up' as const,
             icon: Building2,
             color: 'purple',
             bgGradient: 'from-purple-500 to-purple-600'
@@ -64,7 +85,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             title: 'Monthly Revenue',
             value: `$${(stats.monthlyRevenue / 1000).toFixed(1)}K`,
             change: '+15.2%',
-            trend: 'up',
+            trend: 'up' as const,
             icon: DollarSign,
             color: 'green',
             bgGradient: 'from-green-500 to-green-600'
@@ -73,15 +94,15 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             title: 'System Health',
             value: `${stats.systemHealth}%`,
             change: '+0.5%',
-            trend: 'up',
+            trend: 'up' as const,
             icon: Activity,
             color: 'cyan',
             bgGradient: 'from-cyan-500 to-cyan-600'
         }
-    ];
+    ], [stats]);
 
-    // Admin Sections with modern design
-    const adminSections = [
+    // Memoize admin sections to prevent recreation on every render
+    const adminSections = useMemo(() => [
         { id: 'user-management', title: 'User Management', icon: Users, color: 'blue', count: stats.totalUsers, description: 'Manage all platform users' },
         { id: 'company-management', title: 'Company Management', icon: Building2, color: 'purple', count: stats.totalCompanies, description: 'Oversee all companies' },
         { id: 'billing-payments', title: 'Billing & Payments', icon: CreditCard, color: 'green', count: stats.activeSubscriptions, description: 'Revenue & subscriptions' },
@@ -95,9 +116,10 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
         { id: 'notifications', title: 'Notifications', icon: Bell, color: 'blue', count: 0, description: 'System alerts' },
         { id: 'permissions', title: 'Permissions', icon: Lock, color: 'red', count: 0, description: 'Access control' },
         { id: 'integrations', title: 'Integrations', icon: Globe, color: 'cyan', count: 0, description: 'Third-party services' }
-    ];
+    ], [stats.totalUsers, stats.totalCompanies, stats.activeSubscriptions]);
 
-    const getColorClasses = (color: string) => {
+    // Memoize color classes function
+    const getColorClasses = useCallback((color: string) => {
         const colors: Record<string, { bg: string; text: string; border: string; hover: string }> = {
             blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', hover: 'hover:bg-blue-500/20' },
             purple: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20', hover: 'hover:bg-purple-500/20' },
@@ -258,7 +280,10 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             </div>
         </div>
     );
-};
+});
+
+// Display name for debugging
+SuperAdminDashboardV2.displayName = 'SuperAdminDashboardV2';
 
 export default SuperAdminDashboardV2;
 
