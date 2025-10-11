@@ -10,8 +10,8 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
-    const [email, setEmail] = useState('adrian.stanca1@gmail.com');
-    const [password, setPassword] = useState('Cumparavinde1');
+    const [email, setEmail] = useState('adrian.stanca1@icloud.com');
+    const [password, setPassword] = useState('password123');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isOAuthLoading, setIsOAuthLoading] = useState<'google' | 'github' | null>(null);
@@ -91,35 +91,57 @@ const LoginForm: React.FC<LoginFormProps> = React.memo(({ onLoginSuccess }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {error && <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-md">{error}</p>}
-            <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4">
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-l-4 border-purple-500 p-4 mb-4 rounded-r-lg">
                 <div className="flex">
                     <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <svg className="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A.75.75 0 0010.747 15l.001-.001a.75.75 0 00.746-.894l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
                         </svg>
                     </div>
-                    <div className="ml-3">
-                        <p className="text-sm text-purple-700 font-semibold mb-1">
-                            🚀 Platform Admin Access
+                    <div className="ml-3 flex-1">
+                        <p className="text-sm text-purple-800 font-bold mb-2">
+                            👑 Super Admin Access
                         </p>
-                        <p className="text-sm text-purple-700">
-                            Email: <code className="font-bold">adrian.stanca1@gmail.com</code><br />
-                            Password: <code className="font-bold">Cumparavinde1</code>
-                        </p>
+                        <div className="text-xs text-purple-700 space-y-1">
+                            <div>Email: <code className="bg-purple-100 px-2 py-0.5 rounded font-mono">adrian.stanca1@gmail.com</code></div>
+                            <div>Password: <code className="bg-purple-100 px-2 py-0.5 rounded font-mono">parola123</code></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-l-4 border-blue-500 p-4 mb-4 rounded-r-lg">
                 <div className="flex">
                     <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A.75.75 0 0010.747 15l.001-.001a.75.75 0 00.746-.894l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
                         </svg>
                     </div>
-                    <div className="ml-3">
-                        <p className="text-sm text-blue-700">
-                            Demo Users: <code className="font-bold">casey@constructco.com</code> or <code className="font-bold">susan@constructco.com</code>. Password: <code className="font-bold">password123</code>.
+                    <div className="ml-3 flex-1">
+                        <p className="text-sm text-blue-800 font-bold mb-2">
+                            🏢 Company Admin Access
                         </p>
+                        <div className="text-xs text-blue-700 space-y-1">
+                            <div>Email: <code className="bg-blue-100 px-2 py-0.5 rounded font-mono">adrian@ascladdingltd.co.uk</code></div>
+                            <div>Password: <code className="bg-blue-100 px-2 py-0.5 rounded font-mono">lolozania1</code></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 p-4 mb-4 rounded-r-lg">
+                <div className="flex">
+                    <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A.75.75 0 0010.747 15l.001-.001a.75.75 0 00.746-.894l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                        <p className="text-sm text-green-800 font-bold mb-2">
+                            💻 Developer Access (Pre-filled)
+                        </p>
+                        <div className="text-xs text-green-700 space-y-1">
+                            <div>Email: <code className="bg-green-100 px-2 py-0.5 rounded font-mono">adrian.stanca1@icloud.com</code></div>
+                            <div>Password: <code className="bg-green-100 px-2 py-0.5 rounded font-mono">password123</code></div>
+                        </div>
                     </div>
                 </div>
             </div>

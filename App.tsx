@@ -322,8 +322,8 @@ const App: React.FC = () => {
                 const defaultScreenForRole: Screen = userProfile.role === 'developer'
                     ? 'developer-console'
                     : userProfile.role === 'super_admin'
-                        ? 'developer-dashboard'
-                        : 'global-dashboard';
+                        ? 'super-admin-dashboard'
+                        : 'company-admin-dashboard';
                 navigateToModule(defaultScreenForRole, {});
                 console.log('📍 Navigation stack set to', defaultScreenForRole);
 
@@ -349,8 +349,8 @@ const App: React.FC = () => {
             const fallbackScreen: Screen = fallbackProfile.role === 'developer'
                 ? 'developer-console'
                 : fallbackProfile.role === 'super_admin'
-                    ? 'developer-dashboard'
-                    : 'global-dashboard';
+                    ? 'super-admin-dashboard'
+                    : 'company-admin-dashboard';
             navigateToModule(fallbackScreen, {});
         }
     };
@@ -370,8 +370,8 @@ const App: React.FC = () => {
                         const defaultScreenForRole: Screen = user.role === 'developer'
                             ? 'developer-console'
                             : user.role === 'super_admin'
-                                ? 'developer-dashboard'
-                                : 'global-dashboard';
+                                ? 'super-admin-dashboard'
+                                : 'company-admin-dashboard';
                         navigateToModule(defaultScreenForRole, {});
                     }
                     window.dispatchEvent(new CustomEvent('userLoggedIn'));
@@ -393,7 +393,7 @@ const App: React.FC = () => {
         const handleHashChange = () => {
             const hash = window.location.hash;
             if (hash === '#dashboard' && currentUser) {
-                const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-console' : currentUser.role === 'super_admin' ? 'developer-dashboard' : 'global-dashboard';
+                const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-console' : currentUser.role === 'super_admin' ? 'super-admin-dashboard' : 'company-admin-dashboard';
                 navigateToModule(targetScreen, {});
                 // Clean up the hash
                 window.history.replaceState(null, '', window.location.pathname);
@@ -426,8 +426,8 @@ const App: React.FC = () => {
                 const defaultScreen: Screen = currentUser.role === 'developer'
                     ? 'developer-console'
                     : currentUser.role === 'super_admin'
-                        ? 'developer-dashboard'
-                        : 'global-dashboard';
+                        ? 'super-admin-dashboard'
+                        : 'company-admin-dashboard';
                 navigateToModule(defaultScreen, {});
             }
         } else {
@@ -607,7 +607,7 @@ const App: React.FC = () => {
             return;
         }
         if (currentUser.role === 'super_admin') {
-            navigateToModule('developer-dashboard');
+            navigateToModule('super-admin-dashboard');
             return;
         }
         if (currentUser.role === 'company_admin') {
