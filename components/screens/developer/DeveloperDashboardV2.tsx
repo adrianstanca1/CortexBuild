@@ -1,9 +1,15 @@
 /**
  * Developer Dashboard V2.0 - Revolutionary Design
  * Modern development environment with advanced tools
+ *
+ * OPTIMIZATIONS (Copilot + Augment):
+ * - React.memo for performance
+ * - useMemo for expensive calculations
+ * - useCallback for event handlers
+ * - Memoized static data
  */
 
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useMemo, useCallback } from 'react';
 import {
     Code2, Terminal, GitBranch, Package, Zap, FileCode,
     Database, TestTube, Rocket, BookOpen, Activity, Clock,
@@ -24,7 +30,8 @@ interface DeveloperDashboardV2Props {
     isDarkMode?: boolean;
 }
 
-const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
+// Memoized component for better performance
+const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
     currentUser,
     navigateTo,
     isDarkMode = true
@@ -47,13 +54,18 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
         return () => clearTimeout(timer);
     }, []);
 
-    // Quick Stats
-    const quickStats = [
+    // Memoize tab change handler
+    const handleTabChange = useCallback((tab: 'overview' | 'code' | 'tools' | 'codex') => {
+        setActiveTab(tab);
+    }, []);
+
+    // Memoize quick stats to prevent recalculation on every render
+    const quickStats = useMemo(() => [
         {
             title: 'Active Projects',
             value: stats.projectsCount.toString(),
             change: '+2 this week',
-            trend: 'up',
+            trend: 'up' as const,
             icon: Rocket,
             color: 'blue',
             bgGradient: 'from-blue-500 to-blue-600'
@@ -62,7 +74,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
             title: 'Commits Today',
             value: stats.commitsToday.toString(),
             change: '+8 from yesterday',
-            trend: 'up',
+            trend: 'up' as const,
             icon: GitBranch,
             color: 'green',
             bgGradient: 'from-green-500 to-green-600'
@@ -71,7 +83,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
             title: 'Tests Passed',
             value: stats.testsRun.toString(),
             change: '100% pass rate',
-            trend: 'up',
+            trend: 'up' as const,
             icon: TestTube,
             color: 'purple',
             bgGradient: 'from-purple-500 to-purple-600'
@@ -80,16 +92,16 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
             title: 'Code Quality',
             value: `${stats.codeQuality}%`,
             change: '+1.2%',
-            trend: 'up',
+            trend: 'up' as const,
             icon: Award,
             color: 'cyan',
             bgGradient: 'from-cyan-500 to-cyan-600'
         }
-    ];
+    ], [stats]);
 
-    // Development Tools
-    const developmentTools = [
-        { id: 'codex-agent', title: 'Codex Agent', icon: Bot, color: 'purple', description: 'AI coding assistant (GPT-5-Codex)', action: () => setActiveTab('codex') },
+    // Memoize development tools with useCallback for actions
+    const developmentTools = useMemo(() => [
+        { id: 'codex-agent', title: 'Codex Agent', icon: Bot, color: 'purple', description: 'AI coding assistant (GPT-5-Codex)', action: () => handleTabChange('codex') },
         { id: 'code-editor', title: 'Code Editor', icon: Code2, color: 'blue', description: 'Monaco editor with IntelliSense', action: () => navigateTo('sdk-developer', { startTab: 'builder' }) },
         { id: 'terminal', title: 'Terminal', icon: Terminal, color: 'green', description: 'Integrated terminal', action: () => toast.info('Terminal opening...') },
         { id: 'git', title: 'Git Integration', icon: GitBranch, color: 'orange', description: 'Version control', action: () => toast.info('Git tools opening...') },
@@ -336,7 +348,10 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
             )}
         </div>
     );
-};
+});
+
+// Display name for debugging
+DeveloperDashboardV2.displayName = 'DeveloperDashboardV2';
 
 export default DeveloperDashboardV2;
 
