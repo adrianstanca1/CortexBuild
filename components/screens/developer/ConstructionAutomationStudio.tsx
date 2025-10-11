@@ -457,6 +457,15 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
     const [agents, setAgents] = useState<AgentMonitor[]>(initialAgentRuntimes);
     const [webhooks, setWebhooks] = useState<WebhookRoute[]>(initialWebhookRoutes);
 
+    const handleSelectWorkflow = (workflowId: string) => {
+        const workflow = automationWorkflows.find((item) => item.id === workflowId);
+        if (!workflow) {
+            return;
+        }
+        setSelectedWorkflowId(workflowId);
+        setActiveEnvId(workflow.environmentId);
+    };
+
     const activeEnvironment = useMemo(
         () => environments.find((env) => env.id === activeEnvId) ?? environments[0],
         [environments, activeEnvId]
@@ -466,6 +475,22 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
         () => automationWorkflows.find((workflow) => workflow.id === selectedWorkflowId) ?? automationWorkflows[0],
         [selectedWorkflowId]
     );
+
+    const selectedWorkflowEnvironment = useMemo(
+        () =>
+            selectedWorkflow
+                ? environments.find((environment) => environment.id === selectedWorkflow.environmentId) ?? undefined
+                : undefined,
+        [environments, selectedWorkflow]
+    );
+
+    const environmentForConsole = useMemo(() => {
+        if (selectedWorkflowEnvironment && selectedWorkflow?.environmentId === activeEnvId) {
+            return selectedWorkflowEnvironment;
+        }
+
+        return activeEnvironment;
+    }, [selectedWorkflowEnvironment, selectedWorkflow, activeEnvironment, activeEnvId]);
 
     const totals = useMemo(() => {
         const runningAutomations = automationWorkflows.filter((workflow) => workflow.status === 'running').length;
@@ -782,11 +807,10 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                                     key={environment.id}
                                     type="button"
                                     onClick={() => setActiveEnvId(environment.id)}
-                                    className={`w-full rounded-xl border p-4 text-left transition-shadow ${
-                                        activeEnvId === environment.id
-                                            ? 'border-blue-400 bg-blue-50 shadow'
-                                            : 'border-slate-200 hover:border-blue-200 hover:shadow-sm'
-                                    }`}
+                                    className={`w-full rounded-xl border p-4 text-left transition-shadow ${activeEnvId === environment.id
+                                        ? 'border-blue-400 bg-blue-50 shadow'
+                                        : 'border-slate-200 hover:border-blue-200 hover:shadow-sm'
+                                        }`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -794,13 +818,12 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                                             <p className="text-xs text-slate-500">{environment.type}</p>
                                         </div>
                                         <span
-                                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                environment.status === 'running'
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : environment.status === 'stopped'
-                                                        ? 'bg-slate-200 text-slate-600'
-                                                        : 'bg-amber-100 text-amber-700'
-                                            }`}
+                                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${environment.status === 'running'
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : environment.status === 'stopped'
+                                                    ? 'bg-slate-200 text-slate-600'
+                                                    : 'bg-amber-100 text-amber-700'
+                                                }`}
                                         >
                                             {environment.status === 'running' ? 'Running' : environment.status === 'stopped' ? 'Stopped' : 'Provisioning'}
                                         </span>
@@ -857,7 +880,7 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                             <Shield className="h-5 w-5 text-emerald-500" />
                         </div>
                         <dl className="mt-4 space-y-3 text-sm">
-                            {activeEnvironment.connectors.map((connector) => (
+                            {environmentForConsole.connectors.map((connector) => (
                                 <div key={connector} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
                                     <div className="flex items-center gap-2">
                                         <ClipboardList className="h-4 w-4 text-slate-500" />
@@ -878,9 +901,9 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                                 <span className="text-xs uppercase tracking-wide text-slate-400">Automation Console</span>
                             </div>
                             <div className="flex items-center gap-3 text-[10px] text-slate-400">
-                                <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3" /> {activeEnvironment.cpuUsage}%</span>
-                                <span className="inline-flex items-center gap-1"><Database className="h-3 w-3" /> {activeEnvironment.memoryUsage}%</span>
-                                <span className="inline-flex items-center gap-1"><Globe className="h-3 w-3" /> {activeEnvironment.region}</span>
+                                <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3" /> {environmentForConsole.cpuUsage}%</span>
+                                <span className="inline-flex items-center gap-1"><Database className="h-3 w-3" /> {environmentForConsole.memoryUsage}%</span>
+                                <span className="inline-flex items-center gap-1"><Globe className="h-3 w-3" /> {environmentForConsole.region}</span>
                             </div>
                         </div>
                         <div className="mt-4 h-56 overflow-y-auto rounded-lg bg-slate-900 p-3 font-mono text-xs leading-relaxed text-slate-100">
@@ -954,10 +977,9 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                             <button
                                 key={workflow.id}
                                 type="button"
-                                onClick={() => setSelectedWorkflowId(workflow.id)}
-                                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-                                    selectedWorkflowId === workflow.id ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-blue-200'
-                                }`}
+                                onClick={() => handleSelectWorkflow(workflow.id)}
+                                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${selectedWorkflowId === workflow.id ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-blue-200'
+                                    }`}
                             >
                                 {workflow.name}
                             </button>
@@ -970,7 +992,7 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                         </div>
                         <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
                             <p className="text-[11px] uppercase text-slate-500">Environment</p>
-                            <p className="mt-1 text-sm font-semibold text-slate-900">{activeEnvironment.name}</p>
+                            <p className="mt-1 text-sm font-semibold text-slate-900">{selectedWorkflowEnvironment?.name ?? activeEnvironment.name}</p>
                         </div>
                         <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
                             <p className="text-[11px] uppercase text-slate-500">Success Rate</p>
