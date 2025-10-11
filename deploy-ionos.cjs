@@ -1,3 +1,6 @@
+/* eslint-env node */
+/* global process, console */
+
 const ftp = require('ftp');
 const fs = require('fs');
 const path = require('path');

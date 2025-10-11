@@ -576,7 +576,7 @@ const App: React.FC = () => {
                         isDarkMode={true}
                         onNavigate={(section) => {
                             console.log('Navigating to section:', section);
-                            toast.info(`Opening ${section}...`);
+                            toast.success(`Opening ${section}...`);
                         }}
                     />
                 </Suspense>

@@ -7,9 +7,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Users, Building2, CreditCard, BarChart3, Settings, Shield,
     Database, Activity, FileText, Bell, Lock, Globe, Package,
-    Zap, TrendingUp, DollarSign, UserCheck, AlertCircle,
-    CheckCircle, Clock, Download, ArrowUpRight, ArrowDownRight,
-    Sparkles, Target, Award, Cpu, Eye, ChevronRight
+    DollarSign, Download, ArrowUpRight, ArrowDownRight,
+    Sparkles, Cpu, ChevronRight, LayoutDashboard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -132,13 +131,17 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                                 type="button"
                                 onClick={() => toast.success('Refreshing data...')}
                                 className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all backdrop-blur-sm"
+                                title="Refresh dashboard data"
+                                aria-label="Refresh dashboard data"
                             >
                                 <Activity className="w-5 h-5" />
                             </button>
                             <button
                                 type="button"
-                                onClick={() => toast.info('Downloading report...')}
+                                onClick={() => toast('Downloading report...', { icon: '📥' })}
                                 className="px-6 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium flex items-center space-x-2"
+                                title="Export dashboard report"
+                                aria-label="Export dashboard report"
                             >
                                 <Download className="w-5 h-5" />
                                 <span>Export</span>
@@ -198,8 +201,8 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-blue-600 text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                    ? 'bg-blue-600 text-white shadow-lg'
+                                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
                                     }`}
                             >
                                 <TabIcon className="w-5 h-5" />

@@ -16,20 +16,20 @@ export interface DeveloperMetrics {
     apiRequestsUsed: number;
     apiCostThisMonth: number;
     activeProviders: number;
-    
+
     // Sandbox & Modules
     sandboxRunsToday: number;
     sandboxRunsLimit: number;
     totalModules: number;
     activeModules: number;
     pendingModules: number;
-    
+
     // Workflows & Integrations
     totalWorkflows: number;
     activeWorkflows: number;
     totalWebhooks: number;
     activeWebhooks: number;
-    
+
     // Performance
     avgResponseTime: number;
     successRate: number;
@@ -82,13 +82,24 @@ const DeveloperMetricsWidget: React.FC<DeveloperMetricsWidgetProps> = ({ metrics
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
-    const usagePercentage = metrics.apiRequestsLimit === -1 
-        ? 0 
+    const usagePercentage = metrics.apiRequestsLimit === -1
+        ? 0
         : Math.min((metrics.apiRequestsUsed / metrics.apiRequestsLimit) * 100, 100);
 
     const sandboxPercentage = metrics.sandboxRunsLimit === -1
         ? 0
         : Math.min((metrics.sandboxRunsToday / metrics.sandboxRunsLimit) * 100, 100);
+
+    const PROGRESS_WIDTH_CLASSES = [
+        'w-[0%]', 'w-[5%]', 'w-[10%]', 'w-[15%]', 'w-[20%]', 'w-[25%]', 'w-[30%]', 'w-[35%]', 'w-[40%]', 'w-[45%]',
+        'w-[50%]', 'w-[55%]', 'w-[60%]', 'w-[65%]', 'w-[70%]', 'w-[75%]', 'w-[80%]', 'w-[85%]', 'w-[90%]', 'w-[95%]', 'w-[100%]'
+    ] as const;
+
+    const getProgressWidthClass = (percentage: number) => {
+        const clamped = Math.max(0, Math.min(percentage, 100));
+        const index = Math.round(clamped / 5);
+        return PROGRESS_WIDTH_CLASSES[index] ?? PROGRESS_WIDTH_CLASSES[0];
+    };
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
@@ -112,15 +123,14 @@ const DeveloperMetricsWidget: React.FC<DeveloperMetricsWidgetProps> = ({ metrics
                         {metrics.apiRequestsUsed.toLocaleString()}
                     </div>
                     <div className="text-xs mb-2">
-                        {metrics.apiRequestsLimit === -1 
-                            ? 'Unlimited' 
+                        {metrics.apiRequestsLimit === -1
+                            ? 'Unlimited'
                             : `of ${metrics.apiRequestsLimit.toLocaleString()} requests`}
                     </div>
                     {metrics.apiRequestsLimit !== -1 && (
-                        <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div 
-                                className="bg-current rounded-full h-1.5 transition-all"
-                                style={{ width: `${usagePercentage}%` }}
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                            <div
+                                className={`bg-current rounded-full h-full transition-all ${getProgressWidthClass(usagePercentage)}`}
                             />
                         </div>
                     )}
@@ -158,15 +168,14 @@ const DeveloperMetricsWidget: React.FC<DeveloperMetricsWidgetProps> = ({ metrics
                         {metrics.sandboxRunsToday}
                     </div>
                     <div className="text-xs mb-2">
-                        {metrics.sandboxRunsLimit === -1 
-                            ? 'Unlimited today' 
+                        {metrics.sandboxRunsLimit === -1
+                            ? 'Unlimited today'
                             : `of ${metrics.sandboxRunsLimit} today`}
                     </div>
                     {metrics.sandboxRunsLimit !== -1 && (
-                        <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div 
-                                className="bg-current rounded-full h-1.5 transition-all"
-                                style={{ width: `${sandboxPercentage}%` }}
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                            <div
+                                className={`bg-current rounded-full h-full transition-all ${getProgressWidthClass(sandboxPercentage)}`}
                             />
                         </div>
                     )}
@@ -202,22 +211,19 @@ const DeveloperMetricsWidget: React.FC<DeveloperMetricsWidgetProps> = ({ metrics
                     <div className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium text-gray-600">Success Rate</span>
-                            <span className={`text-xs font-semibold ${
-                                metrics.successRate >= 95 ? 'text-green-600' :
-                                metrics.successRate >= 85 ? 'text-yellow-600' :
-                                'text-red-600'
-                            }`}>
+                            <span className={`text-xs font-semibold ${metrics.successRate >= 95 ? 'text-green-600' :
+                                    metrics.successRate >= 85 ? 'text-yellow-600' :
+                                        'text-red-600'
+                                }`}>
                                 {metrics.successRate.toFixed(1)}%
                             </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                                className={`rounded-full h-2 transition-all ${
-                                    metrics.successRate >= 95 ? 'bg-green-500' :
-                                    metrics.successRate >= 85 ? 'bg-yellow-500' :
-                                    'bg-red-500'
-                                }`}
-                                style={{ width: `${metrics.successRate}%` }}
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                                className={`rounded-full h-full transition-all ${metrics.successRate >= 95 ? 'bg-green-500' :
+                                        metrics.successRate >= 85 ? 'bg-yellow-500' :
+                                            'bg-red-500'
+                                    } ${getProgressWidthClass(metrics.successRate)}`}
                             />
                         </div>
                     </div>
@@ -226,11 +232,10 @@ const DeveloperMetricsWidget: React.FC<DeveloperMetricsWidgetProps> = ({ metrics
                     <div className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium text-gray-600">Avg Response</span>
-                            <span className={`text-xs font-semibold ${
-                                metrics.avgResponseTime < 200 ? 'text-green-600' :
-                                metrics.avgResponseTime < 500 ? 'text-yellow-600' :
-                                'text-red-600'
-                            }`}>
+                            <span className={`text-xs font-semibold ${metrics.avgResponseTime < 200 ? 'text-green-600' :
+                                    metrics.avgResponseTime < 500 ? 'text-yellow-600' :
+                                        'text-red-600'
+                                }`}>
                                 {metrics.avgResponseTime}ms
                             </span>
                         </div>
@@ -244,18 +249,17 @@ const DeveloperMetricsWidget: React.FC<DeveloperMetricsWidgetProps> = ({ metrics
                     <div className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium text-gray-600">Error Rate</span>
-                            <span className={`text-xs font-semibold ${
-                                metrics.errorRate < 1 ? 'text-green-600' :
-                                metrics.errorRate < 5 ? 'text-yellow-600' :
-                                'text-red-600'
-                            }`}>
+                            <span className={`text-xs font-semibold ${metrics.errorRate < 1 ? 'text-green-600' :
+                                    metrics.errorRate < 5 ? 'text-yellow-600' :
+                                        'text-red-600'
+                                }`}>
                                 {metrics.errorRate.toFixed(2)}%
                             </span>
                         </div>
                         <div className="text-xs text-gray-500">
                             {metrics.errorRate < 1 ? 'Excellent' :
-                             metrics.errorRate < 5 ? 'Good' :
-                             'Needs attention'}
+                                metrics.errorRate < 5 ? 'Good' :
+                                    'Needs attention'}
                         </div>
                     </div>
                 </div>
