@@ -192,6 +192,9 @@ const App: React.FC = () => {
         setNavigationStack
     } = useNavigation();
 
+    // Destructure currentNavItem for use in hooks
+    const { screen, params, project } = currentNavItem || {};
+
     const { can } = usePermissions(currentUser);
     const { toasts, removeToast, showSuccess, showError } = useToast();
 
@@ -362,88 +365,7 @@ const App: React.FC = () => {
         );
     }
 
-    if (!currentUser) {
-        return (
-            <div className="bg-slate-100 min-h-screen flex items-center justify-center">
-                <AuthScreen onLoginSuccess={handleLoginSuccess} />
-            </div>
-        );
-    }
-
-    // If no navigation stack, show dashboard directly
-    if (!currentNavItem || navigationStack.length === 0) {
-
-        const commonProps = {
-            currentUser,
-            navigateTo: navigateToModule,
-            isDarkMode: true
-        };
-
-        // Render role-specific dashboard
-        switch (currentUser.role) {
-            case 'developer':
-                return (
-                    <Suspense fallback={<ScreenLoader />}>
-                        <DeveloperDashboardV2 {...commonProps} />
-                    </Suspense>
-                );
-
-            case 'super_admin':
-                return (
-                    <Suspense fallback={<ScreenLoader />}>
-                        <SuperAdminDashboardV2
-                            isDarkMode={true}
-                            onNavigate={(section) => {
-                                showSuccess('Navigation', `Opening ${section}...`);
-                            }}
-                        />
-                    </Suspense>
-                );
-
-            case 'company_admin':
-                return (
-                    <Suspense fallback={<ScreenLoader />}>
-                        <CompanyAdminDashboardV2 {...commonProps} />
-                    </Suspense>
-                );
-
-            default: {
-                // Fallback to unified dashboard
-                const dashboardProps = {
-                    currentUser,
-                    navigateTo,
-                    onDeepLink: handleDeepLinkWrapper,
-                    onQuickAction: handleQuickAction,
-                    onSuggestAction: handleSuggestAction,
-                    selectProject: (id: string) => {
-                        const project = allProjects.find(p => p.id === id);
-                        if (project) selectProject(project);
-                    },
-                    can,
-                    goBack
-                };
-                return (
-                    <div className="min-h-screen bg-gray-50">
-                        <Suspense fallback={<ScreenLoader />}>
-                            <UnifiedDashboardScreen {...dashboardProps} />
-                        </Suspense>
-                    </div>
-                );
-            }
-        }
-    }
-
-    const { screen, params, project } = currentNavItem;
-    const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
-
-    if (screen === 'my-apps-desktop') {
-        return (
-            <Suspense fallback={<ScreenLoader />}>
-                <Base44Clone user={currentUser} onLogout={handleLogout} />
-            </Suspense>
-        );
-    }
-
+    // All hooks must be called before any conditional returns
     const getSidebarProject = useMemo(() => {
         if (project) {
             return project;
@@ -469,6 +391,143 @@ const App: React.FC = () => {
             }
         };
     }, [project, currentUser?.name, currentUser?.companyId]);
+
+    if (!sessionChecked) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                <div className="bg-white p-8 rounded-xl shadow-2xl text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-700 font-medium">Loading session...</p>
+                    <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!currentUser) {
+        return (
+            <div className="bg-slate-100 min-h-screen flex items-center justify-center">
+                <AuthScreen onLoginSuccess={handleLoginSuccess} />
+            </div>
+        );
+    }
+
+    // If no navigation stack, show dashboard directly
+    if (!currentNavItem || navigationStack.length === 0) {
+
+        const commonProps = {
+            currentUser,
+            navigateTo: navigateToModule,
+            isDarkMode: true
+        };
+
+        // Render role-specific dashboard
+        switch (currentUser.role) {
+            case 'developer':
+                return (
+                    <ErrorBoundary>
+                        <div className="bg-slate-50">
+                            <Suspense fallback={<ScreenLoader />}>
+                                <DeveloperDashboardV2 {...commonProps} />
+                            </Suspense>
+                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+                            <Suspense fallback={null}>
+                                <ChatbotWidget />
+                            </Suspense>
+                            <OfflineIndicator position="bottom-right" />
+                        </div>
+                    </ErrorBoundary>
+                );
+
+            case 'super_admin':
+                return (
+                    <ErrorBoundary>
+                        <div className="bg-slate-50">
+                            <Suspense fallback={<ScreenLoader />}>
+                                <SuperAdminDashboardV2
+                                    isDarkMode={true}
+                                    onNavigate={(section) => {
+                                        showSuccess('Navigation', `Opening ${section}...`);
+                                    }}
+                                />
+                            </Suspense>
+                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+                            <Suspense fallback={null}>
+                                <ChatbotWidget />
+                            </Suspense>
+                            <OfflineIndicator position="bottom-right" />
+                        </div>
+                    </ErrorBoundary>
+                );
+
+            case 'company_admin':
+                return (
+                    <ErrorBoundary>
+                        <div className="bg-slate-50">
+                            <Suspense fallback={<ScreenLoader />}>
+                                <CompanyAdminDashboardV2 {...commonProps} />
+                            </Suspense>
+                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+                            <Suspense fallback={null}>
+                                <ChatbotWidget />
+                            </Suspense>
+                            <OfflineIndicator position="bottom-right" />
+                        </div>
+                    </ErrorBoundary>
+                );
+
+            default: {
+                // Fallback to unified dashboard
+                const dashboardProps = {
+                    currentUser,
+                    navigateTo,
+                    onDeepLink: handleDeepLinkWrapper,
+                    onQuickAction: handleQuickAction,
+                    onSuggestAction: handleSuggestAction,
+                    selectProject: (id: string) => {
+                        const project = allProjects.find(p => p.id === id);
+                        if (project) selectProject(project);
+                    },
+                    can,
+                    goBack
+                };
+                return (
+                    <ErrorBoundary>
+                        <div className="min-h-screen bg-gray-50">
+                            <Suspense fallback={<ScreenLoader />}>
+                                <UnifiedDashboardScreen {...dashboardProps} />
+                            </Suspense>
+                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+                            <Suspense fallback={null}>
+                                <ChatbotWidget />
+                            </Suspense>
+                            <OfflineIndicator position="bottom-right" />
+                        </div>
+                    </ErrorBoundary>
+                );
+            }
+        }
+    }
+
+    // Get screen component (screen is already declared at line 196)
+    const ScreenComponent = SCREEN_COMPONENTS[screen || 'unified-dashboard'] || PlaceholderToolScreen;
+
+    if (screen === 'my-apps-desktop') {
+        return (
+            <ErrorBoundary>
+                <div className="bg-slate-50">
+                    <Suspense fallback={<ScreenLoader />}>
+                        <Base44Clone user={currentUser} onLogout={handleLogout} />
+                    </Suspense>
+                    <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+                    <Suspense fallback={null}>
+                        <ChatbotWidget />
+                    </Suspense>
+                    <OfflineIndicator position="bottom-right" />
+                </div>
+            </ErrorBoundary>
+        );
+    }
 
     const sidebarGoHome = useCallback(() => {
         const defaultScreen = getDefaultScreenForRole(currentUser.role);
