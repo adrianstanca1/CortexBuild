@@ -207,7 +207,7 @@ const App: React.FC = () => {
         };
 
         checkSession();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []); // Only run on mount
 
     // Handle URL hash for dashboard navigation
@@ -271,7 +271,7 @@ const App: React.FC = () => {
         };
         window.addEventListener('userLoggedOutTrigger', handleLogoutTrigger);
         return () => window.removeEventListener('userLoggedOutTrigger', handleLogoutTrigger);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []); // handleLogout is stable
 
     const handleLoginSuccess = (user: User) => {
@@ -391,7 +391,7 @@ const App: React.FC = () => {
                     </Suspense>
                 );
 
-            default:
+            default: {
                 // Fallback to unified dashboard
                 const dashboardProps = {
                     currentUser,
@@ -413,6 +413,7 @@ const App: React.FC = () => {
                         </Suspense>
                     </div>
                 );
+            }
         }
     }
 
@@ -528,8 +529,8 @@ const App: React.FC = () => {
 
             <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
 
-            {/* Global AI Chatbot - Available on all pages */}
-            {currentUser && <ChatbotWidget />}
+            {/* Global AI Chatbot - Available on all pages when user is logged in */}
+            <ChatbotWidget />
         </div>
     );
 }

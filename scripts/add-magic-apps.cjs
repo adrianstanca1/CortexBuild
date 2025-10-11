@@ -4,8 +4,7 @@
  */
 
 const Database = require('better-sqlite3');
-const { v4: uuidv4 } = require('uuid');
-
+http://localhost:3000
 const db = new Database('database.db');
 
 // Revolutionary Magic Apps
@@ -181,7 +180,7 @@ magicApps.forEach((app, index) => {
             new Date().toISOString(),
             new Date().toISOString()
         );
-        
+
         console.log(`✅ ${index + 1}. ${app.name} - Added successfully`);
     } catch (error) {
         console.error(`❌ Failed to add ${app.name}:`, error.message);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Screen } from '../../../types';
-import PlatformAdminDashboard from '../dashboards/PlatformAdminDashboard';
+import SuperAdminDashboardV2 from '../../admin/SuperAdminDashboardV2';
 import CompaniesManagement from './CompaniesManagement';
 import InvitationsManagement from './InvitationsManagement';
 import PlansManagement from './PlansManagement';
@@ -58,7 +58,7 @@ const PlatformAdminScreen: React.FC<PlatformAdminScreenProps> = ({
     const renderTabContent = () => {
         switch (activeTab) {
             case 'dashboard':
-                return <PlatformAdminDashboard currentUser={currentUser} navigateTo={navigateTo} />;
+                return <SuperAdminDashboardV2 onNavigate={(section) => navigateTo(section as Screen)} />;
             case 'companies':
                 return <CompaniesManagement currentUser={currentUser} />;
             case 'invitations':
@@ -70,7 +70,7 @@ const PlatformAdminScreen: React.FC<PlatformAdminScreenProps> = ({
             case 'audit':
                 return <AuditLogManagement currentUser={currentUser} />;
             default:
-                return <PlatformAdminDashboard currentUser={currentUser} navigateTo={navigateTo} />;
+                return <SuperAdminDashboardV2 onNavigate={(section) => navigateTo(section as Screen)} />;
         }
     };
 

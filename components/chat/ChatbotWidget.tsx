@@ -24,6 +24,9 @@ export const ChatbotWidget: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    // Check if user is authenticated (checked after hooks to avoid hook rules violation)
+    const isAuthenticated = !!localStorage.getItem('constructai_token');
+
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -150,6 +153,11 @@ export const ChatbotWidget: React.FC = () => {
             }
         }
     };
+
+    // Don't render if user is not authenticated
+    if (!isAuthenticated) {
+        return null;
+    }
 
     return (
         <>

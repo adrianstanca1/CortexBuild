@@ -550,7 +550,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         description: aiExplanation || 'AI generated application',
         code: generatedCode,
         status: 'draft',
-        companyId: user.company_id
+        companyId: user.companyId
       });
 
       if (response.data.success) {
@@ -597,7 +597,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         name: newWorkflowName.trim(),
         definition,
         isActive: !isDemo,
-        companyId: user.company_id
+        companyId: user.companyId
       });
 
       if (response.data.success) {
@@ -916,7 +916,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
               connections: workflow.connections
             },
             isActive: true,
-            companyId: user.company_id
+            companyId: user.companyId
           }).then(response => {
             if (response.data.success) {
               setWorkflows(prev => [response.data.workflow, ...prev]);

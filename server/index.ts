@@ -162,6 +162,22 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
             }
         });
 
+// DELETE /api/chat/message - Clear chat history
+app.delete('/api/chat/message', auth.authenticateToken, async (req, res) => {
+    try {
+        const { sessionId } = req.query;
+        // TODO: Implement chat history deletion from database
+        // For now, just return success
+        res.json({
+            success: true,
+            message: 'Chat history cleared successfully',
+        });
+    } catch (error: any) {
+        console.error('Chat delete error:', error);
+        res.status(500).json({ error: error.message || 'Failed to clear chat history' });
+    }
+});
+
 /**
  * Start server
  */

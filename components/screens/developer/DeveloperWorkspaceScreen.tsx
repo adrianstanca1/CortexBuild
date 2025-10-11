@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Screen, User } from '../../../types';
-import { EnhancedDashboard } from '../../dashboard/EnhancedDashboard';
-import DeveloperDashboardScreen from './DeveloperDashboardScreen';
+import AnalyticsDashboard from '../../development/AnalyticsDashboard';
+import DeveloperDashboardV2 from './DeveloperDashboardV2';
 import { ProductionSDKDeveloperView } from '../../sdk/ProductionSDKDeveloperView';
 
 type DeveloperView = 'control-center' | 'sdk-studio' | 'insights';
@@ -41,13 +41,13 @@ const DeveloperWorkspaceScreen: React.FC<DeveloperWorkspaceScreenProps> = ({ cur
             case 'insights':
                 return (
                     <div className="space-y-4">
-                        <EnhancedDashboard />
+                        <AnalyticsDashboard />
                     </div>
                 );
             case 'control-center':
             default:
                 return (
-                    <DeveloperDashboardScreen
+                    <DeveloperDashboardV2
                         currentUser={currentUser}
                         navigateTo={navigateTo}
                     />
@@ -70,11 +70,10 @@ const DeveloperWorkspaceScreen: React.FC<DeveloperWorkspaceScreenProps> = ({ cur
                             key={view}
                             type="button"
                             onClick={() => setActiveView(view)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                                activeView === view
+                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeView === view
                                     ? 'bg-blue-600 text-white shadow'
                                     : 'text-slate-600 hover:bg-slate-100'
-                            }`}
+                                }`}
                         >
                             {VIEW_LABELS[view]}
                         </button>
