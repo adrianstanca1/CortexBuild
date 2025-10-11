@@ -67,7 +67,6 @@ const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/module
 const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
 const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
 const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
-const MyApplicationsDesktop = lazy(() => import('./components/desktop/MyApplicationsDesktop'));
 const AdminReviewInterface = lazy(() => import('./components/marketplace/AdminReviewInterface'));
 const DeveloperSubmissionInterface = lazy(() => import('./components/marketplace/DeveloperSubmissionInterface'));
 const Base44Clone = lazy(() =>
@@ -142,13 +141,11 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'my-apps-desktop': Base44Clone,
     // Global Marketplace
     'marketplace': GlobalMarketplace,
-    'my-applications': MyApplicationsDesktop,
+    'my-applications': MyApplications,
     'admin-review': AdminReviewInterface,
     'developer-submissions': DeveloperSubmissionInterface,
     // Workflow Builders
     'n8n-procore-builder': N8nProcoreWorkflowBuilder,
-    'construction-oracle': ConstructionOracle,
-    'my-applications': MyApplications,
     'construction-oracle': ConstructionOracle,
     // 'zapier-workflow': ZapierStyleWorkflowBuilder,
     // Admin
