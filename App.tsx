@@ -143,7 +143,8 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'my-applications': MyApplicationsDesktop,
     'admin-review': AdminReviewInterface,
     'developer-submissions': DeveloperSubmissionInterface,
-    // Zapier-Style Workflow Builder (now integrated in SDK Developer)
+    // Workflow Builders
+    'n8n-procore-builder': N8nProcoreWorkflowBuilder,
     // 'zapier-workflow': ZapierStyleWorkflowBuilder,
     // Admin
     'platform-admin': PlatformAdminScreen,
