@@ -1,10 +1,10 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Project, PunchListItem, Screen, User } from '../../types.ts';
+import { Project, PunchListItem, Screen, User } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, PlusIcon, CheckBadgeIcon } from '../Icons.tsx';
+import * as api from '../../api';
+import { ChevronLeftIcon, PlusIcon, CheckBadgeIcon } from '../Icons';
 
 interface PunchListScreenProps {
     project: Project;

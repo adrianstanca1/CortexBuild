@@ -2,6 +2,7 @@
 // Fix: Broke circular dependency by defining UserRole, PermissionSubject, and PermissionAction types directly in this file.
 export type UserRole =
     | 'super_admin'
+    | 'developer'
     | 'company_admin'
     | 'developer'
     | 'Project Manager'
@@ -110,9 +111,18 @@ export type Screen =
     | 'financial-management'
     | 'business-development'
     | 'ai-agents-marketplace'
+    | 'developer-dashboard'
+    | 'automation-studio'
+    | 'developer-console'
+    | 'company-admin-dashboard'
+    | 'super-admin-dashboard'
     | 'sdk-developer'
+    | 'my-apps-desktop'
+    // Workflow Builders
+    | 'n8n-procore-builder'
     // Admin screens
     | 'platform-admin'
+    | 'admin-control-panel'
     // ML & Advanced Analytics
     | 'ml-analytics'
     // Tool screens
@@ -390,4 +400,122 @@ export interface TenantContext {
     subscriptions: CompanySubscription[];
     availableAgents: AIAgent[];
     hasAgentAccess: (agentId: string) => boolean;
+}
+
+// BuilderKit / AgentKit enriched types
+export interface AgentCatalogItem {
+    id: string;
+    slug: string;
+    name: string;
+    description: string;
+    icon: string;
+    status: string;
+    isGlobal: boolean;
+    tags: string[];
+    capabilities: Record<string, unknown>;
+    config: Record<string, unknown>;
+    metadata: Record<string, unknown>;
+    developerId?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AgentInstance extends AgentCatalogItem {
+    companyId: string;
+}
+
+export interface AgentExecution {
+    id: string;
+    agentId: string;
+    companyId: string;
+    triggeredBy?: string;
+    input?: Record<string, unknown>;
+    output?: Record<string, unknown>;
+    status: 'running' | 'success' | 'failed';
+    durationMs?: number;
+    error?: string;
+    startedAt: string;
+    completedAt?: string;
+}
+
+export interface WorkflowTemplate {
+    id: string;
+    name: string;
+    category: string;
+    description: string;
+    icon?: string;
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    definition: Record<string, unknown>;
+}
+
+export interface WorkflowDefinition {
+    trigger?: Record<string, unknown>;
+    steps?: Array<Record<string, unknown>>;
+}
+
+export interface Workflow {
+    id: string;
+    companyId: string;
+    name: string;
+    description: string;
+    version: string;
+    definition: WorkflowDefinition;
+    isActive: boolean;
+    createdBy?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface WorkflowRunStep {
+    id: string;
+    runId: string;
+    index: number;
+    type: string;
+    name: string;
+    status: string;
+    input?: Record<string, unknown>;
+    output?: Record<string, unknown>;
+    error?: string;
+    startedAt: string;
+    completedAt?: string;
+}
+
+export interface WorkflowRun {
+    id: string;
+    workflowId: string;
+    companyId: string;
+    status: 'running' | 'success' | 'failed';
+    trigger?: Record<string, unknown>;
+    input?: Record<string, unknown>;
+    output?: Record<string, unknown>;
+    error?: string;
+    startedAt: string;
+    completedAt?: string;
+    createdAt: string;
+    updatedAt: string;
+    steps?: WorkflowRunStep[];
+}
+
+export interface AutomationRule {
+    id: string;
+    companyId: string;
+    name: string;
+    description: string;
+    triggerType: string;
+    triggerConfig: Record<string, unknown>;
+    actionType: string;
+    actionConfig: Record<string, unknown>;
+    isActive: boolean;
+    lastTriggeredAt?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AutomationEvent {
+    id: string;
+    ruleId: string;
+    status: string;
+    payload: Record<string, unknown>;
+    error?: string;
+    createdAt: string;
 }

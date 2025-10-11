@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { authenticateToken } from '../auth';
-import { createAICodeGenerator } from '../services/ai-code-generator';
+import { AICodeGenerator, createAICodeGenerator } from '../services/ai-code-generator';
 
 // Middleware to check if user is a developer
 const requireDeveloper = (req: Request, res: Response, next: any) => {
@@ -570,7 +570,6 @@ router.get('/models/:provider', authenticateToken, requireDeveloper, (req: Reque
       return res.status(400).json({ error: 'Invalid provider. Use "gemini" or "openai"' });
     }
 
-    const { AICodeGenerator } = require('../services/ai-code-generator');
     const models = AICodeGenerator.getAvailableModels(provider);
 
     res.json({

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Building2, Search, Edit2, Trash2, Plus, RefreshCw, Mail, Phone, MapPin, Globe } from 'lucide-react';
 import { AddCompanyModal } from './AddCompanyModal';
 
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
+
 interface Company {
   id: string;
   name: string;
@@ -29,9 +33,9 @@ export const FullCompaniesManagement: React.FC = () => {
   const fetchCompanies = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/companies`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -48,10 +52,10 @@ export const FullCompaniesManagement: React.FC = () => {
     if (!confirm('Are you sure you want to delete this company? This will affect all associated users and projects.')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/companies/${companyId}`, {
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/companies/${companyId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -65,13 +69,16 @@ export const FullCompaniesManagement: React.FC = () => {
   };
 
   const filteredCompanies = companies.filter(company => {
-    const matchesSearch = company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         company.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const name = company.name?.toLowerCase() ?? '';
+    const email = company.email?.toLowerCase() ?? '';
+    const searchValue = searchTerm.toLowerCase();
+    const matchesSearch = name.includes(searchValue) || email.includes(searchValue);
     const matchesIndustry = selectedIndustry === 'all' || company.industry === selectedIndustry;
     return matchesSearch && matchesIndustry;
   });
 
-  const getIndustryBadgeColor = (industry: string) => {
+  const getIndustryBadgeColor = (industry?: string) => {
+    if (!industry) return 'bg-gray-100 text-gray-800';
     switch (industry) {
       case 'construction': return 'bg-orange-100 text-orange-800';
       case 'real_estate': return 'bg-blue-100 text-blue-800';
@@ -80,6 +87,11 @@ export const FullCompaniesManagement: React.FC = () => {
       case 'property_management': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const formatIndustry = (industry?: string) => {
+    if (!industry) return 'Unknown';
+    return industry.replace('_', ' ');
   };
 
   if (loading) {
@@ -184,7 +196,7 @@ export const FullCompaniesManagement: React.FC = () => {
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-gray-900 mb-1">{company.name}</h3>
                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getIndustryBadgeColor(company.industry)}`}>
-                      {company.industry.replace('_', ' ')}
+                      {formatIndustry(company.industry)}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -229,9 +241,9 @@ export const FullCompaniesManagement: React.FC = () => {
                 {company.website && (
                   <div className="flex items-center text-sm text-gray-600">
                     <Globe className="w-4 h-4 mr-2 text-gray-400" />
-                    <a 
-                      href={company.website} 
-                      target="_blank" 
+                    <a
+                      href={company.website}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline truncate"
                     >
@@ -268,4 +280,3 @@ export const FullCompaniesManagement: React.FC = () => {
     </div>
   );
 };
-

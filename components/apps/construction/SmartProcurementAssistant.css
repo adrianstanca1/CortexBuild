@@ -1,0 +1,32 @@
+.stock-progress {
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 9999px;
+    overflow: hidden;
+    appearance: none;
+    --progress-track: #e5e7eb;
+    --progress-fill: #22c55e;
+}
+
+.stock-progress--dark {
+    --progress-track: #374151;
+}
+
+.stock-progress--low {
+    --progress-fill: #ef4444;
+}
+
+.stock-progress::-webkit-progress-bar {
+    background-color: var(--progress-track);
+    border-radius: inherit;
+}
+
+.stock-progress::-webkit-progress-value {
+    background-color: var(--progress-fill);
+    border-radius: inherit;
+}
+
+.stock-progress::-moz-progress-bar {
+    background-color: var(--progress-fill);
+    border-radius: inherit;
+}

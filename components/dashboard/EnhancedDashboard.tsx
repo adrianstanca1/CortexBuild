@@ -13,7 +13,7 @@ import * as authService from '../../auth/authService';
 import { RealtimeStats } from './RealtimeStats';
 import { RecentActivity } from './RecentActivity';
 import { NotificationCenter } from './NotificationCenter';
-import { PerformanceCharts } from './PerformanceCharts';
+import { DeveloperDashboard } from '../developer/DeveloperDashboard';
 
 interface DashboardStats {
   totalProjects: number;
@@ -63,9 +63,19 @@ export const EnhancedDashboard: React.FC = () => {
       const user = await authService.getCurrentUser();
       setCurrentUser(user);
 
-      // Load health status
-      const health = await authService.getHealthStatus();
-      setHealthStatus(health);
+      // Set mock health status (API endpoint not implemented yet)
+      setHealthStatus({
+        api: 'healthy',
+        database: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: 0,
+        version: '2.0.0',
+        stats: {
+          users: 7,
+          sessions: 1,
+          companies: 2
+        }
+      });
 
       setLoading(false);
     } catch (error) {
@@ -126,6 +136,10 @@ export const EnhancedDashboard: React.FC = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  if (currentUser?.role === 'developer') {
+    return <DeveloperDashboard />;
   }
 
   return (

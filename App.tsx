@@ -1,65 +1,92 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types.ts';
-import * as api from './api.ts';
-import AuthScreen from './components/screens/AuthScreen.tsx';
-import AppLayout from './components/layout/AppLayout.tsx';
-import Sidebar from './components/layout/Sidebar.tsx';
-import { MOCK_PROJECT } from './constants.ts';
-import AISuggestionModal from './components/modals/AISuggestionModal.tsx';
-import ProjectSelectorModal from './components/modals/ProjectSelectorModal.tsx';
-import FloatingMenu from './components/layout/FloatingMenu.tsx';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
-import ToastContainer from './components/ToastContainer.tsx';
-import { usePermissions } from './hooks/usePermissions.ts';
-import * as authService from './auth/authService.ts';
-import { useToast } from './hooks/useToast.ts';
-import { useNavigation } from './hooks/useNavigation.ts';
-import { logger } from './utils/logger.ts';
-import { ChatbotWidget } from './components/chat/ChatbotWidget.tsx';
+// CortexBuild Main App Component
+import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
+import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
+import * as api from './api';
+import AuthScreen from './components/screens/AuthScreen';
+import AppLayout from './components/layout/AppLayout';
+import Sidebar from './components/layout/Sidebar';
+import { MOCK_PROJECT } from './constants';
+import AISuggestionModal from './components/modals/AISuggestionModal';
+import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
+import FloatingMenu from './components/layout/FloatingMenu';
+import ErrorBoundary from './components/ErrorBoundary';
+import ToastContainer from './components/ToastContainer';
+import { usePermissions } from './hooks/usePermissions';
+import * as authService from './auth/authService';
+import { useToast } from './hooks/useToast';
+import { useNavigation } from './hooks/useNavigation';
+import { logger } from './utils/logger';
+import { ChatbotWidget } from './components/chat/ChatbotWidget';
+import { supabase } from './supabaseClient';
 
-// Screen Components
-import UnifiedDashboardScreen from './components/screens/UnifiedDashboardScreen.tsx';
-import ProjectsListScreen from './components/screens/ProjectsListScreen.tsx';
-import ProjectHomeScreen from './components/screens/ProjectHomeScreen.tsx';
-import MyDayScreen from './components/screens/MyDayScreen.tsx';
-import TasksScreen from './components/screens/TasksScreen.tsx';
-import TaskDetailScreen from './components/screens/TaskDetailScreen.tsx';
-import NewTaskScreen from './components/screens/NewTaskScreen.tsx';
-import DailyLogScreen from './components/screens/DailyLogScreen.tsx';
-import PhotoGalleryScreen from './components/screens/PhotoGalleryScreen.tsx';
-import RFIsScreen from './components/screens/RFIsScreen.tsx';
-import RFIDetailScreen from './components/screens/RFIDetailScreen.tsx';
-import NewRFIScreen from './components/screens/NewRFIScreen.tsx';
-import { SDKDeveloperView } from './components/sdk/SDKDeveloperView';
-import PunchListScreen from './components/screens/PunchListScreen.tsx';
-import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen.tsx';
-import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen.tsx';
-import DrawingsScreen from './components/screens/DrawingsScreen.tsx';
-import PlansViewerScreen from './components/screens/PlansViewerScreen.tsx';
-import DayworkSheetsListScreen from './components/screens/DayworkSheetsListScreen.tsx';
-import DayworkSheetDetailScreen from './components/screens/DayworkSheetDetailScreen.tsx';
-import NewDayworkSheetScreen from './components/screens/NewDayworkSheetScreen.tsx';
-import DocumentsScreen from './components/screens/DocumentsScreen.tsx';
-import DeliveryScreen from './components/screens/DeliveryScreen.tsx';
-import DrawingComparisonScreen from './components/screens/DrawingComparisonScreen.tsx';
+// Lazily loaded screens and feature modules
+const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
+const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
+const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
+const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
+const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
+const TaskDetailScreen = lazy(() => import('./components/screens/TaskDetailScreen'));
+const NewTaskScreen = lazy(() => import('./components/screens/NewTaskScreen'));
+const DailyLogScreen = lazy(() => import('./components/screens/DailyLogScreen'));
+const PhotoGalleryScreen = lazy(() => import('./components/screens/PhotoGalleryScreen'));
+const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
+const RFIDetailScreen = lazy(() => import('./components/screens/RFIDetailScreen'));
+const NewRFIScreen = lazy(() => import('./components/screens/NewRFIScreen'));
+const ProductionSDKDeveloperView = lazy(() =>
+    import('./components/sdk/ProductionSDKDeveloperView').then(module => ({
+        default: module.ProductionSDKDeveloperView
+    }))
+);
+const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
+const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
+const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
+const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
+const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
+const CompanyAdminDashboardScreen = lazy(() => import('./components/screens/company/CompanyAdminDashboardScreen'));
+const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
+const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
+const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
+const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
+const NewPunchListItemScreen = lazy(() => import('./components/screens/NewPunchListItemScreen'));
+const DrawingsScreen = lazy(() => import('./components/screens/DrawingsScreen'));
+const PlansViewerScreen = lazy(() => import('./components/screens/PlansViewerScreen'));
+const DayworkSheetsListScreen = lazy(() => import('./components/screens/DayworkSheetsListScreen'));
+const DayworkSheetDetailScreen = lazy(() => import('./components/screens/DayworkSheetDetailScreen'));
+const NewDayworkSheetScreen = lazy(() => import('./components/screens/NewDayworkSheetScreen'));
+const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
+const DeliveryScreen = lazy(() => import('./components/screens/DeliveryScreen'));
+const DrawingComparisonScreen = lazy(() => import('./components/screens/DrawingComparisonScreen'));
+const AccountingScreen = lazy(() => import('./components/screens/modules/AccountingScreen'));
+const AIToolsScreen = lazy(() => import('./components/screens/modules/AIToolsScreen'));
+const DocumentManagementScreen = lazy(() => import('./components/screens/modules/DocumentManagementScreen'));
+const TimeTrackingScreen = lazy(() => import('./components/screens/modules/TimeTrackingScreen'));
+const ProjectOperationsScreen = lazy(() => import('./components/screens/modules/ProjectOperationsScreen'));
+const FinancialManagementScreen = lazy(() => import('./components/screens/modules/FinancialManagementScreen'));
+const BusinessDevelopmentScreen = lazy(() => import('./components/screens/modules/BusinessDevelopmentScreen'));
+const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/modules/AIAgentsMarketplaceScreen'));
+const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
+const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
+const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
+const MyApplicationsDesktop = lazy(() => import('./components/desktop/MyApplicationsDesktop'));
+const AdminReviewInterface = lazy(() => import('./components/marketplace/AdminReviewInterface'));
+const DeveloperSubmissionInterface = lazy(() => import('./components/marketplace/DeveloperSubmissionInterface'));
+const Base44Clone = lazy(() =>
+    import('./components/base44/Base44Clone').then(module => ({
+        default: module.Base44Clone
+    }))
+);
+const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
+const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
+const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
+const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
+const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
+const N8nProcoreWorkflowBuilder = lazy(() => import('./components/sdk/N8nProcoreWorkflowBuilder'));
 
-// Module Screens
-import AccountingScreen from './components/screens/modules/AccountingScreen.tsx';
-import AIToolsScreen from './components/screens/modules/AIToolsScreen.tsx';
-import DocumentManagementScreen from './components/screens/modules/DocumentManagementScreen.tsx';
-import TimeTrackingScreen from './components/screens/modules/TimeTrackingScreen.tsx';
-import ProjectOperationsScreen from './components/screens/modules/ProjectOperationsScreen.tsx';
-import FinancialManagementScreen from './components/screens/modules/FinancialManagementScreen.tsx';
-import BusinessDevelopmentScreen from './components/screens/modules/BusinessDevelopmentScreen.tsx';
-import AIAgentsMarketplaceScreen from './components/screens/modules/AIAgentsMarketplaceScreen.tsx';
-import MyTasksScreen from './components/screens/MyTasksScreen.tsx';
-import PlaceholderToolScreen from './components/screens/tools/PlaceholderToolScreen.tsx';
-
-// Admin Screens
-import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen.tsx';
-
-// ML & Advanced Analytics Screens
-import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard.tsx';
+const ScreenLoader: React.FC = () => (
+    <div className="py-16 text-center text-slate-500">
+        Loading experience...
+    </div>
+);
 
 
 type NavigationItem = {
@@ -68,8 +95,10 @@ type NavigationItem = {
     project?: Project;
 };
 
-const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
+const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'global-dashboard': UnifiedDashboardScreen,
+    'company-admin-dashboard': CompanyAdminDashboard,
+    'company-admin-legacy': CompanyAdminDashboardScreen,
     'projects': ProjectsListScreen,
     'project-home': ProjectHomeScreen,
     'my-day': MyDayScreen,
@@ -102,9 +131,24 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'financial-management': FinancialManagementScreen,
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-    'sdk-developer': SDKDeveloperView,
+    'developer-dashboard': ModernDeveloperDashboard,
+    'automation-studio': ConstructionAutomationStudio,
+    'developer-workspace': DeveloperWorkspaceScreen,
+    'developer-console': EnhancedDeveloperConsole,
+    'super-admin-dashboard': SuperAdminDashboardScreen,
+    'sdk-developer': ProductionSDKDeveloperView,
+    'my-apps-desktop': Base44Clone,
+    // Global Marketplace
+    'marketplace': GlobalMarketplace,
+    'my-applications': MyApplicationsDesktop,
+    'admin-review': AdminReviewInterface,
+    'developer-submissions': DeveloperSubmissionInterface,
+    // Workflow Builders
+    'n8n-procore-builder': N8nProcoreWorkflowBuilder,
+    // 'zapier-workflow': ZapierStyleWorkflowBuilder,
     // Admin
     'platform-admin': PlatformAdminScreen,
+    'admin-control-panel': AdminControlPanel,
     // ML & Advanced Analytics
     'ml-analytics': AdvancedMLDashboard,
     // Tools
@@ -271,6 +315,8 @@ const App: React.FC = () => {
             } : null;
 
             console.log('👤 Final user profile:', userProfile);
+            console.log('🎯 User role from profile:', userProfile?.role);
+            console.log('🎯 Is developer?', userProfile?.role === 'developer');
 
             console.log('📝 Setting currentUser state:', userProfile);
             setCurrentUser(userProfile);
@@ -279,8 +325,13 @@ const App: React.FC = () => {
                 // Navigate to dashboard after successful login
                 console.log('🚀 Navigating to dashboard...');
                 console.log('📍 Current navigation stack before:', navigationStack);
-                navigateToModule('global-dashboard', {});
-                console.log('📍 Navigation stack set to global-dashboard');
+                const defaultScreenForRole: Screen = userProfile.role === 'developer'
+                    ? 'developer-console'
+                    : userProfile.role === 'super_admin'
+                        ? 'super-admin-dashboard'
+                        : 'company-admin-dashboard';
+                navigateToModule(defaultScreenForRole, {});
+                console.log('📍 Navigation stack set to', defaultScreenForRole);
 
                 window.dispatchEvent(new CustomEvent('userLoggedIn'));
                 showSuccess('Welcome back!', `Hello ${userProfile.name}`);
@@ -301,7 +352,12 @@ const App: React.FC = () => {
             };
             console.log('🔄 Using fallback profile:', fallbackProfile);
             setCurrentUser(fallbackProfile);
-            navigateToModule('global-dashboard', {});
+            const fallbackScreen: Screen = fallbackProfile.role === 'developer'
+                ? 'developer-console'
+                : fallbackProfile.role === 'super_admin'
+                    ? 'super-admin-dashboard'
+                    : 'company-admin-dashboard';
+            navigateToModule(fallbackScreen, {});
         }
     };
 
@@ -317,7 +373,12 @@ const App: React.FC = () => {
                     setCurrentUser(user);
                     if (navigationStack.length === 0) {
                         console.log('🔄 Navigating to dashboard from session restore...');
-                        navigateToModule('global-dashboard', {});
+                        const defaultScreenForRole: Screen = user.role === 'developer'
+                            ? 'developer-console'
+                            : user.role === 'super_admin'
+                                ? 'super-admin-dashboard'
+                                : 'company-admin-dashboard';
+                        navigateToModule(defaultScreenForRole, {});
                     }
                     window.dispatchEvent(new CustomEvent('userLoggedIn'));
                 } else {
@@ -338,7 +399,8 @@ const App: React.FC = () => {
         const handleHashChange = () => {
             const hash = window.location.hash;
             if (hash === '#dashboard' && currentUser) {
-                navigateToModule('global-dashboard', {});
+                const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-console' : currentUser.role === 'super_admin' ? 'super-admin-dashboard' : 'company-admin-dashboard';
+                navigateToModule(targetScreen, {});
                 // Clean up the hash
                 window.history.replaceState(null, '', window.location.pathname);
             }
@@ -367,7 +429,12 @@ const App: React.FC = () => {
             // Ensure user is navigated to dashboard if no navigation exists
             if (navigationStack.length === 0) {
                 console.log('🔄 No navigation stack - navigating to dashboard...');
-                navigateToModule('global-dashboard', {});
+                const defaultScreen: Screen = currentUser.role === 'developer'
+                    ? 'developer-console'
+                    : currentUser.role === 'super_admin'
+                        ? 'super-admin-dashboard'
+                        : 'company-admin-dashboard';
+                navigateToModule(defaultScreen, {});
             }
         } else {
             // User logged out - clear navigation
@@ -459,9 +526,11 @@ const App: React.FC = () => {
     }
 
     if (!currentUser) {
-        console.log('🚫 No currentUser - showing AuthScreen');
+        console.log('🚫 No currentUser - waiting for login from landing page');
         console.log('📊 Session checked:', sessionChecked);
         console.log('📊 Navigation stack:', navigationStack);
+        // Don't render anything - let the landing page in index.html show
+        // The landing page will trigger login via the Login button
         return (
             <div className="bg-slate-100 min-h-screen flex items-center justify-center">
                 <AuthScreen onLoginSuccess={handleLoginSuccess} />
@@ -476,6 +545,8 @@ const App: React.FC = () => {
     // If no navigation stack, show dashboard directly
     if (!currentNavItem || navigationStack.length === 0) {
         console.log('🏠 No navigation - showing dashboard directly');
+        console.log('🎯 Current user role at render:', currentUser?.role);
+        console.log('🎯 Is developer at render?', currentUser?.role === 'developer');
         const dashboardProps = {
             currentUser,
             navigateTo,
@@ -490,15 +561,60 @@ const App: React.FC = () => {
             goBack
         };
 
+        if (currentUser.role === 'developer') {
+            console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Developer Dashboard V2');
+            console.log('👤 Current user:', currentUser);
+            return (
+                <Suspense fallback={<ScreenLoader />}>
+                    <DeveloperDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
+                </Suspense>
+            );
+        }
+        if (currentUser.role === 'super_admin') {
+            console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
+            return (
+                <Suspense fallback={<ScreenLoader />}>
+                    <SuperAdminDashboardV2
+                        isDarkMode={true}
+                        onNavigate={(section) => {
+                            console.log('Navigating to section:', section);
+                            toast.success(`Opening ${section}...`);
+                        }}
+                    />
+                </Suspense>
+            );
+        }
+        if (currentUser.role === 'company_admin') {
+            console.log('🎯 COMPANY ADMIN ROLE DETECTED - Rendering Company Admin Dashboard V2');
+            return (
+                <Suspense fallback={<ScreenLoader />}>
+                    <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
+                </Suspense>
+            );
+        }
         return (
             <div className="min-h-screen bg-gray-50">
-                <UnifiedDashboardScreen {...dashboardProps} />
+                <Suspense fallback={<ScreenLoader />}>
+                    <UnifiedDashboardScreen {...dashboardProps} />
+                </Suspense>
             </div>
         );
     }
 
     const { screen, params, project } = currentNavItem;
+    console.log('📺 Rendering screen:', screen);
+    console.log('📺 Current user role:', currentUser?.role);
+    console.log('📺 Navigation stack:', navigationStack);
     const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
+    console.log('📺 Screen component:', ScreenComponent.name);
+
+    if (screen === 'my-apps-desktop') {
+        return (
+            <Suspense fallback={<ScreenLoader />}>
+                <Base44Clone user={currentUser} onLogout={handleLogout} />
+            </Suspense>
+        );
+    }
 
     const getSidebarProject = useMemo(() => {
         if (project) {
@@ -512,6 +628,22 @@ const App: React.FC = () => {
         };
     }, [project, currentUser?.name]);
 
+    const sidebarGoHome = useCallback(() => {
+        if (currentUser.role === 'developer') {
+            navigateToModule('developer-console');
+            return;
+        }
+        if (currentUser.role === 'super_admin') {
+            navigateToModule('super-admin-dashboard');
+            return;
+        }
+        if (currentUser.role === 'company_admin') {
+            navigateToModule('company-admin-dashboard');
+            return;
+        }
+        goHome();
+    }, [currentUser.role, navigateToModule, goHome]);
+
     return (
         <div className="bg-slate-50">
             <AppLayout
@@ -520,7 +652,7 @@ const App: React.FC = () => {
                         project={getSidebarProject}
                         navigateTo={navigateTo}
                         navigateToModule={navigateToModule}
-                        goHome={goHome}
+                        goHome={sidebarGoHome}
                         currentUser={currentUser}
                         onLogout={handleLogout}
                     />
@@ -533,19 +665,21 @@ const App: React.FC = () => {
                 />}
             >
                 <div className="p-8">
-                    <ScreenComponent
-                        currentUser={currentUser}
-                        selectProject={selectProject}
-                        navigateTo={navigateTo}
-                        onDeepLink={handleDeepLink}
-                        onQuickAction={handleQuickAction}
-                        onSuggestAction={handleSuggestAction}
-                        openProjectSelector={openProjectSelector}
-                        project={project}
-                        goBack={goBack}
-                        can={can}
-                        {...params}
-                    />
+                    <Suspense fallback={<ScreenLoader />}>
+                        <ScreenComponent
+                            currentUser={currentUser}
+                            selectProject={selectProject}
+                            navigateTo={navigateTo}
+                            onDeepLink={handleDeepLink}
+                            onQuickAction={handleQuickAction}
+                            onSuggestAction={handleSuggestAction}
+                            openProjectSelector={openProjectSelector}
+                            project={project}
+                            goBack={goBack}
+                            can={can}
+                            {...params}
+                        />
+                    </Suspense>
                 </div>
             </AppLayout>
 

@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Lock, Building2, Shield } from 'lucide-react';
 
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
+
 interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,9 +31,9 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
 
   const fetchCompanies = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/companies`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -46,12 +50,12 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/users', {
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/users`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify(formData)
       });
@@ -220,4 +224,3 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
     </div>
   );
 };
-

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Task, Screen } from '../../types.ts';
+import { Task, Screen } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
-import { CalendarDaysIcon } from '../Icons.tsx';
+import * as api from '../../api';
+import { CalendarDaysIcon } from '../Icons';
 
 interface UpcomingDeadlinesWidgetProps {
     tasks: Task[];

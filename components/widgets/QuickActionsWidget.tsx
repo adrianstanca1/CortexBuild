@@ -1,10 +1,10 @@
 import React from 'react';
 // Fix: Added .ts extension to import
-import { Screen, User } from '../../types.ts';
+import { Screen, User } from '../../types';
 // Fix: Added .tsx extension to import
 import { 
     PlusIcon, DocumentPlusIcon, CheckBadgeIcon, CameraIcon, ClipboardDocumentListIcon, WandSparklesIcon, TicketIcon
-} from '../Icons.tsx';
+} from '../Icons';
 
 interface QuickActionsWidgetProps {
     onQuickAction: (action: Screen, projectId?: string) => void;

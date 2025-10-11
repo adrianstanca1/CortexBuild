@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Task, User, Screen } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon } from '../Icons.tsx';
-import TaskList from '../shared/TaskList.tsx';
+import { Task, User, Screen } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon } from '../Icons';
+import TaskList from '../shared/TaskList';
 
 interface MyTasksScreenProps {
     currentUser: User;

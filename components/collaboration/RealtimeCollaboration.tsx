@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, MessageCircle, Activity, Wifi, WifiOff, Circle } from 'lucide-react';
+import { Users, MessageCircle, Activity as ActivityIcon, Wifi, WifiOff, Circle } from 'lucide-react';
 
 interface User {
   id: number;
@@ -20,7 +20,7 @@ interface Message {
   type: 'chat' | 'system' | 'activity';
 }
 
-interface Activity {
+interface CollaborationActivity {
   id: string;
   userId: number;
   userName: string;
@@ -33,7 +33,7 @@ export const RealtimeCollaboration: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [activeUsers, setActiveUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState<CollaborationActivity[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'users' | 'chat' | 'activity'>('users');
   const wsRef = useRef<WebSocket | null>(null);
@@ -214,7 +214,7 @@ export const RealtimeCollaboration: React.FC = () => {
           }`}
         >
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4" />
+            <ActivityIcon className="w-4 h-4" />
             Activity Feed
           </div>
         </button>
@@ -300,7 +300,7 @@ export const RealtimeCollaboration: React.FC = () => {
           <div className="space-y-2 overflow-y-auto h-full">
             {activities.map(activity => (
               <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                <Activity className="w-5 h-5 text-blue-600 mt-0.5" />
+                <ActivityIcon className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div className="flex-1">
                   <div className="text-sm text-gray-800">
                     <span className="font-medium">{activity.userName}</span>

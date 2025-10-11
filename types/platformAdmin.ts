@@ -25,6 +25,7 @@ export interface PlatformStats {
 // ============================================================================
 
 export interface CompanyDetails extends Company {
+    plan: string;
     user_count: number;
     project_count: number;
     task_count: number;
@@ -245,4 +246,3 @@ export interface AuditLogFilter {
     end_date?: string;
     limit?: number;
 }
-

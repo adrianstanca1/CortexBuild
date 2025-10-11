@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Project, User } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, PlusIcon } from '../Icons.tsx';
+import { Project, User } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon, PlusIcon } from '../Icons';
 
 interface NewDayworkSheetScreenProps {
     project: Project;

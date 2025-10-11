@@ -7,27 +7,39 @@
 -- ============================================
 
 -- Users Table (Compatible with database.ts)
--- NOTE: This table is created by database.ts, schema kept for reference
--- CREATE TABLE IF NOT EXISTS users (
---     id TEXT PRIMARY KEY,
---     email TEXT UNIQUE NOT NULL,
---     password_hash TEXT NOT NULL,
---     name TEXT NOT NULL,
---     role TEXT NOT NULL,
---     avatar TEXT,
---     company_id TEXT NOT NULL,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
--- );
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    phone TEXT,
+    role TEXT NOT NULL,
+    company_id INTEGER NOT NULL,
+    is_active BOOLEAN DEFAULT 1,
+    email_verified BOOLEAN DEFAULT 0,
+    avatar_url TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
 
--- Companies Table (Compatible with database.ts)
--- NOTE: This table is created by database.ts, schema kept for reference
--- CREATE TABLE IF NOT EXISTS companies (
---     id TEXT PRIMARY KEY,
---     name TEXT UNIQUE NOT NULL,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
--- );
+-- Companies Table
+CREATE TABLE IF NOT EXISTS companies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    industry TEXT,
+    size TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    zip_code TEXT,
+    country TEXT DEFAULT 'US',
+    phone TEXT,
+    website TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Sessions Table (Compatible with database.ts)
 -- NOTE: This table is created by database.ts, schema kept for reference

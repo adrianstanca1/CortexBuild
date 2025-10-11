@@ -1,5 +1,5 @@
 import React from 'react';
-import { Screen, PermissionSubject, PermissionAction } from './types.ts';
+import { Screen, PermissionSubject, PermissionAction } from './types';
 import {
     BanknotesIcon,
     CalculatorIcon,
@@ -16,7 +16,7 @@ import {
     CircleStackIcon,
     CurrencyPoundIcon,
     UsersIcon
-} from './components/Icons.tsx';
+} from './components/Icons';
 
 export interface ToolDefinition {
     title: string;

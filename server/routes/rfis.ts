@@ -29,8 +29,8 @@ export function createRFIsRouter(db: Database.Database): Router {
       let query = `
         SELECT r.*, 
                p.name as project_name,
-               u1.first_name || ' ' || u1.last_name as submitted_by_name,
-               u2.first_name || ' ' || u2.last_name as assigned_to_name
+               u1.name as submitted_by_name,
+               u2.name as assigned_to_name
         FROM rfis r
         LEFT JOIN projects p ON r.project_id = p.id
         LEFT JOIN users u1 ON r.submitted_by = u1.id
@@ -66,7 +66,7 @@ export function createRFIsRouter(db: Database.Database): Router {
       }
 
       // Get total count
-      const countQuery = query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM');
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
       const { total } = db.prepare(countQuery).get(...params) as { total: number };
 
       // Add pagination
@@ -101,9 +101,9 @@ export function createRFIsRouter(db: Database.Database): Router {
       const rfi = db.prepare(`
         SELECT r.*, 
                p.name as project_name,
-               u1.first_name || ' ' || u1.last_name as submitted_by_name,
+               u1.name as submitted_by_name,
                u1.email as submitted_by_email,
-               u2.first_name || ' ' || u2.last_name as assigned_to_name,
+               u2.name as assigned_to_name,
                u2.email as assigned_to_email
         FROM rfis r
         LEFT JOIN projects p ON r.project_id = p.id

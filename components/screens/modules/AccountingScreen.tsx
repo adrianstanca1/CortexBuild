@@ -1,8 +1,8 @@
 import React from 'react';
-import { Screen, User, PermissionAction, PermissionSubject } from '../../../types.ts';
-import { ToolDefinition, ACCOUNTING_TOOLS } from '../../../tool-definitions.ts';
-import ToolCard from '../../shared/ToolCard.tsx';
-import { ChevronLeftIcon } from '../../Icons.tsx';
+import { Screen, User, PermissionAction, PermissionSubject } from '../../../types';
+import { ToolDefinition, ACCOUNTING_TOOLS } from '../../../tool-definitions';
+import ToolCard from '../../shared/ToolCard';
+import { ChevronLeftIcon } from '../../Icons';
 
 interface AccountingScreenProps {
     currentUser: User;

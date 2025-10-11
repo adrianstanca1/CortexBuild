@@ -6,10 +6,11 @@
 import axios from 'axios';
 import { User } from '../types';
 
-// Use Vercel API in production, localhost in development
-const API_URL = import.meta.env.PROD
-    ? '/api'  // Vercel will handle this
-    : 'http://localhost:3001/api';  // Local development
+// Use environment variable for API URL, fallback to localhost in development
+const API_URL = import.meta.env.VITE_API_URL
+    || (import.meta.env.PROD
+        ? '/api'  // Vercel will handle this (if backend is deployed)
+        : 'http://localhost:3001/api');  // Local development
 
 const TOKEN_KEY = 'constructai_token';
 
@@ -91,17 +92,60 @@ export const register = async (
 };
 
 /**
+ * Clear all cookies
+ */
+const clearAllCookies = (): void => {
+    const cookies = document.cookie.split(';');
+
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+
+        // Clear cookie for all paths and domains
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + window.location.hostname;
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.' + window.location.hostname;
+    }
+
+    console.log('🍪 [AuthService] All cookies cleared');
+};
+
+/**
  * Logout current user
  */
 export const logout = async (): Promise<void> => {
-    console.log('👋 [AuthService] Logout');
+    console.log('👋 [AuthService] Logout - Clearing all session data');
+
+    const tokenBefore = localStorage.getItem(TOKEN_KEY);
+    console.log('🔍 [AuthService] Token before logout:', tokenBefore ? 'EXISTS' : 'NULL');
 
     try {
+        // Call server logout endpoint
         await api.post('/auth/logout');
+        console.log('✅ [AuthService] Server logout successful');
     } catch (error) {
-        console.error('Logout error:', error);
+        console.error('❌ [AuthService] Server logout error:', error);
     } finally {
-        localStorage.removeItem(TOKEN_KEY);
+        // Clear ALL localStorage data
+        console.log('🗑️ [AuthService] Clearing localStorage...');
+        localStorage.clear();
+
+        const tokenAfterClear = localStorage.getItem(TOKEN_KEY);
+        console.log('🔍 [AuthService] Token after clear:', tokenAfterClear ? 'STILL EXISTS!' : 'NULL ✅');
+
+        // Clear ALL sessionStorage data
+        console.log('🗑️ [AuthService] Clearing sessionStorage...');
+        sessionStorage.clear();
+
+        // Clear ALL cookies
+        console.log('🗑️ [AuthService] Clearing cookies...');
+        clearAllCookies();
+
+        // Dispatch logout event for landing page
+        window.dispatchEvent(new CustomEvent('userLoggedOut'));
+
+        console.log('✅ [AuthService] All session data cleared (localStorage, sessionStorage, cookies)');
     }
 };
 
@@ -111,20 +155,26 @@ export const logout = async (): Promise<void> => {
 export const getCurrentUser = async (): Promise<User | null> => {
     const token = localStorage.getItem(TOKEN_KEY);
 
+    console.log('🔍 [AuthService] getCurrentUser - Token in localStorage:', token ? 'EXISTS' : 'NULL');
+
     if (!token) {
+        console.log('❌ [AuthService] No token found - returning null');
         return null;
     }
 
     try {
+        console.log('📡 [AuthService] Calling /auth/me with token');
         const response = await api.get('/auth/me');
 
         if (response.data.success) {
+            console.log('✅ [AuthService] User found:', response.data.user.name);
             return response.data.user;
         }
 
+        console.log('❌ [AuthService] No user in response');
         return null;
     } catch (error) {
-        console.error('Get current user error:', error);
+        console.error('❌ [AuthService] Get current user error:', error);
         localStorage.removeItem(TOKEN_KEY);
         return null;
     }
@@ -189,17 +239,49 @@ export const refreshToken = async (): Promise<string> => {
 };
 
 /**
- * Get system health status
+ * Get developer modules
  */
-export const getHealthStatus = async (): Promise<any> => {
-    console.log('🏥 [AuthService] Checking system health');
+export const getDeveloperModules = async (): Promise<any> => {
+    console.log('📦 [AuthService] Fetching developer modules');
 
     try {
-        const response = await api.get('/health');
-        console.log('✅ [AuthService] Health check successful');
+        const response = await api.get('/developer/modules');
+        console.log('✅ [AuthService] Developer modules fetched successfully');
         return response.data;
     } catch (error: any) {
-        console.error('❌ [AuthService] Health check failed:', error.message);
+        console.error('❌ [AuthService] Failed to fetch developer modules:', error.message);
+        throw error;
+    }
+};
+
+/**
+ * Get API keys
+ */
+export const getApiKeys = async (): Promise<any> => {
+    console.log('🔑 [AuthService] Fetching API keys');
+
+    try {
+        const response = await api.get('/developer/api-keys');
+        console.log('✅ [AuthService] API keys fetched successfully');
+        return response.data;
+    } catch (error: any) {
+        console.error('❌ [AuthService] Failed to fetch API keys:', error.message);
+        throw error;
+    }
+};
+
+/**
+ * Get webhooks
+ */
+export const getWebhooks = async (): Promise<any> => {
+    console.log('훅 [AuthService] Fetching webhooks');
+
+    try {
+        const response = await api.get('/developer/webhooks');
+        console.log('✅ [AuthService] Webhooks fetched successfully');
+        return response.data;
+    } catch (error: any) {
+        console.error('❌ [AuthService] Failed to fetch webhooks:', error.message);
         throw error;
     }
 };

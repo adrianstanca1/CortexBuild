@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { User, PermissionAction, PermissionSubject } from '../types.ts';
-import { can as canCheck } from '../permissions.ts';
+import { User, PermissionAction, PermissionSubject } from '../types';
+import { can as canCheck } from '../permissions';
 
 /**
  * Custom hook to provide a convenient 'can' function for the current user.

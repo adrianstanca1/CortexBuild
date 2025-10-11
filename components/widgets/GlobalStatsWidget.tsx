@@ -1,11 +1,11 @@
 import React from 'react';
 // Fix: Corrected import paths to use proper relative path and file extension.
-import { Project } from '../../types.ts';
+import { Project } from '../../types';
 // Fix: Corrected import paths to use proper relative path and file extension.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Fix: Added .tsx extension to import
-import StatCard from './StatCard.tsx';
+import StatCard from './StatCard';
 
 interface GlobalStatsWidgetProps {
     projects: Project[];

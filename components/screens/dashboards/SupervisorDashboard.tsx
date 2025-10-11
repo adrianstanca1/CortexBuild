@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 // Fix: Added .ts extension to import
-import { User, Screen, Task, ActivityEvent, Project } from '../../../types.ts';
+import { User, Screen, Task, ActivityEvent, Project } from '../../../types';
 // Fix: Added .ts extension to import
-import * as api from '../../../api.ts';
+import * as api from '../../../api';
 // Fix: Added .tsx extension to widget imports
-import QuickActionsWidget from '../../widgets/QuickActionsWidget.tsx';
-import MyTasksWidget from '../../widgets/MyTasksWidget.tsx';
-import NotificationsWidget from '../../widgets/NotificationsWidget.tsx';
-import ProjectsOverviewWidget from '../../widgets/ProjectsOverviewWidget.tsx';
-import RecentActivityWidget from '../../widgets/RecentActivityWidget.tsx';
-import SmartMetricsWidget from '../../widgets/SmartMetricsWidget.tsx';
-import SmartInsightsWidget from '../../widgets/SmartInsightsWidget.tsx';
-import { processDashboardData, DashboardData } from '../../../utils/dashboardLogic.ts';
+import QuickActionsWidget from '../../widgets/QuickActionsWidget';
+import MyTasksWidget from '../../widgets/MyTasksWidget';
+import NotificationsWidget from '../../widgets/NotificationsWidget';
+import ProjectsOverviewWidget from '../../widgets/ProjectsOverviewWidget';
+import RecentActivityWidget from '../../widgets/RecentActivityWidget';
+import SmartMetricsWidget from '../../widgets/SmartMetricsWidget';
+import SmartInsightsWidget from '../../widgets/SmartInsightsWidget';
+import { processDashboardData, DashboardData } from '../../../utils/dashboardLogic';
 
 interface SupervisorDashboardProps {
     currentUser: User;

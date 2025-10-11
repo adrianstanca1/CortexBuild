@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Project, RFI, Screen, User } from '../../types.ts';
+import { Project, RFI, Screen, User } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
-import { usePermissions } from '../../hooks/usePermissions.ts';
-import { ChevronLeftIcon, PlusIcon, QuestionMarkCircleIcon, ChevronDownIcon } from '../Icons.tsx';
+import * as api from '../../api';
+import { usePermissions } from '../../hooks/usePermissions';
+import { ChevronLeftIcon, PlusIcon, QuestionMarkCircleIcon, ChevronDownIcon } from '../Icons';
 
 interface RFIsScreenProps {
     project: Project;
@@ -83,24 +83,30 @@ const RFIsScreen: React.FC<RFIsScreenProps> = ({ project, navigateTo, goBack, cu
             filteredRfis = filteredRfis.filter(r => new Date(r.dueDate) <= endDate);
         }
 
-        // Apply sorting
+        const selectedSort = sortBy;
         filteredRfis.sort((a, b) => {
-            switch (sortBy) {
-                case 'dueDate-desc':
-                    return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
-                case 'status':
-                    const statusOrder = { 'Open': 1, 'Draft': 2, 'Closed': 3 };
-                    return (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99);
-                case 'dueDate-asc':
-                default:
-                    const aIsClosed = a.status === 'Closed';
-                    const bIsClosed = b.status === 'Closed';
-                    if (filters.status !== 'Closed') {
-                        if (aIsClosed && !bIsClosed) return 1;
-                        if (!aIsClosed && bIsClosed) return -1;
-                    }
-                    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            if (selectedSort === 'dueDate-desc') {
+                return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
             }
+
+            if (selectedSort === 'status') {
+                const statusOrder: Record<RFI['status'], number> = {
+                    Open: 1,
+                    Draft: 2,
+                    Closed: 3,
+                };
+                const aRank = statusOrder[a.status] ?? 99;
+                const bRank = statusOrder[b.status] ?? 99;
+                return aRank - bRank;
+            }
+
+            const aIsClosed = a.status === 'Closed';
+            const bIsClosed = b.status === 'Closed';
+            if (filters.status !== 'Closed') {
+                if (aIsClosed && !bIsClosed) return 1;
+                if (!aIsClosed && bIsClosed) return -1;
+            }
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         });
 
         return filteredRfis;

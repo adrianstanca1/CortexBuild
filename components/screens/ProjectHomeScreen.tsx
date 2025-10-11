@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 // Fix: Added User type import.
 // Fix: Corrected import paths to include file extensions.
-import { Project, Screen, User } from '../../types.ts';
+import { Project, Screen, User } from '../../types';
 // Fix: Added .tsx extension to icon import
 import { 
     BuildingOfficeIcon, UsersIcon, MapPinIcon, ChevronLeftIcon,
-} from '../Icons.tsx';
+} from '../Icons';
 // Fix: Added .tsx extension to widget imports
-import QuickActionsWidget from '../widgets/QuickActionsWidget.tsx';
-import ProjectTasksWidget from '../widgets/ProjectTasksWidget.tsx';
-import StatCard from '../widgets/StatCard.tsx';
-import MyProjectDeadlinesWidget from '../widgets/MyProjectDeadlinesWidget.tsx';
+import QuickActionsWidget from '../widgets/QuickActionsWidget';
+import ProjectTasksWidget from '../widgets/ProjectTasksWidget';
+import StatCard from '../widgets/StatCard';
+import MyProjectDeadlinesWidget from '../widgets/MyProjectDeadlinesWidget';
 
 interface ProjectHomeScreenProps {
     project: Project;

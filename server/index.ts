@@ -6,9 +6,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import Database from 'better-sqlite3';
 import { createServer } from 'http';
-import { initDatabase } from './database';
+import { db, initDatabase } from './database';
 import * as auth from './auth';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
@@ -28,6 +27,7 @@ import { createDocumentsRouter } from './routes/documents';
 import { createModulesRouter } from './routes/modules';
 import { createAdminRouter } from './routes/admin';
 import { createMarketplaceRouter } from './routes/marketplace';
+import { createGlobalMarketplaceRouter } from './routes/global-marketplace';
 import { createWidgetsRouter } from './routes/widgets';
 import { createSmartToolsRouter } from './routes/smart-tools';
 import { createSDKRouter, initSdkTables } from './routes/sdk';
@@ -35,8 +35,10 @@ import adminSDKRouter from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
 import { createAIChatRoutes } from './routes/ai-chat';
 import { createDeveloperRoutes } from './routes/developer';
-import { createAgentsRouter } from './routes/agents';
 import { createIntegrationsRouter } from './routes/integrations';
+import { createAgentKitRouter } from './routes/agentkit';
+import { createWorkflowsRouter } from './routes/workflows';
+import { createAutomationsRouter } from './routes/automations';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -165,16 +167,16 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
 const startServer = async () => {
     try {
         // Initialize database
-        await initDatabase();
-
-        // Connect to database for API routes
-        const db = new Database('cortexbuild.db');
-        db.pragma('journal_mode = WAL');
-        db.pragma('foreign_keys = ON');
+        initDatabase();
+        auth.setDatabase(db);
 
         // Initialize MCP tables
         console.log('🧠 Initializing MCP (Model Context Protocol)...');
-        mcp.initializeMCPTables(db);
+        try {
+            mcp.initializeMCPTables(db);
+        } catch (error) {
+            console.warn('⚠️ MCP initialization failed, continuing without MCP:', error.message);
+        }
 
         // Initialize deployment tables
         console.log('🚀 Initializing Deployment tables...');
@@ -265,7 +267,7 @@ const startServer = async () => {
                     return res.status(401).json({ error: 'Token is required' });
                 }
 
-                const user = auth.getCurrentUser(db, token);
+                const user = auth.getCurrentUserByToken(db, token);
 
                 res.json({
                     success: true,
@@ -324,6 +326,9 @@ const startServer = async () => {
         app.use('/api/marketplace', createMarketplaceRouter(db));
         console.log('  ✓ /api/marketplace');
 
+        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(db));
+        console.log('  ✓ /api/global-marketplace');
+
         app.use('/api/widgets', createWidgetsRouter(db));
         console.log('  ✓ /api/widgets');
 
@@ -345,13 +350,19 @@ const startServer = async () => {
         app.use('/api/developer', createDeveloperRoutes(db));
         console.log('  ✓ /api/developer');
 
-        app.use('/api/sdk/agents', createAgentsRouter(db));
-        console.log('  ✓ /api/sdk/agents');
+        app.use('/api/integrations', createIntegrationsRouter(db));
+        console.log('  ✓ /api/integrations');
 
-        app.use('/api/sdk/integrations', createIntegrationsRouter(db));
-        console.log('  ✓ /api/sdk/integrations');
+        app.use('/api/agentkit', createAgentKitRouter(db));
+        console.log('  ✓ /api/agentkit');
 
-        console.log('✅ All 22 API routes registered successfully');
+        app.use('/api/workflows', createWorkflowsRouter(db));
+        console.log('  ✓ /api/workflows');
+
+        app.use('/api/automations', createAutomationsRouter(db));
+        console.log('  ✓ /api/automations');
+
+        console.log('✅ All 24 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
@@ -427,4 +438,3 @@ const startServer = async () => {
 };
 
 startServer();
-

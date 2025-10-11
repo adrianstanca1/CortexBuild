@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import Toast, { ToastMessage } from './Toast.tsx';
+import Toast, { ToastMessage } from './Toast';
 
 interface ToastContainerProps {
   toasts: ToastMessage[];

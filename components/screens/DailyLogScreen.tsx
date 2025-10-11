@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 // Fix: Added .ts extension to import
-import { Project, User, LogItem } from '../../types.ts';
+import { Project, User, LogItem } from '../../types';
 // Fix: Added .tsx extension to import
-import { ChevronLeftIcon, SunIcon, UsersIcon, CameraIcon, PlusIcon, TrashIcon, ClipboardDocumentListIcon } from '../Icons.tsx';
+import { ChevronLeftIcon, SunIcon, UsersIcon, CameraIcon, PlusIcon, TrashIcon, ClipboardDocumentListIcon } from '../Icons';
 // Fix: Added .ts extension to import
-import * as api from '../../api.ts';
+import * as api from '../../api';
 
 
 interface DailyLogScreenProps {

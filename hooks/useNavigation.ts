@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Screen, Project } from '../types.ts';
+import { Screen, Project } from '../types';
 
 export interface NavigationItem {
     screen: Screen;
@@ -15,7 +15,9 @@ export const useNavigation = () => {
     }, []);
 
     const navigateToModule = useCallback((screen: Screen, params: any = {}) => {
+        console.log('🧭 navigateToModule called with screen:', screen);
         setNavigationStack([{ screen, params, project: undefined }]);
+        console.log('🧭 Navigation stack set to:', [{ screen, params, project: undefined }]);
     }, []);
 
     const goBack = useCallback(() => {

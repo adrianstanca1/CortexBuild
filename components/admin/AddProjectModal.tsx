@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { X, Package, Building2, DollarSign, Calendar, MapPin } from 'lucide-react';
 
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
+
 interface AddProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,9 +34,9 @@ export const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClos
 
   const fetchCompanies = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/admin/companies`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
       const data = await response.json();
       if (data.success) {
@@ -49,12 +53,12 @@ export const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClos
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/projects', {
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/projects`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           ...formData,
@@ -278,4 +282,3 @@ export const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClos
     </div>
   );
 };
-

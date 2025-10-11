@@ -1,8 +1,8 @@
 import React from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { Project } from '../../types.ts';
+import { Project } from '../../types';
 // Fix: Corrected import paths to include file extensions.
-import { BuildingOfficeIcon, MapPinIcon } from '../Icons.tsx';
+import { BuildingOfficeIcon, MapPinIcon } from '../Icons';
 
 interface OverviewWidgetProps {
     project: Project;
