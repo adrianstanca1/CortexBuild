@@ -3,7 +3,7 @@
  * Modern development environment with advanced tools
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import {
     Code2, Terminal, GitBranch, Package, Zap, FileCode,
     Database, TestTube, Rocket, BookOpen, Activity, Clock,
@@ -12,7 +12,11 @@ import {
 } from 'lucide-react';
 import { User, Screen } from '../../../types';
 import toast from 'react-hot-toast';
-import CodexAgent from '../../CodexAgent';
+
+// Lazy load CodexAgent to prevent blocking the main app
+const CodexAgent = lazy(() => import('../../CodexAgent').then(module => ({
+    default: module.CodexAgent
+})));
 
 interface DeveloperDashboardV2Props {
     currentUser: User;
@@ -302,21 +306,30 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                             </button>
                         </div>
                         <div className="h-[calc(100%-80px)]">
-                            <CodexAgent
-                                projectId={currentUser.company_id}
-                                initialContext={{
-                                    userId: currentUser.id,
-                                    userName: currentUser.name,
-                                    companyId: currentUser.company_id,
-                                }}
-                                onResult={(result) => {
-                                    if (result.success) {
-                                        toast.success('Codex task completed!');
-                                    } else {
-                                        toast.error(result.error || 'Codex task failed');
-                                    }
-                                }}
-                            />
+                            <Suspense fallback={
+                                <div className="flex items-center justify-center h-full">
+                                    <div className="text-center">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                                        <p className="text-gray-600 dark:text-gray-400">Loading Codex Agent...</p>
+                                    </div>
+                                </div>
+                            }>
+                                <CodexAgent
+                                    projectId={currentUser.company_id}
+                                    initialContext={{
+                                        userId: currentUser.id,
+                                        userName: currentUser.name,
+                                        companyId: currentUser.company_id,
+                                    }}
+                                    onResult={(result) => {
+                                        if (result.success) {
+                                            toast.success('Codex task completed!');
+                                        } else {
+                                            toast.error(result.error || 'Codex task failed');
+                                        }
+                                    }}
+                                />
+                            </Suspense>
                         </div>
                     </div>
                 </div>
