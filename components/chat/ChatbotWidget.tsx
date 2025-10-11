@@ -1,9 +1,15 @@
 /**
  * Chatbot Widget Component
  * Global AI assistant present on all pages
+ *
+ * OPTIMIZATIONS (Copilot + Augment):
+ * - React.memo for performance
+ * - useCallback for event handlers
+ * - Memoized auth headers
+ * - Optimized re-renders
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChatMessage, ToolResultMessage } from './ChatMessage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,7 +21,7 @@ interface Message {
     toolResults?: any[];
 }
 
-export const ChatbotWidget: React.FC = () => {
+export const ChatbotWidget: React.FC = React.memo(() => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -25,34 +31,19 @@ export const ChatbotWidget: React.FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Check if user is authenticated (checked after hooks to avoid hook rules violation)
-    const isAuthenticated = !!localStorage.getItem('constructai_token');
+    const isAuthenticated = useMemo(() => !!localStorage.getItem('constructai_token'), []);
 
-    // Auto-scroll to bottom when new messages arrive
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    // Focus input when chat opens
-    useEffect(() => {
-        if (isOpen) {
-            inputRef.current?.focus();
-        }
-    }, [isOpen]);
-
-    // Load chat history on mount
-    useEffect(() => {
-        loadChatHistory();
-    }, []);
-
-    const getAuthHeaders = () => {
+    // Memoize auth headers
+    const getAuthHeaders = useCallback(() => {
         const token = localStorage.getItem('constructai_token');
         return {
             'Content-Type': 'application/json',
             ...(token && { 'Authorization': `Bearer ${token}` }),
         };
-    };
+    }, []);
 
-    const loadChatHistory = async () => {
+    // Memoize load chat history function
+    const loadChatHistory = useCallback(async () => {
         try {
             const response = await fetch(`/api/chat/message?sessionId=${sessionId}`, {
                 headers: getAuthHeaders(),
@@ -74,9 +65,26 @@ export const ChatbotWidget: React.FC = () => {
         } catch (error) {
             console.error('Failed to load chat history:', error);
         }
-    };
+    }, [sessionId, getAuthHeaders]);
 
-    const sendMessage = async () => {
+    // Auto-scroll to bottom when new messages arrive
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    // Focus input when chat opens
+    useEffect(() => {
+        if (isOpen) {
+            inputRef.current?.focus();
+        }
+    }, [isOpen]);
+
+    // Load chat history on mount
+    useEffect(() => {
+        loadChatHistory();
+    }, [loadChatHistory]);
+
+    const sendMessage = useCallback(async () => {
         if (!inputValue.trim() || isLoading) return;
 
         const userMessage: Message = {
@@ -291,5 +299,8 @@ export const ChatbotWidget: React.FC = () => {
             )}
         </>
     );
-};
+});
+
+// Display name for debugging
+ChatbotWidget.displayName = 'ChatbotWidget';
 
