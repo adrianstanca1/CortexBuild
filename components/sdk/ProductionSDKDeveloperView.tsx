@@ -3,6 +3,7 @@ import { User } from '../../types';
 import MonacoEditor from '@monaco-editor/react';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
+import { EditorErrorBoundary } from '../../src/components/ErrorBoundaries';
 import {
   Code,
   Zap,
@@ -1169,14 +1170,16 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
             Auto saves are not enabled — remember to store valuable blueprints.
           </span>
         </div>
-        <MonacoEditor
-          height="420px"
-          language="typescript"
-          theme="vs-dark"
-          value={generatedCode}
-          options={{ minimap: { enabled: false }, fontSize: 14, automaticLayout: true }}
-          onChange={value => setGeneratedCode(value || '')}
-        />
+        <EditorErrorBoundary componentName="SDK Developer View - Code Editor">
+          <MonacoEditor
+            height="420px"
+            language="typescript"
+            theme="vs-dark"
+            value={generatedCode}
+            options={{ minimap: { enabled: false }, fontSize: 14, automaticLayout: true }}
+            onChange={value => setGeneratedCode(value || '')}
+          />
+        </EditorErrorBoundary>
       </Card>
 
       {aiExplanation && (

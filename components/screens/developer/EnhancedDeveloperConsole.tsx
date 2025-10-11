@@ -42,6 +42,7 @@ import {
     CreditCard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { EditorErrorBoundary } from '../../../src/components/ErrorBoundaries';
 import FileExplorer from '../../developer/FileExplorer';
 import GitPanel from '../../developer/GitPanel';
 import DatabaseViewer from '../../developer/DatabaseViewer';
@@ -1192,7 +1193,9 @@ Could you be more specific about what you need?`;
                 {/* Advanced Code Editor Tab */}
                 {activeTab === 'code-editor' && (
                     <div className="h-[700px]">
-                        <AdvancedCodeEditor isDarkMode={isDarkMode} />
+                        <EditorErrorBoundary componentName="Enhanced Developer Console - Code Editor">
+                            <AdvancedCodeEditor isDarkMode={isDarkMode} />
+                        </EditorErrorBoundary>
                     </div>
                 )}
 
