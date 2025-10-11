@@ -39,7 +39,6 @@ const EnhancedDeveloperConsole = lazy(() => import('./components/screens/develop
 const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
-const CompanyAdminDashboardScreen = lazy(() => import('./components/screens/company/CompanyAdminDashboardScreen'));
 const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
 const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
 const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
@@ -102,7 +101,6 @@ const getDefaultScreenForRole = (role: string): Screen => {
 const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'global-dashboard': UnifiedDashboardScreen,
     'company-admin-dashboard': CompanyAdminDashboard,
-    'company-admin-legacy': CompanyAdminDashboardScreen,
     'projects': ProjectsListScreen,
     'project-home': ProjectHomeScreen,
     'my-day': MyDayScreen,
@@ -193,20 +191,15 @@ const App: React.FC = () => {
     useEffect(() => {
         const checkSession = async () => {
             try {
-                console.log('🔍 Checking for existing session...');
                 const user = await authService.getCurrentUser();
 
                 if (user) {
-                    console.log('✅ Session found:', user.name);
                     setCurrentUser(user);
                     if (navigationStack.length === 0) {
-                        console.log('🔄 Navigating to dashboard from session restore...');
                         const defaultScreen = getDefaultScreenForRole(user.role);
                         navigateToModule(defaultScreen, {});
                     }
                     window.dispatchEvent(new CustomEvent('userLoggedIn'));
-                } else {
-                    console.log('ℹ️ No active session');
                 }
             } catch (error) {
                 console.error('Session check error:', error);
@@ -261,7 +254,6 @@ const App: React.FC = () => {
 
             // Ensure user is navigated to dashboard if no navigation exists
             if (navigationStack.length === 0) {
-                console.log('🔄 No navigation stack - navigating to dashboard...');
                 const defaultScreen = getDefaultScreenForRole(currentUser.role);
                 navigateToModule(defaultScreen, {});
             }
@@ -285,14 +277,9 @@ const App: React.FC = () => {
     }, []); // handleLogout is stable
 
     const handleLoginSuccess = (user: User) => {
-        console.log('✅ Login successful:', user.name);
-        console.log('🔄 Setting current user...');
         setCurrentUser(user);
-
         window.dispatchEvent(new CustomEvent('userLoggedIn'));
         showSuccess('Welcome back!', `Hello ${user.name}`);
-
-        console.log('✅ User set - dashboard will render automatically');
     };
 
     const handleLogout = async () => {
@@ -362,11 +349,6 @@ const App: React.FC = () => {
     }
 
     if (!currentUser) {
-        console.log('🚫 No currentUser - waiting for login from landing page');
-        console.log('📊 Session checked:', sessionChecked);
-        console.log('📊 Navigation stack:', navigationStack);
-        // Don't render anything - let the landing page in index.html show
-        // The landing page will trigger login via the Login button
         return (
             <div className="bg-slate-100 min-h-screen flex items-center justify-center">
                 <AuthScreen onLoginSuccess={handleLoginSuccess} />
@@ -374,14 +356,8 @@ const App: React.FC = () => {
         );
     }
 
-    console.log('✅ Current user exists - showing app:', currentUser.name);
-    console.log('📊 Navigation stack length:', navigationStack.length);
-    console.log('📊 Current nav item:', currentNavItem);
-
     // If no navigation stack, show dashboard directly
     if (!currentNavItem || navigationStack.length === 0) {
-        console.log('🏠 No navigation - showing dashboard directly');
-        console.log('🎯 Current user role:', currentUser.role);
 
         const commonProps = {
             currentUser,
@@ -392,7 +368,6 @@ const App: React.FC = () => {
         // Render role-specific dashboard
         switch (currentUser.role) {
             case 'developer':
-                console.log('🎯 Rendering Developer Dashboard');
                 return (
                     <Suspense fallback={<ScreenLoader />}>
                         <DeveloperDashboardV2 {...commonProps} />
@@ -400,13 +375,11 @@ const App: React.FC = () => {
                 );
 
             case 'super_admin':
-                console.log('🎯 Rendering Super Admin Dashboard');
                 return (
                     <Suspense fallback={<ScreenLoader />}>
                         <SuperAdminDashboardV2
                             isDarkMode={true}
                             onNavigate={(section) => {
-                                console.log('Navigating to section:', section);
                                 showSuccess('Navigation', `Opening ${section}...`);
                             }}
                         />
@@ -414,7 +387,6 @@ const App: React.FC = () => {
                 );
 
             case 'company_admin':
-                console.log('🎯 Rendering Company Admin Dashboard');
                 return (
                     <Suspense fallback={<ScreenLoader />}>
                         <CompanyAdminDashboardV2 {...commonProps} />
@@ -447,11 +419,7 @@ const App: React.FC = () => {
     }
 
     const { screen, params, project } = currentNavItem;
-    console.log('📺 Rendering screen:', screen);
-    console.log('📺 Current user role:', currentUser?.role);
-    console.log('📺 Navigation stack:', navigationStack);
     const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
-    console.log('📺 Screen component:', ScreenComponent.name);
 
     if (screen === 'my-apps-desktop') {
         return (
@@ -485,14 +453,12 @@ const App: React.FC = () => {
 
     // Handle app launch from My Applications
     const handleLaunchApp = useCallback((appCode: string) => {
-        console.log('🚀 Launching app:', appCode);
-
         // Map app codes to screen names
         const appScreenMap: Record<string, Screen> = {
             'construction-oracle': 'construction-oracle',
             'n8n-procore-builder': 'n8n-procore-builder',
-            'predictive-maintenance': 'ai-assistant', // Fallback to AI assistant
-            'intelligent-router': 'ai-assistant', // Fallback to AI assistant
+            'predictive-maintenance': 'ai-assistant',
+            'intelligent-router': 'ai-assistant',
             'cost-optimizer': 'financial-forecaster',
             'safety-sentinel': 'hse-sentinel',
             'quality-inspector': 'ai-assistant',
@@ -501,14 +467,8 @@ const App: React.FC = () => {
             'reality-simulator': 'ai-assistant'
         };
 
-        const targetScreen = appScreenMap[appCode];
-        if (targetScreen) {
-            navigateToModule(targetScreen);
-        } else {
-            console.warn('Unknown app code:', appCode);
-            // Fallback to AI assistant
-            navigateToModule('ai-assistant');
-        }
+        const targetScreen = appScreenMap[appCode] || 'ai-assistant';
+        navigateToModule(targetScreen);
     }, [navigateToModule]);
 
     return (
