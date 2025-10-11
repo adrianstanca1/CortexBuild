@@ -380,6 +380,31 @@ const App: React.FC = () => {
         };
     }, [project, currentUser?.name, currentUser?.companyId]);
 
+    const sidebarGoHome = useCallback(() => {
+        const defaultScreen = getDefaultScreenForRole(currentUser?.role || 'project_manager');
+        navigateToModule(defaultScreen);
+    }, [currentUser?.role, navigateToModule]);
+
+    // Handle app launch from My Applications
+    const handleLaunchApp = useCallback((appCode: string) => {
+        // Map app codes to screen names
+        const appScreenMap: Record<string, Screen> = {
+            'construction-oracle': 'construction-oracle',
+            'n8n-procore-builder': 'n8n-procore-builder',
+            'predictive-maintenance': 'ai-tools',
+            'intelligent-router': 'ai-tools',
+            'cost-optimizer': 'financial-management',
+            'safety-sentinel': 'ai-tools',
+            'quality-inspector': 'ai-tools',
+            'timeline-magic': 'project-operations',
+            'document-intelligence': 'document-management',
+            'reality-simulator': 'ai-tools'
+        };
+
+        const targetScreen = appScreenMap[appCode] || 'ai-tools';
+        navigateToModule(targetScreen);
+    }, [navigateToModule]);
+
     if (!sessionChecked) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -528,31 +553,6 @@ const App: React.FC = () => {
             </ErrorBoundary>
         );
     }
-
-    const sidebarGoHome = useCallback(() => {
-        const defaultScreen = getDefaultScreenForRole(currentUser.role);
-        navigateToModule(defaultScreen);
-    }, [currentUser.role, navigateToModule]);
-
-    // Handle app launch from My Applications
-    const handleLaunchApp = useCallback((appCode: string) => {
-        // Map app codes to screen names
-        const appScreenMap: Record<string, Screen> = {
-            'construction-oracle': 'construction-oracle',
-            'n8n-procore-builder': 'n8n-procore-builder',
-            'predictive-maintenance': 'ai-tools',
-            'intelligent-router': 'ai-tools',
-            'cost-optimizer': 'financial-management',
-            'safety-sentinel': 'ai-tools',
-            'quality-inspector': 'ai-tools',
-            'timeline-magic': 'project-operations',
-            'document-intelligence': 'document-management',
-            'reality-simulator': 'ai-tools'
-        };
-
-        const targetScreen = appScreenMap[appCode] || 'ai-tools';
-        navigateToModule(targetScreen);
-    }, [navigateToModule]);
 
     return (
         <ErrorBoundary>
