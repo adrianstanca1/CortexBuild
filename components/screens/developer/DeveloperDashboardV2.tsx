@@ -8,10 +8,11 @@ import {
     Code2, Terminal, GitBranch, Package, Zap, FileCode,
     Database, TestTube, Rocket, BookOpen, Activity, Clock,
     ArrowUpRight, ArrowDownRight, Sparkles, Target, Award,
-    ChevronRight, Cpu, LayoutDashboard, Wrench
+    ChevronRight, Cpu, LayoutDashboard, Wrench, Bot
 } from 'lucide-react';
 import { User, Screen } from '../../../types';
 import toast from 'react-hot-toast';
+import CodexAgent from '../../CodexAgent';
 
 interface DeveloperDashboardV2Props {
     currentUser: User;
@@ -34,7 +35,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
         codeQuality: 96.5
     });
 
-    const [activeTab, setActiveTab] = useState<'overview' | 'code' | 'tools'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'code' | 'tools' | 'codex'>('overview');
     const [isAnimating, setIsAnimating] = useState(true);
 
     useEffect(() => {
@@ -84,6 +85,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
 
     // Development Tools
     const developmentTools = [
+        { id: 'codex-agent', title: 'Codex Agent', icon: Bot, color: 'purple', description: 'AI coding assistant (GPT-5-Codex)', action: () => setActiveTab('codex') },
         { id: 'code-editor', title: 'Code Editor', icon: Code2, color: 'blue', description: 'Monaco editor with IntelliSense', action: () => navigateTo('sdk-developer', { startTab: 'builder' }) },
         { id: 'terminal', title: 'Terminal', icon: Terminal, color: 'green', description: 'Integrated terminal', action: () => toast.info('Terminal opening...') },
         { id: 'git', title: 'Git Integration', icon: GitBranch, color: 'orange', description: 'Version control', action: () => toast.info('Git tools opening...') },
@@ -194,8 +196,8 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-green-600 text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                    ? 'bg-green-600 text-white shadow-lg'
+                                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
                                     }`}
                             >
                                 <TabIcon className="w-5 h-5" />
@@ -270,6 +272,55 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
                     </div>
                 </div>
             </div>
+
+            {/* Codex Agent Tab */}
+            {activeTab === 'codex' && (
+                <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="w-full max-w-6xl h-[90vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
+                        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                                    <Bot className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Codex Agent
+                                    </h2>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        Powered by GPT-5-Codex
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('overview')}
+                                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg transition-colors"
+                                title="Close Codex Agent"
+                                aria-label="Close Codex Agent"
+                            >
+                                Close
+                            </button>
+                        </div>
+                        <div className="h-[calc(100%-80px)]">
+                            <CodexAgent
+                                projectId={currentUser.company_id}
+                                initialContext={{
+                                    userId: currentUser.id,
+                                    userName: currentUser.name,
+                                    companyId: currentUser.company_id,
+                                }}
+                                onResult={(result) => {
+                                    if (result.success) {
+                                        toast.success('Codex task completed!');
+                                    } else {
+                                        toast.error(result.error || 'Codex task failed');
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

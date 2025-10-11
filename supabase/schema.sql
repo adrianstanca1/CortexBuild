@@ -372,3 +372,56 @@ CREATE INDEX IF NOT EXISTS idx_user_installations_user ON user_app_installations
 CREATE INDEX IF NOT EXISTS idx_company_installations_company ON company_app_installations(company_id);
 CREATE INDEX IF NOT EXISTS idx_app_analytics_app ON app_analytics(app_id);
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 8. OPENAI CODEX SDK INTEGRATION
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Codex threads table
+CREATE TABLE IF NOT EXISTS codex_threads (
+    id TEXT PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+    context JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Codex messages table
+CREATE TABLE IF NOT EXISTS codex_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    thread_id TEXT NOT NULL REFERENCES codex_threads(id) ON DELETE CASCADE,
+    role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+    content TEXT NOT NULL,
+    metadata JSONB,
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Codex executions table (for tracking code executions)
+CREATE TABLE IF NOT EXISTS codex_executions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    thread_id TEXT NOT NULL REFERENCES codex_threads(id) ON DELETE CASCADE,
+    command TEXT NOT NULL,
+    result JSONB,
+    success BOOLEAN DEFAULT false,
+    duration_ms INTEGER,
+    executed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Codex files table (for tracking file changes)
+CREATE TABLE IF NOT EXISTS codex_files (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    execution_id UUID NOT NULL REFERENCES codex_executions(id) ON DELETE CASCADE,
+    file_path TEXT NOT NULL,
+    content TEXT,
+    language TEXT,
+    changes JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Codex indexes
+CREATE INDEX IF NOT EXISTS idx_codex_threads_user ON codex_threads(user_id);
+CREATE INDEX IF NOT EXISTS idx_codex_threads_project ON codex_threads(project_id);
+CREATE INDEX IF NOT EXISTS idx_codex_messages_thread ON codex_messages(thread_id);
+CREATE INDEX IF NOT EXISTS idx_codex_executions_thread ON codex_executions(thread_id);
+CREATE INDEX IF NOT EXISTS idx_codex_files_execution ON codex_files(execution_id);
+
