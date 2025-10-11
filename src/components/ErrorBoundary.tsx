@@ -10,6 +10,10 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
 import { ErrorLogger, AppError } from '../utils/errorHandler';
+import { advancedErrorLogger } from '../utils/advancedErrorLogger';
+import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
+import { sessionTracker } from '../utils/sessionTracker';
+import { performanceMonitor } from '../utils/performanceMonitor';
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -50,11 +54,34 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-        // Log error to error tracking service
+        // Track error in session
+        sessionTracker.trackError();
+
+        // Log with advanced error logger
+        const errorId = advancedErrorLogger.logError(
+            error,
+            {
+                appState: {
+                    route: window.location.pathname,
+                    component: this.props.componentName || 'ErrorBoundary',
+                    props: undefined,
+                    state: undefined
+                },
+                custom: {
+                    componentStack: errorInfo.componentStack,
+                    errorCount: this.state.errorCount + 1
+                }
+            },
+            ErrorSeverity.HIGH,
+            ErrorCategory.UI
+        );
+
+        // Also log with legacy logger for backward compatibility
         ErrorLogger.log(error, {
             component: this.props.componentName || 'ErrorBoundary',
             componentStack: errorInfo.componentStack,
             errorCount: this.state.errorCount + 1,
+            errorId
         });
 
         // Update state with error details

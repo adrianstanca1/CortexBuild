@@ -9,6 +9,9 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Code, RefreshCw, AlertTriangle, Copy, Check } from 'lucide-react';
 import { ErrorLogger } from '../../utils/errorHandler';
+import { advancedErrorLogger } from '../../utils/advancedErrorLogger';
+import { ErrorSeverity, ErrorCategory } from '../../types/errorTypes';
+import { sessionTracker } from '../../utils/sessionTracker';
 
 interface EditorErrorBoundaryProps {
     children: ReactNode;
@@ -41,10 +44,35 @@ export class EditorErrorBoundary extends Component<EditorErrorBoundaryProps, Edi
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+        // Track error in session
+        sessionTracker.trackError();
+
+        // Log with advanced error logger
+        const errorId = advancedErrorLogger.logError(
+            error,
+            {
+                appState: {
+                    route: window.location.pathname,
+                    component: this.props.componentName || 'EditorErrorBoundary',
+                    props: { language: this.props.language },
+                    state: undefined
+                },
+                custom: {
+                    componentStack: errorInfo.componentStack,
+                    type: 'editor_error',
+                    language: this.props.language
+                }
+            },
+            ErrorSeverity.HIGH,
+            ErrorCategory.UI
+        );
+
+        // Legacy logger
         ErrorLogger.log(error, {
             component: this.props.componentName || 'EditorErrorBoundary',
             componentStack: errorInfo.componentStack,
             type: 'editor_error',
+            errorId
         });
 
         if (this.props.onError) {
