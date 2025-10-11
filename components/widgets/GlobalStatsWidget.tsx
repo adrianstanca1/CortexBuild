@@ -1,9 +1,6 @@
 import React from 'react';
 // Fix: Corrected import paths to use proper relative path and file extension.
 import { Project } from '../../types';
-// Fix: Corrected import paths to use proper relative path and file extension.
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
 // Fix: Added .tsx extension to import
 import StatCard from './StatCard';
 
