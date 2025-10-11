@@ -42,7 +42,7 @@ export function createMyApplicationsRouter(db: Database.Database): Router {
 
             // Get individually installed apps
             const individualApps = db.prepare(`
-                SELECT 
+                SELECT
                     sa.id,
                     sa.name,
                     sa.description,
@@ -50,7 +50,6 @@ export function createMyApplicationsRouter(db: Database.Database): Router {
                     sa.category,
                     sa.version,
                     sa.code,
-                    sa.config,
                     uai.installed_at,
                     uai.is_active,
                     'individual' as install_type
@@ -62,7 +61,7 @@ export function createMyApplicationsRouter(db: Database.Database): Router {
 
             // Get company-wide installed apps
             const companyApps = db.prepare(`
-                SELECT 
+                SELECT
                     sa.id,
                     sa.name,
                     sa.description,
@@ -70,7 +69,6 @@ export function createMyApplicationsRouter(db: Database.Database): Router {
                     sa.category,
                     sa.version,
                     sa.code,
-                    sa.config,
                     cai.installed_at,
                     cai.is_active,
                     'company' as install_type
