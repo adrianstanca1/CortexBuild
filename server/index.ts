@@ -34,6 +34,7 @@ import { createSDKRouter, initSdkTables } from './routes/sdk';
 import adminSDKRouter from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
 import { createAIChatRoutes } from './routes/ai-chat';
+import { createAdvancedAIRoutes } from './routes/advanced-ai';
 import { createDeveloperRoutes } from './routes/developer';
 import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
