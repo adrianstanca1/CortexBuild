@@ -168,10 +168,18 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
 };
 
 const App: React.FC = () => {
+    // All hooks must be called at the top, unconditionally, in the same order
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [sessionChecked, setSessionChecked] = useState(false);
     const [allProjects, setAllProjects] = useState<Project[]>([]);
+    const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
+    const [isAISuggestionLoading, setIsAISuggestionLoading] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
+    const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
+    const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => () => { });
+    const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
 
+    // Custom hooks after state hooks
     const {
         navigationStack,
         currentNavItem,
@@ -183,15 +191,6 @@ const App: React.FC = () => {
         handleDeepLink,
         setNavigationStack
     } = useNavigation();
-
-
-    const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
-    const [isAISuggestionLoading, setIsAISuggestionLoading] = useState(false);
-    const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
-
-    const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
-    const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => () => { });
-    const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
 
     const { can } = usePermissions(currentUser);
     const { toasts, removeToast, showSuccess, showError } = useToast();
