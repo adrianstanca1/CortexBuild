@@ -9,6 +9,7 @@ All demo users have been seeded in the database. Use these credentials to test d
 ## 👤 Demo Users
 
 ### 1. **Super Admin** (Full Platform Control)
+
 ```
 Email:    adrian.stanca1@gmail.com
 Password: Cumparavinde1
@@ -17,6 +18,7 @@ Company:  ASC Cladding Ltd
 ```
 
 **Access:**
+
 - Super Admin Dashboard (12 sections)
 - Platform-wide control
 - User management
@@ -28,6 +30,7 @@ Company:  ASC Cladding Ltd
 ---
 
 ### 2. **Company Admin** (Company-Wide Control)
+
 ```
 Email:    adrian@ascladdingltd.co.uk
 Password: lolozania1
@@ -36,6 +39,7 @@ Company:  ASC Cladding Ltd
 ```
 
 **Access:**
+
 - Company Admin Dashboard (15 sections)
 - Office Operations (7 sections)
 - Field Operations (8 sections)
@@ -46,7 +50,8 @@ Company:  ASC Cladding Ltd
 
 ---
 
-### 3. **Developer** (Development Tools)
+### 3. **Developer #1** (Adrian Stanca)
+
 ```
 Email:    adrian.stanca1@icloud.com
 Password: password123
@@ -55,6 +60,7 @@ Company:  ASC Cladding Ltd
 ```
 
 **Access:**
+
 - Developer Dashboard V2 (10 tools)
 - **🆕 Codex Agent** (GPT-5-Codex AI assistant)
 - Code Editor
@@ -67,7 +73,31 @@ Company:  ASC Cladding Ltd
 
 ---
 
-### 4. **Regular User** (Standard Access)
+### 4. **Developer #2** (Dev User)
+
+```
+Email:    dev@constructco.com
+Password: password123
+Role:     developer
+Company:  ASC Cladding Ltd
+```
+
+**Access:**
+
+- Developer Dashboard V2 (10 tools)
+- **🆕 Codex Agent** (GPT-5-Codex AI assistant)
+- Code Editor
+- SDK Developer
+- API Builder
+- Database Tools
+- Testing Framework
+- Marketplace (browse & publish apps)
+- Documentation
+
+---
+
+### 6. **Regular User** (Standard Access)
+
 ```
 Email:    john.doe@ascladdingltd.co.uk
 Password: password123
@@ -76,6 +106,7 @@ Company:  ASC Cladding Ltd
 ```
 
 **Access:**
+
 - User Dashboard
 - Assigned projects
 - Tasks & milestones
@@ -85,7 +116,8 @@ Company:  ASC Cladding Ltd
 
 ---
 
-### 5. **Field User** (Field Operations)
+### 7. **Field User** (Field Operations)
+
 ```
 Email:    jane.smith@ascladdingltd.co.uk
 Password: password123
@@ -94,6 +126,7 @@ Company:  ASC Cladding Ltd
 ```
 
 **Access:**
+
 - Field Dashboard
 - Daily site logs
 - Safety reports
@@ -107,24 +140,28 @@ Company:  ASC Cladding Ltd
 ## 🚀 Quick Start
 
 ### **1. Access the Application**
+
 ```
 Frontend: http://localhost:3000/
 Backend:  http://localhost:3001/
 ```
 
 ### **2. Login**
-1. Open http://localhost:3000/
+
+1. Open <http://localhost:3000/>
 2. Choose a user from the list above
 3. Enter email and password
 4. Click "Login"
 
 ### **3. Test Codex Agent (Developer Only)**
-1. Login as Developer (adrian.stanca1@icloud.com / password123)
+
+1. Login as Developer (<adrian.stanca1@icloud.com> / password123)
 2. Navigate to Developer Dashboard V2
 3. Click **"Codex Agent"** tool card
 4. Start chatting with GPT-5-Codex!
 
 **Quick Actions:**
+
 - "Explore this repository"
 - "Propose improvements"
 - "Review recent changes"
@@ -135,6 +172,7 @@ Backend:  http://localhost:3001/
 ## 🏢 Demo Companies
 
 ### **ASC Cladding Ltd**
+
 ```
 ID:       company-1
 Industry: Construction
@@ -143,6 +181,7 @@ Projects: 3 active projects
 ```
 
 ### **BuildRight Construction**
+
 ```
 ID:       company-2
 Industry: Construction
@@ -191,6 +230,7 @@ All users have access to these 6 apps:
 ## 🔧 API Testing
 
 ### **Login Endpoint**
+
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
@@ -201,12 +241,14 @@ curl -X POST http://localhost:3001/api/auth/login \
 ```
 
 ### **Get Current User**
+
 ```bash
 curl http://localhost:3001/api/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### **Get Marketplace Apps**
+
 ```bash
 curl http://localhost:3001/api/global-marketplace/apps
 ```
@@ -216,6 +258,7 @@ curl http://localhost:3001/api/global-marketplace/apps
 ## 🎯 Feature Testing Checklist
 
 ### **Super Admin Features**
+
 - [ ] User management (create, edit, delete)
 - [ ] Company management
 - [ ] System settings
@@ -223,6 +266,7 @@ curl http://localhost:3001/api/global-marketplace/apps
 - [ ] Marketplace app approval
 
 ### **Company Admin Features**
+
 - [ ] Team management
 - [ ] Project creation
 - [ ] Financial reports
@@ -230,6 +274,7 @@ curl http://localhost:3001/api/global-marketplace/apps
 - [ ] Field operations
 
 ### **Developer Features**
+
 - [ ] **Codex Agent** (NEW!)
 - [ ] Code Editor
 - [ ] SDK Developer
@@ -238,6 +283,7 @@ curl http://localhost:3001/api/global-marketplace/apps
 - [ ] App publishing
 
 ### **User Features**
+
 - [ ] Project access
 - [ ] Task management
 - [ ] Time tracking
@@ -249,6 +295,7 @@ curl http://localhost:3001/api/global-marketplace/apps
 ## 🆕 Latest Features (Commit: 10b3442)
 
 ### **OpenAI Codex SDK Integration**
+
 ✅ Codex Agent with GPT-5-Codex  
 ✅ Thread-based conversations  
 ✅ Code generation & preview  
@@ -284,9 +331,10 @@ npm run server
 
 ---
 
-## 🎉 Happy Testing!
+## 🎉 Happy Testing
 
 For more information, see:
+
 - `docs/PLATFORM_ARCHITECTURE.md` - Platform overview
 - `docs/ACCESS_CONTROL_MATRIX.md` - RBAC details
 - `docs/DATABASE_SCHEMA.md` - Database structure
@@ -296,6 +344,5 @@ For more information, see:
 
 ---
 
-**Repository:** https://github.com/adrianstanca1/CortexBuild  
+**Repository:** <https://github.com/adrianstanca1/CortexBuild>  
 **Latest Commit:** 10b3442 (OpenAI Codex SDK Integration)
-

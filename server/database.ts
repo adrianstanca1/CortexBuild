@@ -990,6 +990,14 @@ const seedInitialData = () => {
             },
             {
                 id: 'user-5',
+                email: 'adrian.stanca1@icloud.com',
+                password: 'password123',
+                name: 'Adrian Stanca',
+                role: 'developer',
+                companyId: 'company-1'
+            },
+            {
+                id: 'user-6',
                 email: 'dev@constructco.com',
                 password: 'password123',
                 name: 'Dev User',
