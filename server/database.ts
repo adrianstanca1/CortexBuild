@@ -67,6 +67,49 @@ import bcrypt from 'bcryptjs';
 const db = new Database('./cortexbuild.db');
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+db.pragma('synchronous = NORMAL');
+db.pragma('cache_size = 10000'); // 10MB cache
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * GRACEFUL SHUTDOWN HANDLERS
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Ensures WAL checkpoint before exit to prevent data loss
+ */
+
+const gracefulShutdown = (signal: string) => {
+    console.log(`\n🔄 Received ${signal}, shutting down gracefully...`);
+    try {
+        console.log('💾 Performing WAL checkpoint...');
+        db.pragma('wal_checkpoint(TRUNCATE)');
+        console.log('✅ WAL checkpoint completed');
+        
+        console.log('🔒 Closing database connection...');
+        db.close();
+        console.log('✅ Database closed successfully');
+        
+        console.log('👋 Shutdown complete');
+        process.exit(0);
+    } catch (error) {
+        console.error('❌ Error during shutdown:', error);
+        process.exit(1);
+    }
+};
+
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGHUP', () => gracefulShutdown('SIGHUP'));
+
+// Periodic WAL checkpoint (every 30 minutes)
+setInterval(() => {
+    try {
+        const result = db.pragma('wal_checkpoint(PASSIVE)');
+        console.log('🔄 Periodic WAL checkpoint:', result);
+    } catch (error) {
+        console.error('❌ Periodic checkpoint failed:', error);
+    }
+}, 30 * 60 * 1000); // 30 minutes
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -1862,4 +1905,18 @@ export const createCompany = (company: { id: string; name: string }) => {
     return findCompanyByName(company.name);
 };
 
+/**
+ * Statistics for monitoring
+ */
+export const getUsersCount = (): number => {
+    const result = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+    return result.count;
+};
+
+export const getProjectsCount = (): number => {
+    const result = db.prepare('SELECT COUNT(*) as count FROM projects').get() as { count: number };
+    return result.count;
+};
+
 export { db };
+

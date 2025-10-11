@@ -13,7 +13,10 @@
     "vercel:dev": "vercel dev",
     "vercel:deploy": "vercel",
     "vercel:prod": "vercel --prod",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "db:backup": "chmod +x scripts/backup-database.sh && ./scripts/backup-database.sh",
+    "db:restore": "chmod +x scripts/restore-database.sh && ./scripts/restore-database.sh",
+    "db:health": "curl -H \"Authorization: Bearer $(cat .token 2>/dev/null || echo '')\" http://localhost:3001/api/health/database"
   },
   "dependencies": {
     "@google/genai": "^1.22.0",
