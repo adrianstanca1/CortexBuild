@@ -51,6 +51,14 @@ import {
 } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 
+// Import rate limiting middleware
+import {
+  authRateLimit,
+  generalRateLimit,
+  adminRateLimit,
+  uploadRateLimit
+} from './middleware/rateLimiter';
+
 // Import validation middleware
 import {
   validateBody,
@@ -126,7 +134,7 @@ app.get('/api/health', (req, res) => {
  */
 
 // GET /api/chat/message - Get chat history
-app.get('/api/chat/message', auth.authenticateToken, async (req, res) => {
+app.get('/api/chat/message', generalRateLimit, auth.authenticateToken, async (req, res) => {
     try {
         // For now, return empty history
         // TODO: Implement chat history from database
@@ -141,7 +149,7 @@ app.get('/api/chat/message', auth.authenticateToken, async (req, res) => {
 });
 
 // POST /api/chat/message
-app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
+app.post('/api/chat/message', generalRateLimit, auth.authenticateToken, async (req, res) => {
             try {
                 const { message, sessionId, currentPage } = req.body;
                 const userId = (req as any).user.id;
@@ -184,7 +192,7 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
         });
 
 // DELETE /api/chat/message - Clear chat history
-app.delete('/api/chat/message', auth.authenticateToken, async (req, res) => {
+app.delete('/api/chat/message', generalRateLimit, auth.authenticateToken, async (req, res) => {
     try {
         const { sessionId } = req.query;
         // TODO: Implement chat history deletion from database
@@ -227,7 +235,7 @@ const startServer = async () => {
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
 
-        app.post('/api/auth/login', validateBody(loginSchema), (req, res) => {
+        app.post('/api/auth/login', authRateLimit, validateBody(loginSchema), (req, res) => {
             try {
                 const { email, password } = req.body;
 
@@ -247,7 +255,7 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/register', validateBody(registerSchema), (req, res) => {
+        app.post('/api/auth/register', authRateLimit, validateBody(registerSchema), (req, res) => {
             try {
                 const { email, password, name, companyName } = req.body;
 
@@ -311,82 +319,82 @@ const startServer = async () => {
         // Register API routes
         console.log('📝 Registering API routes...');
         const clientsRouter = createClientsRouter(db);
-        app.use('/api/clients', clientsRouter);
+        app.use('/api/clients', generalRateLimit, clientsRouter);
         console.log('  ✓ /api/clients');
 
-        app.use('/api/projects', createProjectsRouter(db));
+        app.use('/api/projects', generalRateLimit, createProjectsRouter(db));
         console.log('  ✓ /api/projects');
 
-        app.use('/api/rfis', createRFIsRouter(db));
+        app.use('/api/rfis', generalRateLimit, createRFIsRouter(db));
         console.log('  ✓ /api/rfis');
 
-        app.use('/api/invoices', createInvoicesRouter(db));
+        app.use('/api/invoices', generalRateLimit, createInvoicesRouter(db));
         console.log('  ✓ /api/invoices');
 
-        app.use('/api/time-entries', createTimeEntriesRouter(db));
+        app.use('/api/time-entries', generalRateLimit, createTimeEntriesRouter(db));
         console.log('  ✓ /api/time-entries');
 
-        app.use('/api/subcontractors', createSubcontractorsRouter(db));
+        app.use('/api/subcontractors', generalRateLimit, createSubcontractorsRouter(db));
         console.log('  ✓ /api/subcontractors');
 
-        app.use('/api/purchase-orders', createPurchaseOrdersRouter(db));
+        app.use('/api/purchase-orders', generalRateLimit, createPurchaseOrdersRouter(db));
         console.log('  ✓ /api/purchase-orders');
 
-        app.use('/api/tasks', createTasksRouter(db));
+        app.use('/api/tasks', generalRateLimit, createTasksRouter(db));
         console.log('  ✓ /api/tasks');
 
-        app.use('/api/milestones', createMilestonesRouter(db));
+        app.use('/api/milestones', generalRateLimit, createMilestonesRouter(db));
         console.log('  ✓ /api/milestones');
 
-        app.use('/api/documents', createDocumentsRouter(db));
+        app.use('/api/documents', generalRateLimit, createDocumentsRouter(db));
         console.log('  ✓ /api/documents');
 
-        app.use('/api/modules', createModulesRouter(db));
+        app.use('/api/modules', generalRateLimit, createModulesRouter(db));
         console.log('  ✓ /api/modules');
 
-        app.use('/api/admin', createAdminRouter(db));
+        app.use('/api/admin', adminRateLimit, createAdminRouter(db));
         console.log('  ✓ /api/admin');
 
-        app.use('/api/marketplace', createMarketplaceRouter(db));
+        app.use('/api/marketplace', generalRateLimit, createMarketplaceRouter(db));
         console.log('  ✓ /api/marketplace');
 
-        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(db));
+        app.use('/api/global-marketplace', generalRateLimit, createGlobalMarketplaceRouter(db));
         console.log('  ✓ /api/global-marketplace');
 
-        app.use('/api/widgets', createWidgetsRouter(db));
+        app.use('/api/widgets', generalRateLimit, createWidgetsRouter(db));
         console.log('  ✓ /api/widgets');
 
-        app.use('/api/smart-tools', createSmartToolsRouter(db));
+        app.use('/api/smart-tools', generalRateLimit, createSmartToolsRouter(db));
         console.log('  ✓ /api/smart-tools');
 
-        app.use('/api/sdk', createSDKRouter(db));
+        app.use('/api/sdk', generalRateLimit, createSDKRouter(db));
         console.log('  ✓ /api/sdk');
 
-        app.use('/api/admin/sdk', adminSDKRouter);
+        app.use('/api/admin/sdk', adminRateLimit, adminSDKRouter);
         console.log('  ✓ /api/admin/sdk');
 
-        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(db));
+        app.use('/api/admin/enhanced', adminRateLimit, createEnhancedAdminRoutes(db));
         console.log('  ✓ /api/admin/enhanced');
 
-        app.use('/api/ai', createAIChatRoutes(db));
+        app.use('/api/ai', generalRateLimit, createAIChatRoutes(db));
         console.log('  ✓ /api/ai');
 
-        app.use('/api/developer', createDeveloperRoutes(db));
+        app.use('/api/developer', generalRateLimit, createDeveloperRoutes(db));
         console.log('  ✓ /api/developer');
 
-        app.use('/api/integrations', createIntegrationsRouter(db));
+        app.use('/api/integrations', generalRateLimit, createIntegrationsRouter(db));
         console.log('  ✓ /api/integrations');
 
-        app.use('/api/agentkit', createAgentKitRouter(db));
+        app.use('/api/agentkit', generalRateLimit, createAgentKitRouter(db));
         console.log('  ✓ /api/agentkit');
 
-        app.use('/api/workflows', createWorkflowsRouter(db));
+        app.use('/api/workflows', generalRateLimit, createWorkflowsRouter(db));
         console.log('  ✓ /api/workflows');
 
-        app.use('/api/automations', createAutomationsRouter(db));
+        app.use('/api/automations', generalRateLimit, createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
-        app.use('/api/my-applications', createMyApplicationsRouter(db));
+        app.use('/api/my-applications', generalRateLimit, createMyApplicationsRouter(db));
         console.log('  ✓ /api/my-applications');
 
         console.log('✅ All 25 API routes registered successfully');
