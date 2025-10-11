@@ -3,6 +3,8 @@ import { User } from '../../types';
 import MonacoEditor from '@monaco-editor/react';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
+import { AIAgentsDashboard } from './AIAgentsDashboard';
+import { IntegrationsHub } from './IntegrationsHub';
 import {
   Code,
   Zap,
@@ -15,7 +17,8 @@ import {
   RefreshCw,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  Plug
 } from 'lucide-react';
 
 // API Configuration
@@ -178,7 +181,7 @@ interface ProductionSDKDeveloperViewProps {
 
 export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProps> = ({ user, onNavigate }) => {
   // State
-  const [activeTab, setActiveTab] = useState<'builder' | 'workflows' | 'agents' | 'marketplace' | 'settings'>('builder');
+  const [activeTab, setActiveTab] = useState<'builder' | 'workflows' | 'agents' | 'integrations' | 'marketplace' | 'settings'>('builder');
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState('// Generated code will appear here...');
   const [aiExplanation, setAiExplanation] = useState('');
@@ -528,11 +531,13 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
               { id: 'builder', label: 'AI Builder', icon: Code },
               { id: 'workflows', label: 'Workflows', icon: Zap },
               { id: 'agents', label: 'AI Agents', icon: Package },
+              { id: 'integrations', label: 'Integrations', icon: Plug },
               { id: 'marketplace', label: 'Marketplace', icon: TrendingUp },
               { id: 'settings', label: 'Settings', icon: Settings }
             ].map(tab => (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? 'border-emerald-500 text-emerald-600'
@@ -547,28 +552,37 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         </div>
       </div>
 
-      {/* Main Content - Placeholder for now */}
+      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card>
-          <h2 className="text-xl font-bold text-slate-900 mb-4">
-            {activeTab === 'builder' && 'AI Code Builder'}
-            {activeTab === 'workflows' && 'Workflow Automation'}
-            {activeTab === 'agents' && 'AI Agent Orchestration'}
-            {activeTab === 'marketplace' && 'App Marketplace'}
-            {activeTab === 'settings' && 'Developer Settings'}
-          </h2>
-          <p className="text-slate-600">
-            Production SDK with real OpenAI integration. All event handlers are connected to the backend API.
-          </p>
-          <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-            <p className="text-sm text-emerald-800">
-              ✅ Backend API connected<br />
-              ✅ OpenAI integration active<br />
-              ✅ Toast notifications enabled<br />
-              ✅ All event handlers implemented
+        {activeTab === 'agents' && (
+          <AIAgentsDashboard subscriptionTier={profile?.subscriptionTier || 'free'} />
+        )}
+
+        {activeTab === 'integrations' && (
+          <IntegrationsHub subscriptionTier={profile?.subscriptionTier || 'free'} />
+        )}
+
+        {(activeTab === 'builder' || activeTab === 'workflows' || activeTab === 'marketplace' || activeTab === 'settings') && (
+          <Card>
+            <h2 className="text-xl font-bold text-slate-900 mb-4">
+              {activeTab === 'builder' && 'AI Code Builder'}
+              {activeTab === 'workflows' && 'Workflow Automation'}
+              {activeTab === 'marketplace' && 'App Marketplace'}
+              {activeTab === 'settings' && 'Developer Settings'}
+            </h2>
+            <p className="text-slate-600">
+              Production SDK with real OpenAI integration. All event handlers are connected to the backend API.
             </p>
-          </div>
-        </Card>
+            <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <p className="text-sm text-emerald-800">
+                ✅ Backend API connected<br />
+                ✅ OpenAI integration active<br />
+                ✅ Toast notifications enabled<br />
+                ✅ All event handlers implemented
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

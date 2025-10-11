@@ -35,6 +35,8 @@ import adminSDKRouter from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
 import { createAIChatRoutes } from './routes/ai-chat';
 import { createDeveloperRoutes } from './routes/developer';
+import { createAgentsRouter } from './routes/agents';
+import { createIntegrationsRouter } from './routes/integrations';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -343,7 +345,13 @@ const startServer = async () => {
         app.use('/api/developer', createDeveloperRoutes(db));
         console.log('  ✓ /api/developer');
 
-        console.log('✅ All 20 API routes registered successfully');
+        app.use('/api/sdk/agents', createAgentsRouter(db));
+        console.log('  ✓ /api/sdk/agents');
+
+        app.use('/api/sdk/integrations', createIntegrationsRouter(db));
+        console.log('  ✓ /api/sdk/integrations');
+
+        console.log('✅ All 22 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
