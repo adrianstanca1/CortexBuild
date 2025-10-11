@@ -7,12 +7,21 @@ import Database from 'better-sqlite3';
 import { Project, ApiResponse, PaginatedResponse, ProjectFilters } from '../types';
 import { logProjectActivity } from '../utils/activity-logger';
 import { asyncHandler, ValidationError, NotFoundError, DatabaseError } from '../middleware/errorHandler';
+import {
+  validateBody,
+  validateQuery,
+  validateParams,
+  createProjectSchema,
+  updateProjectSchema,
+  projectFiltersSchema,
+  idParamSchema
+} from '../utils/validation';
 
 export function createProjectsRouter(db: Database.Database): Router {
   const router = Router();
 
   // GET /api/projects - List all projects with filters
-  router.get('/', asyncHandler(async (req: Request, res: Response) => {
+  router.get('/', validateQuery(projectFiltersSchema), asyncHandler(async (req: Request, res: Response) => {
     const {
       status,
       priority,
@@ -20,20 +29,12 @@ export function createProjectsRouter(db: Database.Database): Router {
       project_manager_id,
       company_id,
       search,
-      page = '1',
-      limit = '20'
+      page = 1,
+      limit = 20
     } = req.query as any;
 
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
-
-    if (isNaN(pageNum) || pageNum < 1) {
-      throw new ValidationError('Invalid page number');
-    }
-
-    if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-      throw new ValidationError('Invalid limit (must be 1-100)');
-    }
+    const pageNum = page;
+    const limitNum = limit;
 
     const offset = (pageNum - 1) * limitNum;
 
@@ -126,13 +127,9 @@ export function createProjectsRouter(db: Database.Database): Router {
   }));
 
   // GET /api/projects/:id - Get single project
-  router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const projectId = parseInt(id);
-
-    if (isNaN(projectId)) {
-      throw new ValidationError('Invalid project ID');
-    }
 
     const project = db.prepare(`
       SELECT p.*,
@@ -200,7 +197,7 @@ export function createProjectsRouter(db: Database.Database): Router {
   }));
 
   // POST /api/projects - Create new project
-  router.post('/', asyncHandler(async (req: Request, res: Response) => {
+  router.post('/', validateBody(createProjectSchema), asyncHandler(async (req: Request, res: Response) => {
     const {
       company_id,
       name,
@@ -218,55 +215,6 @@ export function createProjectsRouter(db: Database.Database): Router {
       client_id,
       project_manager_id
     } = req.body;
-
-    // Validation
-    if (!company_id) {
-      throw new ValidationError('Company ID is required');
-    }
-
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      throw new ValidationError('Project name is required and must be a non-empty string');
-    }
-
-    if (name.length > 255) {
-      throw new ValidationError('Project name must be less than 255 characters');
-    }
-
-    if (description && (typeof description !== 'string' || description.length > 1000)) {
-      throw new ValidationError('Project description must be a string less than 1000 characters');
-    }
-
-    if (project_number && (typeof project_number !== 'string' || project_number.length > 100)) {
-      throw new ValidationError('Project number must be a string less than 100 characters');
-    }
-
-    const validStatuses = ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      throw new ValidationError(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
-    }
-
-    const validPriorities = ['low', 'medium', 'high', 'critical'];
-    if (!validPriorities.includes(priority)) {
-      throw new ValidationError(`Invalid priority. Must be one of: ${validPriorities.join(', ')}`);
-    }
-
-    // Validate dates if provided
-    if (start_date && isNaN(Date.parse(start_date))) {
-      throw new ValidationError('Invalid start date format');
-    }
-
-    if (end_date && isNaN(Date.parse(end_date))) {
-      throw new ValidationError('Invalid end date format');
-    }
-
-    if (start_date && end_date && new Date(start_date) > new Date(end_date)) {
-      throw new ValidationError('Start date cannot be after end date');
-    }
-
-    // Validate budget if provided
-    if (budget !== undefined && (typeof budget !== 'number' || budget < 0)) {
-      throw new ValidationError('Budget must be a positive number');
-    }
 
     try {
       const result = db.prepare(`
@@ -315,70 +263,15 @@ export function createProjectsRouter(db: Database.Database): Router {
   }));
 
   // PUT /api/projects/:id - Update project
-  router.put('/:id', asyncHandler(async (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateProjectSchema), asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
     const projectId = parseInt(id);
-
-    if (isNaN(projectId)) {
-      throw new ValidationError('Invalid project ID');
-    }
 
     // Check if project exists
     const existing = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
     if (!existing) {
       throw new NotFoundError('Project');
-    }
-
-    // Validate updates
-    const allowedFields = [
-      'name', 'description', 'project_number', 'status', 'priority',
-      'start_date', 'end_date', 'budget', 'address', 'city', 'state', 'zip_code',
-      'client_id', 'project_manager_id'
-    ];
-
-    const fields = Object.keys(updates).filter(key => allowedFields.includes(key) && key !== 'id');
-    if (fields.length === 0) {
-      throw new ValidationError('No valid fields to update');
-    }
-
-    // Validate individual fields
-    if (updates.name && (typeof updates.name !== 'string' || updates.name.trim().length === 0 || updates.name.length > 255)) {
-      throw new ValidationError('Project name must be a non-empty string less than 255 characters');
-    }
-
-    if (updates.description && (typeof updates.description !== 'string' || updates.description.length > 1000)) {
-      throw new ValidationError('Project description must be a string less than 1000 characters');
-    }
-
-    if (updates.status) {
-      const validStatuses = ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
-      if (!validStatuses.includes(updates.status)) {
-        throw new ValidationError(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
-      }
-    }
-
-    if (updates.priority) {
-      const validPriorities = ['low', 'medium', 'high', 'critical'];
-      if (!validPriorities.includes(updates.priority)) {
-        throw new ValidationError(`Invalid priority. Must be one of: ${validPriorities.join(', ')}`);
-      }
-    }
-
-    if (updates.start_date && isNaN(Date.parse(updates.start_date))) {
-      throw new ValidationError('Invalid start date format');
-    }
-
-    if (updates.end_date && isNaN(Date.parse(updates.end_date))) {
-      throw new ValidationError('Invalid end date format');
-    }
-
-    if (updates.start_date && updates.end_date && new Date(updates.start_date) > new Date(updates.end_date)) {
-      throw new ValidationError('Start date cannot be after end date');
-    }
-
-    if (updates.budget !== undefined && (typeof updates.budget !== 'number' || updates.budget < 0)) {
-      throw new ValidationError('Budget must be a positive number');
     }
 
     const setClause = fields.map(field => `${field} = ?`).join(', ');
@@ -431,13 +324,9 @@ export function createProjectsRouter(db: Database.Database): Router {
   }));
 
   // DELETE /api/projects/:id - Delete project
-  router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
+  router.delete('/:id', validateParams(idParamSchema), asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const projectId = parseInt(id);
-
-    if (isNaN(projectId)) {
-      throw new ValidationError('Invalid project ID');
-    }
 
     const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
     if (!project) {

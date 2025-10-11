@@ -5,22 +5,31 @@
 import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { Client, ApiResponse, PaginatedResponse } from '../types';
+import {
+  validateBody,
+  validateQuery,
+  validateParams,
+  createClientSchema,
+  updateClientSchema,
+  clientFiltersSchema,
+  idParamSchema
+} from '../utils/validation';
 
 export function createClientsRouter(db: Database.Database): Router {
   const router = Router();
 
   // GET /api/clients - List all clients
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', validateQuery(clientFiltersSchema), (req: Request, res: Response) => {
     try {
       const {
         search,
         is_active,
-        page = '1',
-        limit = '20'
+        page = 1,
+        limit = 20
       } = req.query as any;
 
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      const pageNum = page;
+      const limitNum = limit;
       const offset = (pageNum - 1) * limitNum;
 
       let query = 'SELECT * FROM clients WHERE 1=1';
@@ -66,7 +75,7 @@ export function createClientsRouter(db: Database.Database): Router {
   });
 
   // GET /api/clients/:id - Get single client
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -111,7 +120,7 @@ export function createClientsRouter(db: Database.Database): Router {
   });
 
   // POST /api/clients - Create new client
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', validateBody(createClientSchema), (req: Request, res: Response) => {
     try {
       const {
         company_id,
@@ -130,13 +139,6 @@ export function createClientsRouter(db: Database.Database): Router {
         credit_limit,
         notes
       } = req.body;
-
-      if (!company_id || !name) {
-        return res.status(400).json({
-          success: false,
-          error: 'Company ID and name are required'
-        });
-      }
 
       const result = db.prepare(`
         INSERT INTO clients (
@@ -164,7 +166,7 @@ export function createClientsRouter(db: Database.Database): Router {
   });
 
   // PUT /api/clients/:id - Update client
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateClientSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -174,14 +176,6 @@ export function createClientsRouter(db: Database.Database): Router {
         return res.status(404).json({
           success: false,
           error: 'Client not found'
-        });
-      }
-
-      const fields = Object.keys(updates).filter(key => key !== 'id');
-      if (fields.length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'No fields to update'
         });
       }
 
@@ -210,7 +204,7 @@ export function createClientsRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/clients/:id - Delete client
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 

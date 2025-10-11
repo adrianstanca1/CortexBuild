@@ -51,6 +51,14 @@ import {
 } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 
+// Import validation middleware
+import {
+  validateBody,
+  loginSchema,
+  registerSchema,
+  refreshTokenSchema
+} from './utils/validation';
+
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -83,13 +91,9 @@ app.use((req, res, next) => {
  */
 
 // POST /api/auth/refresh
-app.post('/api/auth/refresh', async (req, res) => {
+app.post('/api/auth/refresh', validateBody(refreshTokenSchema), async (req, res) => {
     try {
-        const token = req.headers.authorization?.replace('Bearer ', '');
-
-        if (!token) {
-            return res.status(400).json({ error: 'Token is required' });
-        }
+        const { token } = req.body;
 
         const result = await auth.refreshToken(token);
         
@@ -223,13 +227,9 @@ const startServer = async () => {
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
 
-        app.post('/api/auth/login', (req, res) => {
+        app.post('/api/auth/login', validateBody(loginSchema), (req, res) => {
             try {
                 const { email, password } = req.body;
-
-                if (!email || !password) {
-                    return res.status(400).json({ error: 'Email and password are required' });
-                }
 
                 const result = auth.login(db, email, password);
 
@@ -247,15 +247,9 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/register', (req, res) => {
+        app.post('/api/auth/register', validateBody(registerSchema), (req, res) => {
             try {
                 const { email, password, name, companyName } = req.body;
-
-                if (!email || !password || !name || !companyName) {
-                    return res.status(400).json({
-                        error: 'Email, password, name, and company name are required'
-                    });
-                }
 
                 const result = auth.register(db, email, password, name, companyName);
 
@@ -273,13 +267,9 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/logout', (req, res) => {
+        app.post('/api/auth/logout', validateBody(refreshTokenSchema), (req, res) => {
             try {
-                const token = req.headers.authorization?.replace('Bearer ', '');
-
-                if (!token) {
-                    return res.status(400).json({ error: 'Token is required' });
-                }
+                const { token } = req.body;
 
                 auth.logout(db, token);
 

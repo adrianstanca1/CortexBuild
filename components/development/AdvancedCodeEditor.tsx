@@ -12,8 +12,7 @@
  * - Find & Replace
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import Editor from '@monaco-editor/react';
+import React, { useState, useRef, useEffect, Suspense, lazy } from 'react';
 import {
     Play,
     Save,
@@ -30,6 +29,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { EditorErrorBoundary } from '../../src/components/ErrorBoundaries';
+import { SkeletonLoader } from '../../src/utils/lazyLoad';
+
+// Lazy load Monaco Editor for better bundle size
+const Editor = lazy(() => import('@monaco-editor/react'));
 
 interface AdvancedCodeEditorProps {
     isDarkMode?: boolean;
@@ -305,32 +308,34 @@ h1 {
 
             {/* Editor */}
             <div className="flex-1 relative">
-                <Editor
-                    height="100%"
-                    language={activeFile.language}
-                    value={activeFile.content}
-                    theme={editorTheme}
-                    onChange={handleEditorChange}
-                    onMount={handleEditorDidMount}
-                    options={{
-                        fontSize,
-                        minimap: { enabled: true },
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                        tabSize: 2,
-                        wordWrap: 'on',
-                        formatOnPaste: true,
-                        formatOnType: true,
-                        suggestOnTriggerCharacters: true,
-                        quickSuggestions: true,
-                        parameterHints: { enabled: true },
-                        folding: true,
-                        lineNumbers: 'on',
-                        renderWhitespace: 'selection',
-                        cursorBlinking: 'smooth',
-                        cursorSmoothCaretAnimation: 'on'
-                    }}
-                />
+                <Suspense fallback={<SkeletonLoader type="editor" />}>
+                    <Editor
+                        height="100%"
+                        language={activeFile.language}
+                        value={activeFile.content}
+                        theme={editorTheme}
+                        onChange={handleEditorChange}
+                        onMount={handleEditorDidMount}
+                        options={{
+                            fontSize,
+                            minimap: { enabled: true },
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                            tabSize: 2,
+                            wordWrap: 'on',
+                            formatOnPaste: true,
+                            formatOnType: true,
+                            suggestOnTriggerCharacters: true,
+                            quickSuggestions: true,
+                            parameterHints: { enabled: true },
+                            folding: true,
+                            lineNumbers: 'on',
+                            renderWhitespace: 'selection',
+                            cursorBlinking: 'smooth',
+                            cursorSmoothCaretAnimation: 'on'
+                        }}
+                    />
+                </Suspense>
             </div>
 
             {/* Console Output */}

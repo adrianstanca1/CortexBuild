@@ -5,12 +5,21 @@
 import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { Task, ApiResponse, PaginatedResponse } from '../types';
+import {
+  validateBody,
+  validateQuery,
+  validateParams,
+  createTaskSchema,
+  updateTaskSchema,
+  taskFiltersSchema,
+  idParamSchema
+} from '../utils/validation';
 
 export function createTasksRouter(db: Database.Database): Router {
   const router = Router();
 
   // GET /api/tasks - List all tasks
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', validateQuery(taskFiltersSchema), (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -19,12 +28,12 @@ export function createTasksRouter(db: Database.Database): Router {
         status,
         priority,
         search,
-        page = '1',
-        limit = '50'
+        page = 1,
+        limit = 50
       } = req.query as any;
 
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      const pageNum = page;
+      const limitNum = limit;
       const offset = (pageNum - 1) * limitNum;
 
       let query = `
@@ -98,7 +107,7 @@ export function createTasksRouter(db: Database.Database): Router {
   });
 
   // GET /api/tasks/:id - Get single task
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -135,7 +144,7 @@ export function createTasksRouter(db: Database.Database): Router {
   });
 
   // POST /api/tasks - Create new task
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', validateBody(createTaskSchema), (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -148,13 +157,6 @@ export function createTasksRouter(db: Database.Database): Router {
         due_date,
         estimated_hours
       } = req.body;
-
-      if (!project_id || !title) {
-        return res.status(400).json({
-          success: false,
-          error: 'Project ID and title are required'
-        });
-      }
 
       const result = db.prepare(`
         INSERT INTO tasks (
@@ -194,7 +196,7 @@ export function createTasksRouter(db: Database.Database): Router {
   });
 
   // PUT /api/tasks/:id - Update task
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateTaskSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -204,14 +206,6 @@ export function createTasksRouter(db: Database.Database): Router {
         return res.status(404).json({
           success: false,
           error: 'Task not found'
-        });
-      }
-
-      const fields = Object.keys(updates).filter(key => key !== 'id');
-      if (fields.length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'No fields to update'
         });
       }
 
@@ -240,7 +234,7 @@ export function createTasksRouter(db: Database.Database): Router {
   });
 
   // PUT /api/tasks/:id/complete - Mark task as complete
-  router.put('/:id/complete', (req: Request, res: Response) => {
+  router.put('/:id/complete', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -286,7 +280,7 @@ export function createTasksRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/tasks/:id - Delete task
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 

@@ -22,6 +22,22 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   const [lastSync, setLastSync] = useState<{ success: number; failed: number } | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
+  /**
+   * Handle manual sync
+   */
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const result = await offlineManager.syncQueue();
+      setLastSync(result);
+      setTimeout(() => setLastSync(null), 5000); // Clear after 5 seconds
+    } catch (error) {
+      console.error('[OfflineIndicator] Sync failed', error);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   useEffect(() => {
     // Subscribe to online/offline events
     const unsubscribeOnline = offlineManager.onOnline(() => {
@@ -54,22 +70,6 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   }, []);
 
   /**
-   * Handle manual sync
-   */
-  const handleSync = async () => {
-    setSyncing(true);
-    try {
-      const result = await offlineManager.syncQueue();
-      setLastSync(result);
-      setTimeout(() => setLastSync(null), 5000); // Clear after 5 seconds
-    } catch (error) {
-      console.error('[OfflineIndicator] Sync failed', error);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  /**
    * Position classes
    */
   const positionClasses = {
@@ -92,11 +92,10 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
     >
       {/* Main indicator */}
       <div
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300 cursor-pointer ${
-          isOnline
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300 cursor-pointer ${isOnline
             ? 'bg-green-500/90 text-white'
             : 'bg-red-500/90 text-white'
-        }`}
+          }`}
         onClick={() => setShowDetails(!showDetails)}
       >
         {/* Icon */}
@@ -223,7 +222,7 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
           {/* Help text */}
           <div className="border-t border-slate-200 pt-3 mt-3">
             <p className="text-xs text-slate-500">
-              {isOnline 
+              {isOnline
                 ? 'All systems operational. Your data is syncing in real-time.'
                 : 'Work continues offline. Changes will sync automatically when you reconnect.'
               }
