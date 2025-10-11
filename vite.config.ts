@@ -2,7 +2,7 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
       server: {
@@ -32,46 +32,85 @@ export default defineConfig(({ mode }) => {
         sourcemap: false,
         rollupOptions: {
           output: {
-            manualChunks: {
+            manualChunks(id) {
               // React ecosystem - core runtime
-              'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-              'react-utils': ['react-markdown', 'react-hot-toast'],
+              if (id.includes('node_modules/react') ||
+                  id.includes('node_modules/react-dom') ||
+                  id.includes('node_modules/react-router-dom') ||
+                  id.includes('node_modules/scheduler')) {
+                return 'react-vendor';
+              }
+
+              // React utilities
+              if (id.includes('node_modules/react-markdown') ||
+                  id.includes('node_modules/react-hot-toast')) {
+                return 'react-utils';
+              }
 
               // Large UI libraries - loaded on demand
-              'ui-vendor': ['lucide-react'],
-              'flow-vendor': ['@xyflow/react'],
+              if (id.includes('node_modules/lucide-react')) {
+                return 'ui-vendor';
+              }
+
+              if (id.includes('node_modules/@xyflow')) {
+                return 'flow-vendor';
+              }
 
               // AI and external services
-              'ai-vendor': ['@google/generative-ai', '@google/genai', 'openai'],
-              'supabase-vendor': ['@supabase/supabase-js'],
+              if (id.includes('node_modules/@google/generative-ai') ||
+                  id.includes('node_modules/@google/genai') ||
+                  id.includes('node_modules/openai')) {
+                return 'ai-vendor';
+              }
+
+              if (id.includes('node_modules/@supabase')) {
+                return 'supabase-vendor';
+              }
 
               // Heavy development tools - lazy loaded
-              'monaco-vendor': ['@monaco-editor/react'],
-              'pdf-vendor': ['jspdf', 'jspdf-autotable'],
+              if (id.includes('node_modules/@monaco-editor') ||
+                  id.includes('node_modules/monaco-editor')) {
+                return 'monaco-vendor';
+              }
+
+              if (id.includes('node_modules/jspdf')) {
+                return 'pdf-vendor';
+              }
 
               // HTTP and utilities
-              'http-vendor': ['axios'],
-              'utils-vendor': ['uuid', 'date-fns'],
+              if (id.includes('node_modules/axios')) {
+                return 'http-vendor';
+              }
+
+              if (id.includes('node_modules/uuid') ||
+                  id.includes('node_modules/date-fns')) {
+                return 'utils-vendor';
+              }
 
               // Admin and developer tools (loaded on demand)
-              'admin-vendor': [
-                'components/screens/admin/',
-                'components/admin/',
-                'components/screens/developer/',
-                'components/sdk/'
-              ],
+              if (id.includes('components/screens/admin/') ||
+                  id.includes('components/admin/') ||
+                  id.includes('components/screens/developer/') ||
+                  id.includes('components/sdk/')) {
+                return 'admin-vendor';
+              }
 
               // Module screens (loaded on demand)
-              'modules-vendor': [
-                'components/screens/modules/',
-                'components/marketplace/'
-              ],
+              if (id.includes('components/screens/modules/') ||
+                  id.includes('components/marketplace/')) {
+                return 'modules-vendor';
+              }
 
               // Base44 and heavy components (loaded on demand)
-              'base44-vendor': [
-                'components/base44/',
-                'components/applications/'
-              ]
+              if (id.includes('components/base44/') ||
+                  id.includes('components/applications/')) {
+                return 'base44-vendor';
+              }
+
+              // Other node_modules
+              if (id.includes('node_modules')) {
+                return 'vendor';
+              }
             },
             // Optimize chunk file names for better caching
             chunkFileNames: (chunkInfo) => {

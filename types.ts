@@ -113,6 +113,7 @@ export type Screen =
     | 'developer-dashboard'
     | 'automation-studio'
     | 'developer-console'
+    | 'developer-workspace'
     | 'company-admin-dashboard'
     | 'super-admin-dashboard'
     | 'sdk-developer'
@@ -121,6 +122,10 @@ export type Screen =
     | 'n8n-procore-builder'
     | 'construction-oracle'
     | 'my-applications'
+    // Marketplace screens
+    | 'marketplace'
+    | 'admin-review'
+    | 'developer-submissions'
     // Admin screens
     | 'platform-admin'
     | 'admin-control-panel'

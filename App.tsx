@@ -14,12 +14,16 @@ import * as authService from './auth/authService';
 import { useToast } from './hooks/useToast';
 import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
-import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { apiClient } from './lib/api/client';
 import ErrorBoundary from './components/ErrorBoundary';
 import OfflineIndicator from './src/components/OfflineIndicator';
 
 // Lazily loaded screens and feature modules
+const ChatbotWidget = lazy(() =>
+    import('./components/chat/ChatbotWidget').then(module => ({
+        default: module.ChatbotWidget
+    }))
+);
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
 const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
 const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
@@ -444,7 +448,16 @@ const App: React.FC = () => {
             status: 'active' as const,
             startDate: new Date().toISOString(),
             budget: 0,
-            spent: 0
+            spent: 0,
+            image: '',
+            description: 'Global application view',
+            contacts: [],
+            snapshot: {
+                openRFIs: 0,
+                overdueTasks: 0,
+                pendingTMTickets: 0,
+                aiRiskLevel: 'low'
+            }
         };
     }, [project, currentUser?.name, currentUser?.companyId]);
 
@@ -459,22 +472,22 @@ const App: React.FC = () => {
         const appScreenMap: Record<string, Screen> = {
             'construction-oracle': 'construction-oracle',
             'n8n-procore-builder': 'n8n-procore-builder',
-            'predictive-maintenance': 'ai-assistant',
-            'intelligent-router': 'ai-assistant',
-            'cost-optimizer': 'financial-forecaster',
-            'safety-sentinel': 'hse-sentinel',
-            'quality-inspector': 'ai-assistant',
-            'timeline-magic': 'project-controls',
-            'document-intelligence': 'ai-assistant',
-            'reality-simulator': 'ai-assistant'
+            'predictive-maintenance': 'ai-tools',
+            'intelligent-router': 'ai-tools',
+            'cost-optimizer': 'financial-management',
+            'safety-sentinel': 'ai-tools',
+            'quality-inspector': 'ai-tools',
+            'timeline-magic': 'project-operations',
+            'document-intelligence': 'document-management',
+            'reality-simulator': 'ai-tools'
         };
 
-        const targetScreen = appScreenMap[appCode] || 'ai-assistant';
+        const targetScreen = appScreenMap[appCode] || 'ai-tools';
         navigateToModule(targetScreen);
     }, [navigateToModule]);
 
     return (
-        <ErrorBoundary componentName="App">
+        <ErrorBoundary>
             <div className="bg-slate-50">
                 <AppLayout
                     sidebar={
@@ -534,7 +547,9 @@ const App: React.FC = () => {
                 <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
 
                 {/* Global AI Chatbot - Available on all pages when user is logged in */}
-                <ChatbotWidget />
+                <Suspense fallback={null}>
+                    <ChatbotWidget />
+                </Suspense>
 
                 {/* Offline Indicator - Task 2.4: API Error Recovery */}
                 <OfflineIndicator position="bottom-right" />
