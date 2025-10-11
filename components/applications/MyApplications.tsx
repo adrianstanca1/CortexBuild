@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Package, Search, Grid3x3, List, Star, Clock, Settings,
     Play, Pause, Trash2, RefreshCw, ExternalLink, Zap,
-    Brain, Crystal, Sparkles, TrendingUp, Shield, Eye,
+    Brain, Gem, Sparkles, TrendingUp, Shield, Eye,
     FileText, DollarSign, Calendar, Wrench, Target
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -154,7 +154,7 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
 
     const getCategoryIcon = (category: string) => {
         switch (category.toLowerCase()) {
-            case 'ai & magic': return <Crystal className="w-5 h-5 text-purple-500" />;
+            case 'ai & magic': return <Gem className="w-5 h-5 text-purple-500" />;
             case 'workflow automation': return <Zap className="w-5 h-5 text-blue-500" />;
             case 'ai & automation': return <Brain className="w-5 h-5 text-green-500" />;
             case 'safety & compliance': return <Shield className="w-5 h-5 text-red-500" />;

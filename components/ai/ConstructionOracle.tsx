@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Brain, 
-    Eye, 
-    Zap, 
-    Sparkles, 
-    Crystal, 
+import {
+    Brain,
+    Eye,
+    Zap,
+    Sparkles,
+    Gem,
     Wand2,
     Globe,
     Target,
@@ -57,7 +57,7 @@ const ConstructionOracle: React.FC = () => {
     const generateOracleVision = () => {
         const visionTypes = ['prediction', 'solution', 'optimization', 'warning'] as const;
         const impacts = ['low', 'medium', 'high', 'critical'] as const;
-        
+
         const magicVisions = [
             {
                 title: "🔮 Future Foundation Issue Detected",
@@ -92,7 +92,7 @@ const ConstructionOracle: React.FC = () => {
         ];
 
         const randomVision = magicVisions[Math.floor(Math.random() * magicVisions.length)];
-        
+
         const newVision: OracleVision = {
             id: `vision-${Date.now()}`,
             type: visionTypes[Math.floor(Math.random() * visionTypes.length)],
@@ -110,7 +110,7 @@ const ConstructionOracle: React.FC = () => {
     const activateOracle = async () => {
         setIsOracleActive(true);
         setIsProcessing(true);
-        
+
         // Simulate Oracle awakening
         setTimeout(() => {
             setMagicInsights([
@@ -121,7 +121,7 @@ const ConstructionOracle: React.FC = () => {
                     revolutionaryLevel: 10
                 },
                 {
-                    category: "✨ Generative Magic", 
+                    category: "✨ Generative Magic",
                     insight: "AI can generate complete building plans from simple descriptions in natural language",
                     actionable: true,
                     revolutionaryLevel: 9
@@ -145,9 +145,9 @@ const ConstructionOracle: React.FC = () => {
 
     const processOracleQuery = async () => {
         if (!userQuery.trim()) return;
-        
+
         setIsProcessing(true);
-        
+
         // Simulate Oracle processing
         setTimeout(() => {
             const magicResponse = {
@@ -160,7 +160,7 @@ const ConstructionOracle: React.FC = () => {
                 timeframe: 'Immediate implementation',
                 magicScore: 95
             };
-            
+
             setVisions(prev => [magicResponse, ...prev.slice(0, 4)]);
             setUserQuery('');
             setIsProcessing(false);
@@ -195,7 +195,7 @@ const ConstructionOracle: React.FC = () => {
                     <div className="flex items-center space-x-4">
                         <div className="relative">
                             <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                                <Crystal className="w-8 h-8 text-white" />
+                                <Gem className="w-8 h-8 text-white" />
                             </div>
                             {isOracleActive && (
                                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse" />
@@ -215,11 +215,10 @@ const ConstructionOracle: React.FC = () => {
                                     key={mode}
                                     type="button"
                                     onClick={() => setOracleMode(mode)}
-                                    className={`px-4 py-2 rounded-lg transition-all flex items-center space-x-2 ${
-                                        oracleMode === mode
-                                            ? 'bg-purple-600 text-white'
-                                            : 'bg-white/10 text-purple-200 hover:bg-white/20'
-                                    }`}
+                                    className={`px-4 py-2 rounded-lg transition-all flex items-center space-x-2 ${oracleMode === mode
+                                        ? 'bg-purple-600 text-white'
+                                        : 'bg-white/10 text-purple-200 hover:bg-white/20'
+                                        }`}
                                 >
                                     {getModeIcon(mode)}
                                     <span className="capitalize">{mode}</span>
@@ -230,11 +229,10 @@ const ConstructionOracle: React.FC = () => {
                             type="button"
                             onClick={activateOracle}
                             disabled={isOracleActive}
-                            className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center space-x-2 ${
-                                isOracleActive
-                                    ? 'bg-green-600 text-white cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
-                            }`}
+                            className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center space-x-2 ${isOracleActive
+                                ? 'bg-green-600 text-white cursor-not-allowed'
+                                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                                }`}
                         >
                             <Sparkles className="w-5 h-5" />
                             <span>{isOracleActive ? 'Oracle Active' : 'Activate Oracle'}</span>
@@ -290,7 +288,7 @@ const ConstructionOracle: React.FC = () => {
                         <div className="max-w-6xl mx-auto">
                             {!isOracleActive ? (
                                 <div className="text-center py-20">
-                                    <Crystal className="w-24 h-24 text-purple-400 mx-auto mb-6 opacity-50" />
+                                    <Gem className="w-24 h-24 text-purple-400 mx-auto mb-6 opacity-50" />
                                     <h3 className="text-2xl font-bold text-white mb-4">Oracle Awaits Activation</h3>
                                     <p className="text-purple-200 mb-8">Activate the Oracle to unlock magical construction intelligence</p>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">

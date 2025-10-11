@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    Crystal, Sparkles, Eye, Wand2, Layers, Lightbulb, DollarSign, Clock,
+    Gem, Sparkles, Eye, Wand2, Layers, Lightbulb, DollarSign, Clock,
     Code, Play, Copy, Check, Download, Book, Zap, Brain, Target
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -284,7 +284,7 @@ console.log('Timeline Magic:', timelineOptimization);
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                            <Crystal className="w-6 h-6 text-white" />
+                            <Gem className="w-6 h-6 text-white" />
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -326,11 +326,10 @@ console.log('Timeline Magic:', timelineOptimization);
                                 key={capability.id}
                                 type="button"
                                 onClick={() => setSelectedCapability(capability.id)}
-                                className={`w-full p-3 rounded-lg text-left transition-all ${
-                                    selectedCapability === capability.id
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
-                                }`}
+                                className={`w-full p-3 rounded-lg text-left transition-all ${selectedCapability === capability.id
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                                    }`}
                             >
                                 <div className="flex items-center space-x-3">
                                     <capability.icon className="w-5 h-5" />

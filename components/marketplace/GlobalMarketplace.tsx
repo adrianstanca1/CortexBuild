@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Package, Search, Filter, Download, Star, TrendingUp,
     Clock, CheckCircle, XCircle, AlertCircle, Grid3x3, List,
-    Eye, Users, Building2, Sparkles, Crystal, Zap, Brain,
+    Eye, Users, Building2, Sparkles, Gem, Zap, Brain,
     Shield, FileText, DollarSign, Calendar, Target, Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -195,7 +195,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
 
     const getCategoryIcon = (category: string) => {
         switch (category.toLowerCase()) {
-            case 'ai & magic': return <Crystal className="w-4 h-4 text-purple-500" />;
+            case 'ai & magic': return <Gem className="w-4 h-4 text-purple-500" />;
             case 'workflow automation': return <Zap className="w-4 h-4 text-blue-500" />;
             case 'ai & automation': return <Brain className="w-4 h-4 text-green-500" />;
             case 'safety & compliance': return <Shield className="w-4 h-4 text-red-500" />;
@@ -286,8 +286,8 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                             type="button"
                             onClick={() => handleInstallIndividual(app.id)}
                             className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors flex items-center justify-center space-x-2 ${isMagic
-                                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-                                    : 'bg-blue-600 hover:bg-blue-700'
+                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                                : 'bg-blue-600 hover:bg-blue-700'
                                 }`}
                         >
                             <Download className="w-4 h-4" />
