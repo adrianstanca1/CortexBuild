@@ -117,6 +117,8 @@ export type Screen =
     | 'super-admin-dashboard'
     | 'sdk-developer'
     | 'my-apps-desktop'
+    // Workflow Builders
+    | 'n8n-procore-builder'
     // Admin screens
     | 'platform-admin'
     | 'admin-control-panel'

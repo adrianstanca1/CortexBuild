@@ -80,6 +80,7 @@ const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/
 const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
+const N8nProcoreWorkflowBuilder = lazy(() => import('./components/sdk/N8nProcoreWorkflowBuilder'));
 
 const ScreenLoader: React.FC = () => (
     <div className="py-16 text-center text-slate-500">

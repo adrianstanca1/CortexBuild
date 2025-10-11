@@ -67,6 +67,57 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
     ]);
     const [showPublishModal, setShowPublishModal] = useState(false);
     const [showVariables, setShowVariables] = useState(false);
+    const [showTemplates, setShowTemplates] = useState(false);
+    const [workflowName, setWorkflowName] = useState('Untitled Workflow');
+    const [workflowDescription, setWorkflowDescription] = useState('');
+    const [executionHistory, setExecutionHistory] = useState<Array<{
+        id: string;
+        timestamp: Date;
+        status: 'success' | 'error' | 'running';
+        duration?: number;
+        modulesExecuted: number;
+        errorMessage?: string;
+    }>>([]);
+
+    // Predefined workflow templates
+    const workflowTemplates = [
+        {
+            id: 'daily-report',
+            name: 'Daily Project Report',
+            description: 'Automatically generate and send daily project reports',
+            category: 'Reporting',
+            modules: [
+                { type: 'trigger', name: 'Schedule Trigger', config: { schedule: 'daily', time: '08:00' } },
+                { type: 'procore', name: 'Get Project Data', config: { endpoint: '/projects', method: 'GET' } },
+                { type: 'action', name: 'Generate Report', config: { template: 'daily-summary' } },
+                { type: 'action', name: 'Send Email', config: { to: 'team@company.com' } }
+            ]
+        },
+        {
+            id: 'rfi-approval',
+            name: 'RFI Approval Workflow',
+            description: 'Automate RFI approval process with notifications',
+            category: 'Project Management',
+            modules: [
+                { type: 'trigger', name: 'RFI Created', config: { event: 'rfi.created' } },
+                { type: 'condition', name: 'Check Priority', config: { field: 'priority', operator: 'equals', value: 'high' } },
+                { type: 'action', name: 'Notify Manager', config: { channel: 'slack', message: 'High priority RFI requires approval' } },
+                { type: 'procore', name: 'Update RFI Status', config: { endpoint: '/rfis/{id}', method: 'PUT' } }
+            ]
+        },
+        {
+            id: 'safety-incident',
+            name: 'Safety Incident Response',
+            description: 'Immediate response workflow for safety incidents',
+            category: 'Safety',
+            modules: [
+                { type: 'trigger', name: 'Incident Reported', config: { event: 'safety.incident' } },
+                { type: 'action', name: 'Alert Safety Team', config: { urgency: 'immediate' } },
+                { type: 'procore', name: 'Create Incident Report', config: { endpoint: '/incidents', method: 'POST' } },
+                { type: 'action', name: 'Schedule Investigation', config: { within: '24 hours' } }
+            ]
+        }
+    ];
 
     // Marketplace Apps - Complete Construction Industry Integrations
     const [marketplaceApps] = useState<MarketplaceApp[]>([
@@ -395,6 +446,42 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
         setConsoleLogs(prev => [...prev, log]);
     };
 
+    // Load workflow template
+    const loadTemplate = (template: any) => {
+        setWorkflowName(template.name);
+        setWorkflowDescription(template.description);
+        setModules(template.modules.map((mod: any, index: number) => ({
+            id: `module-${Date.now()}-${index}`,
+            type: mod.type,
+            category: mod.name.toLowerCase().replace(/\s+/g, '-'),
+            name: mod.name,
+            icon: '⚡',
+            description: `${template.name} - ${mod.name}`,
+            config: mod.config,
+            position: index
+        })));
+        setShowTemplates(false);
+        addLog('success', `Loaded template: ${template.name}`);
+        toast.success(`Template "${template.name}" loaded successfully!`);
+    };
+
+    // Save workflow as template
+    const saveAsTemplate = () => {
+        const template = {
+            id: `custom-${Date.now()}`,
+            name: workflowName,
+            description: workflowDescription,
+            category: 'Custom',
+            modules: modules.map(m => ({
+                type: m.type,
+                name: m.name,
+                config: m.config
+            }))
+        };
+        addLog('success', `Saved template: ${template.name}`);
+        toast.success('Workflow saved as template!');
+    };
+
     const addModule = (moduleTemplate: any, type: 'core' | 'connector' | 'marketplace', marketplaceApp?: MarketplaceApp) => {
         const newModule: WorkflowModule = {
             id: `module-${Date.now()}`,
@@ -541,6 +628,15 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                     <button
+                        type="button"
+                        onClick={() => setShowTemplates(!showTemplates)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                    >
+                        <Package className="w-4 h-4" />
+                        <span>Templates</span>
+                    </button>
+                    <button
+                        type="button"
                         onClick={() => setShowVariables(!showVariables)}
                         className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
                     >
@@ -548,6 +644,16 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
                         <span>Variables</span>
                     </button>
                     <button
+                        type="button"
+                        onClick={saveAsTemplate}
+                        disabled={modules.length === 0}
+                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-2 disabled:opacity-50"
+                    >
+                        <Save className="w-4 h-4" />
+                        <span>Save Template</span>
+                    </button>
+                    <button
+                        type="button"
                         onClick={executeWorkflow}
                         disabled={isExecuting || modules.length === 0}
                         className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1047,6 +1153,53 @@ const ZapierStyleWorkflowBuilder: React.FC = () => {
                                 >
                                     Cancel
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Templates Modal */}
+            {showTemplates && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
+                        <div className="p-6 border-b">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-bold text-gray-900">Workflow Templates</h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTemplates(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-600"
+                                    title="Close templates modal"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <p className="text-gray-600 mt-2">Choose from pre-built workflows to get started quickly</p>
+                        </div>
+                        <div className="p-6 overflow-y-auto max-h-96">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {workflowTemplates.map(template => (
+                                    <div key={template.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                                                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{template.category}</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-4">{template.description}</p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500">{template.modules.length} modules</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => loadTemplate(template)}
+                                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                            >
+                                                Use Template
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
