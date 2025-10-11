@@ -9,6 +9,7 @@ import {
     BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
     WandSparklesIcon, ArrowPathIcon
 } from '../Icons';
+import { NavigationErrorBoundary } from '../../src/components/ErrorBoundaries';
 
 interface SidebarProps {
     project: Project;
@@ -241,4 +242,17 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
     );
 };
 
-export default Sidebar;
+// Wrap with NavigationErrorBoundary
+const WrappedSidebar: React.FC<SidebarProps> = (props) => {
+    return (
+        <NavigationErrorBoundary
+            componentName="Sidebar"
+            onGoHome={props.goHome}
+            onLogout={props.onLogout}
+        >
+            <Sidebar {...props} />
+        </NavigationErrorBoundary>
+    );
+};
+
+export default WrappedSidebar;

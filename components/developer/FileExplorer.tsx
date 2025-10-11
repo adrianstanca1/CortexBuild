@@ -17,6 +17,7 @@ import {
     Upload,
     RefreshCw
 } from 'lucide-react';
+import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
 
 interface FileNode {
     id: string;
@@ -103,7 +104,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
         return nodes.map(node => {
             const isExpanded = expandedFolders.has(node.id);
             const isSelected = selectedFile === node.id;
-            const matchesSearch = searchQuery === '' || 
+            const matchesSearch = searchQuery === '' ||
                 node.name.toLowerCase().includes(searchQuery.toLowerCase());
 
             if (!matchesSearch && node.type === 'file') return null;
@@ -112,13 +113,12 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
                 <div key={node.id}>
                     <div
                         onClick={() => handleFileClick(node)}
-                        className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-all rounded-lg ${
-                            isSelected
-                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                                : isDarkMode
+                        className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-all rounded-lg ${isSelected
+                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                            : isDarkMode
                                 ? 'hover:bg-gray-700 text-gray-300'
                                 : 'hover:bg-gray-100 text-gray-700'
-                        }`}
+                            }`}
                         style={{ paddingLeft: `${level * 20 + 12}px` }}
                     >
                         {node.type === 'folder' && (
@@ -164,18 +164,16 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                            }`}
+                            className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                                }`}
                             title="Refresh"
                         >
                             <RefreshCw className="h-4 w-4" />
                         </button>
                         <button
                             type="button"
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                            }`}
+                            className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                                }`}
                             title="New File"
                         >
                             <Plus className="h-4 w-4" />
@@ -216,5 +214,14 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
     );
 };
 
-export default FileExplorer;
+// Wrap with LightErrorBoundary
+const WrappedFileExplorer: React.FC<FileExplorerProps> = (props) => {
+    return (
+        <LightErrorBoundary>
+            <FileExplorer {...props} />
+        </LightErrorBoundary>
+    );
+};
+
+export default WrappedFileExplorer;
 
