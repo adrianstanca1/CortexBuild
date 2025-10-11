@@ -1,19 +1,16 @@
 /**
- * Enhanced API Client with Retry Logic, Exponential Backoff, and Error Handling
- * Provides robust API communication with automatic recovery
+ * Server-side HTTP Client with Retry Logic and Timeout Handling
+ * Provides robust external API communication with automatic recovery
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
-import toast from 'react-hot-toast';
-import offlineManager from './offlineManager';
 
 /**
- * API Error Interface
+ * HTTP Error Interface
  */
-export interface APIError {
+export interface HTTPError {
   code: string;
   message: string;
-  userMessage: string;
   statusCode?: number;
   originalError?: any;
   retryable: boolean;
@@ -23,50 +20,52 @@ export interface APIError {
 /**
  * Retry Configuration
  */
-export interface RetryConfig {
+export interface HTTPRetryConfig {
   maxRetries: number;
   retryDelay: number; // Base delay in ms
   retryableStatuses: number[];
   retryableMethods: string[];
+  timeout: number; // Request timeout in ms
 }
 
 /**
  * Request Configuration Extension
  */
-export interface APIRequestConfig extends AxiosRequestConfig {
+export interface HTTPRequestConfig extends AxiosRequestConfig {
   skipRetry?: boolean;
-  skipErrorToast?: boolean;
   customTimeout?: number;
 }
 
 /**
  * Default Retry Configuration
  */
-const DEFAULT_RETRY_CONFIG: RetryConfig = {
+const DEFAULT_RETRY_CONFIG: HTTPRetryConfig = {
   maxRetries: 3,
   retryDelay: 1000, // Start with 1 second
   retryableStatuses: [408, 429, 500, 502, 503, 504], // Timeout, Rate Limit, Server Errors
-  retryableMethods: ['GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'] // Safe to retry
+  retryableMethods: ['GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'], // Safe to retry
+  timeout: 30000 // 30 seconds default
 };
 
 /**
- * Enhanced API Client Class
+ * Enhanced HTTP Client Class
  */
-class APIClient {
+class HTTPClient {
   private axiosInstance: AxiosInstance;
-  private retryConfig: RetryConfig;
+  private retryConfig: HTTPRetryConfig;
   private requestCount: number = 0;
   private failureCount: number = 0;
 
-  constructor(baseURL: string = '/api', retryConfig: Partial<RetryConfig> = {}) {
+  constructor(baseURL?: string, retryConfig: Partial<HTTPRetryConfig> = {}) {
     this.retryConfig = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
 
     // Create Axios instance
     this.axiosInstance = axios.create({
       baseURL,
-      timeout: 30000, // 30 seconds default
+      timeout: this.retryConfig.timeout,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'User-Agent': 'CortexBuild-Server/1.0'
       }
     });
 
@@ -77,55 +76,25 @@ class APIClient {
 
   /**
    * Setup Request Interceptor
-   * Add auth token, track requests, handle offline queuing
+   * Track requests and set timeouts
    */
   private setupRequestInterceptor(): void {
     this.axiosInstance.interceptors.request.use(
-      async (config) => {
-        // Check if offline and queue request if necessary
-        if (!offlineManager.checkOnlineStatus()) {
-          const method = config.method?.toUpperCase() || 'GET';
-          const url = config.url || '';
-
-          // Queue the request for later
-          const requestId = await offlineManager.queueRequest({
-            method,
-            url,
-            data: config.data,
-            headers: config.headers as Record<string, string>,
-            priority: this.getRequestPriority(method, url),
-            config: config as APIRequestConfig
-          });
-
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[API Offline] Request queued: ${method} ${url} (ID: ${requestId})`);
-          }
-
-          // Return a promise that will be resolved when the request is processed
-          return new Promise((resolve, reject) => {
-            // The offline manager will handle this request when back online
-            // For now, we'll reject with a specific error to indicate queuing
-            const offlineError = new Error('Request queued due to offline status');
-            (offlineError as any).isOfflineQueued = true;
-            (offlineError as any).requestId = requestId;
-            reject(offlineError);
-          });
-        }
-
-        // Add authorization token if available
-        const token = localStorage.getItem('constructai_token');
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-
+      (config) => {
         // Track request
         this.requestCount++;
 
+        // Set custom timeout if provided
+        if ((config as HTTPRequestConfig).customTimeout) {
+          config.timeout = (config as HTTPRequestConfig).customTimeout;
+        }
+
         // Log request in development
         if (process.env.NODE_ENV === 'development') {
-          console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
+          console.log(`[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`, {
             data: config.data,
-            params: config.params
+            params: config.params,
+            timeout: config.timeout
           });
         }
 
@@ -146,16 +115,16 @@ class APIClient {
       (response) => {
         // Log successful response in development
         if (process.env.NODE_ENV === 'development') {
-          console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+          console.log(`[HTTP Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
             status: response.status,
-            data: response.data
+            data: response.data ? 'data received' : 'no data'
           });
         }
 
         return response;
       },
       async (error: AxiosError) => {
-        const config = error.config as APIRequestConfig;
+        const config = error.config as HTTPRequestConfig;
 
         // Track failure
         this.failureCount++;
@@ -173,7 +142,7 @@ class APIClient {
 
             // Log retry attempt
             if (process.env.NODE_ENV === 'development') {
-              console.log(`[API Retry] Attempt ${retryCount + 1}/${this.retryConfig.maxRetries} after ${delay}ms`, {
+              console.log(`[HTTP Retry] Attempt ${retryCount + 1}/${this.retryConfig.maxRetries} after ${delay}ms`, {
                 url: config.url,
                 method: config.method,
                 error: error.message
@@ -189,17 +158,8 @@ class APIClient {
         }
 
         // Transform and reject error
-        const apiError = this.transformError(error);
-
-        // Show toast notification unless skipped
-        if (!config?.skipErrorToast) {
-          toast.error(apiError.userMessage, {
-            duration: 5000,
-            position: 'top-right'
-          });
-        }
-
-        return Promise.reject(apiError);
+        const httpError = this.transformError(error);
+        return Promise.reject(httpError);
       }
     );
   }
@@ -207,7 +167,7 @@ class APIClient {
   /**
    * Check if error should be retried
    */
-  private shouldRetry(error: AxiosError, config: APIRequestConfig): boolean {
+  private shouldRetry(error: AxiosError, config: HTTPRequestConfig): boolean {
     // Don't retry if explicitly disabled
     if (config.skipRetry) {
       return false;
@@ -250,90 +210,69 @@ class APIClient {
   }
 
   /**
-   * Transform Axios error to API error
+   * Transform Axios error to HTTP error
    */
-  private transformError(error: AxiosError): APIError {
+  private transformError(error: AxiosError): HTTPError {
     const statusCode = error.response?.status;
-    const errorData = error.response?.data as any;
-
-    // Check if this is an offline-queued error
-    if ((error as any).isOfflineQueued) {
-      return {
-        code: 'OFFLINE_QUEUED',
-        message: 'Request queued due to offline status',
-        userMessage: 'You are currently offline. Your request has been saved and will be sent when you reconnect.',
-        statusCode: 0,
-        originalError: error,
-        retryable: false,
-        timestamp: new Date().toISOString()
-      };
-    }
 
     // Default error message
-    let userMessage = 'An unexpected error occurred. Please try again.';
-    let code = 'UNKNOWN_ERROR';
+    let message = 'An unexpected error occurred during HTTP request';
+    let code = 'HTTP_ERROR';
 
     // Network error (no response)
     if (!error.response) {
-      userMessage = 'Network error. Please check your internet connection.';
+      message = 'Network error. Unable to connect to external service.';
       code = 'NETWORK_ERROR';
     }
     // HTTP error codes
     else if (statusCode) {
       switch (statusCode) {
         case 400:
-          userMessage = errorData?.message || 'Invalid request. Please check your input.';
+          message = 'Bad request to external service';
           code = 'BAD_REQUEST';
           break;
         case 401:
-          userMessage = 'Session expired. Please log in again.';
+          message = 'Authentication failed with external service';
           code = 'UNAUTHORIZED';
-          // Optionally redirect to login
-          setTimeout(() => {
-            if (window.location.pathname !== '/login') {
-              window.location.href = '/login';
-            }
-          }, 2000);
           break;
         case 403:
-          userMessage = 'You don\'t have permission to perform this action.';
+          message = 'Access forbidden by external service';
           code = 'FORBIDDEN';
           break;
         case 404:
-          userMessage = 'The requested resource was not found.';
+          message = 'Resource not found on external service';
           code = 'NOT_FOUND';
           break;
         case 408:
-          userMessage = 'Request timeout. Please try again.';
+          message = 'Request timeout to external service';
           code = 'TIMEOUT';
           break;
         case 429:
-          userMessage = 'Too many requests. Please wait a moment and try again.';
+          message = 'Rate limit exceeded on external service';
           code = 'RATE_LIMIT';
           break;
         case 500:
-          userMessage = 'Server error. We\'re working on it.';
+          message = 'External service internal error';
           code = 'SERVER_ERROR';
           break;
         case 502:
         case 503:
         case 504:
-          userMessage = 'Service temporarily unavailable. Please try again.';
+          message = 'External service temporarily unavailable';
           code = 'SERVICE_UNAVAILABLE';
           break;
         default:
-          userMessage = errorData?.message || `Error ${statusCode}`;
+          message = `External service error: ${statusCode}`;
           code = `HTTP_${statusCode}`;
       }
     }
 
     return {
       code,
-      message: error.message,
-      userMessage,
+      message,
       statusCode,
       originalError: error,
-      retryable: this.shouldRetry(error, error.config as APIRequestConfig),
+      retryable: this.shouldRetry(error, error.config as HTTPRequestConfig),
       timestamp: new Date().toISOString()
     };
   }
@@ -345,7 +284,7 @@ class APIClient {
   /**
    * GET request
    */
-  async get<T = any>(url: string, config?: APIRequestConfig): Promise<T> {
+  async get<T = any>(url: string, config?: HTTPRequestConfig): Promise<T> {
     const response = await this.axiosInstance.get<T>(url, config);
     return response.data;
   }
@@ -353,7 +292,7 @@ class APIClient {
   /**
    * POST request
    */
-  async post<T = any>(url: string, data?: any, config?: APIRequestConfig): Promise<T> {
+  async post<T = any>(url: string, data?: any, config?: HTTPRequestConfig): Promise<T> {
     const response = await this.axiosInstance.post<T>(url, data, config);
     return response.data;
   }
@@ -361,7 +300,7 @@ class APIClient {
   /**
    * PUT request
    */
-  async put<T = any>(url: string, data?: any, config?: APIRequestConfig): Promise<T> {
+  async put<T = any>(url: string, data?: any, config?: HTTPRequestConfig): Promise<T> {
     const response = await this.axiosInstance.put<T>(url, data, config);
     return response.data;
   }
@@ -369,7 +308,7 @@ class APIClient {
   /**
    * DELETE request
    */
-  async delete<T = any>(url: string, config?: APIRequestConfig): Promise<T> {
+  async delete<T = any>(url: string, config?: HTTPRequestConfig): Promise<T> {
     const response = await this.axiosInstance.delete<T>(url, config);
     return response.data;
   }
@@ -377,7 +316,7 @@ class APIClient {
   /**
    * PATCH request
    */
-  async patch<T = any>(url: string, data?: any, config?: APIRequestConfig): Promise<T> {
+  async patch<T = any>(url: string, data?: any, config?: HTTPRequestConfig): Promise<T> {
     const response = await this.axiosInstance.patch<T>(url, data, config);
     return response.data;
   }
@@ -385,7 +324,7 @@ class APIClient {
   /**
    * Custom request with full control
    */
-  async request<T = any>(config: APIRequestConfig): Promise<T> {
+  async request<T = any>(config: HTTPRequestConfig): Promise<T> {
     const response = await this.axiosInstance.request<T>(config);
     return response.data;
   }
@@ -410,30 +349,12 @@ class APIClient {
     this.requestCount = 0;
     this.failureCount = 0;
   }
-
-  /**
-   * Determine request priority for offline queuing
-   */
-  private getRequestPriority(method: string, url: string): 'high' | 'normal' | 'low' {
-    // High priority for critical operations
-    if (method === 'POST' && (url.includes('/auth/') || url.includes('/emergency'))) {
-      return 'high';
-    }
-
-    // Normal priority for standard CRUD operations
-    if (['GET', 'POST', 'PUT', 'DELETE'].includes(method)) {
-      return 'normal';
-    }
-
-    // Low priority for everything else
-    return 'low';
-  }
 }
 
 /**
- * Create singleton instance
+ * Create singleton instance for external API calls
  */
-const apiClient = new APIClient();
+const httpClient = new HTTPClient();
 
-export default apiClient;
-export { APIClient };
+export default httpClient;
+export { HTTPClient };

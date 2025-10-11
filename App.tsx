@@ -17,6 +17,7 @@ import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { apiClient } from './lib/api/client';
 import ErrorBoundary from './components/ErrorBoundary';
+import OfflineIndicator from './src/components/OfflineIndicator';
 
 // Lazily loaded screens and feature modules
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
@@ -534,6 +535,9 @@ const App: React.FC = () => {
 
                 {/* Global AI Chatbot - Available on all pages when user is logged in */}
                 <ChatbotWidget />
+
+                {/* Offline Indicator - Task 2.4: API Error Recovery */}
+                <OfflineIndicator position="bottom-right" />
             </div>
         </ErrorBoundary>
     );

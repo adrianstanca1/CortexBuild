@@ -2,8 +2,8 @@
 // Handles third-party integrations: QuickBooks, Slack, Google Drive, etc.
 
 import Database from 'better-sqlite3';
-import axios from 'axios';
 import crypto from 'crypto';
+import httpClient, { HTTPError } from '../utils/httpClient';
 
 export interface Integration {
   id: number;
@@ -237,17 +237,23 @@ export class SlackIntegration {
     const tokens = getOAuthTokens(this.db, this.integrationId);
 
     try {
-      await axios.post('https://slack.com/api/chat.postMessage', {
+      await httpClient.post('https://slack.com/api/chat.postMessage', {
         channel,
         text: message
       }, {
         headers: {
           'Authorization': `Bearer ${tokens.accessToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        customTimeout: 15000 // 15 seconds for Slack API
       });
     } catch (error) {
       console.error('Slack message error:', error);
+      // Re-throw with more context
+      if (error instanceof Error && 'code' in error) {
+        const httpError = error as HTTPError;
+        throw new Error(`Slack integration failed: ${httpError.message}`);
+      }
       throw error;
     }
   }
