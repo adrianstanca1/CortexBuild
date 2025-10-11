@@ -81,6 +81,8 @@ const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPane
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 const N8nProcoreWorkflowBuilder = lazy(() => import('./components/sdk/N8nProcoreWorkflowBuilder'));
+const ConstructionOracle = lazy(() => import('./components/ai/ConstructionOracle'));
+const MyApplications = lazy(() => import('./components/applications/MyApplications'));
 
 const ScreenLoader: React.FC = () => (
     <div className="py-16 text-center text-slate-500">
@@ -145,6 +147,9 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'developer-submissions': DeveloperSubmissionInterface,
     // Workflow Builders
     'n8n-procore-builder': N8nProcoreWorkflowBuilder,
+    'construction-oracle': ConstructionOracle,
+    'my-applications': MyApplications,
+    'construction-oracle': ConstructionOracle,
     // 'zapier-workflow': ZapierStyleWorkflowBuilder,
     // Admin
     'platform-admin': PlatformAdminScreen,
@@ -644,6 +649,34 @@ const App: React.FC = () => {
         goHome();
     }, [currentUser.role, navigateToModule, goHome]);
 
+    // Handle app launch from My Applications
+    const handleLaunchApp = useCallback((appCode: string) => {
+        console.log('🚀 Launching app:', appCode);
+
+        // Map app codes to screen names
+        const appScreenMap: Record<string, Screen> = {
+            'construction-oracle': 'construction-oracle',
+            'n8n-procore-builder': 'n8n-procore-builder',
+            'predictive-maintenance': 'ai-assistant', // Fallback to AI assistant
+            'intelligent-router': 'ai-assistant', // Fallback to AI assistant
+            'cost-optimizer': 'financial-forecaster',
+            'safety-sentinel': 'hse-sentinel',
+            'quality-inspector': 'ai-assistant',
+            'timeline-magic': 'project-controls',
+            'document-intelligence': 'ai-assistant',
+            'reality-simulator': 'ai-assistant'
+        };
+
+        const targetScreen = appScreenMap[appCode];
+        if (targetScreen) {
+            navigateToModule(targetScreen);
+        } else {
+            console.warn('Unknown app code:', appCode);
+            // Fallback to AI assistant
+            navigateToModule('ai-assistant');
+        }
+    }, [navigateToModule]);
+
     return (
         <div className="bg-slate-50">
             <AppLayout
@@ -677,6 +710,7 @@ const App: React.FC = () => {
                             project={project}
                             goBack={goBack}
                             can={can}
+                            onLaunchApp={handleLaunchApp}
                             {...params}
                         />
                     </Suspense>

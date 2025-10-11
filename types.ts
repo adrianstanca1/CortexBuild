@@ -119,6 +119,8 @@ export type Screen =
     | 'my-apps-desktop'
     // Workflow Builders
     | 'n8n-procore-builder'
+    | 'construction-oracle'
+    | 'my-applications'
     // Admin screens
     | 'platform-admin'
     | 'admin-control-panel'

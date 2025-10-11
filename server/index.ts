@@ -39,6 +39,7 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
+import { createMyApplicationsRouter } from './routes/my-applications';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -362,7 +363,10 @@ const startServer = async () => {
         app.use('/api/automations', createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
-        console.log('✅ All 24 API routes registered successfully');
+        app.use('/api/my-applications', createMyApplicationsRouter(db));
+        console.log('  ✓ /api/my-applications');
+
+        console.log('✅ All 25 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
