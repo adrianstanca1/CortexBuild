@@ -1,7 +1,5 @@
 import React from 'react';
 import { Task, Screen } from '../../types';
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
 import { ListBulletIcon, ChevronRightIcon } from '../Icons';
 
 interface MyTasksWidgetProps {
@@ -27,7 +25,7 @@ const MyTasksWidget: React.FC<MyTasksWidgetProps> = ({ tasks, onDeepLink }) => {
             ) : (
                 <ul className="divide-y divide-gray-200">
                     {openTasks.slice(0, 5).map(task => (
-                        <li 
+                        <li
                             key={task.id}
                             onClick={() => onDeepLink(task.projectId, 'task-detail', { taskId: task.id })}
                             className="py-3 flex items-center justify-between hover:bg-gray-50 cursor-pointer -mx-3 px-3 rounded-lg"

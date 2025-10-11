@@ -1,9 +1,6 @@
 import React from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { Project, Screen } from '../../types';
-// Fix: Corrected import paths to include file extensions.
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
 import { ChevronRightIcon, QuestionMarkCircleIcon, AlertTriangleIcon } from '../Icons';
 
 interface ProjectsOverviewWidgetProps {
@@ -35,11 +32,11 @@ const ProjectsOverviewWidget: React.FC<ProjectsOverviewWidgetProps> = ({ project
 
             <>
                 <div className="p-4 bg-gray-50 rounded-lg border flex flex-col sm:flex-row justify-around gap-4 mb-4">
-                   <Stat value={totalOpenRFIs} label="Open RFIs" icon={QuestionMarkCircleIcon} color="text-red-600" />
-                   <Stat value={totalOverdueTasks} label="Overdue Tasks" icon={AlertTriangleIcon} color="text-amber-600" />
+                    <Stat value={totalOpenRFIs} label="Open RFIs" icon={QuestionMarkCircleIcon} color="text-red-600" />
+                    <Stat value={totalOverdueTasks} label="Overdue Tasks" icon={AlertTriangleIcon} color="text-amber-600" />
                 </div>
                 <ul className="space-y-1 flex-grow">
-                     {projects.slice(0, 4).map(project => (
+                    {projects.slice(0, 4).map(project => (
                         <li key={project.id}>
                             <button
                                 onClick={() => onDeepLink(project.id, 'project-home', {})}

@@ -2,8 +2,6 @@ import React from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { ActivityEvent, Screen } from '../../types';
 // Fix: Corrected import paths to include file extensions.
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
 // Fix: Added ClipboardDocumentListIcon for 'log_submitted' and removed unused QuestionMarkCircleIcon.
 import { CheckBadgeIcon, CameraIcon, ChatBubbleBottomCenterTextIcon, ClipboardDocumentListIcon } from '../Icons';
 
@@ -20,7 +18,7 @@ const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ activities,
         // Fix: Added 'log_submitted' to the ICONS record to match the ActivityEvent type.
         log_submitted: ClipboardDocumentListIcon,
     };
-    
+
     const COLORS: Record<ActivityEvent['type'], string> = {
         comment: 'text-blue-600',
         photo: 'text-purple-600',
@@ -51,8 +49,8 @@ const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ activities,
                     {activities.slice(0, 5).map(activity => {
                         const Icon = ICONS[activity.type];
                         return (
-                            <li 
-                                key={activity.id} 
+                            <li
+                                key={activity.id}
                                 onClick={() => onDeepLink(activity.projectId, activity.link.screen, activity.link.params)}
                                 className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
                             >
@@ -60,12 +58,12 @@ const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ activities,
                                     <Icon className={`w-6 h-6 ${COLORS[activity.type]}`} />
                                 </div>
                                 <div className="text-sm">
-                                     <p className="text-gray-800">
+                                    <p className="text-gray-800">
                                         <span className="font-bold">{activity.author}</span> {activity.description}
-                                     </p>
-                                     <p className="text-xs text-gray-500 mt-0.5">
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-0.5">
                                         in <span className="font-semibold">{activity.projectName}</span> &middot; {new Date(activity.timestamp).toLocaleDateString()}
-                                     </p>
+                                    </p>
                                 </div>
                             </li>
                         );

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { Notification, Screen, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+// Fix: Replaced old api.ts import with modern API client
+import { apiClient } from '../../lib/api/client';
 // Fix: Corrected icon import to use CheckCircleIcon and remove unused CheckIcon.
 import { BellIcon, CheckCircleIcon } from '../Icons';
 
@@ -18,7 +18,7 @@ const NotificationsWidget: React.FC<NotificationsWidgetProps> = ({ onDeepLink, c
 
     const loadNotifications = async () => {
         setIsLoading(true);
-        const fetchedNotifications = await api.fetchNotificationsForUser(currentUser);
+        const fetchedNotifications = await apiClient.fetchNotifications();
         setNotifications(fetchedNotifications);
         setIsLoading(false);
     };
@@ -26,35 +26,35 @@ const NotificationsWidget: React.FC<NotificationsWidgetProps> = ({ onDeepLink, c
     useEffect(() => {
         loadNotifications();
     }, [currentUser]);
-    
+
     const handleMarkAsRead = async (id: string) => {
         const notif = notifications.find(n => n.id === id);
         if (notif && !notif.read) {
-            // Fix: Pass currentUser to the markNotificationsAsRead API call.
-            await api.markNotificationsAsRead([id], currentUser);
+            // Using modern API client
+            await apiClient.markNotificationsAsRead([id]);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
         }
     };
-    
+
     const handleMarkAllAsRead = async () => {
         const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
         if (unreadIds.length > 0) {
-            // Fix: Pass currentUser to the markNotificationsAsRead API call.
-            await api.markNotificationsAsRead(unreadIds, currentUser);
-            setNotifications(prev => prev.map(n => ({...n, read: true})));
+            // Using modern API client
+            await apiClient.markNotificationsAsRead(unreadIds);
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
         }
     };
-    
+
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 h-full flex flex-col transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
             <div className="flex justify-between items-center mb-4">
-                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <BellIcon className="w-6 h-6 text-gray-500" />
                     My Inbox
-                 </h2>
-                {unreadCount > 0 && 
+                </h2>
+                {unreadCount > 0 &&
                     <button onClick={handleMarkAllAsRead} className="text-xs font-semibold text-blue-600 hover:underline">
                         Mark all as read
                     </button>
@@ -67,7 +67,7 @@ const NotificationsWidget: React.FC<NotificationsWidgetProps> = ({ onDeepLink, c
             ) : (
                 <ul className="space-y-2">
                     {notifications.map(notif => (
-                        <li 
+                        <li
                             key={notif.id}
                             className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${notif.read ? '' : 'bg-blue-50'}`}
                         >

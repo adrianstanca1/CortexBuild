@@ -1,7 +1,5 @@
 import React from 'react';
 import { Task, Screen } from '../../types';
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
 import { CalendarDaysIcon } from '../Icons';
 
 interface UpcomingDeadlinesWidgetProps {
@@ -24,7 +22,7 @@ const UpcomingDeadlinesWidget: React.FC<UpcomingDeadlinesWidgetProps> = ({ tasks
             ) : (
                 <ul className="space-y-3">
                     {upcomingTasks.slice(0, 4).map(task => (
-                        <li 
+                        <li
                             key={task.id}
                             onClick={() => onDeepLink(task.projectId, 'task-detail', { taskId: task.id })}
                             className="p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100"
