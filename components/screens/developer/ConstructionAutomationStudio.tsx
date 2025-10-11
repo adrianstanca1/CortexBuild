@@ -20,7 +20,13 @@ import {
     BarChart3,
     ClipboardList,
     Puzzle,
-    FileCode
+    FileCode,
+    Box,
+    Workflow,
+    Plug,
+    TestTube,
+    Share2,
+    Bot
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { User } from '../../../types';
@@ -75,6 +81,64 @@ interface ConsoleLog {
     type: ConsoleLogType;
     message: string;
     timestamp: string;
+}
+
+interface WorkspaceTemplate {
+    id: string;
+    name: string;
+    description: string;
+    stack: string[];
+    services: string[];
+    readyIn: string;
+    estimatedCost: string;
+}
+
+type WorkspaceStatus = 'provisioning' | 'ready' | 'hibernated';
+
+interface WorkspaceInstance {
+    id: string;
+    name: string;
+    templateId: string;
+    status: WorkspaceStatus;
+    region: string;
+    url: string;
+    created: string;
+    services: string[];
+}
+
+interface PipelineRun {
+    id: string;
+    name: string;
+    status: 'passed' | 'running' | 'failed';
+    lastRun: string;
+    duration: string;
+    checks: string[];
+}
+
+interface ConnectorSummary {
+    id: string;
+    name: string;
+    type: 'Trigger' | 'Action' | 'Bidirectional';
+    coverage: string;
+    certification: 'Procore Certified' | 'Beta' | 'Internal';
+    description: string;
+}
+
+interface AgentMonitor {
+    id: string;
+    name: string;
+    owner: string;
+    status: 'online' | 'sleeping' | 'degraded';
+    lastEvent: string;
+    uptimeHours: number;
+}
+
+interface WebhookRoute {
+    id: string;
+    name: string;
+    events: string[];
+    health: 'healthy' | 'warning' | 'paused';
+    latencyMs: number;
 }
 
 const initialEnvironments: VirtualEnvironment[] = [
@@ -188,6 +252,172 @@ const marketplaceApps: MarketplaceApp[] = [
     }
 ];
 
+const workspaceTemplates: WorkspaceTemplate[] = [
+    {
+        id: 'procore-automation-stack',
+        name: 'Procore Automation Stack',
+        description: 'Full-stack environment with Procore sandbox, Supabase, and automation SDK.',
+        stack: ['Node 20', 'Python 3.11', 'Temporal Workers'],
+        services: ['Supabase Sandbox', 'Redis Stream', 'Vault Dev'],
+        readyIn: '92 seconds',
+        estimatedCost: '$0.42 / hr'
+    },
+    {
+        id: 'field-edge-cluster',
+        name: 'Field Edge Cluster',
+        description: 'Edge-optimized runtime for jobsite devices and offline workflows.',
+        stack: ['Node 18', 'Rust Workers'],
+        services: ['NATS Jetstream', 'Edge Cache', 'AI Vision Runtime'],
+        readyIn: '2 minutes',
+        estimatedCost: '$0.28 / hr'
+    },
+    {
+        id: 'marketplace-sandbox',
+        name: 'Marketplace Release Sandbox',
+        description: 'Isolated QA environment for marketplace submissions and regression tests.',
+        stack: ['Node 20', 'Playwright', 'Vitest'],
+        services: ['Supabase QA', 'Mock Procore', 'Stripe Test'],
+        readyIn: '75 seconds',
+        estimatedCost: '$0.19 / hr'
+    }
+];
+
+const initialWorkspaceInstances: WorkspaceInstance[] = [
+    {
+        id: 'ws-101',
+        name: 'Automation Core Dev',
+        templateId: 'procore-automation-stack',
+        status: 'ready',
+        region: 'us-central',
+        url: 'https://dev-shell.cortexbuild.dev/ws-101',
+        created: '12 minutes ago',
+        services: ['Supabase Sandbox', 'Redis Stream', 'Vault Dev']
+    },
+    {
+        id: 'ws-202',
+        name: 'Marketplace QA',
+        templateId: 'marketplace-sandbox',
+        status: 'hibernated',
+        region: 'us-west',
+        url: 'https://qa.cortexbuild.dev/ws-202',
+        created: '1 hour ago',
+        services: ['Supabase QA', 'Mock Procore', 'Stripe Test']
+    }
+];
+
+const initialPipelineRuns: PipelineRun[] = [
+    {
+        id: 'pipe-1',
+        name: 'RFI Safety Escalation',
+        status: 'passed',
+        lastRun: '7 minutes ago',
+        duration: '3m 24s',
+        checks: ['Unit Tests', 'n8n Flow Simulation', 'Security Scan', 'Procore Sandbox Replay']
+    },
+    {
+        id: 'pipe-2',
+        name: 'AI Safety Co-Pilot',
+        status: 'running',
+        lastRun: 'in progress',
+        duration: '—',
+        checks: ['Smoke Tests', 'Marketplace QA', 'Contract Review']
+    },
+    {
+        id: 'pipe-3',
+        name: 'Cost Forecast Guardian',
+        status: 'failed',
+        lastRun: '25 minutes ago',
+        duration: '5m 11s',
+        checks: ['Unit Tests', 'ERP Contract Test', 'Performance Budget']
+    }
+];
+
+const connectorLibrary: ConnectorSummary[] = [
+    {
+        id: 'procore-rfis',
+        name: 'Procore RFIs',
+        type: 'Bidirectional',
+        coverage: 'RFIs, Custom Fields, Attachments',
+        certification: 'Procore Certified',
+        description: 'Sync RFI events, update status, and attach AI-reviewed documents automatically.'
+    },
+    {
+        id: 'autodesk-acc',
+        name: 'Autodesk ACC',
+        type: 'Action',
+        coverage: 'Docs, Issues, Reviews',
+        certification: 'Beta',
+        description: 'Push curated documents and comments to Autodesk Construction Cloud projects.'
+    },
+    {
+        id: 'slack-events',
+        name: 'Slack Events',
+        type: 'Trigger',
+        coverage: 'Channels, Threads',
+        certification: 'Internal',
+        description: 'React to keywords or slash commands and feed updates to field teams instantly.'
+    },
+    {
+        id: 'sap-erp',
+        name: 'SAP ERP',
+        type: 'Action',
+        coverage: 'Cost Codes, Forecasts',
+        certification: 'Procore Certified',
+        description: 'Publish managed cost forecasts downstream to accounting systems with approvals.'
+    }
+];
+
+const initialAgentRuntimes: AgentMonitor[] = [
+    {
+        id: 'agent-1',
+        name: 'Site Safety Copilot',
+        owner: 'Safety Innovation',
+        status: 'online',
+        lastEvent: 'Responded to incident INC-482 in 2.1s',
+        uptimeHours: 137
+    },
+    {
+        id: 'agent-2',
+        name: 'Design Spec Reviewer',
+        owner: 'VDC Ops',
+        status: 'sleeping',
+        lastEvent: 'Awaiting new submittal in queue',
+        uptimeHours: 89
+    },
+    {
+        id: 'agent-3',
+        name: 'Prefabrication Optimizer',
+        owner: 'Manufacturing Integration',
+        status: 'degraded',
+        lastEvent: 'Warning: sensor feed latency exceeds SLA',
+        uptimeHours: 212
+    }
+];
+
+const initialWebhookRoutes: WebhookRoute[] = [
+    {
+        id: 'webhook-1',
+        name: 'Procore Daily Log Capture',
+        events: ['daily_log.created', 'daily_log.updated'],
+        health: 'healthy',
+        latencyMs: 184
+    },
+    {
+        id: 'webhook-2',
+        name: 'ERP Cost Delta Broadcast',
+        events: ['forecast.updated'],
+        health: 'warning',
+        latencyMs: 652
+    },
+    {
+        id: 'webhook-3',
+        name: 'Marketplace Telemetry Collector',
+        events: ['automation.deployed', 'automation.failed'],
+        health: 'healthy',
+        latencyMs: 97
+    }
+];
+
 const consolePresetLogs: ConsoleLog[] = [
     {
         id: 'log-1',
@@ -222,6 +452,10 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
     const [logs, setLogs] = useState<ConsoleLog[]>(consolePresetLogs);
     const [command, setCommand] = useState('deploy automation-core --with-blueprint rfi-safety');
     const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('rfi-safety');
+    const [workspaceInstances, setWorkspaceInstances] = useState<WorkspaceInstance[]>(initialWorkspaceInstances);
+    const [pipelines, setPipelines] = useState<PipelineRun[]>(initialPipelineRuns);
+    const [agents, setAgents] = useState<AgentMonitor[]>(initialAgentRuntimes);
+    const [webhooks, setWebhooks] = useState<WebhookRoute[]>(initialWebhookRoutes);
 
     const activeEnvironment = useMemo(
         () => environments.find((env) => env.id === activeEnvId) ?? environments[0],
@@ -239,8 +473,9 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
         const averageSuccessRate = Math.round(
             automationWorkflows.reduce((sum, workflow) => sum + workflow.successRate, 0) / automationWorkflows.length
         );
-        return { runningAutomations, totalConnectors, averageSuccessRate };
-    }, [environments]);
+        const activeWorkspaces = workspaceInstances.filter((workspace) => workspace.status === 'ready').length;
+        return { runningAutomations, totalConnectors, averageSuccessRate, activeWorkspaces };
+    }, [environments, workspaceInstances]);
 
     const addLog = (type: ConsoleLogType, message: string) => {
         setLogs((previous) => [
@@ -265,6 +500,20 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                         memoryUsage: memoryUsage ?? environment.memoryUsage
                     }
                     : environment
+            )
+        );
+    };
+
+    const updateWorkspaceStatus = (workspaceId: string, status: WorkspaceStatus, overrides: Partial<WorkspaceInstance> = {}) => {
+        setWorkspaceInstances((previous) =>
+            previous.map((workspace) =>
+                workspace.id === workspaceId
+                    ? {
+                        ...workspace,
+                        status,
+                        ...overrides
+                    }
+                    : workspace
             )
         );
     };
@@ -327,6 +576,134 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
         setCommand('');
     };
 
+    const handleProvisionWorkspace = (template: WorkspaceTemplate) => {
+        const workspaceId = `ws-${Date.now().toString().slice(-4)}`;
+        addLog('command', `$ workspace create ${template.id}`);
+        addLog('info', `[workspace ${workspaceId}] Provisioning ${template.name}...`);
+        const newWorkspace: WorkspaceInstance = {
+            id: workspaceId,
+            name: `${template.name.split(' ')[0]} Workspace`,
+            templateId: template.id,
+            status: 'provisioning',
+            region: activeEnvironment?.region ?? 'us-central',
+            url: `https://dev.cortexbuild.dev/${workspaceId}`,
+            created: 'just now',
+            services: template.services
+        };
+        setWorkspaceInstances((previous) => [newWorkspace, ...previous]);
+        toast.loading(`Provisioning ${template.name}`, { id: workspaceId });
+        setTimeout(() => {
+            updateWorkspaceStatus(workspaceId, 'ready', { created: 'a moment ago' });
+            toast.success(`${template.name} workspace ready`, { id: workspaceId });
+            addLog('success', `[workspace ${workspaceId}] Environment ready. IDE & runtimes online.`);
+        }, 1400);
+    };
+
+    const handleWorkspaceAction = (workspaceId: string, action: 'resume' | 'hibernate') => {
+        const workspace = workspaceInstances.find((instance) => instance.id === workspaceId);
+        if (!workspace) {
+            return;
+        }
+
+        if (action === 'hibernate') {
+            if (workspace.status === 'hibernated') {
+                toast(`Workspace already hibernated`);
+                return;
+            }
+            addLog('info', `[${workspace.name}] Hibernating workspace services...`);
+            updateWorkspaceStatus(workspaceId, 'hibernated');
+            toast.success(`${workspace.name} hibernated`);
+            return;
+        }
+
+        addLog('info', `[${workspace.name}] Resuming workspace...`);
+        updateWorkspaceStatus(workspaceId, 'provisioning');
+        toast.loading(`Resuming ${workspace.name}`, { id: workspaceId });
+        setTimeout(() => {
+            updateWorkspaceStatus(workspaceId, 'ready', { created: 'just restarted' });
+            toast.success(`${workspace.name} resumed`, { id: workspaceId });
+            addLog('success', `[${workspace.name}] Workspace health restored.`);
+        }, 1200);
+    };
+
+    const handleRunPipeline = (pipelineId: string) => {
+        const pipeline = pipelines.find((item) => item.id === pipelineId);
+        if (!pipeline) {
+            return;
+        }
+        addLog('info', `[pipeline] Running ${pipeline.name} release checks...`);
+        setPipelines((previous) =>
+            previous.map((item) =>
+                item.id === pipelineId
+                    ? {
+                        ...item,
+                        status: 'running',
+                        lastRun: 'in progress',
+                        duration: '—'
+                    }
+                    : item
+            )
+        );
+        setTimeout(() => {
+            const succeeded = pipeline.status !== 'failed';
+            setPipelines((previous) =>
+                previous.map((item) =>
+                    item.id === pipelineId
+                        ? {
+                            ...item,
+                            status: succeeded ? 'passed' : 'failed',
+                            lastRun: succeeded ? 'just now' : '2 mins ago',
+                            duration: succeeded ? '4m 02s' : '5m 11s'
+                        }
+                        : item
+                )
+            );
+            addLog(succeeded ? 'success' : 'error', `[pipeline] ${pipeline.name} ${succeeded ? 'passed' : 'failed'} checks.`);
+            toast[succeeded ? 'success' : 'error'](`${pipeline.name} ${succeeded ? 'passed' : 'failed'}`);
+        }, 1400);
+    };
+
+    const handleRestartAgent = (agentId: string) => {
+        const agent = agents.find((item) => item.id === agentId);
+        if (!agent) {
+            return;
+        }
+        addLog('info', `[agent] Restarting ${agent.name} runtime...`);
+        setAgents((previous) =>
+            previous.map((item) =>
+                item.id === agentId
+                    ? {
+                        ...item,
+                        status: 'online',
+                        uptimeHours: 0,
+                        lastEvent: 'Agent runtime restarted cleanly'
+                    }
+                    : item
+            )
+        );
+        toast.success(`${agent.name} restarted`);
+    };
+
+    const handleResetWebhook = (webhookId: string) => {
+        const route = webhooks.find((item) => item.id === webhookId);
+        if (!route) {
+            return;
+        }
+        addLog('info', `[webhook] Resetting delivery buffer for ${route.name}...`);
+        setWebhooks((previous) =>
+            previous.map((item) =>
+                item.id === webhookId
+                    ? {
+                        ...item,
+                        health: 'healthy',
+                        latencyMs: Math.max(120, Math.round(item.latencyMs * 0.6))
+                    }
+                    : item
+            )
+        );
+        toast.success(`${route.name} normalized`);
+    };
+
     return (
         <div className="space-y-8">
             <header className="space-y-2">
@@ -380,12 +757,12 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                 <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs uppercase tracking-wide text-slate-500">Marketplace Drafts</p>
-                            <p className="mt-1 text-2xl font-semibold text-slate-900">7</p>
+                            <p className="text-xs uppercase tracking-wide text-slate-500">Active Workspaces</p>
+                            <p className="mt-1 text-2xl font-semibold text-slate-900">{totals.activeWorkspaces}</p>
                         </div>
-                        <Puzzle className="h-6 w-6 text-violet-500" />
+                        <Box className="h-6 w-6 text-sky-500" />
                     </div>
-                    <p className="mt-2 text-xs text-slate-500">Ready for review & publishing</p>
+                    <p className="mt-2 text-xs text-slate-500">Dev shells with live consoles</p>
                 </div>
             </section>
 
@@ -520,7 +897,7 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                                 value={command}
                                 onChange={(event) => setCommand(event.target.value)}
                                 className="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:outline-none"
-                                placeholder="Type a command (deploy, test workflow, logs)"
+                                placeholder="Type a command (deploy, test workflow, logs, workspace create)"
                             />
                             <button
                                 type="submit"
@@ -796,6 +1173,296 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                                 <Shield className="h-4 w-4 text-emerald-500" /> Webhook retries configured with exponential backoff
                             </li>
                         </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section className="grid gap-6 xl:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900">Workspace Templates</h3>
+                            <p className="text-xs text-slate-500">Spin up isolated developer shells with all construction services prewired.</p>
+                        </div>
+                        <Box className="h-5 w-5 text-sky-500" />
+                    </div>
+                    <div className="mt-4 space-y-3">
+                        {workspaceTemplates.map((template) => (
+                            <div key={template.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <div className="flex items-center justify-between gap-2">
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-slate-900">{template.name}</h4>
+                                        <p className="text-[11px] uppercase text-slate-500">{template.stack.join(' • ')}</p>
+                                    </div>
+                                    <span className="text-xs font-semibold text-emerald-600">{template.readyIn}</span>
+                                </div>
+                                <p className="mt-2 text-xs text-slate-600">{template.description}</p>
+                                <div className="mt-3 flex flex-wrap gap-1">
+                                    {template.services.map((service) => (
+                                        <span key={service} className="rounded-full bg-white px-2 py-1 text-[11px] font-medium text-slate-600">
+                                            {service}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
+                                    <span>{template.estimatedCost}</span>
+                                    <button
+                                        type="button"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500"
+                                        onClick={() => handleProvisionWorkspace(template)}
+                                    >
+                                        <Rocket className="h-4 w-4" /> Provision
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="xl:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900">Active Workspaces</h3>
+                            <p className="text-xs text-slate-500">Open VS Code, automation runtimes, and tunnel URLs in one click.</p>
+                        </div>
+                        <Terminal className="h-5 w-5 text-slate-500" />
+                    </div>
+                    <div className="mt-4 space-y-3">
+                        {workspaceInstances.map((workspace) => {
+                            const template = workspaceTemplates.find((item) => item.id === workspace.templateId);
+                            const badgeClasses =
+                                workspace.status === 'ready'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : workspace.status === 'hibernated'
+                                        ? 'bg-slate-200 text-slate-600'
+                                        : 'bg-amber-100 text-amber-700';
+                            return (
+                                <div key={workspace.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-900">{workspace.name}</p>
+                                            <p className="text-[11px] text-slate-500">
+                                                {template?.name ?? 'Custom Template'} • {workspace.region} • {workspace.created}
+                                            </p>
+                                        </div>
+                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClasses}`}>
+                                            {workspace.status === 'ready'
+                                                ? 'Ready'
+                                                : workspace.status === 'hibernated'
+                                                    ? 'Hibernated'
+                                                    : 'Provisioning'}
+                                        </span>
+                                    </div>
+                                    <div className="mt-3 flex flex-wrap gap-1 text-[11px] text-slate-600">
+                                        {workspace.services.map((service) => (
+                                            <span key={service} className="rounded-full bg-white px-2 py-1 shadow-sm">
+                                                {service}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+                                        <a
+                                            href={workspace.url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-500"
+                                        >
+                                            <Terminal className="h-3.5 w-3.5" /> Open shell
+                                        </a>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleWorkspaceAction(workspace.id, 'hibernate')}
+                                                disabled={workspace.status !== 'ready'}
+                                                className="rounded-lg border border-slate-200 px-3 py-1 font-medium text-slate-700 hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                Hibernate
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleWorkspaceAction(workspace.id, 'resume')}
+                                                disabled={workspace.status === 'ready' || workspace.status === 'provisioning'}
+                                                className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 font-medium text-blue-700 hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                Resume
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            <section className="grid gap-6 xl:grid-cols-3">
+                <div className="xl:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900">Automation Release Pipeline</h3>
+                            <p className="text-xs text-slate-500">n8n-style flow validations, AI code reviews, and marketplace gating.</p>
+                        </div>
+                        <Workflow className="h-5 w-5 text-slate-500" />
+                    </div>
+                    <div className="mt-4 space-y-3">
+                        {pipelines.map((pipeline) => {
+                            const statusClasses =
+                                pipeline.status === 'passed'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : pipeline.status === 'running'
+                                        ? 'bg-amber-100 text-amber-700'
+                                        : 'bg-rose-100 text-rose-700';
+                            return (
+                                <div key={pipeline.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-900">{pipeline.name}</p>
+                                            <p className="text-[11px] text-slate-500">
+                                                {pipeline.lastRun === 'in progress' ? 'Running checks...' : `Last run ${pipeline.lastRun} • ${pipeline.duration}`}
+                                            </p>
+                                        </div>
+                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${statusClasses}`}>
+                                            {pipeline.status === 'passed'
+                                                ? 'Passed'
+                                                : pipeline.status === 'running'
+                                                    ? 'Running'
+                                                    : 'Failed'}
+                                        </span>
+                                    </div>
+                                    <div className="mt-3 flex flex-wrap gap-1 text-[11px] text-slate-600">
+                                        {pipeline.checks.map((check) => (
+                                            <span key={check} className="rounded-full bg-white px-2 py-1 shadow-sm">
+                                                <TestTube className="mr-1 inline h-3 w-3 text-amber-500" />
+                                                {check}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="mt-4 flex items-center justify-end">
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:border-emerald-300"
+                                            onClick={() => handleRunPipeline(pipeline.id)}
+                                        >
+                                            <Play className="h-4 w-4" /> Run checks
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900">Connector Library</h3>
+                            <p className="text-xs text-slate-500">Production-ready Procore + partner integrations.</p>
+                        </div>
+                        <Plug className="h-5 w-5 text-indigo-500" />
+                    </div>
+                    <div className="mt-4 space-y-3">
+                        {connectorLibrary.map((connector) => (
+                            <div key={connector.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <div className="flex items-center justify-between gap-2">
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-slate-900">{connector.name}</h4>
+                                        <p className="text-[11px] uppercase text-slate-500">{connector.type}</p>
+                                    </div>
+                                    <span className="text-[11px] font-semibold text-emerald-600">{connector.certification}</span>
+                                </div>
+                                <p className="mt-2 text-xs text-slate-600">{connector.description}</p>
+                                <p className="mt-3 text-[11px] text-slate-500">Coverage • {connector.coverage}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <section className="grid gap-6 xl:grid-cols-3">
+                <div className="xl:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900">Agent Operations Center</h3>
+                            <p className="text-xs text-slate-500">Manage AI co-pilots, n8n nodes, and runtime uptime guarantees.</p>
+                        </div>
+                        <Bot className="h-5 w-5 text-violet-500" />
+                    </div>
+                    <div className="mt-4 space-y-3">
+                        {agents.map((agent) => {
+                            const statusClasses =
+                                agent.status === 'online'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : agent.status === 'sleeping'
+                                        ? 'bg-slate-200 text-slate-600'
+                                        : 'bg-rose-100 text-rose-700';
+                            return (
+                                <div key={agent.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-900">{agent.name}</p>
+                                            <p className="text-[11px] text-slate-500">{agent.owner}</p>
+                                        </div>
+                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${statusClasses}`}>
+                                            {agent.status === 'online' ? 'Online' : agent.status === 'sleeping' ? 'Sleeping' : 'Degraded'}
+                                        </span>
+                                    </div>
+                                    <p className="mt-2 text-xs text-slate-600">{agent.lastEvent}</p>
+                                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
+                                        <span>Uptime • {agent.uptimeHours}h</span>
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:border-violet-300"
+                                            onClick={() => handleRestartAgent(agent.id)}
+                                        >
+                                            <RefreshCw className="h-4 w-4" /> Restart
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900">Webhook Delivery Health</h3>
+                            <p className="text-xs text-slate-500">Track Procore + ERP event fan-out latency and retries.</p>
+                        </div>
+                        <Share2 className="h-5 w-5 text-amber-500" />
+                    </div>
+                    <div className="mt-4 space-y-3">
+                        {webhooks.map((route) => {
+                            const badgeClasses =
+                                route.health === 'healthy'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : route.health === 'warning'
+                                        ? 'bg-amber-100 text-amber-700'
+                                        : 'bg-slate-200 text-slate-600';
+                            return (
+                                <div key={route.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-900">{route.name}</p>
+                                            <p className="text-[11px] text-slate-500">{route.events.join(', ')}</p>
+                                        </div>
+                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClasses}`}>
+                                            {route.health === 'healthy' ? 'Healthy' : route.health === 'warning' ? 'Warning' : 'Paused'}
+                                        </span>
+                                    </div>
+                                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
+                                        <span>p95 latency • {route.latencyMs}ms</span>
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:border-amber-300"
+                                            onClick={() => handleResetWebhook(route.id)}
+                                        >
+                                            <RefreshCw className="h-4 w-4" /> Normalize
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
