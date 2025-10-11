@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, RFI, User, Comment, Attachment } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, ClockIcon, TrashIcon } from '../Icons';
 import DiffViewer from '../shared/DiffViewer';
 
@@ -52,9 +52,9 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
     useEffect(() => {
         const loadRfiData = async () => {
             setIsLoading(true);
-            const initialRfi = await api.fetchRFIById(rfiId);
+            const initialRfi = await apiClient.fetchRFIById(rfiId);
             if (initialRfi) {
-                const versions = await api.fetchRFIVersions(initialRfi.rfiNumber);
+                const versions = await apiClient.fetchRFIVersions(initialRfi.rfiNumber);
                 setAllVersions(versions);
                 const latest = versions[versions.length - 1];
                 setLatestRfi(latest);
@@ -70,10 +70,10 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
         };
         loadRfiData();
     }, [rfiId]);
-    
+
     const handleAddComment = async () => {
         if (!latestRfi || !newComment.trim()) return;
-        const comment = await api.addCommentToRFI(latestRfi.id, newComment, currentUser);
+        const comment = await apiClient.addCommentToRFI(latestRfi.id, newComment, currentUser);
         setLatestRfi(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
         setNewComment('');
     };
@@ -85,7 +85,7 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
         }
         const attachmentsForApi: Attachment[] = await Promise.all(
             responseFiles.map(file => new Promise<Attachment>((resolve, reject) => {
-                 const reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = (e) => {
                     resolve({ name: file.name, url: e.target?.result as string });
                 };
@@ -94,8 +94,8 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
             }))
         );
 
-        const updatedRfi = await api.addAnswerToRFI(latestRfi.id, answer, attachmentsForApi, currentUser);
-        if(updatedRfi) {
+        const updatedRfi = await apiClient.addAnswerToRFI(latestRfi.id, answer, attachmentsForApi, currentUser);
+        if (updatedRfi) {
             setLatestRfi(updatedRfi);
         }
         setAnswer('');
@@ -138,7 +138,7 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
     if (!latestRfi) {
         return <div className="text-center p-8 text-red-500">RFI not found.</div>;
     }
-    
+
     const comparisonRfi = allVersions.find(v => v.id === comparisonVersionId) || null;
     const overdue = isRfiOverdue(latestRfi);
     const canAnswer = (currentUser.role === 'company_admin' || currentUser.role === 'Project Manager');
@@ -165,16 +165,16 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
                     <h4 className="font-bold text-gray-800 mb-2">Attachments</h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-gray-50 p-3 rounded-md">
-                             <h5 className="font-semibold text-sm mb-2">Version {comparisonRfi.version}</h5>
-                             <ul className="list-disc list-inside text-sm space-y-1">
+                            <h5 className="font-semibold text-sm mb-2">Version {comparisonRfi.version}</h5>
+                            <ul className="list-disc list-inside text-sm space-y-1">
                                 {comparisonRfi.attachments.map(att => <li key={att.name} className={!attachmentsB.has(att.name) ? 'text-red-600' : ''}>{att.name}</li>)}
-                             </ul>
+                            </ul>
                         </div>
-                         <div className="bg-gray-50 p-3 rounded-md">
+                        <div className="bg-gray-50 p-3 rounded-md">
                             <h5 className="font-semibold text-sm mb-2">Version {latestRfi.version} (Latest)</h5>
                             <ul className="list-disc list-inside text-sm space-y-1">
                                 {latestRfi.attachments.map(att => <li key={att.name} className={!attachmentsA.has(att.name) ? 'text-green-600' : ''}>{att.name}</li>)}
-                             </ul>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -193,7 +193,7 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
                     <p className="text-sm text-gray-500">{project.name}</p>
                 </div>
             </header>
-            
+
             <div className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-lg">
                     <TabButton label="Details" isActive={activeTab === 'details'} onClick={() => setActiveTab('details')} />
@@ -216,12 +216,12 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
                                     <p className={`font-bold py-1 px-2 rounded-full inline-block text-xs mt-1 ${getStatusColor(latestRfi.status)}`}>{latestRfi.status}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><UsersIcon className="w-4 h-4"/>Assigned To</p>
+                                    <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><UsersIcon className="w-4 h-4" />Assigned To</p>
                                     <p className="text-gray-800 font-semibold">{latestRfi.assignee}</p>
                                 </div>
                                 <div>
                                     <p className={`text-xs font-bold uppercase mb-1 flex items-center gap-1.5 ${overdue ? 'text-red-600' : 'text-gray-500'}`}>
-                                        <CalendarDaysIcon className="w-4 h-4"/>Response Due
+                                        <CalendarDaysIcon className="w-4 h-4" />Response Due
                                     </p>
                                     <p className={`font-semibold ${overdue ? 'text-red-600' : 'text-gray-800'}`}>
                                         {new Date(latestRfi.dueDate).toLocaleDateString()}
@@ -229,7 +229,7 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
                             <h3 className="font-bold text-lg text-gray-800 mb-4">Official Response</h3>
                             {latestRfi.status === 'Closed' && latestRfi.response ? (
@@ -291,10 +291,10 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
                 )}
 
                 {activeTab === 'comparison' && (
-                     <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
+                    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
                         <div className="flex items-center gap-4 mb-6">
                             <label htmlFor="comparison-version" className="font-semibold text-gray-700">Compare latest version with:</label>
-                            <select 
+                            <select
                                 id="comparison-version"
                                 value={comparisonVersionId || ''}
                                 onChange={(e) => setComparisonVersionId(e.target.value)}
@@ -302,7 +302,7 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
                             >
                                 {allVersions.filter(v => v.id !== latestRfi.id).map(v => (
                                     <option key={v.id} value={v.id}>
-                                        Version {v.version} ({new Date(v.history?.[v.history.length-1]?.timestamp || '').toLocaleDateString()})
+                                        Version {v.version} ({new Date(v.history?.[v.history.length - 1]?.timestamp || '').toLocaleDateString()})
                                     </option>
                                 ))}
                             </select>

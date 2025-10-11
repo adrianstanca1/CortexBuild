@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, AIAgent, CompanySubscription, TenantContext } from '../types';
-import * as api from '../api';
+import { apiClient } from '../lib/api/client';
 
 interface UseAIAgentsReturn {
     // State
@@ -40,7 +40,7 @@ export const useAIAgents = (currentUser: User | null): UseAIAgentsReturn => {
         
         try {
             console.log('🤖 Loading available AI agents...');
-            const agents = await api.fetchAvailableAIAgents();
+            const agents = await apiClient.fetchAvailableAIAgents();
             setAvailableAgents(agents);
             console.log('✅ Loaded', agents.length, 'AI agents');
         } catch (err: any) {
@@ -60,7 +60,7 @@ export const useAIAgents = (currentUser: User | null): UseAIAgentsReturn => {
         
         try {
             console.log('📋 Loading company subscriptions...');
-            const subscriptions = await api.fetchCompanySubscriptions(currentUser);
+            const subscriptions = await apiClient.fetchCompanySubscriptions(currentUser);
             setCompanySubscriptions(subscriptions);
             console.log('✅ Loaded', subscriptions.length, 'active subscriptions');
         } catch (err: any) {
@@ -83,7 +83,7 @@ export const useAIAgents = (currentUser: User | null): UseAIAgentsReturn => {
         
         try {
             console.log('💳 Subscribing to agent:', agentId);
-            const subscription = await api.subscribeToAgent(currentUser, agentId, billingCycle);
+            const subscription = await apiClient.subscribeToAgent(currentUser, agentId, billingCycle);
             
             if (subscription) {
                 // Refresh subscriptions to get the latest data

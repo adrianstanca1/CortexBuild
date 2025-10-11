@@ -7,7 +7,7 @@ interface AuditLogManagementProps {
 }
 
 const AuditLogManagement: React.FC<AuditLogManagementProps> = ({ currentUser }) => {
-    const [auditLogs, setAuditLogs] = useState<api.AuditLogEntry[]>([]);
+    const [auditLogs, setAuditLogs] = useState<apiClient.AuditLogEntry[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +31,7 @@ const AuditLogManagement: React.FC<AuditLogManagementProps> = ({ currentUser }) 
         setError(null);
         try {
             const offset = (currentPage - 1) * logsPerPage;
-            const logs = await api.getPlatformAuditLogs(currentUser, logsPerPage, offset);
+            const logs = await apiClient.getPlatformAuditLogs(currentUser, logsPerPage, offset);
 
             // Apply client-side filters
             let filteredLogs = logs;

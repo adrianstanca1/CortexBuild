@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, PunchListItem, User, Comment } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PaperClipIcon, UsersIcon, MapPinIcon, ClockIcon } from '../Icons';
 import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
 
@@ -32,7 +32,7 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
     useEffect(() => {
         const loadItem = async () => {
             setIsLoading(true);
-            const fetchedItem = await api.fetchPunchListItemById(itemId);
+            const fetchedItem = await apiClient.fetchPunchListItemById(itemId);
             setItem(fetchedItem || null);
             setIsLoading(false);
         };
@@ -46,7 +46,7 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
         const updatedItemData = { ...item, status: newStatus };
         setItem(updatedItemData); // Optimistic update
         try {
-            const savedItem = await api.updatePunchListItem(updatedItemData, currentUser);
+            const savedItem = await apiClient.updatePunchListItem(updatedItemData, currentUser);
             setItem(savedItem); // Update with response from API to get history
         } catch (error: any) {
             alert(error.message);
@@ -56,7 +56,7 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
 
     const handleAddComment = async () => {
         if (!item || !newComment.trim()) return;
-        const comment = await api.addCommentToPunchListItem(item.id, newComment, currentUser);
+        const comment = await apiClient.addCommentToPunchListItem(item.id, newComment, currentUser);
         setItem(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
         setNewComment('');
     };

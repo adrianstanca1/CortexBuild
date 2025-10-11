@@ -331,6 +331,40 @@ export const apiClient = {
         });
     },
 
+    /**
+     * Fetch RFI by ID
+     */
+    async fetchRFIById(rfiId: string): Promise<any> {
+        return apiRequest<any>(`/rfis/${rfiId}`);
+    },
+
+    /**
+     * Fetch RFI versions
+     */
+    async fetchRFIVersions(rfiNumber: string): Promise<any[]> {
+        return apiRequest<any[]>(`/rfis/versions/${rfiNumber}`);
+    },
+
+    /**
+     * Add comment to RFI
+     */
+    async addCommentToRFI(rfiId: string, comment: string, user: any): Promise<any> {
+        return apiRequest<any>(`/rfis/${rfiId}/comments`, {
+            method: 'POST',
+            body: JSON.stringify({ comment, userId: user.id }),
+        });
+    },
+
+    /**
+     * Add answer to RFI
+     */
+    async addAnswerToRFI(rfiId: string, answer: string, attachments: any[], user: any): Promise<any> {
+        return apiRequest<any>(`/rfis/${rfiId}/answer`, {
+            method: 'POST',
+            body: JSON.stringify({ answer, attachments, userId: user.id }),
+        });
+    },
+
     // ==================== TIME ENTRIES ====================
 
     /**

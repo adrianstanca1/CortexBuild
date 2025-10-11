@@ -34,8 +34,8 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = (props) => {
             setIsLoading(true);
             try {
                 const [fetchedProjects, fetchedTasks] = await Promise.all([
-                    api.fetchAllProjects(currentUser),
-                    api.fetchTasksForUser(currentUser)
+                    apiClient.fetchAllProjects(currentUser),
+                    apiClient.fetchTasksForUser(currentUser)
                 ]);
                 setProjects(fetchedProjects);
                 setTasks(fetchedTasks);
@@ -51,7 +51,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = (props) => {
         };
 
         loadDashboardData();
-        api.checkAndCreateDueDateNotifications(currentUser);
+        apiClient.checkAndCreateDueDateNotifications(currentUser);
     }, [currentUser]);
 
     const handleNavigateToProject = (projectId: string) => {

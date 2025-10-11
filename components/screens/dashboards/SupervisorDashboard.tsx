@@ -34,9 +34,9 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
             setIsLoading(true);
             try {
                 const [fetchedTasks, fetchedActivities, fetchedProjects] = await Promise.all([
-                    api.fetchTasksForUser(currentUser),
-                    api.fetchRecentActivity(currentUser),
-                    api.fetchAllProjects(currentUser)
+                    apiClient.fetchTasksForUser(currentUser),
+                    apiClient.fetchRecentActivity(currentUser),
+                    apiClient.fetchAllProjects(currentUser)
                 ]);
                 setTasks(fetchedTasks);
                 setActivities(fetchedActivities);
@@ -53,7 +53,7 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
         };
 
         loadDashboardData();
-        api.checkAndCreateDueDateNotifications(currentUser);
+        apiClient.checkAndCreateDueDateNotifications(currentUser);
     }, [currentUser]);
 
     const handleNavigateToProject = (projectId: string) => {

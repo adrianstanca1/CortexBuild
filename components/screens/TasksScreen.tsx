@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Project, Task, Screen, User } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { usePermissions } from '../../hooks/usePermissions';
 import { ChevronLeftIcon, PlusIcon, PaperClipIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, ChevronDownIcon } from '../Icons';
 
@@ -75,8 +75,8 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
         const loadData = async () => {
             setIsLoading(true);
             const [projectTasks, companyUsers] = await Promise.all([
-                api.fetchTasksForProject(project.id, currentUser),
-                api.fetchUsersByCompany(project.companyId)
+                apiClient.fetchTasksForProject(project.id, currentUser),
+                apiClient.fetchUsersByCompany(project.companyId)
             ]);
             setAllTasks(projectTasks);
             setUsers(companyUsers);

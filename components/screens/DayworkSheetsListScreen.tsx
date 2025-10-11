@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, DayworkSheet, Screen, User } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PlusIcon, TicketIcon } from '../Icons';
 
 interface DayworkSheetsListScreenProps {
@@ -26,7 +26,7 @@ const DayworkSheetsListScreen: React.FC<DayworkSheetsListScreenProps> = ({ proje
     useEffect(() => {
         const loadSheets = async () => {
             setIsLoading(true);
-            const projectSheets = await api.fetchDayworkSheetsForProject(project.id);
+            const projectSheets = await apiClient.fetchDayworkSheetsForProject(project.id);
             setSheets(projectSheets);
             setIsLoading(false);
         };

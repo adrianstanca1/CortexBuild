@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { AISuggestion, NotificationLink, User } from '../../types';
 import { XMarkIcon, WandSparklesIcon, ArrowPathIcon, HandThumbUpIcon, HandThumbDownIcon } from '../Icons';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 
 interface AISuggestionModalProps {
     isOpen: boolean;
@@ -27,7 +27,7 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({ isOpen, isLoading
     const handleFeedback = async (feedback: 'up' | 'down') => {
         if (feedbackStatus || !suggestion) return;
         setFeedbackStatus(feedback);
-        await api.submitAIFeedback(suggestion, feedback, currentUser);
+        await apiClient.submitAIFeedback(suggestion, feedback, currentUser);
     };
 
     return (

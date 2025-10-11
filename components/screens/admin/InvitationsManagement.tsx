@@ -7,7 +7,7 @@ interface InvitationsManagementProps {
 }
 
 const InvitationsManagement: React.FC<InvitationsManagementProps> = ({ currentUser }) => {
-    const [invitations, setInvitations] = useState<api.PlatformInvitation[]>([]);
+    const [invitations, setInvitations] = useState<apiClient.PlatformInvitation[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showSendForm, setShowSendForm] = useState(false);
@@ -25,7 +25,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({ currentUs
         setIsLoading(true);
         setError(null);
         try {
-            const invitationsData = await api.getPlatformInvitations(currentUser);
+            const invitationsData = await apiClient.getPlatformInvitations(currentUser);
             setInvitations(invitationsData);
         } catch (err: any) {
             console.error('Error loading invitations:', err);
@@ -40,7 +40,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({ currentUs
         setError(null);
 
         try {
-            await api.sendPlatformInvitation(currentUser, formData.email, formData.companyName, formData.invitationType);
+            await apiClient.sendPlatformInvitation(currentUser, formData.email, formData.companyName, formData.invitationType);
             setFormData({ email: '', companyName: '', invitationType: 'company_admin' });
             setShowSendForm(false);
             loadInvitations();

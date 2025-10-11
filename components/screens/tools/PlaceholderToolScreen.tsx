@@ -42,9 +42,9 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
         const loadData = async () => {
             setIsLoading(true);
             const [userTasks, userProjects, userTimeEntries] = await Promise.all([
-                api.fetchTasksForUser(currentUser),
-                api.fetchAllProjects(currentUser),
-                api.fetchTimeEntriesForUser(currentUser.id)
+                apiClient.fetchTasksForUser(currentUser),
+                apiClient.fetchAllProjects(currentUser),
+                apiClient.fetchTimeEntriesForUser(currentUser.id)
             ]);
             setTasks(userTasks.filter(t => t.status !== 'Done'));
             setProjects(userProjects);
@@ -73,7 +73,7 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
             return;
         }
         try {
-            const newEntry = await api.startTimeEntry(task.id, task.projectId, currentUser.id);
+            const newEntry = await apiClient.startTimeEntry(task.id, task.projectId, currentUser.id);
             setTimeEntries(prev => [...prev, newEntry]);
         } catch (error) {
             console.error(error);
@@ -84,7 +84,7 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
     const handleClockOut = async () => {
         if (!activeEntry) return;
         try {
-            const updatedEntry = await api.stopTimeEntry(activeEntry.id);
+            const updatedEntry = await apiClient.stopTimeEntry(activeEntry.id);
             setTimeEntries(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
         } catch (error) {
             console.error(error);

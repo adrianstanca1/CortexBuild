@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { XMarkIcon, MapPinIcon } from '../Icons';
 
 interface ProjectSelectorModalProps {
@@ -22,7 +22,7 @@ const ProjectSelectorModal: React.FC<ProjectSelectorModalProps> = ({ onSelectPro
     useEffect(() => {
         const loadProjects = async () => {
             setIsLoading(true);
-            const fetchedProjects = await api.fetchAllProjects(currentUser);
+            const fetchedProjects = await apiClient.fetchAllProjects(currentUser);
             setProjects(fetchedProjects);
             setIsLoading(false);
         };

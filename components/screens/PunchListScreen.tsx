@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Project, PunchListItem, Screen, User } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PlusIcon, CheckBadgeIcon } from '../Icons';
 
 interface PunchListScreenProps {
@@ -31,7 +31,7 @@ const PunchListScreen: React.FC<PunchListScreenProps> = ({ project, navigateTo, 
     useEffect(() => {
         const loadItems = async () => {
             setIsLoading(true);
-            const projectItems = await api.fetchPunchListItemsForProject(project.id);
+            const projectItems = await apiClient.fetchPunchListItemsForProject(project.id);
             setItems(projectItems);
             setIsLoading(false);
         };
