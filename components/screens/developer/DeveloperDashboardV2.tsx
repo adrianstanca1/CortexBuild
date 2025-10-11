@@ -25,6 +25,9 @@ const CodexAgent = lazy(() => import('../../CodexAgent').then(module => ({
     default: module.CodexAgent
 })));
 
+// Lazy load PerformanceDashboard
+const PerformanceDashboard = lazy(() => import('../../monitoring/PerformanceDashboard'));
+
 interface DeveloperDashboardV2Props {
     currentUser: User;
     navigateTo: (screen: Screen, params?: any) => void;
@@ -47,7 +50,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
         codeQuality: 96.5
     });
 
-    const [activeTab, setActiveTab] = useState<'overview' | 'code' | 'tools' | 'codex'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'code' | 'tools' | 'codex' | 'performance'>('overview');
     const [isAnimating, setIsAnimating] = useState(true);
 
     useEffect(() => {
@@ -56,7 +59,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
     }, []);
 
     // Memoize tab change handler
-    const handleTabChange = useCallback((tab: 'overview' | 'code' | 'tools' | 'codex') => {
+    const handleTabChange = useCallback((tab: 'overview' | 'code' | 'tools' | 'codex' | 'performance') => {
         setActiveTab(tab);
     }, []);
 
@@ -204,7 +207,8 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                     {[
                         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                         { id: 'code', label: 'Code & Build', icon: Code2 },
-                        { id: 'tools', label: 'Dev Tools', icon: Wrench }
+                        { id: 'tools', label: 'Dev Tools', icon: Wrench },
+                        { id: 'performance', label: 'Performance', icon: Activity }
                     ].map((tab) => {
                         const TabIcon = tab.icon;
                         return (
@@ -345,6 +349,22 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                             </Suspense>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Performance Dashboard Tab */}
+            {activeTab === 'performance' && (
+                <div className="mt-6">
+                    <Suspense fallback={
+                        <div className="flex items-center justify-center h-64">
+                            <div className="text-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                                <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Loading Performance Dashboard...</p>
+                            </div>
+                        </div>
+                    }>
+                        <PerformanceDashboard isDarkMode={isDarkMode} />
+                    </Suspense>
                 </div>
             )}
         </div>
