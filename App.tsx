@@ -1,14 +1,12 @@
 // CortexBuild Main App Component
 import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
+import { Screen, User, Project, NotificationLink, AISuggestion } from './types';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
 import Sidebar from './components/layout/Sidebar';
-import { MOCK_PROJECT } from './constants';
 import AISuggestionModal from './components/modals/AISuggestionModal';
 import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
 import FloatingMenu from './components/layout/FloatingMenu';
-import ErrorBoundary from './components/ErrorBoundary';
 import ToastContainer from './components/ToastContainer';
 import { usePermissions } from './hooks/usePermissions';
 import * as authService from './auth/authService';
@@ -16,7 +14,7 @@ import { useToast } from './hooks/useToast';
 import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
-import { supabase } from './supabaseClient';
+import { apiClient } from './lib/api/client';
 
 // Lazily loaded screens and feature modules
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
@@ -88,11 +86,17 @@ const ScreenLoader: React.FC = () => (
     </div>
 );
 
-
-type NavigationItem = {
-    screen: Screen;
-    params?: any;
-    project?: Project;
+// Helper function to get default screen for user role
+const getDefaultScreenForRole = (role: string): Screen => {
+    switch (role) {
+        case 'developer':
+            return 'developer-console';
+        case 'super_admin':
+            return 'super-admin-dashboard';
+        case 'company_admin':
+        default:
+            return 'company-admin-dashboard';
+    }
 };
 
 const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
@@ -185,185 +189,8 @@ const App: React.FC = () => {
     const { can } = usePermissions(currentUser);
     const { toasts, removeToast, showSuccess, showError } = useToast();
 
-    const handleOAuthCallback = async (hash: string) => {
-        try {
-            logger.info('Processing OAuth callback', { hashLength: hash.length });
-
-            // Extract tokens from URL hash - handle format like #dashboard#access_token=...
-            const hashParts = hash.split('#');
-            let tokenPart = '';
-            for (const part of hashParts) {
-                if (part.includes('access_token')) {
-                    tokenPart = part;
-                    break;
-                }
-            }
-
-            if (tokenPart) {
-                const params = new URLSearchParams(tokenPart);
-                const accessToken = params.get('access_token');
-                const refreshToken = params.get('refresh_token');
-                const error = params.get('error');
-                const errorDescription = params.get('error_description');
-
-                if (error) {
-                    logger.error('OAuth error in callback', { error, errorDescription });
-                    showError('Authentication Failed', errorDescription || 'OAuth authentication failed');
-                    return;
-                }
-
-                if (accessToken && refreshToken) {
-                    logger.info('Setting OAuth session');
-                    const { error: sessionError } = await supabase.auth.setSession({
-                        access_token: accessToken,
-                        refresh_token: refreshToken
-                    });
-
-                    if (sessionError) {
-                        logger.error('Error setting OAuth session', sessionError);
-                        showError('Authentication Failed', 'Failed to establish session');
-                    } else {
-                        logger.info('OAuth session set successfully');
-                    }
-                } else {
-                    logger.warn('OAuth callback missing tokens', { hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
-                }
-            } else {
-                logger.warn('No token part found in OAuth callback hash');
-            }
-        } catch (error) {
-            logger.error('Unexpected error in OAuth callback', error);
-            showError('Authentication Error', 'An unexpected error occurred during authentication');
-        } finally {
-            // Clean up OAuth tokens from URL
-            window.history.replaceState(null, '', window.location.pathname);
-        }
-    };
-
-    const handleUserSignIn = async (user: any) => {
-        try {
-            console.log('🔐 Handling user sign in for:', user.email);
-
-            // Try to fetch from users table first (our main table)
-            let profile = null;
-            let fetchError = null;
-
-            try {
-                console.log('📊 Fetching user profile from users table...');
-                const result = await supabase
-                    .from('users')
-                    .select('id, name, email, role, avatar, company_id')
-                    .eq('id', user.id)
-                    .single();
-
-                profile = result.data;
-                fetchError = result.error;
-
-                if (profile) {
-                    console.log('✅ Profile found in users table:', profile.name);
-                } else if (fetchError) {
-                    console.warn('⚠️ Error fetching from users table:', fetchError.message);
-                }
-            } catch (error) {
-                console.warn('⚠️ Exception fetching from users table:', error);
-            }
-
-            // If not found in users table, try profiles table as fallback
-            if (!profile) {
-                try {
-                    console.log('📊 Trying profiles table as fallback...');
-                    const result = await supabase
-                        .from('profiles')
-                        .select('id, name, email, role, avatar, company_id')
-                        .eq('id', user.id)
-                        .single();
-
-                    profile = result.data;
-                    if (profile) {
-                        console.log('✅ Profile found in profiles table:', profile.name);
-                    }
-                } catch (error) {
-                    console.warn('⚠️ Profiles table also failed:', error);
-                }
-            }
-
-            let finalProfile = profile;
-
-            // If no profile exists in either table, create a profile from user metadata
-            if (!profile) {
-                console.warn('⚠️ No profile found in database, creating from user metadata');
-                finalProfile = {
-                    id: user.id,
-                    email: user.email || '',
-                    name: user.user_metadata?.full_name ||
-                        user.user_metadata?.name ||
-                        user.email?.split('@')[0] || 'User',
-                    role: user.email === 'adrian.stanca1@gmail.com' ? 'super_admin' : 'company_admin',
-                    avatar: user.user_metadata?.avatar_url || user.user_metadata?.picture,
-                    company_id: undefined
-                };
-                console.log('✅ Created profile from metadata:', finalProfile);
-            }
-
-            // Convert snake_case to camelCase
-            const userProfile = finalProfile ? {
-                id: finalProfile.id,
-                name: finalProfile.name,
-                email: finalProfile.email,
-                role: finalProfile.role,
-                avatar: finalProfile.avatar,
-                companyId: finalProfile.company_id
-            } : null;
-
-            console.log('👤 Final user profile:', userProfile);
-            console.log('🎯 User role from profile:', userProfile?.role);
-            console.log('🎯 Is developer?', userProfile?.role === 'developer');
-
-            console.log('📝 Setting currentUser state:', userProfile);
-            setCurrentUser(userProfile);
-
-            if (userProfile) {
-                // Navigate to dashboard after successful login
-                console.log('🚀 Navigating to dashboard...');
-                console.log('📍 Current navigation stack before:', navigationStack);
-                const defaultScreenForRole: Screen = userProfile.role === 'developer'
-                    ? 'developer-console'
-                    : userProfile.role === 'super_admin'
-                        ? 'super-admin-dashboard'
-                        : 'company-admin-dashboard';
-                navigateToModule(defaultScreenForRole, {});
-                console.log('📍 Navigation stack set to', defaultScreenForRole);
-
-                window.dispatchEvent(new CustomEvent('userLoggedIn'));
-                showSuccess('Welcome back!', `Hello ${userProfile.name}`);
-                logger.logUserAction('login_successful', { userId: userProfile.id, userEmail: userProfile.email }, userProfile.id);
-                console.log('✅ User sign in completed successfully');
-                console.log('👤 Current user should now be:', userProfile);
-            }
-        } catch (error) {
-            console.error('❌ Error in sign in:', error);
-            // Even on error, try to set a basic user profile so the app doesn't break
-            const fallbackProfile: User = {
-                id: user.id,
-                name: user.email?.split('@')[0] || 'User',
-                email: user.email || '',
-                role: (user.email === 'adrian.stanca1@gmail.com' ? 'super_admin' : 'company_admin') as any,
-                avatar: null,
-                companyId: undefined
-            };
-            console.log('🔄 Using fallback profile:', fallbackProfile);
-            setCurrentUser(fallbackProfile);
-            const fallbackScreen: Screen = fallbackProfile.role === 'developer'
-                ? 'developer-console'
-                : fallbackProfile.role === 'super_admin'
-                    ? 'super-admin-dashboard'
-                    : 'company-admin-dashboard';
-            navigateToModule(fallbackScreen, {});
-        }
-    };
-
+    // Check for existing session on mount
     useEffect(() => {
-        // Check for existing session on mount
         const checkSession = async () => {
             try {
                 console.log('🔍 Checking for existing session...');
@@ -374,12 +201,8 @@ const App: React.FC = () => {
                     setCurrentUser(user);
                     if (navigationStack.length === 0) {
                         console.log('🔄 Navigating to dashboard from session restore...');
-                        const defaultScreenForRole: Screen = user.role === 'developer'
-                            ? 'developer-console'
-                            : user.role === 'super_admin'
-                                ? 'super-admin-dashboard'
-                                : 'company-admin-dashboard';
-                        navigateToModule(defaultScreenForRole, {});
+                        const defaultScreen = getDefaultScreenForRole(user.role);
+                        navigateToModule(defaultScreen, {});
                     }
                     window.dispatchEvent(new CustomEvent('userLoggedIn'));
                 } else {
@@ -393,14 +216,17 @@ const App: React.FC = () => {
         };
 
         checkSession();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Only run on mount
 
-    // Handle URL hash for OAuth redirects
+    // Handle URL hash for dashboard navigation
     useEffect(() => {
+        if (!currentUser) return;
+
         const handleHashChange = () => {
             const hash = window.location.hash;
-            if (hash === '#dashboard' && currentUser) {
-                const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-console' : currentUser.role === 'super_admin' ? 'super-admin-dashboard' : 'company-admin-dashboard';
+            if (hash === '#dashboard') {
+                const targetScreen = getDefaultScreenForRole(currentUser.role);
                 navigateToModule(targetScreen, {});
                 // Clean up the hash
                 window.history.replaceState(null, '', window.location.pathname);
@@ -416,24 +242,16 @@ const App: React.FC = () => {
         return () => {
             window.removeEventListener('hashchange', handleHashChange);
         };
-    }, [currentUser]);
+    }, [currentUser, navigateToModule]);
 
 
+    // Load projects and ensure navigation when user logs in
     useEffect(() => {
         if (currentUser) {
             const loadProjects = async () => {
                 try {
-                    const token = localStorage.getItem('token') || localStorage.getItem('constructai_token');
-                    const response = await fetch('http://localhost:3001/api/projects', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (response.ok) {
-                        const projects = await response.json();
-                        setAllProjects(projects);
-                    }
+                    const projects = await apiClient.fetchProjects();
+                    setAllProjects(projects);
                 } catch (error) {
                     console.error('Error loading projects:', error);
                     setAllProjects([]);
@@ -444,11 +262,7 @@ const App: React.FC = () => {
             // Ensure user is navigated to dashboard if no navigation exists
             if (navigationStack.length === 0) {
                 console.log('🔄 No navigation stack - navigating to dashboard...');
-                const defaultScreen: Screen = currentUser.role === 'developer'
-                    ? 'developer-console'
-                    : currentUser.role === 'super_admin'
-                        ? 'super-admin-dashboard'
-                        : 'company-admin-dashboard';
+                const defaultScreen = getDefaultScreenForRole(currentUser.role);
                 navigateToModule(defaultScreen, {});
             }
         } else {
@@ -458,15 +272,17 @@ const App: React.FC = () => {
             }
             setAllProjects([]);
         }
-    }, [currentUser]);
+    }, [currentUser, navigationStack.length, navigateToModule, setNavigationStack]);
 
+    // Listen for logout trigger events
     useEffect(() => {
         const handleLogoutTrigger = () => {
             handleLogout();
         };
         window.addEventListener('userLoggedOutTrigger', handleLogoutTrigger);
         return () => window.removeEventListener('userLoggedOutTrigger', handleLogoutTrigger);
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // handleLogout is stable
 
     const handleLoginSuccess = (user: User) => {
         console.log('✅ Login successful:', user.name);
@@ -517,23 +333,13 @@ const App: React.FC = () => {
         setIsAISuggestionLoading(true);
         setAiSuggestion(null);
         try {
-            const token = localStorage.getItem('token') || localStorage.getItem('constructai_token');
-            const response = await fetch('http://localhost:3001/api/ai/suggest', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: currentUser.id })
-            });
-            if (response.ok) {
-                const suggestion = await response.json();
-                setAiSuggestion(suggestion);
-            }
+            const suggestion = await apiClient.getAISuggestion(currentUser.id);
+            setAiSuggestion(suggestion);
         } catch (error) {
             console.error('Error getting AI suggestion:', error);
+        } finally {
+            setIsAISuggestionLoading(false);
         }
-        setIsAISuggestionLoading(false);
     };
 
     const handleAISuggestionAction = (link: NotificationLink) => {
@@ -575,60 +381,69 @@ const App: React.FC = () => {
     // If no navigation stack, show dashboard directly
     if (!currentNavItem || navigationStack.length === 0) {
         console.log('🏠 No navigation - showing dashboard directly');
-        console.log('🎯 Current user role at render:', currentUser?.role);
-        console.log('🎯 Is developer at render?', currentUser?.role === 'developer');
-        const dashboardProps = {
+        console.log('🎯 Current user role:', currentUser.role);
+
+        const commonProps = {
             currentUser,
-            navigateTo,
-            onDeepLink: handleDeepLinkWrapper,
-            onQuickAction: handleQuickAction,
-            onSuggestAction: handleSuggestAction,
-            selectProject: (id: string) => {
-                const project = allProjects.find(p => p.id === id);
-                if (project) selectProject(project);
-            },
-            can: () => true, // Simple permission check - allow all for now
-            goBack
+            navigateTo: navigateToModule,
+            isDarkMode: true
         };
 
-        if (currentUser.role === 'developer') {
-            console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Developer Dashboard V2');
-            console.log('👤 Current user:', currentUser);
-            return (
-                <Suspense fallback={<ScreenLoader />}>
-                    <DeveloperDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
-                </Suspense>
-            );
+        // Render role-specific dashboard
+        switch (currentUser.role) {
+            case 'developer':
+                console.log('🎯 Rendering Developer Dashboard');
+                return (
+                    <Suspense fallback={<ScreenLoader />}>
+                        <DeveloperDashboardV2 {...commonProps} />
+                    </Suspense>
+                );
+
+            case 'super_admin':
+                console.log('🎯 Rendering Super Admin Dashboard');
+                return (
+                    <Suspense fallback={<ScreenLoader />}>
+                        <SuperAdminDashboardV2
+                            isDarkMode={true}
+                            onNavigate={(section) => {
+                                console.log('Navigating to section:', section);
+                                showSuccess('Navigation', `Opening ${section}...`);
+                            }}
+                        />
+                    </Suspense>
+                );
+
+            case 'company_admin':
+                console.log('🎯 Rendering Company Admin Dashboard');
+                return (
+                    <Suspense fallback={<ScreenLoader />}>
+                        <CompanyAdminDashboardV2 {...commonProps} />
+                    </Suspense>
+                );
+
+            default:
+                // Fallback to unified dashboard
+                const dashboardProps = {
+                    currentUser,
+                    navigateTo,
+                    onDeepLink: handleDeepLinkWrapper,
+                    onQuickAction: handleQuickAction,
+                    onSuggestAction: handleSuggestAction,
+                    selectProject: (id: string) => {
+                        const project = allProjects.find(p => p.id === id);
+                        if (project) selectProject(project);
+                    },
+                    can,
+                    goBack
+                };
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        <Suspense fallback={<ScreenLoader />}>
+                            <UnifiedDashboardScreen {...dashboardProps} />
+                        </Suspense>
+                    </div>
+                );
         }
-        if (currentUser.role === 'super_admin') {
-            console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
-            return (
-                <Suspense fallback={<ScreenLoader />}>
-                    <SuperAdminDashboardV2
-                        isDarkMode={true}
-                        onNavigate={(section) => {
-                            console.log('Navigating to section:', section);
-                            toast.success(`Opening ${section}...`);
-                        }}
-                    />
-                </Suspense>
-            );
-        }
-        if (currentUser.role === 'company_admin') {
-            console.log('🎯 COMPANY ADMIN ROLE DETECTED - Rendering Company Admin Dashboard V2');
-            return (
-                <Suspense fallback={<ScreenLoader />}>
-                    <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
-                </Suspense>
-            );
-        }
-        return (
-            <div className="min-h-screen bg-gray-50">
-                <Suspense fallback={<ScreenLoader />}>
-                    <UnifiedDashboardScreen {...dashboardProps} />
-                </Suspense>
-            </div>
-        );
     }
 
     const { screen, params, project } = currentNavItem;
@@ -650,29 +465,23 @@ const App: React.FC = () => {
         if (project) {
             return project;
         }
+        // Return a minimal project object for global view
         return {
-            ...MOCK_PROJECT,
             id: '',
             name: 'Global View',
             location: `Welcome, ${currentUser?.name || 'User'}`,
+            companyId: currentUser?.companyId || '',
+            status: 'active' as const,
+            startDate: new Date().toISOString(),
+            budget: 0,
+            spent: 0
         };
-    }, [project, currentUser?.name]);
+    }, [project, currentUser?.name, currentUser?.companyId]);
 
     const sidebarGoHome = useCallback(() => {
-        if (currentUser.role === 'developer') {
-            navigateToModule('developer-console');
-            return;
-        }
-        if (currentUser.role === 'super_admin') {
-            navigateToModule('super-admin-dashboard');
-            return;
-        }
-        if (currentUser.role === 'company_admin') {
-            navigateToModule('company-admin-dashboard');
-            return;
-        }
-        goHome();
-    }, [currentUser.role, navigateToModule, goHome]);
+        const defaultScreen = getDefaultScreenForRole(currentUser.role);
+        navigateToModule(defaultScreen);
+    }, [currentUser.role, navigateToModule]);
 
     // Handle app launch from My Applications
     const handleLaunchApp = useCallback((appCode: string) => {
