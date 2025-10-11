@@ -62,13 +62,14 @@ export async function generatePDF(
                     yPosition += 10;
                     break;
                     
-                case 'text':
+                case 'text': {
                     doc.setFontSize(section.style?.fontSize || 12);
                     doc.setFont('helvetica', 'normal');
                     const lines = doc.splitTextToSize(section.content, pageWidth - 2 * margin);
                     doc.text(lines, margin, yPosition);
                     yPosition += lines.length * 7;
                     break;
+                }
                     
                 case 'table':
                     autoTable(doc, {
@@ -394,4 +395,3 @@ async function loadImage(url: string): Promise<string> {
         img.src = url;
     });
 }
-

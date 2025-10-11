@@ -4,7 +4,6 @@
  */
 
 import Database from 'better-sqlite3';
-import { v4 as uuidv4 } from 'uuid';
 
 const db = new Database('./cortexbuild.db');
 db.pragma('foreign_keys = ON');
@@ -248,4 +247,3 @@ try {
 } finally {
     db.close();
 }
-

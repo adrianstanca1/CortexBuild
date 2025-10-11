@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 
+/* eslint-env node */
+
 /**
  * Platform Testing Script
  * Tests all major platform components
  */
 
 const http = require('http');
+const console = require('console');
+const { Buffer } = require('buffer');
+const process = require('process');
 
 // ANSI color codes
 const colors = {
@@ -41,10 +46,6 @@ function fail(message) {
     log(`❌ ${message}`, 'red');
     results.failed++;
     results.total++;
-}
-
-function info(message) {
-    log(`ℹ️  ${message}`, 'cyan');
 }
 
 function header(message) {
@@ -151,8 +152,8 @@ async function testAuthEndpoints() {
                 } else {
                     fail('Login response format incorrect');
                 }
-            } catch (e) {
-                fail('Login response is not valid JSON');
+            } catch (error) {
+                fail(`Login response is not valid JSON: ${error.message}`);
             }
         } else {
             fail(`Login endpoint returned status ${response.statusCode}`);
@@ -281,4 +282,3 @@ runTests().catch(error => {
     log(`\n❌ Test runner error: ${error.message}`, 'red');
     process.exit(1);
 });
-
