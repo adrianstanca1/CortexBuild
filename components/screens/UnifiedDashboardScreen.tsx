@@ -2,7 +2,7 @@ import React from 'react';
 import { User, Screen, PermissionAction, PermissionSubject } from '../../types';
 import PlatformAdminScreen from './admin/PlatformAdminScreen';
 import SuperAdminDashboardScreen from './admin/SuperAdminDashboardScreen';
-import CompanyAdminDashboard from './dashboards/CompanyAdminDashboard';
+import CompanyAdminDashboard from './company/CompanyAdminDashboard';
 import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard';
 import DeveloperWorkspaceScreen from './developer/DeveloperWorkspaceScreen';
 
