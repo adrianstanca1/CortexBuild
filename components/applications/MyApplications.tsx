@@ -128,10 +128,28 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
     const handleLaunchApp = (app: InstalledApp) => {
         if (onLaunchApp) {
             onLaunchApp(app.code);
-            toast.success(`Launching ${app.name}...`);
+            toast.success(`🚀 Launching ${app.name}...`);
         } else {
             toast.error('App launcher not available');
         }
+    };
+
+    const getMagicScore = (app: InstalledApp) => {
+        try {
+            const config = typeof app.config === 'string' ? JSON.parse(app.config) : app.config;
+            if (config?.magicScore) return config.magicScore;
+            if (config?.accuracy) return config.accuracy;
+        } catch (e) {
+            // Ignore parsing errors
+        }
+
+        // Default magic scores for known apps
+        if (app.name.includes('Oracle')) return 99;
+        if (app.name.includes('Predictive')) return 97;
+        if (app.name.includes('Intelligent')) return 96;
+        if (app.name.includes('Magic')) return 95;
+        if (app.name.includes('AI')) return 92;
+        return 85;
     };
 
     const getCategoryIcon = (category: string) => {
@@ -151,7 +169,7 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
 
     const filteredApps = apps.filter(app => {
         const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            app.description.toLowerCase().includes(searchQuery.toLowerCase());
+            app.description.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === 'all' || app.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
@@ -160,13 +178,12 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
 
     const renderAppCard = (app: InstalledApp) => {
         const isMagic = app.category.includes('Magic') || app.config?.magical;
-        
+
         return (
             <div
                 key={app.id}
-                className={`${cardClass} border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-105 ${
-                    isMagic ? 'border-purple-500/30 bg-gradient-to-br from-purple-900/20 to-pink-900/20' : ''
-                }`}
+                className={`${cardClass} border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-105 ${isMagic ? 'border-purple-500/30 bg-gradient-to-br from-purple-900/20 to-pink-900/20' : ''
+                    }`}
             >
                 {/* App Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -231,20 +248,18 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
                     <button
                         type="button"
                         onClick={() => handleLaunchApp(app)}
-                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center space-x-2 ${
-                            isMagic 
-                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
+                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center space-x-2 ${isMagic
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
                     >
                         <Play className="w-4 h-4" />
                         <span>Launch</span>
                     </button>
                     <button
                         type="button"
-                        className={`px-3 py-2 border rounded-lg transition-all hover:bg-gray-50 ${
-                            isDarkMode ? 'border-gray-600 hover:bg-gray-700' : 'border-gray-300'
-                        }`}
+                        className={`px-3 py-2 border rounded-lg transition-all hover:bg-gray-50 ${isDarkMode ? 'border-gray-600 hover:bg-gray-700' : 'border-gray-300'
+                            }`}
                     >
                         <Settings className="w-4 h-4" />
                     </button>
@@ -267,22 +282,30 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
                         <p className={mutedClass}>Manage your installed construction apps</p>
                     </div>
                     <div className="flex items-center space-x-4">
+                        <div className="text-right mr-4">
+                            <div className="text-2xl font-bold text-white">{apps.length}</div>
+                            <div className="text-sm text-gray-400">Total Apps</div>
+                        </div>
+                        <div className="text-right mr-4">
+                            <div className="text-2xl font-bold text-purple-400">
+                                {apps.filter(app => app.category?.includes('Magic') || app.category?.includes('AI')).length}
+                            </div>
+                            <div className="text-sm text-gray-400">Magic Apps</div>
+                        </div>
                         <div className="flex space-x-2">
                             <button
                                 type="button"
                                 onClick={() => setViewMode('grid')}
-                                className={`p-2 rounded-lg transition-all ${
-                                    viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-                                }`}
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                                    }`}
                             >
                                 <Grid3x3 className="w-5 h-5" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setViewMode('list')}
-                                className={`p-2 rounded-lg transition-all ${
-                                    viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-                                }`}
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                                    }`}
                             >
                                 <List className="w-5 h-5" />
                             </button>
@@ -297,6 +320,36 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
                         </button>
                     </div>
                 </div>
+
+                {/* Magic Insights Section */}
+                {apps.filter(app => app.category?.includes('Magic') || app.category?.includes('AI')).length > 0 && (
+                    <div className="mt-4 mx-6 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/30">
+                        <div className="flex items-center space-x-2 mb-3">
+                            <Sparkles className="w-5 h-5 text-yellow-400" />
+                            <h3 className="text-lg font-semibold text-white">Magic Insights</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-yellow-400">
+                                    {Math.round(apps.filter(app => app.category?.includes('Magic') || app.category?.includes('AI'))
+                                        .reduce((sum, app) => sum + getMagicScore(app), 0) /
+                                        Math.max(apps.filter(app => app.category?.includes('Magic') || app.category?.includes('AI')).length, 1))}%
+                                </div>
+                                <div className="text-sm text-gray-400">Average Magic Score</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-purple-400">
+                                    {apps.filter(app => getMagicScore(app) >= 95).length}
+                                </div>
+                                <div className="text-sm text-gray-400">Revolutionary Apps</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-pink-400">∞</div>
+                                <div className="text-sm text-gray-400">Magical Possibilities</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Filters */}
@@ -342,11 +395,10 @@ const MyApplications: React.FC<MyApplicationsProps> = ({
                         <p className={mutedClass}>Install apps from the marketplace to get started</p>
                     </div>
                 ) : (
-                    <div className={`grid gap-6 ${
-                        viewMode === 'grid' 
-                            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                            : 'grid-cols-1'
-                    }`}>
+                    <div className={`grid gap-6 ${viewMode === 'grid'
+                        ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                        : 'grid-cols-1'
+                        }`}>
                         {filteredApps.map(renderAppCard)}
                     </div>
                 )}

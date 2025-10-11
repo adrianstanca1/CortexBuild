@@ -7,7 +7,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Package, Search, Filter, Download, Star, TrendingUp,
     Clock, CheckCircle, XCircle, AlertCircle, Grid3x3, List,
-    Eye, Users, Building2
+    Eye, Users, Building2, Sparkles, Crystal, Zap, Brain,
+    Shield, FileText, DollarSign, Calendar, Target, Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -76,12 +77,12 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             setLoading(true);
             const token = localStorage.getItem('token');
             const params = new URLSearchParams();
-            
+
             if (selectedCategory !== 'all') params.append('category', selectedCategory);
             if (searchQuery) params.append('search', searchQuery);
             params.append('sort', sortBy);
 
-            const endpoint = token 
+            const endpoint = token
                 ? 'http://localhost:3001/api/global-marketplace/apps/detailed'
                 : 'http://localhost:3001/api/global-marketplace/apps';
 
@@ -90,7 +91,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
 
             const response = await fetch(`${endpoint}?${params}`, { headers });
             const data = await response.json();
-            
+
             if (data.success) {
                 setApps(data.apps);
             }
@@ -119,7 +120,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 toast.success('App installed successfully!');
                 fetchApps(); // Refresh to update install status
@@ -149,7 +150,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 toast.success('App installed for entire company!');
                 fetchApps(); // Refresh to update install status
@@ -162,32 +163,101 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
         }
     };
 
+    // Helper functions for magic apps
+    const isMagicApp = (app: App) => {
+        return app.category?.includes('Magic') ||
+            app.category?.includes('AI') ||
+            app.name.includes('🔮') ||
+            app.name.includes('✨') ||
+            app.name.includes('⚡') ||
+            app.name.includes('🧠') ||
+            app.name.includes('🌟');
+    };
+
+    const getMagicScore = (app: App) => {
+        // Extract magic score from config or generate based on app type
+        try {
+            const config = typeof app.config === 'string' ? JSON.parse(app.config) : app.config;
+            if (config?.magicScore) return config.magicScore;
+            if (config?.accuracy) return config.accuracy;
+        } catch (e) {
+            // Ignore parsing errors
+        }
+
+        // Default magic scores for known apps
+        if (app.name.includes('Oracle')) return 99;
+        if (app.name.includes('Predictive')) return 97;
+        if (app.name.includes('Intelligent')) return 96;
+        if (app.name.includes('Magic')) return 95;
+        if (app.name.includes('AI')) return 92;
+        return 85;
+    };
+
+    const getCategoryIcon = (category: string) => {
+        switch (category.toLowerCase()) {
+            case 'ai & magic': return <Crystal className="w-4 h-4 text-purple-500" />;
+            case 'workflow automation': return <Zap className="w-4 h-4 text-blue-500" />;
+            case 'ai & automation': return <Brain className="w-4 h-4 text-green-500" />;
+            case 'safety & compliance': return <Shield className="w-4 h-4 text-red-500" />;
+            case 'quality control': return <Eye className="w-4 h-4 text-orange-500" />;
+            case 'document management': return <FileText className="w-4 h-4 text-indigo-500" />;
+            case 'financial management': return <DollarSign className="w-4 h-4 text-yellow-500" />;
+            case 'project management': return <Calendar className="w-4 h-4 text-pink-500" />;
+            case 'simulation & modeling': return <Layers className="w-4 h-4 text-cyan-500" />;
+            default: return <Package className="w-4 h-4 text-gray-500" />;
+        }
+    };
+
     const renderAppCard = (app: App) => {
         const isInstalledByMe = app.is_installed_by_me === 1;
         const isInstalledByCompany = app.is_installed_by_company === 1;
         const totalInstalls = app.install_count + app.company_install_count;
         const isAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'company_admin';
+        const isMagic = isMagicApp(app);
+        const magicScore = getMagicScore(app);
 
         return (
             <div
                 key={app.id}
-                className={`${cardClass} border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-105`}
+                className={`${cardClass} border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-105 ${isMagic ? 'border-purple-500/30 bg-gradient-to-br from-purple-900/20 to-pink-900/20' : ''
+                    }`}
             >
                 {/* App Icon & Name */}
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                        <div className="text-4xl">{app.icon}</div>
+                        <div className={`text-4xl ${isMagic ? 'animate-pulse' : ''}`}>
+                            {app.icon}
+                        </div>
                         <div>
-                            <h3 className={`text-lg font-bold ${textClass}`}>{app.name}</h3>
-                            <p className={`text-sm ${mutedClass}`}>v{app.version}</p>
+                            <h3 className={`text-lg font-bold ${textClass} flex items-center`}>
+                                {app.name}
+                                {isMagic && <Sparkles className="w-4 h-4 ml-2 text-yellow-400" />}
+                            </h3>
+                            <div className="flex items-center space-x-2">
+                                {getCategoryIcon(app.category)}
+                                <span className={`text-sm ${mutedClass}`}>v{app.version}</span>
+                                {isMagic && (
+                                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                                        Magic
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
-                    {(isInstalledByMe || isInstalledByCompany) && (
-                        <div className="flex items-center space-x-1 text-green-500 text-sm">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>Installed</span>
-                        </div>
-                    )}
+                    <div className="flex flex-col items-end space-y-2">
+                        {(isInstalledByMe || isInstalledByCompany) && (
+                            <div className="flex items-center space-x-1 text-green-500 text-sm">
+                                <CheckCircle className="w-4 h-4" />
+                                <span>Installed</span>
+                            </div>
+                        )}
+                        {isMagic && (
+                            <div className="flex items-center space-x-1">
+                                <Sparkles className="w-4 h-4 text-yellow-400" />
+                                <span className="text-sm text-yellow-400 font-medium">{magicScore}%</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Description */}
@@ -213,11 +283,15 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                 <div className="flex space-x-2">
                     {!isInstalledByMe && (
                         <button
+                            type="button"
                             onClick={() => handleInstallIndividual(app.id)}
-                            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                            className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors flex items-center justify-center space-x-2 ${isMagic
+                                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                                    : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
                         >
                             <Download className="w-4 h-4" />
-                            <span>Install for Me</span>
+                            <span>{isMagic ? 'Install Magic' : 'Install for Me'}</span>
                         </button>
                     )}
                     {isAdmin && !isInstalledByCompany && (
@@ -301,11 +375,10 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                         <button
                             key={category.id}
                             onClick={() => setSelectedCategory(category.id)}
-                            className={`px-4 py-2 rounded-lg transition-all ${
-                                selectedCategory === category.id
-                                    ? 'bg-blue-600 text-white'
-                                    : `${cardClass} ${textClass} hover:bg-blue-600 hover:text-white`
-                            }`}
+                            className={`px-4 py-2 rounded-lg transition-all ${selectedCategory === category.id
+                                ? 'bg-blue-600 text-white'
+                                : `${cardClass} ${textClass} hover:bg-blue-600 hover:text-white`
+                                }`}
                         >
                             <span className="mr-2">{category.icon}</span>
                             {category.name}

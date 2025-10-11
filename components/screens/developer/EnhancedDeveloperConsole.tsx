@@ -48,6 +48,7 @@ import DatabaseViewer from '../../developer/DatabaseViewer';
 import APITester from '../../developer/APITester';
 import Marketplace from '../../apps/Marketplace';
 import AppContainer, { MiniApp } from '../../apps/AppContainer';
+import MagicSDK from '../../developer/MagicSDK';
 import { APP_REGISTRY, installApp as installAppInRegistry } from '../../apps/appRegistry';
 
 // Advanced Development Platform Components
@@ -212,7 +213,7 @@ console.log(user);`
 
 const EnhancedDeveloperConsole: React.FC<EnhancedDeveloperConsoleProps> = ({ onLogout, navigateTo }) => {
     // State
-    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps' | 'code-editor' | 'git-integration' | 'api-builder' | 'testing' | 'analytics' | 'user-roles' | 'teams' | 'app-sharing' | 'billing'>('console');
+    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps' | 'code-editor' | 'git-integration' | 'api-builder' | 'testing' | 'analytics' | 'user-roles' | 'teams' | 'app-sharing' | 'billing' | 'magic-sdk'>('console');
     const [apps, setApps] = useState<MiniApp[]>(APP_REGISTRY);
     const [runningApp, setRunningApp] = useState<MiniApp | null>(null);
     const [code, setCode] = useState<string>('// Write your code here\nconsole.log("Hello, Developer!");');
@@ -593,6 +594,22 @@ Could you be more specific about what you need?`;
                             </div>
                             {activeTab === 'ai' && (
                                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('magic-sdk')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'magic-sdk'
+                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Sparkles className={`h-4 w-4 ${activeTab === 'magic-sdk' ? 'animate-pulse' : ''}`} />
+                                Magic SDK
+                            </div>
+                            {activeTab === 'magic-sdk' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
                             )}
                         </button>
                         <button
@@ -1235,6 +1252,13 @@ Could you be more specific about what you need?`;
                     </div>
                 )}
 
+                {/* Magic SDK Tab */}
+                {activeTab === 'magic-sdk' && (
+                    <div className="h-[700px]">
+                        <MagicSDK isDarkMode={isDarkMode} />
+                    </div>
+                )}
+
                 {/* Running App Container */}
                 {runningApp && (
                     <AppContainer
@@ -1281,6 +1305,18 @@ Could you be more specific about what you need?`;
                                             <Sparkles className="h-4 w-4 text-purple-500" />
                                             <div>
                                                 <div className={textClass}>Open AI Assistant</div>
+                                                <div className="text-xs text-gray-500">Get AI help and suggestions</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={() => { setActiveTab('magic-sdk'); setShowCommandPalette(false); }}
+                                        className={`w-full text-left px-4 py-2 rounded ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Sparkles className="h-4 w-4 text-pink-500" />
+                                            <div>
+                                                <div className={textClass}>Open Magic SDK</div>
                                                 <div className="text-xs text-gray-500">Get coding help from AI</div>
                                             </div>
                                         </div>
