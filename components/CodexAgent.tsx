@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { CodexSDK, CodexThread, CodexMessage, CodexResult } from '@/lib/integrations/codex-sdk';
+import { CodexSDK, CodexThread, CodexMessage, CodexResult } from '../lib/integrations/codex-sdk';
 import { Send, Code, FileText, CheckCircle, AlertCircle, Loader, Sparkles } from 'lucide-react';
 
 interface CodexAgentProps {
@@ -174,16 +174,14 @@ export const CodexAgent: React.FC<CodexAgentProps> = ({
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
+            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'
+              }`}
           >
             <div
-              className={`max-w-[80%] rounded-lg px-4 py-3 ${
-                message.role === 'user'
+              className={`max-w-[80%] rounded-lg px-4 py-3 ${message.role === 'user'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-              }`}
+                }`}
             >
               <div className="whitespace-pre-wrap text-sm">{message.content}</div>
 
