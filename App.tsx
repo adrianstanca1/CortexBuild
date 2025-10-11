@@ -37,6 +37,7 @@ import DeveloperWorkspaceScreen from './components/screens/developer/DeveloperWo
 import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
 import ModernDeveloperDashboard from './components/screens/developer/ModernDeveloperDashboard';
 import DeveloperDashboardV2 from './components/screens/developer/DeveloperDashboardV2';
+import ConstructionAutomationStudio from './components/screens/developer/ConstructionAutomationStudio';
 import CompanyAdminDashboardScreen from './components/screens/company/CompanyAdminDashboardScreen';
 import CompanyAdminDashboard from './components/screens/company/CompanyAdminDashboard';
 import CompanyAdminDashboardV2 from './components/screens/company/CompanyAdminDashboardV2';
@@ -128,6 +129,7 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'business-development': BusinessDevelopmentScreen,
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
     'developer-dashboard': ModernDeveloperDashboard,
+    'automation-studio': ConstructionAutomationStudio,
     'developer-workspace': DeveloperWorkspaceScreen,
     'developer-console': EnhancedDeveloperConsole,
     'super-admin-dashboard': SuperAdminDashboardScreen,

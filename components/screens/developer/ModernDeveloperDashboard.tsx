@@ -50,6 +50,14 @@ const ModernDeveloperDashboard: React.FC<ModernDeveloperDashboardProps> = ({
     // Development Tools - Pure Development Functions
     const developmentTools = [
         {
+            id: 'automation-studio',
+            title: 'Automation Studio',
+            description: 'Visual runtime orchestration for Procore automations',
+            icon: Activity,
+            color: 'cyan',
+            action: () => navigateTo('automation-studio')
+        },
+        {
             id: 'code-editor',
             title: 'Code Editor',
             description: 'Advanced Monaco editor with IntelliSense',
@@ -121,6 +129,11 @@ const ModernDeveloperDashboard: React.FC<ModernDeveloperDashboardProps> = ({
             label: 'New Project',
             icon: FileCode,
             action: () => toast.success('Creating new project...')
+        },
+        {
+            label: 'Automation Studio',
+            icon: Zap,
+            action: () => navigateTo('automation-studio')
         },
         {
             label: 'Run Tests',

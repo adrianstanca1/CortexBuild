@@ -7,7 +7,7 @@ import {
     ChevronLeftIcon, BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
     CheckBadgeIcon, DocumentDuplicateIcon, CameraIcon, ClipboardDocumentListIcon,
     BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
-    WandSparklesIcon
+    WandSparklesIcon, ArrowPathIcon
 } from '../Icons';
 
 interface SidebarProps {
@@ -124,6 +124,12 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
             label: 'Developer Console',
             screen: 'developer-console',
             icon: WandSparklesIcon,
+            isModule: true
+        },
+        {
+            label: 'Automation Studio',
+            screen: 'automation-studio',
+            icon: ArrowPathIcon,
             isModule: true
         },
         {

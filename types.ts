@@ -111,6 +111,7 @@ export type Screen =
     | 'business-development'
     | 'ai-agents-marketplace'
     | 'developer-dashboard'
+    | 'automation-studio'
     | 'developer-console'
     | 'company-admin-dashboard'
     | 'super-admin-dashboard'
