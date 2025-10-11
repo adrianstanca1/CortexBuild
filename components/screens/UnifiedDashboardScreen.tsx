@@ -23,51 +23,45 @@ const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) =>
     const [showEnhancedDashboard, setShowEnhancedDashboard] = React.useState(true);
 
     // Route to the correct dashboard based on the user's role
-    switch (currentUser.role) {
-        case 'super_admin':
-            if (showEnhancedDashboard) {
-                return (
-                    <div>
-                        <div className="mb-4 flex justify-end">
-                            <button
-                                type="button"
-                                onClick={() => setShowEnhancedDashboard(false)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                Switch to Platform Admin
-                            </button>
-                        </div>
-                        <SuperAdminDashboardScreen />
-                    </div>
-                );
-            }
+    if (currentUser.role === 'super_admin') {
+        if (showEnhancedDashboard) {
             return (
                 <div>
                     <div className="mb-4 flex justify-end">
                         <button
                             type="button"
-                            onClick={() => setShowEnhancedDashboard(true)}
+                            onClick={() => setShowEnhancedDashboard(false)}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
-                            Back to Super Admin Dashboard
+                            Switch to Platform Admin
                         </button>
                     </div>
-                    <PlatformAdminScreen {...props} />
+                    <SuperAdminDashboardScreen />
                 </div>
             );
-
-        case 'developer':
-            return <DeveloperWorkspaceScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
-
-        case 'company_admin':
-        case 'Project Manager':
-        case 'Accounting Clerk':
-        case 'Foreman':
-        case 'Safety Officer':
-        case 'operative':
-        default:
-            return <CompanyAdminDashboard {...props} />;
+        }
+        return (
+            <div>
+                <div className="mb-4 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={() => setShowEnhancedDashboard(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Back to Super Admin Dashboard
+                    </button>
+                </div>
+                <PlatformAdminScreen {...props} />
+            </div>
+        );
     }
+
+    if (currentUser.role === 'developer') {
+        return <DeveloperWorkspaceScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
+    }
+
+    // Default for all other roles
+    return <CompanyAdminDashboard {...props} />;
 };
 
 export default UnifiedDashboardScreen;
