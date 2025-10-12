@@ -21,6 +21,8 @@ import { initWebVitals } from './src/monitoring/webVitals';
 import { initPerformanceObservers } from './src/monitoring/performanceObserver';
 import { initMetricsCollector } from './src/monitoring/metricsCollector';
 import { initPerformanceAlerting } from './src/monitoring/alerting';
+import { initializeModules, ModuleRegistry } from './src/modules';
+import { useModule } from './src/modules/useModule';
 
 // Lazily loaded screens and feature modules
 const ChatbotWidget = lazy(() =>
@@ -107,64 +109,37 @@ const getDefaultScreenForRole = (role: string): Screen => {
     }
 };
 
-const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
-    'global-dashboard': UnifiedDashboardScreen,
-    'company-admin-dashboard': CompanyAdminDashboardV2,
-    'projects': ProjectsListScreen,
-    'project-home': ProjectHomeScreen,
-    'my-day': MyDayScreen,
-    'tasks': TasksScreen,
-    'my-tasks': MyTasksScreen,
-    'task-detail': TaskDetailScreen,
-    'new-task': NewTaskScreen,
-    'daily-log': DailyLogScreen,
-    'photos': PhotoGalleryScreen,
-    'rfis': RFIsScreen,
-    'rfi-detail': RFIDetailScreen,
-    'new-rfi': NewRFIScreen,
-    'punch-list': PunchListScreen,
-    'punch-list-item-detail': PunchListItemDetailScreen,
-    'new-punch-list-item': NewPunchListItemScreen,
-    'drawings': DrawingsScreen,
-    'plans': PlansViewerScreen,
-    'daywork-sheets': DayworkSheetsListScreen,
-    'daywork-sheet-detail': DayworkSheetDetailScreen,
-    'new-daywork-sheet': NewDayworkSheetScreen,
-    'documents': DocumentsScreen,
-    'delivery': DeliveryScreen,
-    'drawing-comparison': DrawingComparisonScreen,
-    // Modules
-    'accounting': AccountingScreen,
-    'ai-tools': AIToolsScreen,
-    'document-management': DocumentManagementScreen,
-    'time-tracking': TimeTrackingScreen,
-    'project-operations': ProjectOperationsScreen,
-    'financial-management': FinancialManagementScreen,
-    'business-development': BusinessDevelopmentScreen,
-    'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-    'developer-dashboard': DeveloperDashboardV2,
-    'automation-studio': ConstructionAutomationStudio,
-    'developer-workspace': DeveloperWorkspaceScreen,
-    'developer-console': EnhancedDeveloperConsole,
-    'super-admin-dashboard': SuperAdminDashboardScreen,
-    'sdk-developer': ProductionSDKDeveloperView,
-    'my-apps-desktop': Base44Clone,
-    // Global Marketplace
-    'marketplace': GlobalMarketplace,
-    'my-applications': MyApplications,
-    'admin-review': AdminReviewInterface,
-    'developer-submissions': DeveloperSubmissionInterface,
-    // Workflow Builders
-    'n8n-procore-builder': N8nProcoreWorkflowBuilder,
-    'construction-oracle': ConstructionOracle,
-    // 'zapier-workflow': ZapierStyleWorkflowBuilder,
-    // Admin
-    'platform-admin': PlatformAdminScreen,
-    'admin-control-panel': AdminControlPanel,
-    // ML & Advanced Analytics
-    'ml-analytics': AdvancedMLDashboard,
-    // Tools
-    'placeholder-tool': PlaceholderToolScreen,
+// Initialize module system on app load
+initializeModules();
+
+// Helper function to get screen component from module registry
+const getScreenComponent = (screen: Screen): React.ComponentType<any> | null => {
+    const lazyComponent = ModuleRegistry.getLazyComponent(screen);
+    if (lazyComponent) {
+        return lazyComponent;
+    }
+
+    // Fallback to legacy components for screens not yet in module system
+    const legacyComponents: Partial<Record<Screen, React.ComponentType<any>>> = {
+        'task-detail': TaskDetailScreen,
+        'new-task': NewTaskScreen,
+        'daily-log': DailyLogScreen,
+        'photos': PhotoGalleryScreen,
+        'rfi-detail': RFIDetailScreen,
+        'new-rfi': NewRFIScreen,
+        'punch-list': PunchListScreen,
+        'punch-list-item-detail': PunchListItemDetailScreen,
+        'new-punch-list-item': NewPunchListItemScreen,
+        'drawings': DrawingsScreen,
+        'plans': PlansViewerScreen,
+        'daywork-sheets': DayworkSheetsListScreen,
+        'daywork-sheet-detail': DayworkSheetDetailScreen,
+        'new-daywork-sheet': NewDayworkSheetScreen,
+        'delivery': DeliveryScreen,
+        'drawing-comparison': DrawingComparisonScreen,
+    };
+
+    return legacyComponents[screen] || PlaceholderToolScreen;
 };
 
 const App: React.FC = () => {
@@ -534,8 +509,8 @@ const App: React.FC = () => {
         }
     }
 
-    // Get screen component (screen is already declared at line 196)
-    const ScreenComponent = SCREEN_COMPONENTS[screen || 'unified-dashboard'] || PlaceholderToolScreen;
+    // Get screen component from module registry
+    const ScreenComponent = getScreenComponent(screen || 'global-dashboard') || PlaceholderToolScreen;
 
     if (screen === 'my-apps-desktop') {
         return (

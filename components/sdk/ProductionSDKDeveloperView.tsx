@@ -28,7 +28,7 @@ import {
 import ZapierStyleWorkflowBuilder from './ZapierStyleWorkflowBuilder';
 
 type Provider = 'openai' | 'gemini';
-type TabKey = 'builder' | 'workflows' | 'agents' | 'marketplace' | 'analytics' | 'settings' | 'management' | 'zapier';
+type TabKey = 'builder' | 'workflows' | 'agents' | 'marketplace' | 'analytics' | 'settings' | 'management' | 'zapier' | 'workspace' | 'collaboration';
 
 interface ModelOption {
   id: string;

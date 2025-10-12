@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { authenticateToken } from '../auth';
 import { AICodeGenerator, createAICodeGenerator } from '../services/ai-code-generator';
+import { createWorkspaceManager, WorkspaceManager } from '../services/workspace-manager';
+import { createCollaborationService, CollaborationService } from '../services/collaboration-service';
 
 // Middleware to check if user is a developer
 const requireDeveloper = (req: Request, res: Response, next: any) => {
@@ -95,6 +97,10 @@ export const initSdkTables = (db: Database.Database) => {
       FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `);
+
+  // Initialize workspace and collaboration tables
+  WorkspaceManager.initTables(db);
+  CollaborationService.initTables(db);
 };
 
 export const createSDKRouter = (db: Database.Database) => {
@@ -580,6 +586,369 @@ router.get('/models/:provider', authenticateToken, requireDeveloper, (req: Reque
   } catch (error: any) {
     console.error('Get models error:', error);
     res.status(500).json({ error: 'Failed to get models' });
+  }
+});
+
+// ==========================================
+// WORKSPACE MANAGEMENT ROUTES
+// ==========================================
+
+// Create workspace
+router.post('/workspaces', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { name, description, isPublic, settings } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Workspace name is required' });
+    }
+
+    const workspaceManager = createWorkspaceManager(db);
+    const workspace = workspaceManager.createWorkspace(
+      name.trim(),
+      description || '',
+      user.id,
+      isPublic || false,
+      settings || {}
+    );
+
+    // Add creator as owner
+    workspaceManager.addWorkspaceMember(workspace.id, user.id, 'owner', ['read', 'write', 'admin']);
+
+    res.json({
+      success: true,
+      workspace: {
+        ...workspace,
+        members: workspaceManager.getWorkspaceMembers(workspace.id)
+      }
+    });
+  } catch (error: any) {
+    console.error('Create workspace error:', error);
+    res.status(500).json({ error: 'Failed to create workspace' });
+  }
+});
+
+// Get user workspaces
+router.get('/workspaces', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+
+    const workspaceManager = createWorkspaceManager(db);
+
+    // Get workspaces where user is a member
+    const workspaces = db.prepare(`
+      SELECT w.* FROM workspaces w
+      INNER JOIN workspace_members wm ON w.id = wm.workspace_id
+      WHERE wm.user_id = ?
+      ORDER BY w.created_at DESC
+    `).all(user.id) as any[];
+
+    const workspacesWithMembers = workspaces.map(workspace => ({
+      ...workspace,
+      is_public: Boolean(workspace.is_public),
+      settings: JSON.parse(workspace.settings || '{}'),
+      members: workspaceManager.getWorkspaceMembers(workspace.id)
+    }));
+
+    res.json({
+      success: true,
+      workspaces: workspacesWithMembers
+    });
+  } catch (error: any) {
+    console.error('Get workspaces error:', error);
+    res.status(500).json({ error: 'Failed to get workspaces' });
+  }
+});
+
+// Get workspace details
+router.get('/workspaces/:id', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const db = (req as any).db;
+
+    const workspaceManager = createWorkspaceManager(db);
+    const workspace = workspaceManager.getWorkspace(id);
+
+    if (!workspace) {
+      return res.status(404).json({ error: 'Workspace not found' });
+    }
+
+    res.json({
+      success: true,
+      workspace: {
+        ...workspace,
+        members: workspaceManager.getWorkspaceMembers(id)
+      }
+    });
+  } catch (error: any) {
+    console.error('Get workspace error:', error);
+    res.status(500).json({ error: 'Failed to get workspace' });
+  }
+});
+
+// Add workspace member
+router.post('/workspaces/:id/members', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { userId, role = 'member', permissions = [] } = req.body;
+    const db = (req as any).db;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const workspaceManager = createWorkspaceManager(db);
+    const member = workspaceManager.addWorkspaceMember(id, userId, role, permissions);
+
+    res.json({
+      success: true,
+      member
+    });
+  } catch (error: any) {
+    console.error('Add workspace member error:', error);
+    res.status(500).json({ error: 'Failed to add workspace member' });
+  }
+});
+
+// ==========================================
+// COLLABORATION ROUTES
+// ==========================================
+
+// Create collaboration session
+router.post('/collaboration/sessions', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { workspaceId, name, description, settings } = req.body;
+
+    if (!workspaceId || !name) {
+      return res.status(400).json({ error: 'Workspace ID and name are required' });
+    }
+
+    const collaborationService = createCollaborationService(db);
+    const session = collaborationService.createSession(
+      workspaceId,
+      name,
+      description || '',
+      user.id,
+      settings || {}
+    );
+
+    res.json({
+      success: true,
+      session
+    });
+  } catch (error: any) {
+    console.error('Create collaboration session error:', error);
+    res.status(500).json({ error: 'Failed to create collaboration session' });
+  }
+});
+
+// Join collaboration session
+router.post('/collaboration/sessions/:id/join', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = (req as any).user;
+    const db = (req as any).db;
+
+    const collaborationService = createCollaborationService(db);
+    const session = collaborationService.joinSession(id, user.id);
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found or inactive' });
+    }
+
+    res.json({
+      success: true,
+      session
+    });
+  } catch (error: any) {
+    console.error('Join session error:', error);
+    res.status(500).json({ error: 'Failed to join session' });
+  }
+});
+
+// Leave collaboration session
+router.post('/collaboration/sessions/:id/leave', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = (req as any).user;
+    const db = (req as any).db;
+
+    const collaborationService = createCollaborationService(db);
+    const success = collaborationService.leaveSession(id, user.id);
+
+    if (!success) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Leave session error:', error);
+    res.status(500).json({ error: 'Failed to leave session' });
+  }
+});
+
+// Get session events
+router.get('/collaboration/sessions/:id/events', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { limit = 50 } = req.query;
+    const db = (req as any).db;
+
+    const collaborationService = createCollaborationService(db);
+    const events = collaborationService.getSessionEvents(id, Number(limit));
+
+    res.json({
+      success: true,
+      events
+    });
+  } catch (error: any) {
+    console.error('Get session events error:', error);
+    res.status(500).json({ error: 'Failed to get session events' });
+  }
+});
+
+// Update live cursor
+router.post('/collaboration/cursor', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { sessionId, filePath, lineNumber, column, color } = req.body;
+
+    if (!sessionId || !filePath || lineNumber === undefined || column === undefined) {
+      return res.status(400).json({ error: 'Session ID, file path, line number, and column are required' });
+    }
+
+    const collaborationService = createCollaborationService(db);
+    const cursor = collaborationService.updateLiveCursor(
+      sessionId,
+      user.id,
+      filePath,
+      lineNumber,
+      column,
+      color || '#3B82F6',
+      user.name || 'Unknown User'
+    );
+
+    // Get all cursors for this session
+    const allCursors = collaborationService.getLiveCursors(sessionId);
+
+    res.json({
+      success: true,
+      cursor,
+      allCursors
+    });
+  } catch (error: any) {
+    console.error('Update cursor error:', error);
+    res.status(500).json({ error: 'Failed to update cursor' });
+  }
+});
+
+// Add code comment
+router.post('/collaboration/comments', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { sessionId, filePath, lineNumber, columnStart, columnEnd, content } = req.body;
+
+    if (!sessionId || !filePath || !content) {
+      return res.status(400).json({ error: 'Session ID, file path, and content are required' });
+    }
+
+    const collaborationService = createCollaborationService(db);
+    const comment = collaborationService.addCodeComment(
+      sessionId,
+      filePath,
+      lineNumber || 0,
+      columnStart || 0,
+      columnEnd || 0,
+      content,
+      user.id
+    );
+
+    res.json({
+      success: true,
+      comment
+    });
+  } catch (error: any) {
+    console.error('Add comment error:', error);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
+
+// Get file comments
+router.get('/collaboration/sessions/:id/comments/:filePath', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { id, filePath } = req.params;
+    const db = (req as any).db;
+
+    const collaborationService = createCollaborationService(db);
+    const comments = collaborationService.getFileComments(id, decodeURIComponent(filePath));
+
+    res.json({
+      success: true,
+      comments
+    });
+  } catch (error: any) {
+    console.error('Get file comments error:', error);
+    res.status(500).json({ error: 'Failed to get file comments' });
+  }
+});
+
+// ==========================================
+// PROJECT TEMPLATES
+// ==========================================
+
+// Get project templates
+router.get('/templates', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { category } = req.query;
+    const db = (req as any).db;
+
+    const workspaceManager = createWorkspaceManager(db);
+    const templates = workspaceManager.getProjectTemplates(category as string);
+
+    res.json({
+      success: true,
+      templates
+    });
+  } catch (error: any) {
+    console.error('Get templates error:', error);
+    res.status(500).json({ error: 'Failed to get templates' });
+  }
+});
+
+// Create project template
+router.post('/templates', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { name, description, category, templateData, isPublic } = req.body;
+
+    if (!name || !category || !templateData) {
+      return res.status(400).json({ error: 'Name, category, and template data are required' });
+    }
+
+    const workspaceManager = createWorkspaceManager(db);
+    const template = workspaceManager.createProjectTemplate(
+      name,
+      description || '',
+      category,
+      templateData,
+      user.id,
+      isPublic || false
+    );
+
+    res.json({
+      success: true,
+      template
+    });
+  } catch (error: any) {
+    console.error('Create template error:', error);
+    res.status(500).json({ error: 'Failed to create template' });
   }
 });
 
