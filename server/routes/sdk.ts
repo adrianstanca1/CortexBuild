@@ -51,6 +51,179 @@ export const initSdkTables = (db: Database.Database) => {
     )
   `);
 
+  // Add missing columns to existing sdk_profiles table if they don't exist
+  try {
+    db.exec(`ALTER TABLE sdk_profiles ADD COLUMN subscription_status TEXT DEFAULT 'active'`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_profiles ADD COLUMN stripe_customer_id TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_profiles ADD COLUMN current_period_start DATETIME`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_profiles ADD COLUMN current_period_end DATETIME`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_profiles ADD COLUMN cancel_at_period_end BOOLEAN DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_profiles ADD COLUMN trial_ends_at DATETIME`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  // Add missing columns to sdk_workflows table
+  try {
+    db.exec(`ALTER TABLE sdk_workflows ADD COLUMN is_public INTEGER DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_workflows ADD COLUMN tags TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_workflows ADD COLUMN category TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_workflows ADD COLUMN downloads INTEGER DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_workflows ADD COLUMN rating DECIMAL(3, 2) DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_workflows ADD COLUMN reviews_count INTEGER DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  // Add missing columns to sdk_apps table
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN repository_url TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN documentation_url TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN demo_url TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN price DECIMAL(10, 2) DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN is_free BOOLEAN DEFAULT 1`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN downloads INTEGER DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN rating DECIMAL(3, 2) DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN reviews_count INTEGER DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE sdk_apps ADD COLUMN published_at DATETIME`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  // Add missing columns to ai_agents table
+  try {
+    db.exec(`ALTER TABLE ai_agents ADD COLUMN last_activity DATETIME`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  // Add missing columns to api_usage_logs table
+  try {
+    db.exec(`ALTER TABLE api_usage_logs ADD COLUMN session_id TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE api_usage_logs ADD COLUMN operation TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE api_usage_logs ADD COLUMN duration_ms INTEGER DEFAULT 0`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE api_usage_logs ADD COLUMN success BOOLEAN DEFAULT 1`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE api_usage_logs ADD COLUMN error_message TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec(`ALTER TABLE api_usage_logs ADD COLUMN metadata TEXT`);
+  } catch (error) {
+    // Column already exists, ignore
+  }
+
   // Subscription History table (Audit trail)
   db.exec(`
     CREATE TABLE IF NOT EXISTS subscription_history (
