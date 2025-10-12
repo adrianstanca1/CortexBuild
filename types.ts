@@ -2,7 +2,6 @@
 // Fix: Broke circular dependency by defining UserRole, PermissionSubject, and PermissionAction types directly in this file.
 export type UserRole =
     | 'super_admin'
-    | 'developer'
     | 'company_admin'
     | 'developer'
     | 'Project Manager'
