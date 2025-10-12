@@ -187,8 +187,19 @@ const App: React.FC = () => {
                     }
                     window.dispatchEvent(new CustomEvent('userLoggedIn'));
                 }
-            } catch (error) {
-                console.error('Session check error:', error);
+            } catch (error: unknown) {
+                const err = error instanceof Error ? error : new Error('Session check failed');
+                logger.logError(err, { context: 'session_check' });
+
+                // Clear invalid session
+                await authService.logout().catch(() => {
+                    // Ignore logout errors during session check
+                });
+
+                // Show user-friendly message only if it's not a "no session" error
+                if (error instanceof Error && !error.message.includes('No token')) {
+                    showError('Session Expired', 'Please log in again');
+                }
             } finally {
                 setSessionChecked(true);
             }
@@ -230,33 +241,40 @@ const App: React.FC = () => {
     }, [currentUser, navigateToModule]);
 
 
-    // Load projects and ensure navigation when user logs in
+    // Load projects when user logs in
     useEffect(() => {
-        if (currentUser) {
-            const loadProjects = async () => {
-                try {
-                    const projects = await apiClient.fetchProjects();
-                    setAllProjects(projects);
-                } catch (error) {
-                    console.error('Error loading projects:', error);
-                    setAllProjects([]);
-                }
-            };
-            loadProjects();
-
-            // Ensure user is navigated to dashboard if no navigation exists
-            if (navigationStack.length === 0) {
-                const defaultScreen = getDefaultScreenForRole(currentUser?.role || 'project_manager');
-                navigateToModule(defaultScreen, {});
-            }
-        } else {
-            // User logged out - clear navigation
-            if (navigationStack.length > 0) {
-                setNavigationStack([]);
-            }
+        if (!currentUser) {
             setAllProjects([]);
+            return;
         }
-    }, [currentUser, navigationStack.length, navigateToModule, setNavigationStack]);
+
+        const loadProjects = async () => {
+            try {
+                const projects = await apiClient.fetchProjects();
+                setAllProjects(projects);
+            } catch (error: unknown) {
+                const err = error instanceof Error ? error : new Error('Failed to load projects');
+                logger.logError(err, { context: 'load_projects' });
+                setAllProjects([]);
+            }
+        };
+        loadProjects();
+    }, [currentUser]);
+
+    // Ensure navigation to dashboard when user logs in
+    useEffect(() => {
+        if (currentUser && navigationStack.length === 0) {
+            const defaultScreen = getDefaultScreenForRole(currentUser.role || 'project_manager');
+            navigateToModule(defaultScreen, {});
+        }
+    }, [currentUser, navigationStack.length, navigateToModule]);
+
+    // Clear navigation when user logs out
+    useEffect(() => {
+        if (!currentUser && navigationStack.length > 0) {
+            setNavigationStack([]);
+        }
+    }, [currentUser, navigationStack.length, setNavigationStack]);
 
     // Listen for logout trigger events
     useEffect(() => {
@@ -274,17 +292,31 @@ const App: React.FC = () => {
         showSuccess('Welcome back!', `Hello ${user.name}`);
     };
 
-    const handleLogout = async () => {
-        logger.logUserAction('logout_initiated', { userId: currentUser?.id }, currentUser?.id);
+    const handleLogout = useCallback(async () => {
+        try {
+            logger.logUserAction('logout_initiated', { userId: currentUser?.id }, currentUser?.id);
 
-        await authService.logout();
+            await authService.logout();
 
-        setCurrentUser(null);
-        setNavigationStack([]);
-        window.dispatchEvent(new CustomEvent('userLoggedOut'));
-        showSuccess('Logged out', 'You have been successfully logged out');
-        logger.logUserAction('logout_successful', { userId: currentUser?.id }, currentUser?.id);
-    };
+            setCurrentUser(null);
+            setNavigationStack([]);
+            setAllProjects([]);
+
+            window.dispatchEvent(new CustomEvent('userLoggedOut'));
+            showSuccess('Logged out', 'You have been successfully logged out');
+            logger.logUserAction('logout_successful', { userId: currentUser?.id }, currentUser?.id);
+        } catch (error: unknown) {
+            const err = error instanceof Error ? error : new Error('Logout failed');
+            logger.logError(err, { context: 'logout' });
+
+            // Force logout even if API call fails
+            setCurrentUser(null);
+            setNavigationStack([]);
+            setAllProjects([]);
+
+            showError('Logout Error', 'You have been logged out locally');
+        }
+    }, [currentUser, setNavigationStack, showSuccess, showError]);
 
 
     const openProjectSelector = useCallback((title: string, onSelect: (projectId: string) => void) => {
