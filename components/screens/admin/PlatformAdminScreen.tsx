@@ -6,6 +6,7 @@ import InvitationsManagement from './InvitationsManagement';
 import PlansManagement from './PlansManagement';
 import AIAgentsManagement from './AIAgentsManagement';
 import AuditLogManagement from './AuditLogManagement';
+import UserRolesPermissions from '../../user-management/UserRolesPermissions';
 
 interface PlatformAdminScreenProps {
     currentUser: User;
@@ -18,7 +19,7 @@ const PlatformAdminScreen: React.FC<PlatformAdminScreenProps> = ({
     navigateTo,
     goBack
 }) => {
-    const [activeTab, setActiveTab] = useState<'dashboard' | 'companies' | 'invitations' | 'plans' | 'agents' | 'audit'>('dashboard');
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'companies' | 'invitations' | 'plans' | 'agents' | 'audit'>('dashboard');
 
     // Check if user is super admin
     if (currentUser.role !== 'super_admin') {
@@ -46,6 +47,7 @@ const PlatformAdminScreen: React.FC<PlatformAdminScreenProps> = ({
 
     const tabs = [
         { id: 'dashboard', name: 'Dashboard', icon: '📊' },
+        { id: 'users', name: 'User Management', icon: '👥' },
         { id: 'companies', name: 'Companies', icon: '🏢' },
         { id: 'invitations', name: 'Invitations', icon: '📧' },
         { id: 'plans', name: 'Plans', icon: '💳' },
@@ -59,6 +61,12 @@ const PlatformAdminScreen: React.FC<PlatformAdminScreenProps> = ({
         switch (activeTab) {
             case 'dashboard':
                 return <SuperAdminDashboardV2 onNavigate={(section) => navigateTo(section as Screen)} />;
+            case 'users':
+                return (
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                        <UserRolesPermissions isDarkMode={false} />
+                    </div>
+                );
             case 'companies':
                 return <CompaniesManagement currentUser={currentUser} />;
             case 'invitations':
