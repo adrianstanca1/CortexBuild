@@ -8,8 +8,22 @@ import { createCollaborationService, CollaborationService } from '../services/co
 // Middleware to check if user is a developer
 const requireDeveloper = (req: Request, res: Response, next: any) => {
   const user = (req as any).user;
-  if (!user || (user.role !== 'developer' && user.role !== 'super_admin')) {
-    return res.status(403).json({ error: 'Developer access required' });
+  if (!user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  // Allow developers, super admins, and company admins to access SDK
+  if (!['developer', 'super_admin', 'company_admin'].includes(user.role)) {
+    return res.status(403).json({ error: 'Developer or admin access required' });
+  }
+  next();
+};
+
+// Middleware for basic SDK access (any authenticated user)
+const requireAuth = (req: Request, res: Response, next: any) => {
+  const user = (req as any).user;
+  if (!user) {
+    return res.status(401).json({ error: 'Authentication required' });
   }
   next();
 };
@@ -112,8 +126,8 @@ export const createSDKRouter = (db: Database.Database) => {
     next();
   });
 
-// Get or create SDK profile
-router.get('/profile', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+// Get or create SDK profile (available to all authenticated users)
+router.get('/profile', authenticateToken, requireAuth, (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const db = (req as any).db;
@@ -567,8 +581,8 @@ router.post('/generate', authenticateToken, requireDeveloper, async (req: Reques
   }
 });
 
-// Get available AI models
-router.get('/models/:provider', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+// Get available AI models (available to all authenticated users)
+router.get('/models/:provider', authenticateToken, requireAuth, (req: Request, res: Response) => {
   try {
     const { provider } = req.params;
 

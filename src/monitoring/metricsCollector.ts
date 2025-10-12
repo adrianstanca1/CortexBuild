@@ -8,7 +8,7 @@
 import { performanceMonitor } from '../utils/performanceMonitor';
 import { sessionTracker } from '../utils/sessionTracker';
 import { webVitalsCollector } from './webVitals';
-import { loggingConfig } from '../config/logging.config';
+import { loggingConfig, Logger } from '../config/logging.config';
 import { performanceObserverManager } from './performanceObserver';
 
 /**
@@ -107,7 +107,7 @@ class MetricsCollector {
         this.trackNavigationTiming();
         // Only log if monitoring is verbose
         if (loggingConfig.monitoring.verbose) {
-            console.log('✅ Metrics collector initialized');
+            Logger.debug('✅ Metrics collector initialized');
         }
     }
 
@@ -132,7 +132,7 @@ class MetricsCollector {
 
                     // Only log if navigation tracking is verbose
                     if (loggingConfig.performance.navigation && loggingConfig.performance.verbose) {
-                        console.log('📊 Navigation timing:', {
+                        Logger.debug('📊 Navigation timing:', {
                             route: metric.route,
                             loadTime: `${Math.round(metric.loadTime)}ms`,
                             renderTime: `${Math.round(metric.renderTime)}ms`
@@ -174,7 +174,7 @@ class MetricsCollector {
             if (memory) {
                 // Check for potential memory leak (>100MB)
                 if (memory.usedJSHeapSize > 100 * 1024 * 1024) {
-                    console.warn('⚠️ High memory usage:', {
+                    Logger.warn('⚠️ High memory usage:', {
                         used: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB`,
                         total: `${Math.round(memory.totalJSHeapSize / 1024 / 1024)}MB`
                     });

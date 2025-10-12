@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { metricsCollector, AggregatedMetrics } from '../monitoring/metricsCollector';
 import { webVitalsCollector, WebVitalsSummary } from '../monitoring/webVitals';
 import { performanceObserverManager } from '../monitoring/performanceObserver';
+import { Logger } from '../config/logging.config';
 
 /**
  * Performance Metrics Hook
@@ -30,7 +31,7 @@ export function usePerformanceMetrics() {
             setWebVitals(vitals);
             setIsLoading(false);
         } catch (error) {
-            console.error('Error refreshing metrics:', error);
+            Logger.error('Error refreshing metrics:', error);
             setIsLoading(false);
         }
     }, []);

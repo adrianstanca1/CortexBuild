@@ -145,9 +145,9 @@ class APIClient {
   private setupResponseInterceptor(): void {
     this.axiosInstance.interceptors.response.use(
       (response) => {
-        // Log successful response in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+        // Log successful response in development (only if verbose)
+        if (process.env.NODE_ENV === 'development' && loggingConfig.api.verbose) {
+          Logger.debug(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
             status: response.status,
             data: response.data
           });
@@ -172,9 +172,9 @@ class APIClient {
             // Calculate delay with exponential backoff
             const delay = this.calculateDelay(retryCount);
 
-            // Log retry attempt
-            if (process.env.NODE_ENV === 'development') {
-              console.log(`[API Retry] Attempt ${retryCount + 1}/${this.retryConfig.maxRetries} after ${delay}ms`, {
+            // Log retry attempt (only if verbose)
+            if (process.env.NODE_ENV === 'development' && loggingConfig.api.verbose) {
+              Logger.debug(`[API Retry] Attempt ${retryCount + 1}/${this.retryConfig.maxRetries} after ${delay}ms`, {
                 url: config.url,
                 method: config.method,
                 error: error.message

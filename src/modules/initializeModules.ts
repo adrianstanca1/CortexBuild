@@ -5,6 +5,7 @@
 
 import { ModuleRegistry } from './ModuleRegistry';
 import { allModules } from './moduleDefinitions';
+import { Logger } from '../config/logging.config';
 
 let initialized = false;
 
@@ -13,27 +14,27 @@ let initialized = false;
  */
 export function initializeModules(): void {
     if (initialized) {
-        console.warn('⚠️ Modules already initialized');
+        Logger.warn('⚠️ Modules already initialized');
         return;
     }
 
-    console.log('🚀 Initializing CortexBuild Module System...');
-    console.log(`📦 Registering ${allModules.length} modules...`);
+    Logger.info('🚀 Initializing CortexBuild Module System...');
+    Logger.debug(`📦 Registering ${allModules.length} modules...`);
 
     // Register all modules
     ModuleRegistry.registerBatch(allModules);
 
     // Get statistics
     const stats = ModuleRegistry.getStats();
-    console.log('📊 Module Statistics:', stats);
+    Logger.debug('📊 Module Statistics:', stats);
 
     // Preload critical modules
     ModuleRegistry.preloadModules().then(() => {
-        console.log('✅ Critical modules preloaded');
+        Logger.debug('✅ Critical modules preloaded');
     });
 
     initialized = true;
-    console.log('✅ Module system initialized successfully');
+    Logger.info('✅ Module system initialized successfully');
 }
 
 /**
@@ -48,7 +49,7 @@ export function isInitialized(): boolean {
  */
 export function getModuleRegistry() {
     if (!initialized) {
-        console.warn('⚠️ Modules not initialized. Call initializeModules() first.');
+        Logger.warn('⚠️ Modules not initialized. Call initializeModules() first.');
     }
     return ModuleRegistry;
 }

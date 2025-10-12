@@ -10,7 +10,7 @@ import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
 import { metricsCollector } from './metricsCollector';
 import { webVitalsCollector } from './webVitals';
 import { performanceObserverManager } from './performanceObserver';
-import { loggingConfig } from '../config/logging.config';
+import { loggingConfig, Logger } from '../config/logging.config';
 
 /**
  * Alert Types
@@ -326,7 +326,7 @@ class PerformanceAlertingManager {
     private logAlert(alert: PerformanceAlert): void {
         // Only log if alerts are enabled and verbose
         if (loggingConfig.monitoring.alerts && loggingConfig.monitoring.verbose) {
-            console.warn(`🚨 Performance Alert [${alert.severity.toUpperCase()}]:`, alert.message, alert.details);
+            Logger.warn(`🚨 Performance Alert [${alert.severity.toUpperCase()}]:`, alert.message, alert.details);
         }
 
         // Log to error logger only for high/critical severity

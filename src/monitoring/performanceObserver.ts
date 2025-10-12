@@ -7,6 +7,7 @@
 
 import { advancedErrorLogger } from '../utils/advancedErrorLogger';
 import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
+import { Logger } from '../config/logging.config';
 
 /**
  * Long Task Entry
@@ -213,7 +214,7 @@ class PerformanceObserverManager {
      */
     private logLongTask(task: LongTaskEntry): void {
         if (import.meta.env.DEV) {
-            console.warn('⚠️ Long task detected:', {
+            Logger.warn('⚠️ Long task detected:', {
                 duration: `${Math.round(task.duration)}ms`,
                 attribution: task.attribution
             });
