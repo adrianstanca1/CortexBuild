@@ -19,9 +19,9 @@ export const coreModules: ModuleConfig[] = [
             version: '2.0.0',
             category: 'core'
         },
-        () => import('../components/screens/UnifiedDashboardScreen')
+        () => import('../../components/screens/UnifiedDashboardScreen')
     ),
-    
+
     createPublicModule(
         'projects',
         {
@@ -31,7 +31,7 @@ export const coreModules: ModuleConfig[] = [
             version: '2.0.0',
             category: 'core'
         },
-        () => import('../components/screens/ProjectsListScreen')
+        () => import('../../components/screens/ProjectsListScreen')
     ),
 
     createPublicModule(
@@ -43,7 +43,7 @@ export const coreModules: ModuleConfig[] = [
             version: '2.0.0',
             category: 'project'
         },
-        () => import('../components/screens/ProjectHomeScreen')
+        () => import('../../components/screens/ProjectHomeScreen')
     ),
 
     createPublicModule(
@@ -55,7 +55,7 @@ export const coreModules: ModuleConfig[] = [
             version: '2.0.0',
             category: 'core'
         },
-        () => import('../components/screens/MyDayScreen')
+        () => import('../../components/screens/MyDayScreen')
     ),
 
     createPublicModule(
@@ -67,7 +67,7 @@ export const coreModules: ModuleConfig[] = [
             version: '2.0.0',
             category: 'project'
         },
-        () => import('../components/screens/TasksScreen')
+        () => import('../../components/screens/TasksScreen')
     ),
 
     createPublicModule(
@@ -79,7 +79,7 @@ export const coreModules: ModuleConfig[] = [
             version: '2.0.0',
             category: 'core'
         },
-        () => import('../components/screens/MyTasksScreen')
+        () => import('../../components/screens/MyTasksScreen')
     ),
 ];
 
@@ -98,7 +98,7 @@ export const aiModules: ModuleConfig[] = [
             category: 'ai',
             tags: ['ai', 'automation', 'ml']
         },
-        () => import('../components/screens/modules/AIToolsScreen')
+        () => import('../../components/screens/modules/AIToolsScreen')
     ),
 
     createPublicModule(
@@ -111,7 +111,7 @@ export const aiModules: ModuleConfig[] = [
             category: 'ai',
             tags: ['ai', 'assistant', 'insights']
         },
-        () => import('../components/ai/ConstructionOracle')
+        () => import('../../components/ai/ConstructionOracle')
     ),
 
     createPublicModule(
@@ -124,7 +124,7 @@ export const aiModules: ModuleConfig[] = [
             category: 'marketplace',
             tags: ['ai', 'marketplace', 'agents']
         },
-        () => import('../components/screens/modules/AIAgentsMarketplaceScreen')
+        () => import('../../components/screens/modules/AIAgentsMarketplaceScreen')
     ),
 ];
 
@@ -143,7 +143,7 @@ export const developerModules: ModuleConfig[] = [
             category: 'developer',
             tags: ['developer', 'dashboard']
         },
-        () => import('../components/screens/developer/DeveloperDashboardV2'),
+        () => import('../../components/screens/developer/DeveloperDashboardV2'),
         ['developer', 'super_admin']
     ),
 
@@ -157,7 +157,7 @@ export const developerModules: ModuleConfig[] = [
             category: 'developer',
             tags: ['developer', 'console', 'debug']
         },
-        () => import('../components/screens/developer/EnhancedDeveloperConsole'),
+        () => import('../../components/screens/developer/EnhancedDeveloperConsole'),
         ['developer', 'super_admin']
     ),
 
@@ -171,7 +171,7 @@ export const developerModules: ModuleConfig[] = [
             category: 'developer',
             tags: ['developer', 'automation', 'workflows']
         },
-        () => import('../components/screens/developer/ConstructionAutomationStudio'),
+        () => import('../../components/screens/developer/ConstructionAutomationStudio'),
         ['developer', 'super_admin', 'company_admin']
     ),
 
@@ -185,7 +185,7 @@ export const developerModules: ModuleConfig[] = [
             category: 'developer',
             tags: ['developer', 'sdk', 'api']
         },
-        () => import('../components/sdk/ProductionSDKDeveloperView').then(module => ({
+        () => import('../../components/sdk/ProductionSDKDeveloperView').then(module => ({
             default: module.ProductionSDKDeveloperView
         })),
         ['developer', 'super_admin']
@@ -201,7 +201,7 @@ export const developerModules: ModuleConfig[] = [
             category: 'developer',
             tags: ['developer', 'workspace', 'ide']
         },
-        () => import('../components/screens/developer/DeveloperWorkspaceScreen'),
+        () => import('../../components/screens/developer/DeveloperWorkspaceScreen'),
         ['developer', 'super_admin']
     ),
 
@@ -215,7 +215,7 @@ export const developerModules: ModuleConfig[] = [
             category: 'developer',
             tags: ['developer', 'n8n', 'workflows', 'procore']
         },
-        () => import('../components/sdk/N8nProcoreWorkflowBuilder'),
+        () => import('../../components/sdk/N8nProcoreWorkflowBuilder'),
         ['developer', 'super_admin', 'company_admin']
     ),
 ];
@@ -235,7 +235,7 @@ export const adminModules: ModuleConfig[] = [
             category: 'admin',
             tags: ['admin', 'platform']
         },
-        () => import('../components/screens/admin/SuperAdminDashboardScreen'),
+        () => import('../../components/screens/admin/SuperAdminDashboardScreen'),
         ['super_admin']
     ),
 
@@ -249,7 +249,7 @@ export const adminModules: ModuleConfig[] = [
             category: 'admin',
             tags: ['admin', 'platform', 'config']
         },
-        () => import('../components/screens/admin/PlatformAdminScreen'),
+        () => import('../../components/screens/admin/PlatformAdminScreen'),
         ['super_admin']
     ),
 
@@ -263,7 +263,7 @@ export const adminModules: ModuleConfig[] = [
             category: 'admin',
             tags: ['admin', 'control', 'monitoring']
         },
-        () => import('../components/admin/AdminControlPanel'),
+        () => import('../../components/admin/AdminControlPanel'),
         ['super_admin']
     ),
 
@@ -277,7 +277,7 @@ export const adminModules: ModuleConfig[] = [
             category: 'company',
             tags: ['admin', 'company']
         },
-        () => import('../components/screens/company/CompanyAdminDashboardV2'),
+        () => import('../../components/screens/company/CompanyAdminDashboardV2'),
         ['company_admin', 'super_admin']
     ),
 ];
@@ -297,7 +297,7 @@ export const businessModules: ModuleConfig[] = [
             category: 'financial',
             tags: ['accounting', 'finance']
         },
-        () => import('../components/screens/modules/AccountingScreen')
+        () => import('../../components/screens/modules/AccountingScreen')
     ),
 
     createPublicModule(
@@ -310,7 +310,7 @@ export const businessModules: ModuleConfig[] = [
             category: 'financial',
             tags: ['finance', 'budget', 'cost']
         },
-        () => import('../components/screens/modules/FinancialManagementScreen')
+        () => import('../../components/screens/modules/FinancialManagementScreen')
     ),
 
     createPublicModule(
@@ -323,7 +323,7 @@ export const businessModules: ModuleConfig[] = [
             category: 'operations',
             tags: ['business', 'sales', 'growth']
         },
-        () => import('../components/screens/modules/BusinessDevelopmentScreen')
+        () => import('../../components/screens/modules/BusinessDevelopmentScreen')
     ),
 ];
 
@@ -342,7 +342,7 @@ export const projectModules: ModuleConfig[] = [
             category: 'project',
             tags: ['rfi', 'communication']
         },
-        () => import('../components/screens/RFIsScreen')
+        () => import('../../components/screens/RFIsScreen')
     ),
 
     createPublicModule(
@@ -355,7 +355,7 @@ export const projectModules: ModuleConfig[] = [
             category: 'project',
             tags: ['documents', 'files']
         },
-        () => import('../components/screens/DocumentsScreen')
+        () => import('../../components/screens/DocumentsScreen')
     ),
 
     createPublicModule(
@@ -368,7 +368,7 @@ export const projectModules: ModuleConfig[] = [
             category: 'project',
             tags: ['documents', 'management']
         },
-        () => import('../components/screens/modules/DocumentManagementScreen')
+        () => import('../../components/screens/modules/DocumentManagementScreen')
     ),
 
     createPublicModule(
@@ -381,7 +381,7 @@ export const projectModules: ModuleConfig[] = [
             category: 'operations',
             tags: ['time', 'tracking', 'attendance']
         },
-        () => import('../components/screens/modules/TimeTrackingScreen')
+        () => import('../../components/screens/modules/TimeTrackingScreen')
     ),
 
     createPublicModule(
@@ -394,7 +394,7 @@ export const projectModules: ModuleConfig[] = [
             category: 'operations',
             tags: ['operations', 'management']
         },
-        () => import('../components/screens/modules/ProjectOperationsScreen')
+        () => import('../../components/screens/modules/ProjectOperationsScreen')
     ),
 ];
 
@@ -413,7 +413,7 @@ export const marketplaceModules: ModuleConfig[] = [
             category: 'marketplace',
             tags: ['marketplace', 'modules']
         },
-        () => import('../components/marketplace/GlobalMarketplace')
+        () => import('../../components/marketplace/GlobalMarketplace')
     ),
 
     createPublicModule(
@@ -426,7 +426,7 @@ export const marketplaceModules: ModuleConfig[] = [
             category: 'marketplace',
             tags: ['applications', 'installed']
         },
-        () => import('../components/applications/MyApplications')
+        () => import('../../components/applications/MyApplications')
     ),
 
     createPublicModule(
@@ -439,7 +439,7 @@ export const marketplaceModules: ModuleConfig[] = [
             category: 'marketplace',
             tags: ['desktop', 'launcher']
         },
-        () => import('../components/base44/Base44Clone').then(module => ({
+        () => import('../../components/base44/Base44Clone').then(module => ({
             default: module.Base44Clone
         }))
     ),
@@ -454,7 +454,7 @@ export const marketplaceModules: ModuleConfig[] = [
             category: 'marketplace',
             tags: ['admin', 'review']
         },
-        () => import('../components/marketplace/AdminReviewInterface'),
+        () => import('../../components/marketplace/AdminReviewInterface'),
         ['super_admin', 'company_admin']
     ),
 
@@ -468,7 +468,7 @@ export const marketplaceModules: ModuleConfig[] = [
             category: 'marketplace',
             tags: ['developer', 'submit']
         },
-        () => import('../components/marketplace/DeveloperSubmissionInterface'),
+        () => import('../../components/marketplace/DeveloperSubmissionInterface'),
         ['developer', 'super_admin']
     ),
 ];
@@ -488,7 +488,7 @@ export const toolsModules: ModuleConfig[] = [
             category: 'tools',
             tags: ['placeholder']
         },
-        () => import('../components/screens/tools/PlaceholderToolScreen')
+        () => import('../../components/screens/tools/PlaceholderToolScreen')
     ),
 
     createPublicModule(
@@ -501,7 +501,7 @@ export const toolsModules: ModuleConfig[] = [
             category: 'ai',
             tags: ['ml', 'analytics', 'ai']
         },
-        () => import('../components/screens/dashboards/AdvancedMLDashboard')
+        () => import('../../components/screens/dashboards/AdvancedMLDashboard')
     ),
 ];
 
