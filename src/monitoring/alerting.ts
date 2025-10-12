@@ -10,6 +10,7 @@ import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
 import { metricsCollector } from './metricsCollector';
 import { webVitalsCollector } from './webVitals';
 import { performanceObserverManager } from './performanceObserver';
+import { loggingConfig } from '../config/logging.config';
 
 /**
  * Alert Types
@@ -103,12 +104,22 @@ class PerformanceAlertingManager {
             this.thresholds = { ...DEFAULT_THRESHOLDS, ...customThresholds };
         }
 
+        // Only enable alerting if configured
+        if (!loggingConfig.monitoring.alerts) {
+            if (loggingConfig.monitoring.verbose) {
+                console.log('⚠️ Performance alerting disabled by config');
+            }
+            return;
+        }
+
         // Check metrics every 30 seconds
         this.checkInterval = window.setInterval(() => {
             this.checkMetrics();
         }, 30000);
 
-        console.log('✅ Performance alerting initialized');
+        if (loggingConfig.monitoring.verbose) {
+            console.log('✅ Performance alerting initialized');
+        }
     }
 
     /**
@@ -313,18 +324,21 @@ class PerformanceAlertingManager {
      * Log alert
      */
     private logAlert(alert: PerformanceAlert): void {
-        if (import.meta.env.DEV) {
+        // Only log if alerts are enabled and verbose
+        if (loggingConfig.monitoring.alerts && loggingConfig.monitoring.verbose) {
             console.warn(`🚨 Performance Alert [${alert.severity.toUpperCase()}]:`, alert.message, alert.details);
         }
 
-        // Log to error logger
-        const errorSeverity = this.mapAlertSeverityToErrorSeverity(alert.severity);
-        advancedErrorLogger.logError(
-            new Error(alert.message),
-            { custom: { alertType: alert.type, ...alert.details } },
-            errorSeverity,
-            ErrorCategory.PERFORMANCE
-        );
+        // Log to error logger only for high/critical severity
+        if (alert.severity === 'high' || alert.severity === 'critical') {
+            const errorSeverity = this.mapAlertSeverityToErrorSeverity(alert.severity);
+            advancedErrorLogger.logError(
+                new Error(alert.message),
+                { custom: { alertType: alert.type, ...alert.details } },
+                errorSeverity,
+                ErrorCategory.PERFORMANCE
+            );
+        }
     }
 
     /**

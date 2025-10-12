@@ -15,6 +15,7 @@ import {
     Breadcrumb,
     ErrorRecoveryAction
 } from '../types/errorTypes';
+import { loggingConfig } from '../config/logging.config';
 
 /**
  * Advanced Error Logger Class
@@ -410,14 +411,20 @@ export class AdvancedErrorLogger {
      * Log to console (development)
      */
     private logToConsole(error: CategorizedError): void {
+        // Only log if errors are enabled and verbose, or if critical
+        if (!loggingConfig.errors.enabled) return;
+        if (!loggingConfig.errors.verbose && error.severity !== ErrorSeverity.CRITICAL) return;
+
         const emoji = this.getSeverityEmoji(error.severity);
         console.group(`${emoji} ${error.severity.toUpperCase()}: ${error.name}`);
         console.error('Message:', error.message);
         console.error('Category:', error.category);
         console.error('Error ID:', error.errorId);
-        console.error('Context:', error.context);
-        if (error.stack) {
-            console.error('Stack:', error.stack);
+        if (loggingConfig.errors.verbose) {
+            console.error('Context:', error.context);
+            if (error.stack) {
+                console.error('Stack:', error.stack);
+            }
         }
         console.groupEnd();
     }
@@ -440,30 +447,34 @@ export class AdvancedErrorLogger {
      * Setup console capture
      */
     private setupConsoleCapture(): void {
-        if (!this.config.captureConsole) return;
+        if (!this.config.captureConsole || !loggingConfig.errors.captureConsole) return;
 
         const originalError = console.error;
         const originalWarn = console.warn;
 
         console.error = (...args: any[]) => {
-            this.addBreadcrumb({
-                timestamp: new Date().toISOString(),
-                type: 'error',
-                category: 'console',
-                message: args.join(' '),
-                level: 'error'
-            });
+            if (loggingConfig.errors.captureBreadcrumbs) {
+                this.addBreadcrumb({
+                    timestamp: new Date().toISOString(),
+                    type: 'error',
+                    category: 'console',
+                    message: args.join(' '),
+                    level: 'error'
+                });
+            }
             originalError.apply(console, args);
         };
 
         console.warn = (...args: any[]) => {
-            this.addBreadcrumb({
-                timestamp: new Date().toISOString(),
-                type: 'error',
-                category: 'console',
-                message: args.join(' '),
-                level: 'warning'
-            });
+            if (loggingConfig.errors.captureBreadcrumbs) {
+                this.addBreadcrumb({
+                    timestamp: new Date().toISOString(),
+                    type: 'error',
+                    category: 'console',
+                    message: args.join(' '),
+                    level: 'warning'
+                });
+            }
             originalWarn.apply(console, args);
         };
     }

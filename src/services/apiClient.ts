@@ -6,6 +6,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
 import toast from 'react-hot-toast';
 import offlineManager from './offlineManager';
+import { loggingConfig, Logger } from '../config/logging.config';
 
 /**
  * API Error Interface
@@ -97,8 +98,8 @@ class APIClient {
             config: config as APIRequestConfig
           });
 
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[API Offline] Request queued: ${method} ${url} (ID: ${requestId})`);
+          if (loggingConfig.api.verbose) {
+            Logger.info(`[API Offline] Request queued: ${method} ${url} (ID: ${requestId})`);
           }
 
           // Return a promise that will be resolved when the request is processed
@@ -121,9 +122,9 @@ class APIClient {
         // Track request
         this.requestCount++;
 
-        // Log request in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
+        // Log request if enabled
+        if (loggingConfig.api.logRequests && loggingConfig.api.verbose) {
+          Logger.info(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
             data: config.data,
             params: config.params
           });

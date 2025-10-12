@@ -8,6 +8,7 @@
 import { onCLS, onLCP, onFCP, onTTFB, onINP, Metric } from 'web-vitals';
 import { advancedErrorLogger } from '../utils/advancedErrorLogger';
 import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
+import { loggingConfig } from '../config/logging.config';
 
 /**
  * Web Vitals Thresholds
@@ -118,8 +119,8 @@ class WebVitalsCollector {
             });
         }
 
-        // Log to console in development
-        if (import.meta.env.DEV) {
+        // Log to console only if enabled and verbose
+        if (loggingConfig.performance.enabled && loggingConfig.performance.verbose) {
             const emoji = metric.rating === 'good' ? '✅' : metric.rating === 'needs-improvement' ? '⚠️' : '❌';
             console.log(`${emoji} ${metric.name}:`, {
                 value: `${Math.round(metric.value)}${metric.name === 'CLS' ? '' : 'ms'}`,

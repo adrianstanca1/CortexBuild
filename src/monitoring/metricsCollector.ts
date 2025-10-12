@@ -8,6 +8,7 @@
 import { performanceMonitor } from '../utils/performanceMonitor';
 import { sessionTracker } from '../utils/sessionTracker';
 import { webVitalsCollector } from './webVitals';
+import { loggingConfig } from '../config/logging.config';
 import { performanceObserverManager } from './performanceObserver';
 
 /**
@@ -104,7 +105,10 @@ class MetricsCollector {
     public init(): void {
         this.startMemoryMonitoring();
         this.trackNavigationTiming();
-        console.log('✅ Metrics collector initialized');
+        // Only log if monitoring is verbose
+        if (loggingConfig.monitoring.verbose) {
+            console.log('✅ Metrics collector initialized');
+        }
     }
 
     /**
@@ -125,8 +129,9 @@ class MetricsCollector {
                     };
                     
                     this.navigationMetrics.push(metric);
-                    
-                    if (import.meta.env.DEV) {
+
+                    // Only log if navigation tracking is verbose
+                    if (loggingConfig.performance.navigation && loggingConfig.performance.verbose) {
                         console.log('📊 Navigation timing:', {
                             route: metric.route,
                             loadTime: `${Math.round(metric.loadTime)}ms`,
