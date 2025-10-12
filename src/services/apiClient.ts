@@ -59,7 +59,7 @@ class APIClient {
   private requestCount: number = 0;
   private failureCount: number = 0;
 
-  constructor(baseURL: string = '/api', retryConfig: Partial<RetryConfig> = {}) {
+  constructor(baseURL: string = 'http://localhost:3001/api', retryConfig: Partial<RetryConfig> = {}) {
     this.retryConfig = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
 
     // Create Axios instance
