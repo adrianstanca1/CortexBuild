@@ -275,11 +275,13 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/logout', validateBody(refreshTokenSchema), (req, res) => {
+        app.post('/api/auth/logout', (req, res) => {
             try {
-                const { token } = req.body;
+                const token = req.body?.token || req.headers.authorization?.replace('Bearer ', '');
 
-                auth.logout(db, token);
+                if (token) {
+                    auth.logout(db, token);
+                }
 
                 res.json({ success: true });
             } catch (error: any) {

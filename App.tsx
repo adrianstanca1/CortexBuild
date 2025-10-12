@@ -11,7 +11,7 @@ import FloatingMenu from './components/layout/FloatingMenu';
 import ToastContainer from './components/ToastContainer';
 import { usePermissions } from './hooks/usePermissions';
 import * as authService from './auth/authService';
-import { useToast } from './hooks/useToast';
+import { useToast } from './src/hooks/useToast';
 import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { apiClient } from './lib/api/client';
