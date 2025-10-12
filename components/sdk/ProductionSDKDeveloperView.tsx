@@ -24,7 +24,6 @@ import {
   Workflow,
   Loader2
 } from 'lucide-react';
-import ZapierStyleWorkflowBuilder from './ZapierStyleWorkflowBuilder';
 
 // Lazy load heavy components
 const MonacoEditor = lazy(() => import('@monaco-editor/react').then(module => ({ default: module.default })));
@@ -2072,4 +2071,5 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       </div>
     </div >
   );
+};
 };

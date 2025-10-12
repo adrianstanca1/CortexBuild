@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DashboardErrorBoundary } from '../../src/components/ErrorBoundaries';
+import './SuperAdminDashboardV2.css';
 
 interface SuperAdminDashboardV2Props {
     isDarkMode?: boolean;
@@ -136,6 +137,12 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo((
         return colors[color] || colors.blue;
     }, []);
 
+    const quickStatDelayClasses = useMemo(() => ['delay-0', 'delay-100', 'delay-200', 'delay-300'], []);
+    const adminSectionDelayClasses = useMemo(
+        () => ['delay-200', 'delay-250', 'delay-300', 'delay-350', 'delay-400', 'delay-450', 'delay-500', 'delay-550', 'delay-600', 'delay-650', 'delay-700', 'delay-750', 'delay-800'],
+        []
+    );
+
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {/* Header with gradient */}
@@ -184,8 +191,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo((
                         return (
                             <div
                                 key={stat.title}
-                                className={`relative overflow-hidden rounded-2xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 transition-all duration-300 hover:scale-105 hover:shadow-2xl ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}
-                                style={{ transitionDelay: `${index * 100}ms` }}
+                                className={`relative overflow-hidden rounded-2xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 transition-all duration-300 hover:scale-105 hover:shadow-2xl ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'} ${quickStatDelayClasses[index] ?? 'delay-0'}`}
                             >
                                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.bgGradient} opacity-10 rounded-full -mr-16 -mt-16`} />
 
@@ -249,8 +255,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo((
                                     toast.success(`Opening ${section.title}...`);
                                     onNavigate?.(section.id);
                                 }}
-                                className={`group relative overflow-hidden rounded-2xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 text-left transition-all duration-300 hover:scale-105 hover:shadow-2xl ${colors.hover} ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}
-                                style={{ transitionDelay: `${(index + 4) * 50}ms` }}
+                                className={`group relative overflow-hidden rounded-2xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 text-left transition-all duration-300 hover:scale-105 hover:shadow-2xl ${colors.hover} ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'} ${adminSectionDelayClasses[index] ?? 'delay-200'}`}
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className={`p-3 rounded-xl ${colors.bg} border ${colors.border}`}>
