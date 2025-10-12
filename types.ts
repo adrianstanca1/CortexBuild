@@ -2,6 +2,7 @@
 // Fix: Broke circular dependency by defining UserRole, PermissionSubject, and PermissionAction types directly in this file.
 export type UserRole =
     | 'super_admin'
+    | 'developer'
     | 'company_admin'
     | 'developer'
     | 'Project Manager'
@@ -116,19 +117,25 @@ export type Screen =
     | 'developer-dashboard'
     | 'automation-studio'
     | 'developer-console'
+<<<<<<< Updated upstream
     | 'developer-workspace'
+=======
+>>>>>>> Stashed changes
     | 'company-admin-dashboard'
     | 'super-admin-dashboard'
     | 'sdk-developer'
     | 'my-apps-desktop'
     // Workflow Builders
     | 'n8n-procore-builder'
+<<<<<<< Updated upstream
     | 'construction-oracle'
     | 'my-applications'
     // Marketplace screens
     | 'marketplace'
     | 'admin-review'
     | 'developer-submissions'
+=======
+>>>>>>> Stashed changes
     // Admin screens
     | 'platform-admin'
     | 'admin-control-panel'

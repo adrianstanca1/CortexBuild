@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Project, RFI, Screen, User } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 import { usePermissions } from '../../hooks/usePermissions';
 import { ChevronLeftIcon, PlusIcon, QuestionMarkCircleIcon, ChevronDownIcon } from '../Icons';
 

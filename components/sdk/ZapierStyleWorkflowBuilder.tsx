@@ -8,7 +8,11 @@ import {
     Play, Plus, Trash2, Settings, Code, Zap, Database, Mail, Webhook,
     GitBranch, Clock, CheckCircle, XCircle, AlertCircle, Info,
     Search, Filter, Package, Building2, FileText, Upload, Download,
+<<<<<<< Updated upstream
     Globe, Key, Lock, Eye, EyeOff, ChevronDown, ChevronRight, X, Save
+=======
+    Globe, Key, Lock, Eye, EyeOff, ChevronDown, ChevronRight, X
+>>>>>>> Stashed changes
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

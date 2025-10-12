@@ -1,6 +1,7 @@
 /**
  * Developer Dashboard V2.0 - Revolutionary Design
  * Modern development environment with advanced tools
+<<<<<<< Updated upstream
  *
  * OPTIMIZATIONS (Copilot + Augment):
  * - React.memo for performance
@@ -10,6 +11,11 @@
  */
 
 import React, { useState, useEffect, lazy, Suspense, useMemo, useCallback } from 'react';
+=======
+ */
+
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+>>>>>>> Stashed changes
 import {
     Code2, Terminal, GitBranch, Package, Zap, FileCode,
     Database, TestTube, Rocket, BookOpen, Activity, Clock,
@@ -18,27 +24,37 @@ import {
 } from 'lucide-react';
 import { User, Screen } from '../../../types';
 import toast from 'react-hot-toast';
+<<<<<<< Updated upstream
 import { DashboardErrorBoundary } from '../../../src/components/ErrorBoundaries';
+=======
+>>>>>>> Stashed changes
 
 // Lazy load CodexAgent to prevent blocking the main app
 const CodexAgent = lazy(() => import('../../CodexAgent').then(module => ({
     default: module.CodexAgent
 })));
 
+<<<<<<< Updated upstream
 // Lazy load PerformanceDashboard
 const PerformanceDashboard = lazy(() => import('../../monitoring/PerformanceDashboard'));
 
 // Lazy load APIDocumentation
 const APIDocumentation = lazy(() => import('../../documentation/APIDocumentation'));
 
+=======
+>>>>>>> Stashed changes
 interface DeveloperDashboardV2Props {
     currentUser: User;
     navigateTo: (screen: Screen, params?: any) => void;
     isDarkMode?: boolean;
 }
 
+<<<<<<< Updated upstream
 // Memoized component for better performance
 const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
+=======
+const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = ({
+>>>>>>> Stashed changes
     currentUser,
     navigateTo,
     isDarkMode = true
@@ -53,7 +69,11 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
         codeQuality: 96.5
     });
 
+<<<<<<< Updated upstream
     const [activeTab, setActiveTab] = useState<'overview' | 'code' | 'tools' | 'codex' | 'performance' | 'api-docs'>('overview');
+=======
+    const [activeTab, setActiveTab] = useState<'overview' | 'code' | 'tools' | 'codex'>('overview');
+>>>>>>> Stashed changes
     const [isAnimating, setIsAnimating] = useState(true);
 
     useEffect(() => {
@@ -61,6 +81,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
         return () => clearTimeout(timer);
     }, []);
 
+<<<<<<< Updated upstream
     // Memoize tab change handler
     const handleTabChange = useCallback((tab: 'overview' | 'code' | 'tools' | 'codex' | 'performance' | 'api-docs') => {
         setActiveTab(tab);
@@ -68,11 +89,19 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
 
     // Memoize quick stats to prevent recalculation on every render
     const quickStats = useMemo(() => [
+=======
+    // Quick Stats
+    const quickStats = [
+>>>>>>> Stashed changes
         {
             title: 'Active Projects',
             value: stats.projectsCount.toString(),
             change: '+2 this week',
+<<<<<<< Updated upstream
             trend: 'up' as const,
+=======
+            trend: 'up',
+>>>>>>> Stashed changes
             icon: Rocket,
             color: 'blue',
             bgGradient: 'from-blue-500 to-blue-600'
@@ -81,7 +110,11 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
             title: 'Commits Today',
             value: stats.commitsToday.toString(),
             change: '+8 from yesterday',
+<<<<<<< Updated upstream
             trend: 'up' as const,
+=======
+            trend: 'up',
+>>>>>>> Stashed changes
             icon: GitBranch,
             color: 'green',
             bgGradient: 'from-green-500 to-green-600'
@@ -90,7 +123,11 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
             title: 'Tests Passed',
             value: stats.testsRun.toString(),
             change: '100% pass rate',
+<<<<<<< Updated upstream
             trend: 'up' as const,
+=======
+            trend: 'up',
+>>>>>>> Stashed changes
             icon: TestTube,
             color: 'purple',
             bgGradient: 'from-purple-500 to-purple-600'
@@ -99,11 +136,16 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
             title: 'Code Quality',
             value: `${stats.codeQuality}%`,
             change: '+1.2%',
+<<<<<<< Updated upstream
             trend: 'up' as const,
+=======
+            trend: 'up',
+>>>>>>> Stashed changes
             icon: Award,
             color: 'cyan',
             bgGradient: 'from-cyan-500 to-cyan-600'
         }
+<<<<<<< Updated upstream
     ], [stats]);
 
     // Memoize development tools with useCallback for actions
@@ -119,6 +161,23 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
         { id: 'testing', title: 'Testing Framework', icon: TestTube, color: 'pink', description: 'Unit & integration tests', action: () => toast('Testing framework opening...') },
         { id: 'docs', title: 'Documentation', icon: BookOpen, color: 'indigo', description: 'API documentation', action: () => toast('Documentation opening...') }
     ], [handleTabChange, navigateTo]);
+=======
+    ];
+
+    // Development Tools
+    const developmentTools = [
+        { id: 'codex-agent', title: 'Codex Agent', icon: Bot, color: 'purple', description: 'AI coding assistant (GPT-5-Codex)', action: () => setActiveTab('codex') },
+        { id: 'code-editor', title: 'Code Editor', icon: Code2, color: 'blue', description: 'Monaco editor with IntelliSense', action: () => navigateTo('sdk-developer', { startTab: 'builder' }) },
+        { id: 'terminal', title: 'Terminal', icon: Terminal, color: 'green', description: 'Integrated terminal', action: () => toast.info('Terminal opening...') },
+        { id: 'git', title: 'Git Integration', icon: GitBranch, color: 'orange', description: 'Version control', action: () => toast.info('Git tools opening...') },
+        { id: 'package-manager', title: 'Package Manager', icon: Package, color: 'purple', description: 'Dependency management', action: () => toast.info('Package manager opening...') },
+        { id: 'marketplace', title: 'App Marketplace', icon: Package, color: 'purple', description: 'Browse & publish apps', action: () => navigateTo('marketplace') },
+        { id: 'api-builder', title: 'API Builder', icon: Zap, color: 'yellow', description: 'REST API testing', action: () => toast.info('API builder opening...') },
+        { id: 'database-tools', title: 'Database Tools', icon: Database, color: 'cyan', description: 'Query & manage data', action: () => toast.info('Database tools opening...') },
+        { id: 'testing', title: 'Testing Framework', icon: TestTube, color: 'pink', description: 'Unit & integration tests', action: () => toast.info('Testing framework opening...') },
+        { id: 'docs', title: 'Documentation', icon: BookOpen, color: 'indigo', description: 'API documentation', action: () => toast.info('Documentation opening...') }
+    ];
+>>>>>>> Stashed changes
 
     const getColorClasses = (color: string) => {
         const colors: Record<string, { bg: string; text: string; border: string; hover: string }> = {
@@ -158,7 +217,11 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                             </button>
                             <button
                                 type="button"
+<<<<<<< Updated upstream
                                 onClick={() => toast('Deploying...')}
+=======
+                                onClick={() => toast.info('Deploying...')}
+>>>>>>> Stashed changes
                                 className="px-6 py-2 bg-white text-green-600 hover:bg-green-50 rounded-lg transition-all font-medium flex items-center space-x-2"
                             >
                                 <Rocket className="w-5 h-5" />
@@ -210,9 +273,13 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                     {[
                         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                         { id: 'code', label: 'Code & Build', icon: Code2 },
+<<<<<<< Updated upstream
                         { id: 'tools', label: 'Dev Tools', icon: Wrench },
                         { id: 'performance', label: 'Performance', icon: Activity },
                         { id: 'api-docs', label: 'API Docs', icon: BookOpen }
+=======
+                        { id: 'tools', label: 'Dev Tools', icon: Wrench }
+>>>>>>> Stashed changes
                     ].map((tab) => {
                         const TabIcon = tab.icon;
                         return (
@@ -336,11 +403,19 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                                 </div>
                             }>
                                 <CodexAgent
+<<<<<<< Updated upstream
                                     projectId={currentUser.companyId}
                                     initialContext={{
                                         userId: currentUser.id,
                                         userName: currentUser.name,
                                         companyId: currentUser.companyId,
+=======
+                                    projectId={currentUser.company_id}
+                                    initialContext={{
+                                        userId: currentUser.id,
+                                        userName: currentUser.name,
+                                        companyId: currentUser.company_id,
+>>>>>>> Stashed changes
                                     }}
                                     onResult={(result) => {
                                         if (result.success) {
@@ -355,6 +430,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                     </div>
                 </div>
             )}
+<<<<<<< Updated upstream
 
             {/* Performance Dashboard Tab */}
             {activeTab === 'performance' && (
@@ -411,4 +487,11 @@ const WrappedDeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = (props)
 };
 
 export default WrappedDeveloperDashboardV2;
+=======
+        </div>
+    );
+};
+
+export default DeveloperDashboardV2;
+>>>>>>> Stashed changes
 

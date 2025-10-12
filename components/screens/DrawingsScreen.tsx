@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Project, Drawing, Screen, User } from '../../types';
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 import { ChevronLeftIcon, PlusIcon, DocumentDuplicateIcon, MagnifyingGlassIcon, SparklesIcon, ChevronDownIcon } from '../Icons';
 import NewDrawingModal from '../modals/NewDrawingModal';
 // Fix: Imported the 'usePermissions' hook.

@@ -15,16 +15,29 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+  Plug
+=======
+>>>>>>> Stashed changes
   BarChart3,
   Webhook,
   ShieldCheck,
   Trash2,
   Globe,
   Activity,
+<<<<<<< Updated upstream
   Workflow,
   Loader2
+=======
+  Workflow
+>>>>>>> origin/main
+>>>>>>> Stashed changes
 } from 'lucide-react';
+import ZapierStyleWorkflowBuilder from './ZapierStyleWorkflowBuilder';
 
+<<<<<<< Updated upstream
 // Lazy load heavy components
 const MonacoEditor = lazy(() => import('@monaco-editor/react').then(module => ({ default: module.default })));
 const ZapierStyleWorkflowBuilder = lazy(() => import('./ZapierStyleWorkflowBuilder').then(module => ({ default: module.default })));
@@ -37,6 +50,16 @@ interface ModelOption {
   label: string;
 }
 
+=======
+type Provider = 'openai' | 'gemini';
+type TabKey = 'builder' | 'workflows' | 'agents' | 'marketplace' | 'analytics' | 'settings' | 'management' | 'zapier';
+
+interface ModelOption {
+  id: string;
+  label: string;
+}
+
+>>>>>>> Stashed changes
 interface WorkflowNodeDefinition {
   id: string;
   type: string;
@@ -140,6 +163,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+<<<<<<< Updated upstream
 // Custom hook for SDK data management
 const useSDKData = (user: User) => {
   const [profile, setProfile] = useState<SdkProfile | null>(null);
@@ -302,6 +326,8 @@ const useSDKData = (user: User) => {
   };
 };
 
+=======
+>>>>>>> Stashed changes
 // Constants
 const GEMINI_MODELS = [
   { id: 'gemini-pro', label: 'Gemini Pro' },
@@ -362,6 +388,7 @@ const NAV_TABS: Array<{ id: TabKey; label: string; icon: React.ComponentType<any
   { id: 'settings', label: 'Settings', icon: Settings }
 ];
 
+<<<<<<< Updated upstream
 // Loading Components
 const SkeletonLoader: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div className={`animate-pulse ${className}`}>
@@ -379,6 +406,8 @@ const CardSkeleton: React.FC<{ rows?: number }> = ({ rows = 3 }) => (
   </div>
 );
 
+=======
+>>>>>>> Stashed changes
 // Components
 const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
   <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 ${className}`}>
@@ -431,8 +460,17 @@ interface ProductionSDKDeveloperViewProps {
 
 export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProps> = ({ user, onNavigate: _onNavigate, startTab }) => {
   // State
+<<<<<<< Updated upstream
   const [activeTab, setActiveTab] = useState<TabKey>(startTab ?? 'builder');
   const [provider, setProvider] = useState<Provider>('openai');
+=======
+<<<<<<< HEAD
+  const [activeTab, setActiveTab] = useState<'builder' | 'workflows' | 'agents' | 'integrations' | 'marketplace' | 'settings'>('builder');
+=======
+  const [activeTab, setActiveTab] = useState<TabKey>(startTab ?? 'builder');
+  const [provider, setProvider] = useState<Provider>('openai');
+>>>>>>> origin/main
+>>>>>>> Stashed changes
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState('// Generated code will appear here...');
   const [aiExplanation, setAiExplanation] = useState('');
@@ -444,6 +482,14 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
   const [isSavingWorkflow, setIsSavingWorkflow] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
+<<<<<<< Updated upstream
+=======
+  const [profile, setProfile] = useState<SdkProfile | null>(null);
+  const [apps, setApps] = useState<SdkApp[]>([]);
+  const [workflows, setWorkflows] = useState<SdkWorkflow[]>([]);
+  const [agents, setAgents] = useState<AiAgent[]>([]);
+  const [costSummary, setCostSummary] = useState<CostSummary[]>([]);
+>>>>>>> Stashed changes
   const [tokenUsage, setTokenUsage] = useState({ prompt: 0, completion: 0, total: 0 });
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('All');
   const [activeGeminiKey, setActiveGeminiKey] = useState('');
@@ -455,6 +501,11 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
 
   const [nodes, setNodes] = useState<BuilderNode[]>([]);
   const [edges, setEdges] = useState<BuilderEdge[]>([]);
+<<<<<<< Updated upstream
+=======
+  const [webhooks, setWebhooks] = useState<WebhookEntry[]>([]);
+  const [availableWebhookEvents, setAvailableWebhookEvents] = useState<string[]>([]);
+>>>>>>> Stashed changes
   const [webhookForm, setWebhookForm] = useState<{ name: string; url: string; events: string[] }>({
     name: '',
     url: '',
@@ -483,8 +534,87 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
   const developerId = user?.id || '';
 
   useEffect(() => {
+<<<<<<< Updated upstream
     if (startTab) {
       setActiveTab(startTab);
+=======
+    loadProfile();
+    loadApps();
+    loadWorkflows();
+    loadAgents();
+    loadAnalytics();
+    loadWebhooks();
+    loadWebhookEvents();
+  }, []);
+
+  useEffect(() => {
+    if (startTab) {
+      setActiveTab(startTab);
+    }
+  }, [startTab]);
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      setModelsLoading(true);
+      try {
+        const response = await api.get(`/sdk/models/${provider}`);
+        if (response.data?.success && Array.isArray(response.data.models) && response.data.models.length > 0) {
+          const parsed: ModelOption[] = response.data.models.map((model: any) => ({
+            id: model.id || model.model || model.name || model.value || model,
+            label: model.label || model.displayName || model.name || model.id || model
+          }));
+          setModelOptions(parsed);
+          setSelectedModel(prev => (parsed.some(option => option.id === prev) ? prev : parsed[0].id));
+          return;
+        }
+      } catch (error) {
+        console.error(`Failed to load ${provider} models from API, using fallback`, error);
+      } finally {
+        setModelsLoading(false);
+      }
+
+      const fallback = getFallbackModels(provider);
+      setModelOptions(fallback);
+      setSelectedModel(prev => (fallback.some(option => option.id === prev) ? prev : fallback[0]?.id || ''));
+    };
+
+    fetchModels().catch(() => {
+      const fallback = getFallbackModels(provider);
+      setModelOptions(fallback);
+      setSelectedModel(prev => (fallback.some(option => option.id === prev) ? prev : fallback[0]?.id || ''));
+      setModelsLoading(false);
+    });
+  }, [provider]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem(getStorageKey(user.id));
+    if (stored) {
+      try {
+        const decoded = atob(stored);
+        const [, keyValue] = decoded.split(':');
+        if (keyValue) {
+          setActiveGeminiKey(keyValue);
+        }
+      } catch (error) {
+        console.warn('Failed to decode stored Gemini API key', error);
+      }
+    }
+  }, [user.id]);
+
+  // API Functions
+  const loadProfile = async () => {
+    try {
+      const response = await api.get('/sdk/profile');
+      if (response.data.success) {
+        setProfile(response.data.profile);
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+      if (!axios.isAxiosError(error) || error.response?.status !== 403) {
+        toast.error('Failed to load SDK profile');
+      }
+>>>>>>> Stashed changes
     }
   }, [startTab]);
 
@@ -537,6 +667,28 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
     }
   }, [user?.id]);
 
+
+  const loadWebhooks = async () => {
+    try {
+      const response = await api.get('/integrations/webhooks/list');
+      if (response.data.success) {
+        setWebhooks(response.data.webhooks);
+      }
+    } catch (error) {
+      console.error('Failed to load webhooks:', error);
+    }
+  };
+
+  const loadWebhookEvents = async () => {
+    try {
+      const response = await api.get('/integrations/webhooks/events/available');
+      if (response.data.success) {
+        setAvailableWebhookEvents(response.data.events);
+      }
+    } catch (error) {
+      console.error('Failed to load webhook events:', error);
+    }
+  };
 
   // Helper functions
   const formatCurrency = (amount: number) => {
@@ -620,8 +772,13 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
           model: response.data.model || selectedModel
         });
         toast.success(`Code generated successfully! (${(tokens.total || 0)} tokens${response.data.cost ? `, ${formatCurrency(response.data.cost)}` : ''})`);
+<<<<<<< Updated upstream
         await reloadData.profile(); // Refresh usage
         await reloadData.analytics();
+=======
+        await loadProfile(); // Refresh usage
+        await loadAnalytics();
+>>>>>>> Stashed changes
       }
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
@@ -653,9 +810,14 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       });
 
       if (response.data.success) {
+<<<<<<< Updated upstream
         // Update apps state directly since we're using the hook
         apps.unshift(response.data.app);
         await reloadData.apps();
+=======
+        setApps(prev => [response.data.app, ...prev]);
+        await loadApps();
+>>>>>>> Stashed changes
         toast.success(isDemo ? 'Demo app saved locally' : 'App saved to sandbox');
       }
     } catch (error: any) {
@@ -701,9 +863,14 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       });
 
       if (response.data.success) {
+<<<<<<< Updated upstream
         // Update workflows state directly since we're using the hook
         workflows.unshift(response.data.workflow);
         await reloadData.workflows();
+=======
+        setWorkflows(prev => [response.data.workflow, ...prev]);
+        await loadWorkflows();
+>>>>>>> Stashed changes
         setNewWorkflowName('New Workflow');
         setNewNodeLabel('');
         setNodes([]);
@@ -731,8 +898,15 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       });
 
       if (response.data.success) {
+<<<<<<< Updated upstream
         // Reload agents data to reflect the changes
         await reloadData.agents();
+=======
+        setAgents(prev => prev.map(a =>
+          a.id === response.data.agent.id ? response.data.agent : a
+        ));
+        await loadAgents();
+>>>>>>> Stashed changes
         toast.success(`Agent ${response.data.agent.name} is now ${response.data.agent.status}`);
       }
     } catch (error: any) {
@@ -858,8 +1032,15 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       });
 
       if (response.data.success) {
+<<<<<<< Updated upstream
         // Reload apps data to reflect the changes
         await reloadData.apps();
+=======
+        setApps(prev => prev.map(a =>
+          a.id === response.data.app.id ? response.data.app : a
+        ));
+        await loadApps();
+>>>>>>> Stashed changes
         toast.success(`App status updated to ${response.data.app.status}`);
       }
     } catch (error: any) {
@@ -931,8 +1112,12 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         events: webhookForm.events
       });
       if (response.data.success) {
+<<<<<<< Updated upstream
         // Update webhooks state directly since we're using the hook
         webhooks.unshift(response.data.webhook);
+=======
+        setWebhooks(prev => [response.data.webhook, ...prev]);
+>>>>>>> Stashed changes
         setWebhookForm({ name: '', url: '', events: ['project.created'] });
         toast.success('Webhook created');
       }
@@ -946,8 +1131,12 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
   const handleWebhookDelete = async (webhookId: number) => {
     try {
       await api.delete(`/integrations/webhooks/${webhookId}`);
+<<<<<<< Updated upstream
       // Reload webhooks data to reflect the deletion
       await reloadData.webhooks();
+=======
+      setWebhooks(prev => prev.filter(webhook => webhook.id !== webhookId));
+>>>>>>> Stashed changes
       toast.success('Webhook deleted');
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to delete webhook');
@@ -960,8 +1149,16 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       await api.patch(`/integrations/webhooks/${webhook.id}`, {
         is_active: currentlyActive ? 0 : 1
       });
+<<<<<<< Updated upstream
       // Reload webhooks data to reflect the changes
       await reloadData.webhooks();
+=======
+      setWebhooks(prev =>
+        prev.map(entry =>
+          entry.id === webhook.id ? { ...entry, is_active: currentlyActive ? 0 : 1 } : entry
+        )
+      );
+>>>>>>> Stashed changes
       toast.success(`Webhook ${webhook.name} ${currentlyActive ? 'paused' : 'activated'}`);
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to update webhook');
@@ -1005,8 +1202,12 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         templates.map(template =>
           api.post('/integrations/webhooks', template).then(response => {
             if (response.data.success) {
+<<<<<<< Updated upstream
               // Update webhooks state directly since we're using the hook
               webhooks.unshift(response.data.webhook);
+=======
+              setWebhooks(prev => [response.data.webhook, ...prev]);
+>>>>>>> Stashed changes
             }
           })
         )
@@ -1076,11 +1277,18 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
               connections: workflow.connections
             },
             isActive: true,
+<<<<<<< Updated upstream
             companyId: user.companyId
           }).then(response => {
             if (response.data.success) {
               // Update workflows state directly since we're using the hook
               workflows.unshift(response.data.workflow);
+=======
+            companyId: user.company_id
+          }).then(response => {
+            if (response.data.success) {
+              setWorkflows(prev => [response.data.workflow, ...prev]);
+>>>>>>> Stashed changes
             }
           })
         )
@@ -1230,7 +1438,10 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
                 ))}
               </div>
               <select
+<<<<<<< Updated upstream
                 aria-label="Select AI Model"
+=======
+>>>>>>> Stashed changes
                 className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 value={selectedModel}
                 onChange={event => setSelectedModel(event.target.value)}
@@ -1297,7 +1508,11 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
 
         <Card className="lg:col-span-2 space-y-4">
           <h3 className="text-lg font-semibold text-slate-900">Usage Summary</h3>
+<<<<<<< Updated upstream
           {renderUsageBar}
+=======
+          {renderUsageBar()}
+>>>>>>> Stashed changes
           <div className="space-y-3">
             {costSummary.length === 0 ? (
               <p className="text-sm text-slate-500">Generate with the SDK to populate usage analytics.</p>
@@ -1331,6 +1546,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
             Auto saves are not enabled — remember to store valuable blueprints.
           </span>
         </div>
+<<<<<<< Updated upstream
         <Suspense fallback={
           <div className="h-[420px] bg-slate-900 rounded-lg flex items-center justify-center">
             <div className="text-slate-400 flex items-center gap-2">
@@ -1348,6 +1564,16 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
             onChange={value => setGeneratedCode(value || '')}
           />
         </Suspense>
+=======
+        <MonacoEditor
+          height="420px"
+          language="typescript"
+          theme="vs-dark"
+          value={generatedCode}
+          options={{ minimap: { enabled: false }, fontSize: 14, automaticLayout: true }}
+          onChange={value => setGeneratedCode(value || '')}
+        />
+>>>>>>> Stashed changes
       </Card>
 
       {aiExplanation && (
@@ -1646,7 +1872,11 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         <p className="text-sm text-slate-600">
           Track token consumption and cost for each AI provider connected to your SDK account.
         </p>
+<<<<<<< Updated upstream
         {renderUsageBar}
+=======
+        {renderUsageBar()}
+>>>>>>> Stashed changes
       </Card>
 
       {costSummary.length === 0 ? (
@@ -1685,7 +1915,11 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
             </p>
           </div>
           <div className="flex gap-2">
+<<<<<<< Updated upstream
             <Button variant="secondary" size="sm" onClick={reloadData.webhooks}>
+=======
+            <Button variant="secondary" size="sm" onClick={loadWebhooks}>
+>>>>>>> Stashed changes
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
@@ -1823,6 +2057,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
 
   const renderSettingsTab = () => (
     <div className="space-y-6">
+<<<<<<< Updated upstream
       {/* Notifications Panel */}
       {notifications.length > 0 && (
         <Card className="space-y-4">
@@ -1873,6 +2108,8 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         </Card>
       )}
 
+=======
+>>>>>>> Stashed changes
       <Card className="space-y-4">
         <h3 className="text-lg font-semibold text-slate-900">Subscription Tier</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -1906,6 +2143,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         )}
       </Card>
 
+<<<<<<< Updated upstream
       {/* Subscription History */}
       {subscriptionHistory.length > 0 && (
         <Card className="space-y-4">
@@ -1935,6 +2173,8 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         </Card>
       )}
 
+=======
+>>>>>>> Stashed changes
       <Card className="space-y-4">
         <h3 className="text-lg font-semibold text-slate-900">Gemini API Key</h3>
         <p className="text-sm text-slate-600">
@@ -2014,7 +2254,22 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
+<<<<<<< Updated upstream
             {NAV_TABS.map(tab => (
+=======
+<<<<<<< HEAD
+            {[
+              { id: 'builder', label: 'AI Builder', icon: Code },
+              { id: 'workflows', label: 'Workflows', icon: Zap },
+              { id: 'agents', label: 'AI Agents', icon: Package },
+              { id: 'integrations', label: 'Integrations', icon: Plug },
+              { id: 'marketplace', label: 'Marketplace', icon: TrendingUp },
+              { id: 'settings', label: 'Settings', icon: Settings }
+            ].map(tab => (
+=======
+            {NAV_TABS.map(tab => (
+>>>>>>> origin/main
+>>>>>>> Stashed changes
               <button
                 key={tab.id}
                 type="button"
@@ -2034,18 +2289,58 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<<<<<<< Updated upstream
         {activeTab === 'builder' && renderBuilderTab()}
         {activeTab === 'zapier' && (
           <Suspense fallback={<CardSkeleton />}>
             <ZapierStyleWorkflowBuilder />
           </Suspense>
         )}
+=======
+<<<<<<< HEAD
+        {activeTab === 'agents' && (
+          <AIAgentsDashboard subscriptionTier={profile?.subscriptionTier || 'free'} />
+        )}
+
+        {activeTab === 'integrations' && (
+          <IntegrationsHub subscriptionTier={profile?.subscriptionTier || 'free'} />
+        )}
+
+        {(activeTab === 'builder' || activeTab === 'workflows' || activeTab === 'marketplace' || activeTab === 'settings') && (
+          <Card>
+            <h2 className="text-xl font-bold text-slate-900 mb-4">
+              {activeTab === 'builder' && 'AI Code Builder'}
+              {activeTab === 'workflows' && 'Workflow Automation'}
+              {activeTab === 'marketplace' && 'App Marketplace'}
+              {activeTab === 'settings' && 'Developer Settings'}
+            </h2>
+            <p className="text-slate-600">
+              Production SDK with real OpenAI integration. All event handlers are connected to the backend API.
+            </p>
+            <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <p className="text-sm text-emerald-800">
+                ✅ Backend API connected<br />
+                ✅ OpenAI integration active<br />
+                ✅ Toast notifications enabled<br />
+                ✅ All event handlers implemented
+              </p>
+            </div>
+          </Card>
+        )}
+=======
+        {activeTab === 'builder' && renderBuilderTab()}
+        {activeTab === 'zapier' && <ZapierStyleWorkflowBuilder />}
+>>>>>>> Stashed changes
         {activeTab === 'workflows' && renderWorkflowsTab()}
         {activeTab === 'agents' && renderAgentsTab()}
         {activeTab === 'marketplace' && renderMarketplaceTab()}
         {activeTab === 'management' && renderManagementTab()}
         {activeTab === 'analytics' && renderAnalyticsTab()}
         {activeTab === 'settings' && renderSettingsTab()}
+<<<<<<< Updated upstream
+=======
+>>>>>>> origin/main
+>>>>>>> Stashed changes
       </div>
     </div >
   );

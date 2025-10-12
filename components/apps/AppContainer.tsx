@@ -13,7 +13,11 @@ export interface MiniApp {
     icon: string;
     version: string;
     author: string;
+<<<<<<< Updated upstream
     category: 'productivity' | 'finance' | 'health' | 'utilities' | 'entertainment' | 'construction';
+=======
+    category: 'productivity' | 'finance' | 'health' | 'utilities' | 'entertainment';
+>>>>>>> Stashed changes
     component: React.ComponentType<any>;
     installed: boolean;
     free: boolean;

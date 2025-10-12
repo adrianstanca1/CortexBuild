@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 // Fix: Added .ts extension to import
 import { Project, Screen, User, PermissionAction, PermissionSubject } from '../../types';
 import { usePermissions } from '../../hooks/usePermissions';
+<<<<<<< Updated upstream
 import { useDevelopmentAccess } from '../../hooks/useDevelopmentAccess';
+=======
+>>>>>>> Stashed changes
 // Fix: Added .tsx extension to import
 import {
     ChevronLeftIcon, BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
@@ -10,8 +13,11 @@ import {
     BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
     WandSparklesIcon, ArrowPathIcon
 } from '../Icons';
+<<<<<<< Updated upstream
 import { NavigationErrorBoundary } from '../../src/components/ErrorBoundaries';
 import { RoleBasedNavigation } from './RoleBasedNavigation';
+=======
+>>>>>>> Stashed changes
 
 interface SidebarProps {
     project: Project;
@@ -91,6 +97,11 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
     const isDeveloper = currentUser?.role === 'developer';
     const isSuperAdmin = currentUser?.role === 'super_admin';
     const isCompanyAdmin = currentUser?.role === 'company_admin';
+<<<<<<< Updated upstream
+=======
+    // Check if user has SDK access (super_admin or developer role)
+    const isSdkFullAccess = currentUser?.role === 'super_admin' || isDeveloper;
+>>>>>>> Stashed changes
 
     const allNavItems = [
         { label: 'My Projects', screen: 'projects', icon: BuildingOfficeIcon, permission: { subject: 'task', action: 'read' } }, // Simplified permission
@@ -243,6 +254,7 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
     );
 };
 
+<<<<<<< Updated upstream
 // Wrap with NavigationErrorBoundary
 const WrappedSidebar: React.FC<SidebarProps> = (props) => {
     return (
@@ -257,3 +269,6 @@ const WrappedSidebar: React.FC<SidebarProps> = (props) => {
 };
 
 export default WrappedSidebar;
+=======
+export default Sidebar;
+>>>>>>> Stashed changes

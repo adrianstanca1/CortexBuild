@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Project, User } from '../../types';
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 import { ChevronLeftIcon, PlusIcon } from '../Icons';
 
 interface NewDayworkSheetScreenProps {

@@ -5,7 +5,11 @@ import React, { useState, useEffect } from 'react';
 import { Project, DeliveryItem } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 import { ChevronLeftIcon, QRCodeIcon, CheckIcon } from '../Icons';
 
 interface DeliveryScreenProps {

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Project, PunchListItem, User, Comment } from '../../types';
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 import { ChevronLeftIcon, PaperClipIcon, UsersIcon, MapPinIcon, ClockIcon } from '../Icons';
 import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
 

@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Project, Task, Screen, User } from '../../types';
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 import { usePermissions } from '../../hooks/usePermissions';
 import { ChevronLeftIcon, PlusIcon, PaperClipIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, ChevronDownIcon } from '../Icons';
 

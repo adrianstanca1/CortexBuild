@@ -3,7 +3,11 @@ import React, { useState, useRef } from 'react';
 import { Project, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 // Fix: Corrected import paths to include file extensions.
 // Change: Swapped XMarkIcon for TrashIcon for photo removal UI.
 import { ChevronLeftIcon, UsersIcon, MapPinIcon, CameraIcon, TrashIcon } from '../Icons';

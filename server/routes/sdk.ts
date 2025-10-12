@@ -2,8 +2,11 @@ import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { authenticateToken } from '../auth';
 import { AICodeGenerator, createAICodeGenerator } from '../services/ai-code-generator';
+<<<<<<< Updated upstream
 import { createWorkspaceManager, WorkspaceManager } from '../services/workspace-manager';
 import { createCollaborationService, CollaborationService } from '../services/collaboration-service';
+=======
+>>>>>>> Stashed changes
 
 // Middleware to check if user is a developer
 const requireDeveloper = (req: Request, res: Response, next: any) => {

@@ -2,7 +2,11 @@ import React, { useState, useRef } from 'react';
 // Fix: Added .ts extension to import
 import { Project, User, Attachment } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
+<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
+=======
+import * as api from '../../api';
+>>>>>>> Stashed changes
 // Fix: Added .tsx extension to import
 import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, PaperClipIcon, SparklesIcon, ArrowPathIcon, TrashIcon } from '../Icons';
 

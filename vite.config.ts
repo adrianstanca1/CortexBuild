@@ -27,6 +27,7 @@ export default defineConfig(async ({ mode }) => {
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       build: {
+<<<<<<< Updated upstream
         target: 'esnext',
         minify: 'esbuild',
         sourcemap: false,
@@ -140,6 +141,50 @@ export default defineConfig(async ({ mode }) => {
         cssMinify: 'esbuild',
         // Set reasonable chunk size warnings
         chunkSizeWarningLimit: 1000
+=======
+        rollupOptions: {
+          output: {
+            manualChunks(id) {
+              if (id.includes('node_modules/@monaco-editor')) {
+                return 'monaco';
+              }
+              if (id.includes('components/sdk/') || id.includes('components/screens/developer/')) {
+                return 'developer-tools';
+              }
+              if (id.includes('components/marketplace/')) {
+                return 'marketplace';
+              }
+              if (id.includes('components/screens/modules/')) {
+                return 'module-screens';
+              }
+              if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable')) {
+                return 'pdf-tools';
+              }
+              if (id.includes('node_modules/react-dom') || id.includes('node_modules/react') || id.includes('node_modules/scheduler')) {
+                return 'react-core';
+              }
+              if (id.includes('node_modules/lucide-react')) {
+                return 'icon-pack';
+              }
+              if (id.includes('node_modules/@supabase')) {
+                return 'supabase';
+              }
+              if (id.includes('node_modules/@xyflow')) {
+                return 'workflow';
+              }
+              if (id.includes('node_modules/axios')) {
+                return 'axios';
+              }
+              if (id.includes('node_modules/@google')) {
+                return 'google-ai';
+              }
+              if (id.includes('node_modules')) {
+                return 'vendor';
+              }
+            }
+          }
+        }
+>>>>>>> Stashed changes
       },
       resolve: {
         alias: {
