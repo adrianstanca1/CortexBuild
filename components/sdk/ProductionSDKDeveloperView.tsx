@@ -18,9 +18,7 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-<<<<<<< HEAD
-  Plug
-=======
+  Plug,
   BarChart3,
   Webhook,
   ShieldCheck,
@@ -28,7 +26,6 @@ import {
   Globe,
   Activity,
   Workflow
->>>>>>> origin/main
 } from 'lucide-react';
 import ZapierStyleWorkflowBuilder from './ZapierStyleWorkflowBuilder';
 
@@ -254,12 +251,8 @@ interface ProductionSDKDeveloperViewProps {
 
 export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProps> = ({ user, onNavigate: _onNavigate, startTab }) => {
   // State
-<<<<<<< HEAD
-  const [activeTab, setActiveTab] = useState<'builder' | 'workflows' | 'agents' | 'integrations' | 'marketplace' | 'settings'>('builder');
-=======
   const [activeTab, setActiveTab] = useState<TabKey>(startTab ?? 'builder');
   const [provider, setProvider] = useState<Provider>('openai');
->>>>>>> origin/main
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState('// Generated code will appear here...');
   const [aiExplanation, setAiExplanation] = useState('');
@@ -1764,18 +1757,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
-<<<<<<< HEAD
-            {[
-              { id: 'builder', label: 'AI Builder', icon: Code },
-              { id: 'workflows', label: 'Workflows', icon: Zap },
-              { id: 'agents', label: 'AI Agents', icon: Package },
-              { id: 'integrations', label: 'Integrations', icon: Plug },
-              { id: 'marketplace', label: 'Marketplace', icon: TrendingUp },
-              { id: 'settings', label: 'Settings', icon: Settings }
-            ].map(tab => (
-=======
             {NAV_TABS.map(tab => (
->>>>>>> origin/main
               <button
                 key={tab.id}
                 type="button"
@@ -1789,43 +1771,12 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
                 <span>{tab.label}</span>
               </button>
             ))}
-          </nav>
-        </div>
-      </div>
+          </nav >
+        </div >
+      </div >
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-<<<<<<< HEAD
-        {activeTab === 'agents' && (
-          <AIAgentsDashboard subscriptionTier={profile?.subscriptionTier || 'free'} />
-        )}
-
-        {activeTab === 'integrations' && (
-          <IntegrationsHub subscriptionTier={profile?.subscriptionTier || 'free'} />
-        )}
-
-        {(activeTab === 'builder' || activeTab === 'workflows' || activeTab === 'marketplace' || activeTab === 'settings') && (
-          <Card>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">
-              {activeTab === 'builder' && 'AI Code Builder'}
-              {activeTab === 'workflows' && 'Workflow Automation'}
-              {activeTab === 'marketplace' && 'App Marketplace'}
-              {activeTab === 'settings' && 'Developer Settings'}
-            </h2>
-            <p className="text-slate-600">
-              Production SDK with real OpenAI integration. All event handlers are connected to the backend API.
-            </p>
-            <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <p className="text-sm text-emerald-800">
-                ✅ Backend API connected<br />
-                ✅ OpenAI integration active<br />
-                ✅ Toast notifications enabled<br />
-                ✅ All event handlers implemented
-              </p>
-            </div>
-          </Card>
-        )}
-=======
         {activeTab === 'builder' && renderBuilderTab()}
         {activeTab === 'zapier' && <ZapierStyleWorkflowBuilder />}
         {activeTab === 'workflows' && renderWorkflowsTab()}
@@ -1834,8 +1785,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         {activeTab === 'management' && renderManagementTab()}
         {activeTab === 'analytics' && renderAnalyticsTab()}
         {activeTab === 'settings' && renderSettingsTab()}
->>>>>>> origin/main
       </div>
-    </div>
+    </div >
   );
 };
