@@ -200,6 +200,8 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = React.me
                                 type="button"
                                 onClick={() => toast.success('Refreshing data...')}
                                 className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all backdrop-blur-sm"
+                                title="Refresh dashboard data"
+                                aria-label="Refresh dashboard data"
                             >
                                 <Activity className="w-5 h-5" />
                             </button>
