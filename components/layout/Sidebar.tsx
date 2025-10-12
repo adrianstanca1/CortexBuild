@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 // Fix: Added .ts extension to import
 import { Project, Screen, User, PermissionAction, PermissionSubject } from '../../types';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useDevelopmentAccess } from '../../hooks/useDevelopmentAccess';
 // Fix: Added .tsx extension to import
 import {
     ChevronLeftIcon, BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
@@ -10,6 +11,7 @@ import {
     WandSparklesIcon, ArrowPathIcon
 } from '../Icons';
 import { NavigationErrorBoundary } from '../../src/components/ErrorBoundaries';
+import { RoleBasedNavigation } from './RoleBasedNavigation';
 
 interface SidebarProps {
     project: Project;
@@ -84,12 +86,11 @@ const RealtimeInfoCard: React.FC = () => {
 
 const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule, goHome, currentUser, onLogout }) => {
     const { can } = usePermissions(currentUser);
+    const { canAccessDevFeature, canAccessDashboard, getDevelopmentMode } = useDevelopmentAccess(currentUser);
 
     const isDeveloper = currentUser?.role === 'developer';
     const isSuperAdmin = currentUser?.role === 'super_admin';
     const isCompanyAdmin = currentUser?.role === 'company_admin';
-    // Check if user has SDK access (super_admin or developer role)
-    const isSdkFullAccess = currentUser?.role === 'super_admin' || isDeveloper;
 
     const allNavItems = [
         { label: 'My Projects', screen: 'projects', icon: BuildingOfficeIcon, permission: { subject: 'task', action: 'read' } }, // Simplified permission
@@ -105,9 +106,9 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
     ];
 
     // Add SDK Developer item if user has access
-    const sdkNavItems = isSdkFullAccess ? [
+    const sdkNavItems = (canAccessDevFeature('ai_builder') || isSuperAdmin || isDeveloper) ? [
         {
-            label: isSdkFullAccess ? 'SDK Developer' : 'SDK Demo',
+            label: (isSuperAdmin || isDeveloper) ? 'SDK Developer' : 'SDK Demo',
             screen: 'sdk-developer',
             icon: () => (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,7 +116,7 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 8h8v8H8z" />
                 </svg>
             ),
-            permission: { subject: 'task', action: 'read' }, // Dummy permission, actual check is isSdkFullAccess
+            permission: { subject: 'task', action: 'read' }, // Dummy permission, actual check is handled above
             isModule: true
         }
     ] : [];
