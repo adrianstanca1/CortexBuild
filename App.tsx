@@ -236,7 +236,7 @@ const App: React.FC = () => {
         const handleHashChange = () => {
             const hash = window.location.hash;
             if (hash === '#dashboard') {
-                const targetScreen = getDefaultScreenForRole(currentUser.role);
+                const targetScreen = getDefaultScreenForRole(currentUser?.role || 'project_manager');
                 navigateToModule(targetScreen, {});
                 // Clean up the hash
                 window.history.replaceState(null, '', window.location.pathname);
@@ -271,7 +271,7 @@ const App: React.FC = () => {
 
             // Ensure user is navigated to dashboard if no navigation exists
             if (navigationStack.length === 0) {
-                const defaultScreen = getDefaultScreenForRole(currentUser.role);
+                const defaultScreen = getDefaultScreenForRole(currentUser?.role || 'project_manager');
                 navigateToModule(defaultScreen, {});
             }
         } else {
@@ -447,7 +447,7 @@ const App: React.FC = () => {
         };
 
         // Render role-specific dashboard
-        switch (currentUser.role) {
+        switch (currentUser?.role) {
             case 'developer':
                 return (
                     <ErrorBoundary>
