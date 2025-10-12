@@ -4,6 +4,7 @@
  */
 
 import { APIRequestConfig } from './apiClient';
+import { Logger } from '../config/logging.config';
 
 /**
  * Queued Request Interface
@@ -63,7 +64,7 @@ class OfflineManager {
     this.setupEventListeners();
 
     // Log initial status
-    console.log(`[OfflineManager] Initialized - ${this.isOnline ? 'Online' : 'Offline'}`);
+    Logger.info(`[OfflineManager] Initialized - ${this.isOnline ? 'Online' : 'Offline'}`);
   }
 
   /**
@@ -78,7 +79,7 @@ class OfflineManager {
    * Handle online event
    */
   private async handleOnline(): Promise<void> {
-    console.log('[OfflineManager] Connection restored');
+    Logger.info('[OfflineManager] Connection restored');
     this.isOnline = true;
 
     // Trigger callbacks
@@ -86,7 +87,7 @@ class OfflineManager {
 
     // Auto-sync queue if enabled
     if (this.config.syncOnReconnect && this.queue.length > 0) {
-      console.log(`[OfflineManager] Auto-syncing ${this.queue.length} queued requests`);
+      Logger.info(`[OfflineManager] Auto-syncing ${this.queue.length} queued requests`);
       await this.syncQueue();
     }
   }
@@ -95,7 +96,7 @@ class OfflineManager {
    * Handle offline event
    */
   private handleOffline(): void {
-    console.log('[OfflineManager] Connection lost');
+    Logger.warn('[OfflineManager] Connection lost');
     this.isOnline = false;
 
     // Trigger callbacks
@@ -108,7 +109,7 @@ class OfflineManager {
   async queueRequest(request: Omit<QueuedRequest, 'id' | 'timestamp' | 'retries'>): Promise<string> {
     // Check queue size
     if (this.queue.length >= this.config.maxQueueSize) {
-      console.warn('[OfflineManager] Queue is full, removing oldest low-priority item');
+      Logger.warn('[OfflineManager] Queue is full, removing oldest low-priority item');
       this.removeOldestLowPriority();
     }
 
@@ -131,7 +132,7 @@ class OfflineManager {
       this.saveQueue();
     }
 
-    console.log(`[OfflineManager] Request queued: ${request.method} ${request.url}`);
+    Logger.debug(`[OfflineManager] Request queued: ${request.method} ${request.url}`);
 
     return queuedRequest.id;
   }
@@ -141,19 +142,19 @@ class OfflineManager {
    */
   async syncQueue(): Promise<{ success: number; failed: number }> {
     if (this.syncInProgress) {
-      console.warn('[OfflineManager] Sync already in progress');
+      Logger.warn('[OfflineManager] Sync already in progress');
       return { success: 0, failed: 0 };
     }
 
     if (!this.isOnline) {
-      console.warn('[OfflineManager] Cannot sync - offline');
+      Logger.warn('[OfflineManager] Cannot sync - offline');
       return { success: 0, failed: 0 };
     }
 
     this.syncInProgress = true;
     const stats = { success: 0, failed: 0 };
 
-    console.log(`[OfflineManager] Starting sync of ${this.queue.length} requests`);
+    Logger.info(`[OfflineManager] Starting sync of ${this.queue.length} requests`);
 
     // Process queue
     while (this.queue.length > 0) {
@@ -162,13 +163,14 @@ class OfflineManager {
       try {
         await this.executeRequest(request);
         stats.success++;
-        
+
         // Remove from queue
         this.queue.shift();
-        console.log(`[OfflineManager] Request synced: ${request.method} ${request.url}`);
-      } catch (error) {
-        console.error(`[OfflineManager] Failed to sync request: ${request.method} ${request.url}`, error);
-        
+        Logger.debug(`[OfflineManager] Request synced: ${request.method} ${request.url}`);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        Logger.error(`[OfflineManager] Failed to sync request: ${request.method} ${request.url}`, { error: errorMessage });
+
         // Increment retries
         request.retries++;
 
@@ -176,15 +178,15 @@ class OfflineManager {
         if (request.retries >= 3) {
           stats.failed++;
           this.queue.shift();
-          console.warn(`[OfflineManager] Request removed after 3 failed attempts: ${request.url}`);
+          Logger.warn(`[OfflineManager] Request removed after 3 failed attempts: ${request.url}`);
         } else {
           // Move to end of queue
           this.queue.push(this.queue.shift()!);
         }
-        
+
         // Break if offline
         if (!navigator.onLine) {
-          console.log('[OfflineManager] Went offline during sync');
+          Logger.info('[OfflineManager] Went offline during sync');
           break;
         }
       }
@@ -197,7 +199,7 @@ class OfflineManager {
 
     this.syncInProgress = false;
 
-    console.log(`[OfflineManager] Sync complete - Success: ${stats.success}, Failed: ${stats.failed}`);
+    Logger.info(`[OfflineManager] Sync complete - Success: ${stats.success}, Failed: ${stats.failed}`);
 
     return stats;
   }
@@ -229,7 +231,7 @@ class OfflineManager {
     if (this.config.persistQueue) {
       localStorage.removeItem(this.config.queueStorageKey);
     }
-    console.log('[OfflineManager] Queue cleared');
+    Logger.info('[OfflineManager] Queue cleared');
   }
 
   /**
@@ -333,8 +335,9 @@ class OfflineManager {
         this.config.queueStorageKey,
         JSON.stringify(this.queue)
       );
-    } catch (error) {
-      console.error('[OfflineManager] Failed to save queue to localStorage', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error('[OfflineManager] Failed to save queue to localStorage', { error: errorMessage });
     }
   }
 
@@ -346,10 +349,11 @@ class OfflineManager {
       const stored = localStorage.getItem(this.config.queueStorageKey);
       if (stored) {
         this.queue = JSON.parse(stored);
-        console.log(`[OfflineManager] Loaded ${this.queue.length} queued requests from storage`);
+        Logger.info(`[OfflineManager] Loaded ${this.queue.length} queued requests from storage`);
       }
-    } catch (error) {
-      console.error('[OfflineManager] Failed to load queue from localStorage', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error('[OfflineManager] Failed to load queue from localStorage', { error: errorMessage });
       this.queue = [];
     }
   }
