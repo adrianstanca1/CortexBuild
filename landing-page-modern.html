@@ -39,8 +39,7 @@
         /* Glassmorphism */
         .glass {
             background: rgba(255, 255, 255, 0.1);
-            An element doesn't have an autocomplete attribute
- Deprecated feature used Users may have difficulties reading text content due to insufficient color contrastp-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -161,23 +160,30 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-black text-gradient">CortexBuild</h1>
-                        <p class="text-xs text-gray-600 font-semibold">AI INTELLIGENCE</p>
+                        <p class="text-xs text-gray-600 font-semibold">AI INTELLIGENCE PLATFORM</p>
                     </div>
                 </div>
 
                 <!-- Nav Links -->
                 <div class="hidden md:flex space-x-8">
-                    <a href="#features" class="text-gray-700 hover:text-purple-600 font-medium transition">Features</a>
-                    <a href="#how-it-works" class="text-gray-700 hover:text-purple-600 font-medium transition">How It
-                        Works</a>
-                    <a href="#pricing" class="text-gray-700 hover:text-purple-600 font-medium transition">Pricing</a>
+                    <a href="#home" class="text-gray-700 hover:text-purple-600 font-medium transition">Home</a>
+                    <a href="#neural-network" class="text-gray-700 hover:text-purple-600 font-medium transition">The Neural Network</a>
+                    <a href="#platform-features" class="text-gray-700 hover:text-purple-600 font-medium transition">Platform Features</a>
+                    <a href="#connectivity" class="text-gray-700 hover:text-purple-600 font-medium transition">Connectivity</a>
+                    <a href="#developer-platform" class="text-gray-700 hover:text-purple-600 font-medium transition">Developer Platform</a>
                 </div>
 
-                <!-- CTA Button -->
-                <button onclick="showAppForLogin()"
-                    class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-2xl transition transform hover:scale-105">
-                    Get Started →
-                </button>
+                <!-- CTA Buttons -->
+                <div class="flex space-x-4">
+                    <button onclick="showAppForLogin()"
+                        class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-2xl transition transform hover:scale-105">
+                        Get Started
+                    </button>
+                    <button onclick="showAppForLogin()"
+                        class="glass text-white px-6 py-3 rounded-xl font-bold hover:bg-white/30 transition transform hover:scale-105">
+                        Login
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
