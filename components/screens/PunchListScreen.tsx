@@ -3,11 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Project, PunchListItem, Screen, User } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
-=======
-import * as api from '../../api';
->>>>>>> Stashed changes
 import { ChevronLeftIcon, PlusIcon, CheckBadgeIcon } from '../Icons';
 
 interface PunchListScreenProps {

@@ -117,25 +117,19 @@ export type Screen =
     | 'developer-dashboard'
     | 'automation-studio'
     | 'developer-console'
-<<<<<<< Updated upstream
     | 'developer-workspace'
-=======
->>>>>>> Stashed changes
     | 'company-admin-dashboard'
     | 'super-admin-dashboard'
     | 'sdk-developer'
     | 'my-apps-desktop'
     // Workflow Builders
     | 'n8n-procore-builder'
-<<<<<<< Updated upstream
     | 'construction-oracle'
     | 'my-applications'
     // Marketplace screens
     | 'marketplace'
     | 'admin-review'
     | 'developer-submissions'
-=======
->>>>>>> Stashed changes
     // Admin screens
     | 'platform-admin'
     | 'admin-control-panel'

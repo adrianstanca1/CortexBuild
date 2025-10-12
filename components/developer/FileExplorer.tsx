@@ -17,10 +17,7 @@ import {
     Upload,
     RefreshCw
 } from 'lucide-react';
-<<<<<<< Updated upstream
 import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
-=======
->>>>>>> Stashed changes
 
 interface FileNode {
     id: string;
@@ -107,11 +104,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
         return nodes.map(node => {
             const isExpanded = expandedFolders.has(node.id);
             const isSelected = selectedFile === node.id;
-<<<<<<< Updated upstream
             const matchesSearch = searchQuery === '' ||
-=======
-            const matchesSearch = searchQuery === '' || 
->>>>>>> Stashed changes
                 node.name.toLowerCase().includes(searchQuery.toLowerCase());
 
             if (!matchesSearch && node.type === 'file') return null;
@@ -120,22 +113,12 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
                 <div key={node.id}>
                     <div
                         onClick={() => handleFileClick(node)}
-<<<<<<< Updated upstream
                         className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-all rounded-lg ${isSelected
                             ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
                             : isDarkMode
                                 ? 'hover:bg-gray-700 text-gray-300'
                                 : 'hover:bg-gray-100 text-gray-700'
                             }`}
-=======
-                        className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-all rounded-lg ${
-                            isSelected
-                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                                : isDarkMode
-                                ? 'hover:bg-gray-700 text-gray-300'
-                                : 'hover:bg-gray-100 text-gray-700'
-                        }`}
->>>>>>> Stashed changes
                         style={{ paddingLeft: `${level * 20 + 12}px` }}
                     >
                         {node.type === 'folder' && (
@@ -181,28 +164,16 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
-<<<<<<< Updated upstream
                             className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
                                 }`}
-=======
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                            }`}
->>>>>>> Stashed changes
                             title="Refresh"
                         >
                             <RefreshCw className="h-4 w-4" />
                         </button>
                         <button
                             type="button"
-<<<<<<< Updated upstream
                             className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
                                 }`}
-=======
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                            }`}
->>>>>>> Stashed changes
                             title="New File"
                         >
                             <Plus className="h-4 w-4" />
@@ -243,7 +214,6 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
     );
 };
 
-<<<<<<< Updated upstream
 // Wrap with LightErrorBoundary
 const WrappedFileExplorer: React.FC<FileExplorerProps> = (props) => {
     return (
@@ -254,7 +224,4 @@ const WrappedFileExplorer: React.FC<FileExplorerProps> = (props) => {
 };
 
 export default WrappedFileExplorer;
-=======
-export default FileExplorer;
->>>>>>> Stashed changes
 

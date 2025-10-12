@@ -18,10 +18,7 @@ import {
     AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-<<<<<<< Updated upstream
 import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
-=======
->>>>>>> Stashed changes
 
 interface GitFile {
     path: string;
@@ -80,11 +77,7 @@ const GitPanel: React.FC<GitPanelProps> = ({ isDarkMode }) => {
         // Simulate commit
         await new Promise(resolve => setTimeout(resolve, 1000));
         setIsCommitting(false);
-<<<<<<< Updated upstream
 
-=======
-        
->>>>>>> Stashed changes
         toast.success(`Committed ${stagedFiles.size} files`);
         setCommitMessage('');
         setStagedFiles(new Set());
@@ -183,7 +176,6 @@ const GitPanel: React.FC<GitPanelProps> = ({ isDarkMode }) => {
                             <div
                                 key={file.path}
                                 onClick={() => toggleStageFile(file.path)}
-<<<<<<< Updated upstream
                                 className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${isStaged
                                     ? 'bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/50'
                                     : isDarkMode
@@ -197,23 +189,6 @@ const GitPanel: React.FC<GitPanelProps> = ({ isDarkMode }) => {
                                         ? 'border-gray-600'
                                         : 'border-gray-300'
                                     }`}>
-=======
-                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
-                                    isStaged
-                                        ? 'bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/50'
-                                        : isDarkMode
-                                        ? 'hover:bg-gray-700 border border-transparent'
-                                        : 'hover:bg-gray-50 border border-transparent'
-                                }`}
-                            >
-                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                                    isStaged
-                                        ? 'bg-purple-600 border-purple-600'
-                                        : isDarkMode
-                                        ? 'border-gray-600'
-                                        : 'border-gray-300'
-                                }`}>
->>>>>>> Stashed changes
                                     {isStaged && <Check className="h-3 w-3 text-white" />}
                                 </div>
                                 {getStatusIcon(file.status)}
@@ -264,7 +239,6 @@ const GitPanel: React.FC<GitPanelProps> = ({ isDarkMode }) => {
     );
 };
 
-<<<<<<< Updated upstream
 // Wrap with LightErrorBoundary
 const WrappedGitPanel: React.FC<GitPanelProps> = (props) => {
     return (
@@ -275,7 +249,4 @@ const WrappedGitPanel: React.FC<GitPanelProps> = (props) => {
 };
 
 export default WrappedGitPanel;
-=======
-export default GitPanel;
->>>>>>> Stashed changes
 

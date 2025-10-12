@@ -1,12 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Screen, User } from '../../../types';
-<<<<<<< Updated upstream
 import AnalyticsDashboard from '../../development/AnalyticsDashboard';
 import DeveloperDashboardV2 from './DeveloperDashboardV2';
-=======
-import { EnhancedDashboard } from '../../dashboard/EnhancedDashboard';
-import DeveloperDashboardScreen from './DeveloperDashboardScreen';
->>>>>>> Stashed changes
 import { ProductionSDKDeveloperView } from '../../sdk/ProductionSDKDeveloperView';
 
 type DeveloperView = 'control-center' | 'sdk-studio' | 'insights';
@@ -46,21 +41,13 @@ const DeveloperWorkspaceScreen: React.FC<DeveloperWorkspaceScreenProps> = ({ cur
             case 'insights':
                 return (
                     <div className="space-y-4">
-<<<<<<< Updated upstream
                         <AnalyticsDashboard />
-=======
-                        <EnhancedDashboard />
->>>>>>> Stashed changes
                     </div>
                 );
             case 'control-center':
             default:
                 return (
-<<<<<<< Updated upstream
                     <DeveloperDashboardV2
-=======
-                    <DeveloperDashboardScreen
->>>>>>> Stashed changes
                         currentUser={currentUser}
                         navigateTo={navigateTo}
                     />
@@ -83,18 +70,10 @@ const DeveloperWorkspaceScreen: React.FC<DeveloperWorkspaceScreenProps> = ({ cur
                             key={view}
                             type="button"
                             onClick={() => setActiveView(view)}
-<<<<<<< Updated upstream
                             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeView === view
                                     ? 'bg-blue-600 text-white shadow'
                                     : 'text-slate-600 hover:bg-slate-100'
                                 }`}
-=======
-                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                                activeView === view
-                                    ? 'bg-blue-600 text-white shadow'
-                                    : 'text-slate-600 hover:bg-slate-100'
-                            }`}
->>>>>>> Stashed changes
                         >
                             {VIEW_LABELS[view]}
                         </button>

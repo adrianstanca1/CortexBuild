@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Task, Screen, User, Project } from '../../types';
-<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
-=======
-import * as api from '../../api';
->>>>>>> Stashed changes
 import { CalendarDaysIcon } from '../Icons';
 
 interface MyProjectDeadlinesWidgetProps {

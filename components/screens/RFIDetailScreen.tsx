@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, RFI, User, Comment, Attachment } from '../../types';
-<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
-=======
-import * as api from '../../api';
->>>>>>> Stashed changes
 import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, ClockIcon, TrashIcon } from '../Icons';
 import DiffViewer from '../shared/DiffViewer';
 

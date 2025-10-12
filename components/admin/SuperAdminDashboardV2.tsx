@@ -1,7 +1,6 @@
 /**
  * Super Admin Dashboard V2.0 - Revolutionary Design
  * Modern, animated, feature-rich administrative control panel
-<<<<<<< Updated upstream
  *
  * OPTIMIZATIONS (Copilot + Augment):
  * - React.memo for performance
@@ -11,11 +10,6 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-=======
- */
-
-import React, { useState, useEffect } from 'react';
->>>>>>> Stashed changes
 import {
     Users, Building2, CreditCard, BarChart3, Settings, Shield,
     Database, Activity, FileText, Bell, Lock, Globe, Package,
@@ -23,22 +17,15 @@ import {
     Sparkles, Cpu, ChevronRight, LayoutDashboard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-<<<<<<< Updated upstream
 import { DashboardErrorBoundary } from '../../src/components/ErrorBoundaries';
-=======
->>>>>>> Stashed changes
 
 interface SuperAdminDashboardV2Props {
     isDarkMode?: boolean;
     onNavigate?: (section: string) => void;
 }
 
-<<<<<<< Updated upstream
 // Memoized component for better performance
 const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo(({
-=======
-const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
->>>>>>> Stashed changes
     isDarkMode = true,
     onNavigate
 }) => {
@@ -61,7 +48,6 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
         return () => clearTimeout(timer);
     }, []);
 
-<<<<<<< Updated upstream
     // Memoize tab change handler
     const handleTabChange = useCallback((tab: 'overview' | 'analytics' | 'system') => {
         setActiveTab(tab);
@@ -78,19 +64,11 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
 
     // Memoize quick stats to prevent recalculation on every render
     const quickStats = useMemo(() => [
-=======
-    // Quick Stats Cards with animations
-    const quickStats = [
->>>>>>> Stashed changes
         {
             title: 'Total Users',
             value: stats.totalUsers.toLocaleString(),
             change: '+12.5%',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: Users,
             color: 'blue',
             bgGradient: 'from-blue-500 to-blue-600'
@@ -99,11 +77,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             title: 'Active Companies',
             value: stats.activeCompanies.toLocaleString(),
             change: '+8.3%',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: Building2,
             color: 'purple',
             bgGradient: 'from-purple-500 to-purple-600'
@@ -112,11 +86,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             title: 'Monthly Revenue',
             value: `$${(stats.monthlyRevenue / 1000).toFixed(1)}K`,
             change: '+15.2%',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: DollarSign,
             color: 'green',
             bgGradient: 'from-green-500 to-green-600'
@@ -125,26 +95,15 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             title: 'System Health',
             value: `${stats.systemHealth}%`,
             change: '+0.5%',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: Activity,
             color: 'cyan',
             bgGradient: 'from-cyan-500 to-cyan-600'
         }
-<<<<<<< Updated upstream
     ], [stats]);
 
     // Memoize admin sections to prevent recreation on every render
     const adminSections = useMemo(() => [
-=======
-    ];
-
-    // Admin Sections with modern design
-    const adminSections = [
->>>>>>> Stashed changes
         { id: 'user-management', title: 'User Management', icon: Users, color: 'blue', count: stats.totalUsers, description: 'Manage all platform users' },
         { id: 'company-management', title: 'Company Management', icon: Building2, color: 'purple', count: stats.totalCompanies, description: 'Oversee all companies' },
         { id: 'billing-payments', title: 'Billing & Payments', icon: CreditCard, color: 'green', count: stats.activeSubscriptions, description: 'Revenue & subscriptions' },
@@ -158,16 +117,10 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
         { id: 'notifications', title: 'Notifications', icon: Bell, color: 'blue', count: 0, description: 'System alerts' },
         { id: 'permissions', title: 'Permissions', icon: Lock, color: 'red', count: 0, description: 'Access control' },
         { id: 'integrations', title: 'Integrations', icon: Globe, color: 'cyan', count: 0, description: 'Third-party services' }
-<<<<<<< Updated upstream
     ], [stats.totalUsers, stats.totalCompanies, stats.activeSubscriptions]);
 
     // Memoize color classes function
     const getColorClasses = useCallback((color: string) => {
-=======
-    ];
-
-    const getColorClasses = (color: string) => {
->>>>>>> Stashed changes
         const colors: Record<string, { bg: string; text: string; border: string; hover: string }> = {
             blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', hover: 'hover:bg-blue-500/20' },
             purple: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20', hover: 'hover:bg-purple-500/20' },
@@ -181,11 +134,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             gray: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20', hover: 'hover:bg-gray-500/20' }
         };
         return colors[color] || colors.blue;
-<<<<<<< Updated upstream
     }, []);
-=======
-    };
->>>>>>> Stashed changes
 
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -332,7 +281,6 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
             </div>
         </div>
     );
-<<<<<<< Updated upstream
 });
 
 // Display name for debugging
@@ -355,9 +303,4 @@ const WrappedSuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = (prop
 };
 
 export default WrappedSuperAdminDashboardV2;
-=======
-};
-
-export default SuperAdminDashboardV2;
->>>>>>> Stashed changes
 

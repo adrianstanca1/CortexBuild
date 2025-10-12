@@ -2,11 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 // Fix: Added .ts extension to import
 import { Project, Task, User, Comment, Attachment, PermissionAction, PermissionSubject } from '../../types';
 // Fix: Added .ts extension to import
-<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
-=======
-import * as api from '../../api';
->>>>>>> Stashed changes
 // Fix: Added .tsx extension to import
 import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, AlertTriangleIcon, TrashIcon, ClockIcon } from '../Icons';
 import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';

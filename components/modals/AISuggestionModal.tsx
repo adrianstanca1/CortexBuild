@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { AISuggestion, NotificationLink, User } from '../../types';
 import { XMarkIcon, WandSparklesIcon, ArrowPathIcon, HandThumbUpIcon, HandThumbDownIcon } from '../Icons';
-<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
-=======
-import * as api from '../../api';
->>>>>>> Stashed changes
 
 interface AISuggestionModalProps {
     isOpen: boolean;

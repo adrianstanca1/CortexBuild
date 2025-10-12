@@ -15,10 +15,7 @@ import {
     AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-<<<<<<< Updated upstream
 import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
-=======
->>>>>>> Stashed changes
 
 interface Header {
     key: string;
@@ -160,14 +157,8 @@ const APITester: React.FC<APITesterProps> = ({ isDarkMode }) => {
                             <button
                                 type="button"
                                 onClick={addHeader}
-<<<<<<< Updated upstream
                                 className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
                                     }`}
-=======
-                                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
-                                    isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                                }`}
->>>>>>> Stashed changes
                             >
                                 <Plus className="h-3 w-3" />
                                 Add Header
@@ -193,14 +184,8 @@ const APITester: React.FC<APITesterProps> = ({ isDarkMode }) => {
                                     <button
                                         type="button"
                                         onClick={() => removeHeader(index)}
-<<<<<<< Updated upstream
                                         className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
                                             }`}
-=======
-                                        className={`p-2 rounded-lg transition-colors ${
-                                            isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                                        }`}
->>>>>>> Stashed changes
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </button>
@@ -234,14 +219,8 @@ const APITester: React.FC<APITesterProps> = ({ isDarkMode }) => {
                         {/* Response Status */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-<<<<<<< Updated upstream
                                 <div className={`px-3 py-1 rounded-lg font-semibold ${response.status < 300 ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
                                     }`}>
-=======
-                                <div className={`px-3 py-1 rounded-lg font-semibold ${
-                                    response.status < 300 ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                                }`}>
->>>>>>> Stashed changes
                                     {response.status} {response.statusText}
                                 </div>
                                 {responseTime && (
@@ -254,14 +233,8 @@ const APITester: React.FC<APITesterProps> = ({ isDarkMode }) => {
                             <button
                                 type="button"
                                 onClick={copyResponse}
-<<<<<<< Updated upstream
                                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
                                     }`}
-=======
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                                    isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                                }`}
->>>>>>> Stashed changes
                             >
                                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                                 {copied ? 'Copied!' : 'Copy'}
@@ -310,7 +283,6 @@ const APITester: React.FC<APITesterProps> = ({ isDarkMode }) => {
     );
 };
 
-<<<<<<< Updated upstream
 // Wrap with LightErrorBoundary
 const WrappedAPITester: React.FC<APITesterProps> = (props) => {
     return (
@@ -321,7 +293,4 @@ const WrappedAPITester: React.FC<APITesterProps> = (props) => {
 };
 
 export default WrappedAPITester;
-=======
-export default APITester;
->>>>>>> Stashed changes
 

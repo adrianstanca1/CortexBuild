@@ -2,11 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 // Fix: Added .ts extension to import
 import { Project, User, UserRole, Task } from '../../types';
 // Fix: Added .ts extension to import
-<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
-=======
-import * as api from '../../api';
->>>>>>> Stashed changes
 // Fix: Added .tsx extension to import
 // Change: Swapped XMarkIcon for TrashIcon for photo removal UI.
 import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, CameraIcon, TrashIcon, SparklesIcon, ArrowPathIcon, AlertTriangleIcon } from '../Icons';

@@ -67,7 +67,6 @@ import bcrypt from 'bcryptjs';
 const db = new Database('./cortexbuild.db');
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
-<<<<<<< Updated upstream
 db.pragma('synchronous = NORMAL');
 db.pragma('cache_size = 10000'); // 10MB cache
 
@@ -117,14 +116,6 @@ setInterval(() => {
  * INITIALIZE DATABASE
  * ═══════════════════════════════════════════════════════════════════════════
  */
-=======
-
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * INITIALIZE DATABASE
- * ═══════════════════════════════════════════════════════════════════════════
- */
->>>>>>> Stashed changes
 export const initDatabase = () => {
     console.log('📊 Initializing database...');
 

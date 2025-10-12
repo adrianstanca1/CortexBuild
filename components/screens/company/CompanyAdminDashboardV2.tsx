@@ -1,7 +1,6 @@
 /**
  * Company Admin Dashboard V2.0 - Revolutionary Design
  * Modern dual-scope dashboard: Office Operations + Field Operations
-<<<<<<< Updated upstream
  *
  * OPTIMIZATIONS (Copilot + Augment):
  * - React.memo for performance
@@ -11,11 +10,6 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-=======
- */
-
-import React, { useState, useEffect } from 'react';
->>>>>>> Stashed changes
 import {
     LayoutDashboard, Users, FolderKanban, FileText, BarChart3,
     CreditCard, Settings, Briefcase, ClipboardList, Shield,
@@ -26,10 +20,7 @@ import {
 } from 'lucide-react';
 import { User } from '../../../types';
 import toast from 'react-hot-toast';
-<<<<<<< Updated upstream
 import { DashboardErrorBoundary } from '../../../src/components/ErrorBoundaries';
-=======
->>>>>>> Stashed changes
 
 interface CompanyAdminDashboardV2Props {
     currentUser: User;
@@ -37,12 +28,8 @@ interface CompanyAdminDashboardV2Props {
     isDarkMode?: boolean;
 }
 
-<<<<<<< Updated upstream
 // Memoized component for better performance
 const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = React.memo(({
-=======
-const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
->>>>>>> Stashed changes
     currentUser,
     navigateTo,
     isDarkMode = true
@@ -64,7 +51,6 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
         return () => clearTimeout(timer);
     }, []);
 
-<<<<<<< Updated upstream
     // Memoize tab change handler
     const handleTabChange = useCallback((tab: 'overview' | 'office' | 'field') => {
         setActiveTab(tab);
@@ -77,19 +63,11 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
 
     // Memoize quick stats to prevent recalculation on every render
     const quickStats = useMemo(() => [
-=======
-    // Quick Stats
-    const quickStats = [
->>>>>>> Stashed changes
         {
             title: 'Active Projects',
             value: stats.activeProjects.toString(),
             change: '+3 this month',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: FolderKanban,
             color: 'blue',
             bgGradient: 'from-blue-500 to-blue-600'
@@ -98,11 +76,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             title: 'Team Members',
             value: stats.teamMembers.toString(),
             change: '+5 new',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: Users,
             color: 'purple',
             bgGradient: 'from-purple-500 to-purple-600'
@@ -111,11 +85,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             title: 'Monthly Revenue',
             value: `$${(stats.monthlyRevenue / 1000).toFixed(0)}K`,
             change: '+12.5%',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: TrendingUp,
             color: 'green',
             bgGradient: 'from-green-500 to-green-600'
@@ -124,20 +94,12 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             title: 'Quality Score',
             value: `${stats.qualityScore}%`,
             change: '+2.3%',
-<<<<<<< Updated upstream
             trend: 'up' as const,
-=======
-            trend: 'up',
->>>>>>> Stashed changes
             icon: Award,
             color: 'cyan',
             bgGradient: 'from-cyan-500 to-cyan-600'
         }
-<<<<<<< Updated upstream
     ], [stats]);
-=======
-    ];
->>>>>>> Stashed changes
 
     // Office Operations
     const officeOperations = [
@@ -296,13 +258,8 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
-<<<<<<< Updated upstream
                                     ? 'bg-purple-600 text-white shadow-lg'
                                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
-=======
-                                        ? 'bg-purple-600 text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
->>>>>>> Stashed changes
                                     }`}
                             >
                                 <TabIcon className="w-5 h-5" />
@@ -348,7 +305,6 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             </div>
         </div>
     );
-<<<<<<< Updated upstream
 });
 
 // Display name for debugging
@@ -371,9 +327,4 @@ const WrappedCompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = (
 };
 
 export default WrappedCompanyAdminDashboardV2;
-=======
-};
-
-export default CompanyAdminDashboardV2;
->>>>>>> Stashed changes
 

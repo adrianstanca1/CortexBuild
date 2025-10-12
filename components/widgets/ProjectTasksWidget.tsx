@@ -3,13 +3,8 @@ import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { Task, Project, Screen, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
-<<<<<<< Updated upstream
 // Fix: Replaced old api.ts import with modern API client
 import { apiClient } from '../../lib/api/client';
-=======
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
->>>>>>> Stashed changes
 // Fix: Added .tsx extension to icon import
 import { ListBulletIcon, ChevronRightIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, PaperClipIcon } from '../Icons';
 

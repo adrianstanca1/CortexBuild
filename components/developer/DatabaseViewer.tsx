@@ -15,10 +15,7 @@ import {
     Filter
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-<<<<<<< Updated upstream
 import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
-=======
->>>>>>> Stashed changes
 
 interface TableInfo {
     name: string;
@@ -95,14 +92,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                     </div>
                     <button
                         type="button"
-<<<<<<< Updated upstream
                         className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
                             }`}
-=======
-                        className={`p-2 rounded-lg transition-colors ${
-                            isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                        }`}
->>>>>>> Stashed changes
                         title="Refresh"
                     >
                         <RefreshCw className="h-4 w-4" />
@@ -142,22 +133,12 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                             <div
                                 key={table.name}
                                 onClick={() => handleTableClick(table.name)}
-<<<<<<< Updated upstream
                                 className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 ${selectedTable === table.name
                                     ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
                                     : isDarkMode
                                         ? 'hover:bg-gray-700 text-gray-300'
                                         : 'hover:bg-gray-100 text-gray-700'
                                     }`}
-=======
-                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 ${
-                                    selectedTable === table.name
-                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                                        : isDarkMode
-                                        ? 'hover:bg-gray-700 text-gray-300'
-                                        : 'hover:bg-gray-100 text-gray-700'
-                                }`}
->>>>>>> Stashed changes
                             >
                                 <Table className="h-4 w-4 flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
@@ -214,14 +195,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                                     <button
                                         type="button"
                                         onClick={exportResults}
-<<<<<<< Updated upstream
                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
                                             }`}
-=======
-                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                                            isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                                        }`}
->>>>>>> Stashed changes
                                     >
                                         <Download className="h-4 w-4" />
                                         Export CSV
@@ -234,14 +209,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                                                 {Object.keys(queryResults[0]).map((key) => (
                                                     <th
                                                         key={key}
-<<<<<<< Updated upstream
                                                         className={`px-4 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
                                                             }`}
-=======
-                                                        className={`px-4 py-2 text-left font-semibold ${
-                                                            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                                                        }`}
->>>>>>> Stashed changes
                                                     >
                                                         {key}
                                                     </th>
@@ -252,14 +221,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                                             {queryResults.map((row, idx) => (
                                                 <tr
                                                     key={idx}
-<<<<<<< Updated upstream
                                                     className={`border-b ${isDarkMode ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-200 hover:bg-gray-50'
                                                         }`}
-=======
-                                                    className={`border-b ${
-                                                        isDarkMode ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-200 hover:bg-gray-50'
-                                                    }`}
->>>>>>> Stashed changes
                                                 >
                                                     {Object.values(row).map((value: any, i) => (
                                                         <td
@@ -290,7 +253,6 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
     );
 };
 
-<<<<<<< Updated upstream
 // Wrap with LightErrorBoundary
 const WrappedDatabaseViewer: React.FC<DatabaseViewerProps> = (props) => {
     return (
@@ -301,7 +263,4 @@ const WrappedDatabaseViewer: React.FC<DatabaseViewerProps> = (props) => {
 };
 
 export default WrappedDatabaseViewer;
-=======
-export default DatabaseViewer;
->>>>>>> Stashed changes
 

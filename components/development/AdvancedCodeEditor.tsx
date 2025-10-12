@@ -12,12 +12,7 @@
  * - Find & Replace
  */
 
-<<<<<<< Updated upstream
 import React, { useState, useRef, useEffect, Suspense, lazy } from 'react';
-=======
-import React, { useState, useRef, useEffect } from 'react';
-import Editor from '@monaco-editor/react';
->>>>>>> Stashed changes
 import {
     Play,
     Save,
@@ -33,14 +28,11 @@ import {
     Bug
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-<<<<<<< Updated upstream
 import { EditorErrorBoundary } from '../../src/components/ErrorBoundaries';
 import { SkeletonLoader } from '../../src/utils/lazyLoad';
 
 // Lazy load Monaco Editor for better bundle size
 const Editor = lazy(() => import('@monaco-editor/react'));
-=======
->>>>>>> Stashed changes
 
 interface AdvancedCodeEditorProps {
     isDarkMode?: boolean;
@@ -135,11 +127,7 @@ h1 {
 
     const handleEditorChange = (value: string | undefined) => {
         if (value !== undefined) {
-<<<<<<< Updated upstream
             setFiles(files.map(f =>
-=======
-            setFiles(files.map(f => 
->>>>>>> Stashed changes
                 f.id === activeFileId ? { ...f, content: value } : f
             ));
         }
@@ -228,14 +216,8 @@ h1 {
     return (
         <div className={`h-full flex flex-col ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {/* Header */}
-<<<<<<< Updated upstream
             <div className={`flex items-center justify-between px-6 py-4 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
                 }`}>
-=======
-            <div className={`flex items-center justify-between px-6 py-4 border-b ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
->>>>>>> Stashed changes
                 <div className="flex items-center gap-4">
                     <FileCode className={`h-6 w-6 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
                     <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -271,42 +253,24 @@ h1 {
                     <button
                         type="button"
                         onClick={formatCode}
-<<<<<<< Updated upstream
                         className={`p-2 rounded-lg transition-all ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
                             }`}
-=======
-                        className={`p-2 rounded-lg transition-all ${
-                            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-                        }`}
->>>>>>> Stashed changes
                     >
                         <Bug className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                     </button>
                     <button
                         type="button"
                         onClick={downloadFile}
-<<<<<<< Updated upstream
                         className={`p-2 rounded-lg transition-all ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
                             }`}
-=======
-                        className={`p-2 rounded-lg transition-all ${
-                            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-                        }`}
->>>>>>> Stashed changes
                     >
                         <Download className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                     </button>
                     <button
                         type="button"
                         onClick={() => setShowSettings(!showSettings)}
-<<<<<<< Updated upstream
                         className={`p-2 rounded-lg transition-all ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
                             }`}
-=======
-                        className={`p-2 rounded-lg transition-all ${
-                            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'
-                        }`}
->>>>>>> Stashed changes
                     >
                         <Settings className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                     </button>
@@ -314,7 +278,6 @@ h1 {
             </div>
 
             {/* File Tabs */}
-<<<<<<< Updated upstream
             <div className={`flex items-center gap-1 px-4 py-2 border-b overflow-x-auto ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
                 }`}>
                 {files.map(file => (
@@ -324,19 +287,6 @@ h1 {
                             ? isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
                             : isDarkMode ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                             }`}
-=======
-            <div className={`flex items-center gap-1 px-4 py-2 border-b overflow-x-auto ${
-                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
-            }`}>
-                {files.map(file => (
-                    <div
-                        key={file.id}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-t-lg cursor-pointer transition-all ${
-                            activeFileId === file.id
-                                ? isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
-                                : isDarkMode ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
->>>>>>> Stashed changes
                         onClick={() => setActiveFileId(file.id)}
                     >
                         <span className="text-sm font-medium">{file.name}</span>
@@ -358,7 +308,6 @@ h1 {
 
             {/* Editor */}
             <div className="flex-1 relative">
-<<<<<<< Updated upstream
                 <Suspense fallback={<SkeletonLoader type="editor" />}>
                     <Editor
                         height="100%"
@@ -387,46 +336,12 @@ h1 {
                         }}
                     />
                 </Suspense>
-=======
-                <Editor
-                    height="100%"
-                    language={activeFile.language}
-                    value={activeFile.content}
-                    theme={editorTheme}
-                    onChange={handleEditorChange}
-                    onMount={handleEditorDidMount}
-                    options={{
-                        fontSize,
-                        minimap: { enabled: true },
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                        tabSize: 2,
-                        wordWrap: 'on',
-                        formatOnPaste: true,
-                        formatOnType: true,
-                        suggestOnTriggerCharacters: true,
-                        quickSuggestions: true,
-                        parameterHints: { enabled: true },
-                        folding: true,
-                        lineNumbers: 'on',
-                        renderWhitespace: 'selection',
-                        cursorBlinking: 'smooth',
-                        cursorSmoothCaretAnimation: 'on'
-                    }}
-                />
->>>>>>> Stashed changes
             </div>
 
             {/* Console Output */}
             {consoleOutput.length > 0 && (
-<<<<<<< Updated upstream
                 <div className={`h-48 border-t overflow-y-auto ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
                     }`}>
-=======
-                <div className={`h-48 border-t overflow-y-auto ${
-                    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
-                }`}>
->>>>>>> Stashed changes
                     <div className="flex items-center gap-2 px-4 py-2 border-b">
                         <Terminal className={`h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
                         <span className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -445,14 +360,8 @@ h1 {
 
             {/* Settings Panel */}
             {showSettings && (
-<<<<<<< Updated upstream
                 <div className={`absolute top-16 right-4 w-80 p-6 rounded-2xl border shadow-2xl z-50 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
                     }`}>
-=======
-                <div className={`absolute top-16 right-4 w-80 p-6 rounded-2xl border shadow-2xl z-50 ${
-                    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                }`}>
->>>>>>> Stashed changes
                     <h3 className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         Editor Settings
                     </h3>
@@ -465,14 +374,8 @@ h1 {
                             <select
                                 value={editorTheme}
                                 onChange={(e) => setEditorTheme(e.target.value as any)}
-<<<<<<< Updated upstream
                                 className={`w-full px-3 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'
                                     }`}
-=======
-                                className={`w-full px-3 py-2 rounded-lg border ${
-                                    isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'
-                                }`}
->>>>>>> Stashed changes
                             >
                                 <option value="vs-dark">Dark</option>
                                 <option value="light">Light</option>
@@ -499,7 +402,6 @@ h1 {
     );
 };
 
-<<<<<<< Updated upstream
 // Wrap with EditorErrorBoundary
 const WrappedAdvancedCodeEditor: React.FC<AdvancedCodeEditorProps> = (props) => {
     return (
@@ -514,7 +416,4 @@ const WrappedAdvancedCodeEditor: React.FC<AdvancedCodeEditorProps> = (props) => 
 };
 
 export default WrappedAdvancedCodeEditor;
-=======
-export default AdvancedCodeEditor;
->>>>>>> Stashed changes
 

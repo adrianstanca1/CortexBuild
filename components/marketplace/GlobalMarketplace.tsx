@@ -7,12 +7,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Package, Search, Filter, Download, Star, TrendingUp,
     Clock, CheckCircle, XCircle, AlertCircle, Grid3x3, List,
-<<<<<<< Updated upstream
     Eye, Users, Building2, Sparkles, Gem, Zap, Brain,
     Shield, FileText, DollarSign, Calendar, Target, Layers
-=======
-    Eye, Users, Building2
->>>>>>> Stashed changes
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -29,10 +25,7 @@ interface App {
     company_install_count: number;
     is_installed_by_me?: number;
     is_installed_by_company?: number;
-<<<<<<< Updated upstream
     config?: string | any;
-=======
->>>>>>> Stashed changes
 }
 
 interface Category {
@@ -85,20 +78,12 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             setLoading(true);
             const token = localStorage.getItem('token');
             const params = new URLSearchParams();
-<<<<<<< Updated upstream
 
-=======
-            
->>>>>>> Stashed changes
             if (selectedCategory !== 'all') params.append('category', selectedCategory);
             if (searchQuery) params.append('search', searchQuery);
             params.append('sort', sortBy);
 
-<<<<<<< Updated upstream
             const endpoint = token
-=======
-            const endpoint = token 
->>>>>>> Stashed changes
                 ? 'http://localhost:3001/api/global-marketplace/apps/detailed'
                 : 'http://localhost:3001/api/global-marketplace/apps';
 
@@ -107,11 +92,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
 
             const response = await fetch(`${endpoint}?${params}`, { headers });
             const data = await response.json();
-<<<<<<< Updated upstream
 
-=======
-            
->>>>>>> Stashed changes
             if (data.success) {
                 setApps(data.apps);
             }
@@ -140,11 +121,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             });
 
             const data = await response.json();
-<<<<<<< Updated upstream
 
-=======
-            
->>>>>>> Stashed changes
             if (data.success) {
                 toast.success('App installed successfully!');
                 fetchApps(); // Refresh to update install status
@@ -174,11 +151,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             });
 
             const data = await response.json();
-<<<<<<< Updated upstream
 
-=======
-            
->>>>>>> Stashed changes
             if (data.success) {
                 toast.success('App installed for entire company!');
                 fetchApps(); // Refresh to update install status
@@ -191,7 +164,6 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
         }
     };
 
-<<<<<<< Updated upstream
     // Helper functions for magic apps
     const isMagicApp = (app: App) => {
         return app.category?.includes('Magic') ||
@@ -237,33 +209,23 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
         }
     };
 
-=======
->>>>>>> Stashed changes
     const renderAppCard = (app: App) => {
         const isInstalledByMe = app.is_installed_by_me === 1;
         const isInstalledByCompany = app.is_installed_by_company === 1;
         const totalInstalls = app.install_count + app.company_install_count;
         const isAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'company_admin';
-<<<<<<< Updated upstream
         const isMagic = isMagicApp(app);
         const magicScore = getMagicScore(app);
-=======
->>>>>>> Stashed changes
 
         return (
             <div
                 key={app.id}
-<<<<<<< Updated upstream
                 className={`${cardClass} border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-105 ${isMagic ? 'border-purple-500/30 bg-gradient-to-br from-purple-900/20 to-pink-900/20' : ''
                     }`}
-=======
-                className={`${cardClass} border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-105`}
->>>>>>> Stashed changes
             >
                 {/* App Icon & Name */}
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-<<<<<<< Updated upstream
                         <div className={`text-4xl ${isMagic ? 'animate-pulse' : ''}`}>
                             {app.icon}
                         </div>
@@ -297,20 +259,6 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                             </div>
                         )}
                     </div>
-=======
-                        <div className="text-4xl">{app.icon}</div>
-                        <div>
-                            <h3 className={`text-lg font-bold ${textClass}`}>{app.name}</h3>
-                            <p className={`text-sm ${mutedClass}`}>v{app.version}</p>
-                        </div>
-                    </div>
-                    {(isInstalledByMe || isInstalledByCompany) && (
-                        <div className="flex items-center space-x-1 text-green-500 text-sm">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>Installed</span>
-                        </div>
-                    )}
->>>>>>> Stashed changes
                 </div>
 
                 {/* Description */}
@@ -336,7 +284,6 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                 <div className="flex space-x-2">
                     {!isInstalledByMe && (
                         <button
-<<<<<<< Updated upstream
                             type="button"
                             onClick={() => handleInstallIndividual(app.id)}
                             className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors flex items-center justify-center space-x-2 ${isMagic
@@ -346,13 +293,6 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                         >
                             <Download className="w-4 h-4" />
                             <span>{isMagic ? 'Install Magic' : 'Install for Me'}</span>
-=======
-                            onClick={() => handleInstallIndividual(app.id)}
-                            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
-                        >
-                            <Download className="w-4 h-4" />
-                            <span>Install for Me</span>
->>>>>>> Stashed changes
                         </button>
                     )}
                     {isAdmin && !isInstalledByCompany && (
@@ -436,18 +376,10 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                         <button
                             key={category.id}
                             onClick={() => setSelectedCategory(category.id)}
-<<<<<<< Updated upstream
                             className={`px-4 py-2 rounded-lg transition-all ${selectedCategory === category.id
                                 ? 'bg-blue-600 text-white'
                                 : `${cardClass} ${textClass} hover:bg-blue-600 hover:text-white`
                                 }`}
-=======
-                            className={`px-4 py-2 rounded-lg transition-all ${
-                                selectedCategory === category.id
-                                    ? 'bg-blue-600 text-white'
-                                    : `${cardClass} ${textClass} hover:bg-blue-600 hover:text-white`
-                            }`}
->>>>>>> Stashed changes
                         >
                             <span className="mr-2">{category.icon}</span>
                             {category.name}

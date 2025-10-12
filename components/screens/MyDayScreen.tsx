@@ -3,11 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, Screen, Task, SiteInstruction, User, AIInsight } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-<<<<<<< Updated upstream
 import { apiClient } from '../../lib/api/client';
-=======
-import * as api from '../../api';
->>>>>>> Stashed changes
 // Use WandSparklesIcon for AI suggestions and move it to the main content area for prominence.
 import { ChevronLeftIcon, CheckBadgeIcon, AlertTriangleIcon, SunIcon, ClipboardDocumentListIcon, WandSparklesIcon, ArrowPathIcon } from '../Icons';
 import TaskList from '../shared/TaskList';
