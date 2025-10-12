@@ -567,7 +567,7 @@ export const apiClient = {
      */
     async fetchAvailableAIAgents(): Promise<any[]> {
         try {
-            const response = await apiRequest<{ agents: any[] }>('/integrations/agents');
+            const response = await apiRequest<{ agents: any[] }>('/sdk/agents');
             return response.agents || [];
         } catch (error) {
             console.error('[APIClient] Error fetching AI agents:', error);
@@ -577,18 +577,24 @@ export const apiClient = {
 
     /**
      * Fetch company subscriptions for a user
+     * Note: This endpoint is not yet implemented on the backend
      */
     async fetchCompanySubscriptions(user: any): Promise<any[]> {
         try {
             if (!user || !user.companyId) {
-                console.warn('[APIClient] No user or companyId provided for fetchCompanySubscriptions');
+                // Silently return empty array - this is expected behavior
                 return [];
             }
 
-            const response = await apiRequest<{ subscriptions: any[] }>(
-                `/integrations/subscriptions?companyId=${user.companyId}`
-            );
-            return response.subscriptions || [];
+            // TODO: Implement backend endpoint for company subscriptions
+            // For now, return empty array to avoid 404 errors
+            return [];
+
+            // Future implementation:
+            // const response = await apiRequest<{ subscriptions: any[] }>(
+            //     `/sdk/subscriptions?companyId=${user.companyId}`
+            // );
+            // return response.subscriptions || [];
         } catch (error) {
             console.error('[APIClient] Error fetching company subscriptions:', error);
             throw error;
