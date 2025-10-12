@@ -40,7 +40,7 @@ import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
 import { createMyApplicationsRouter } from './routes/my-applications';
-import { createSubscriptionService } from './services/subscription-service';
+import { createSubscriptionService, SubscriptionService } from './services/subscription-service';
 
 // Import error handling middleware
 import {

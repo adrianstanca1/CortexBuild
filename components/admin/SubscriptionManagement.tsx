@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import {
   Users,
   TrendingUp,
@@ -58,21 +59,6 @@ const Badge: React.FC<{ children: React.ReactNode; className?: string }> = ({ ch
     {children}
   </span>
 );
-import {
-  Users,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
-  Search,
-  Filter,
-  Crown,
-  DollarSign,
-  Calendar,
-  Activity
-} from 'lucide-react';
-import toast from 'react-hot-toast';
 
 interface SubscriptionProfile {
   id: string;
