@@ -429,6 +429,29 @@ class APIClient {
     // Low priority for everything else
     return 'low';
   }
+
+  /**
+   * Fetch company subscriptions for a user
+   */
+  async fetchCompanySubscriptions(user: any): Promise<any[]> {
+    try {
+      if (!user || !user.companyId) {
+        Logger.warn('[APIClient] No user or companyId provided for fetchCompanySubscriptions');
+        return [];
+      }
+
+      const response = await this.get<any>(`/integrations/subscriptions?companyId=${user.companyId}`);
+      return response.subscriptions || [];
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch company subscriptions');
+      Logger.error('[APIClient] Error fetching company subscriptions', {
+        error: err.message,
+        userId: user?.id,
+        companyId: user?.companyId
+      });
+      throw err;
+    }
+  }
 }
 
 /**
