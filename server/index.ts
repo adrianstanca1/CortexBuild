@@ -39,7 +39,6 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
-<<<<<<< Updated upstream
 import { createMyApplicationsRouter } from './routes/my-applications';
 import { createSubscriptionService, SubscriptionService } from './services/subscription-service';
 
@@ -68,8 +67,6 @@ import {
   registerSchema,
   refreshTokenSchema
 } from './utils/validation';
-=======
->>>>>>> Stashed changes
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -368,17 +365,10 @@ const startServer = async () => {
         app.use('/api/marketplace', generalRateLimit, createMarketplaceRouter(db));
         console.log('  ✓ /api/marketplace');
 
-<<<<<<< Updated upstream
         app.use('/api/global-marketplace', generalRateLimit, createGlobalMarketplaceRouter(db));
         console.log('  ✓ /api/global-marketplace');
 
         app.use('/api/widgets', generalRateLimit, createWidgetsRouter(db));
-=======
-        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(db));
-        console.log('  ✓ /api/global-marketplace');
-
-        app.use('/api/widgets', createWidgetsRouter(db));
->>>>>>> Stashed changes
         console.log('  ✓ /api/widgets');
 
         app.use('/api/smart-tools', generalRateLimit, createSmartToolsRouter(db));
@@ -399,7 +389,6 @@ const startServer = async () => {
         app.use('/api/developer', generalRateLimit, createDeveloperRoutes(db));
         console.log('  ✓ /api/developer');
 
-<<<<<<< Updated upstream
         app.use('/api/integrations', generalRateLimit, createIntegrationsRouter(db));
         console.log('  ✓ /api/integrations');
 
@@ -408,21 +397,6 @@ const startServer = async () => {
 
         app.use('/api/workflows', generalRateLimit, createWorkflowsRouter(db));
         console.log('  ✓ /api/workflows');
-=======
-        app.use('/api/integrations', createIntegrationsRouter(db));
-        console.log('  ✓ /api/integrations');
-
-        app.use('/api/agentkit', createAgentKitRouter(db));
-        console.log('  ✓ /api/agentkit');
-
-        app.use('/api/workflows', createWorkflowsRouter(db));
-        console.log('  ✓ /api/workflows');
-
-        app.use('/api/automations', createAutomationsRouter(db));
-        console.log('  ✓ /api/automations');
-
-        console.log('✅ All 24 API routes registered successfully');
->>>>>>> Stashed changes
 
         app.use('/api/automations', generalRateLimit, createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
