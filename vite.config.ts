@@ -10,18 +10,18 @@ export default defineConfig(async ({ mode }) => {
         host: '0.0.0.0',
         proxy: {
           '/api': {
-            target: 'http://localhost:3001',
+            target: process.env.API_URL || 'http://localhost:54112',
             changeOrigin: true,
           }
         }
       },
       plugins: [
         react(),
-        mode === 'analyze' && (await import('vite-bundle-visualizer')).default({
+        ...(mode === 'analyze' ? [await (await import('vite-bundle-visualizer')).default({
           fileName: 'dist/report.html',
           openBrowser: false,
-        }),
-      ].filter(Boolean),
+        })] : []),
+      ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)

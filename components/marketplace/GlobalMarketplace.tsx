@@ -25,6 +25,7 @@ interface App {
     company_install_count: number;
     is_installed_by_me?: number;
     is_installed_by_company?: number;
+    config?: string | any;
 }
 
 interface Category {

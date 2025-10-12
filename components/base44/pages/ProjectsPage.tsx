@@ -3,30 +3,108 @@
  * Version: 1.1.0 GOLDEN
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ProjectDetailPage } from './ProjectDetailPage';
 import { CreateProjectModal } from '../modals/CreateProjectModal';
 
 interface Project {
-    id: number;
+    id: number | string;
     name: string;
-    client_name?: string;
+    client: string;
     location?: string;
     budget?: number;
     spent?: number;
     progress?: number;
     status: string;
     priority?: string;
-    start_date?: string;
-    end_date?: string;
+    startDate?: string | null;
+    endDate?: string | null;
 }
+
+const formatCurrency = (amount?: number | null) => {
+    if (!amount) return '£0';
+    return `£${amount.toLocaleString('en-GB')}`;
+};
+
+const formatDate = (value?: string | null) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const normalizeProject = (raw: any): Project => {
+    const budget = typeof raw.budget === 'number' ? raw.budget : Number(raw.budget) || undefined;
+    const spent = typeof raw.spent === 'number' ? raw.spent : Number(raw.spent) || undefined;
+    const progress = typeof raw.progress === 'number' ? raw.progress : Number(raw.progress) || undefined;
+
+    return {
+        id: raw.id ?? raw.project_id ?? `project-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: raw.name ?? raw.project_name ?? 'Untitled Project',
+        client: raw.client ?? raw.client_name ?? raw.clientName ?? 'Unknown Client',
+        location: raw.location ?? raw.site_location,
+        budget,
+        spent,
+        progress,
+        status: (raw.status ?? 'planning').toString().toLowerCase(),
+        priority: raw.priority ?? raw.project_priority,
+        startDate: formatDate(raw.start_date ?? raw.startDate),
+        endDate: formatDate(raw.end_date ?? raw.endDate)
+    };
+};
+
+const MOCK_PROJECTS: Project[] = [
+    {
+        id: '1',
+        name: 'ASasdad',
+        client: 'Green Valley Homes',
+        location: 'rm82ul',
+        budget: 123333,
+        spent: 0,
+        progress: 0,
+        status: 'planning',
+        priority: 'medium',
+        startDate: null,
+        endDate: null
+    },
+    {
+        id: '2',
+        name: 'Downtown Office Complex',
+        client: 'Metro Construction Group',
+        location: 'Manhattan, NY',
+        budget: 12500000,
+        spent: 5200000,
+        progress: 45,
+        status: 'in progress',
+        priority: 'high',
+        startDate: '15 Jan 2024',
+        endDate: '30 Jun 2025'
+    },
+    {
+        id: '3',
+        name: 'Riverside Luxury Apartments',
+        client: 'Green Valley Homes',
+        location: 'Los Angeles, CA',
+        budget: 8900000,
+        spent: 2100000,
+        progress: 28,
+        status: 'in progress',
+        priority: 'medium',
+        startDate: '01 Mar 2024',
+        endDate: '31 Aug 2025'
+    }
+];
 
 export const ProjectsPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | number | null>(null);
+    const [projects, setProjects] = useState<Project[]>(MOCK_PROJECTS);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
@@ -34,13 +112,7 @@ export const ProjectsPage: React.FC = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Fetch projects from API
-    useEffect(() => {
-        if (!selectedProjectId) {
-            fetchProjects();
-        }
-    }, [searchQuery, statusFilter, page, selectedProjectId]);
-
-    const fetchProjects = async () => {
+    const fetchProjects = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -57,125 +129,37 @@ export const ProjectsPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success) {
-                setProjects(data.data);
+                const normalized = Array.isArray(data.data) ? data.data.map(normalizeProject) : [];
+                setProjects(normalized.length > 0 ? normalized : MOCK_PROJECTS);
+                if (!normalized.length) {
+                    setError('No projects found for the selected filters.');
+                }
                 setTotalPages(data.pagination?.totalPages || 1);
             } else {
                 setError(data.error || 'Failed to fetch projects');
+                setProjects(MOCK_PROJECTS);
             }
         } catch (err: any) {
             setError(err.message || 'Failed to fetch projects');
             // Fallback to mock data
-            setProjects(mockProjects);
+            setProjects(MOCK_PROJECTS);
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, searchQuery, statusFilter]);
+
+    useEffect(() => {
+        if (!selectedProjectId) {
+            fetchProjects();
+        }
+    }, [fetchProjects, selectedProjectId]);
 
     // If a project is selected, show the detail page
     if (selectedProjectId) {
-        return <ProjectDetailPage projectId={selectedProjectId} onBack={() => setSelectedProjectId(null)} />;
+        return <ProjectDetailPage projectId={String(selectedProjectId)} onBack={() => setSelectedProjectId(null)} />;
     }
 
     // Mock data as fallback
-    const mockProjects: Project[] = [
-        {
-            id: '1',
-            name: 'ASasdad',
-            client: 'Green Valley Homes',
-            location: 'rm82ul',
-            budget: 123333,
-            spent: 0,
-            progress: 0,
-            status: 'planning',
-            priority: 'medium',
-            startDate: null,
-            endDate: null
-        },
-        {
-            id: '2',
-            name: 'Downtown Office Complex',
-            client: 'Metro Construction Group',
-            location: 'Manhattan, NY',
-            budget: 12500000,
-            spent: 5200000,
-            progress: 45,
-            status: 'in progress',
-            priority: 'high',
-            startDate: 'Jan 15, 2024',
-            endDate: 'Jun 30, 2025'
-        },
-        {
-            id: '3',
-            name: 'Riverside Luxury Apartments',
-            client: 'Green Valley Homes',
-            location: 'Los Angeles, CA',
-            budget: 8900000,
-            spent: 2100000,
-            progress: 28,
-            status: 'in progress',
-            priority: 'medium',
-            startDate: 'Mar 1, 2024',
-            endDate: 'Aug 31, 2025'
-        },
-        {
-            id: '4',
-            name: 'Manufacturing Facility Expansion',
-            client: 'Industrial Partners LLC',
-            location: 'Chicago, IL',
-            budget: 15000000,
-            spent: 0,
-            progress: 0,
-            status: 'planning',
-            priority: 'critical',
-            startDate: 'Jun 1, 2024',
-            endDate: 'Dec 31, 2025'
-        },
-        {
-            id: '5',
-            name: 'Riverside Apartments',
-            client: 'Green Valley Homes',
-            location: '456 River Rd',
-            budget: 3200000,
-            spent: 1800000,
-            progress: 56,
-            status: 'in progress',
-            priority: 'medium',
-            startDate: 'Mar 1, 2024',
-            endDate: 'Dec 15, 2024'
-        },
-        {
-            id: '6',
-            name: 'City Bridge Renovation',
-            client: 'Metro City Council',
-            location: 'Old Town Bridge',
-            budget: 1800000,
-            spent: 0,
-            progress: 0,
-            status: 'approved',
-            priority: 'critical',
-            startDate: 'Jul 1, 2024',
-            endDate: 'Mar 31, 2025'
-        },
-        {
-            id: '7',
-            name: 'Downtown Office Complex',
-            client: 'Sunset Developments',
-            location: '123 Main St, Downtown',
-            budget: 5500000,
-            spent: 2100000,
-            progress: 38,
-            status: 'in progress',
-            priority: 'high',
-            startDate: 'Jan 15, 2024',
-            endDate: 'Jun 30, 2025'
-        }
-    ];
-
-    const formatCurrency = (amount?: number) => {
-        if (amount === undefined || amount === null) return '£0';
-        return `£${amount.toLocaleString()}`;
-    };
-
     const getStatusColor = (status: string) => {
         const colors: Record<string, string> = {
             'planning': 'bg-yellow-100 text-yellow-800',
@@ -259,6 +243,34 @@ export const ProjectsPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error}
+                </div>
+            )}
+
+            {loading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                        <div key={`project-skeleton-${index}`} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-1/3 mb-3" />
+                            <div className="h-5 bg-gray-200 rounded w-3/4 mb-4" />
+                            <div className="space-y-2">
+                                <div className="h-3 bg-gray-100 rounded w-full" />
+                                <div className="h-3 bg-gray-100 rounded w-5/6" />
+                                <div className="h-3 bg-gray-100 rounded w-2/3" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {!loading && projects.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+                    <p>No projects found. Try adjusting your filters or create a new project.</p>
+                </div>
+            )}
 
             {/* Projects Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -345,4 +357,3 @@ export const ProjectsPage: React.FC = () => {
         </div>
     );
 };
-

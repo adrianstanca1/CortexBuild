@@ -110,14 +110,14 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
     const developmentTools = useMemo(() => [
         { id: 'codex-agent', title: 'Codex Agent', icon: Bot, color: 'purple', description: 'AI coding assistant (GPT-5-Codex)', action: () => handleTabChange('codex') },
         { id: 'code-editor', title: 'Code Editor', icon: Code2, color: 'blue', description: 'Monaco editor with IntelliSense', action: () => navigateTo('sdk-developer', { startTab: 'builder' }) },
-        { id: 'terminal', title: 'Terminal', icon: Terminal, color: 'green', description: 'Integrated terminal', action: () => toast.info('Terminal opening...') },
-        { id: 'git', title: 'Git Integration', icon: GitBranch, color: 'orange', description: 'Version control', action: () => toast.info('Git tools opening...') },
-        { id: 'package-manager', title: 'Package Manager', icon: Package, color: 'purple', description: 'Dependency management', action: () => toast.info('Package manager opening...') },
+        { id: 'terminal', title: 'Terminal', icon: Terminal, color: 'green', description: 'Integrated terminal', action: () => toast('Terminal opening...') },
+        { id: 'git', title: 'Git Integration', icon: GitBranch, color: 'orange', description: 'Version control', action: () => toast('Git tools opening...') },
+        { id: 'package-manager', title: 'Package Manager', icon: Package, color: 'purple', description: 'Dependency management', action: () => toast('Package manager opening...') },
         { id: 'marketplace', title: 'App Marketplace', icon: Package, color: 'purple', description: 'Browse & publish apps', action: () => navigateTo('marketplace') },
-        { id: 'api-builder', title: 'API Builder', icon: Zap, color: 'yellow', description: 'REST API testing', action: () => toast.info('API builder opening...') },
-        { id: 'database-tools', title: 'Database Tools', icon: Database, color: 'cyan', description: 'Query & manage data', action: () => toast.info('Database tools opening...') },
-        { id: 'testing', title: 'Testing Framework', icon: TestTube, color: 'pink', description: 'Unit & integration tests', action: () => toast.info('Testing framework opening...') },
-        { id: 'docs', title: 'Documentation', icon: BookOpen, color: 'indigo', description: 'API documentation', action: () => toast.info('Documentation opening...') }
+        { id: 'api-builder', title: 'API Builder', icon: Zap, color: 'yellow', description: 'REST API testing', action: () => toast('API builder opening...') },
+        { id: 'database-tools', title: 'Database Tools', icon: Database, color: 'cyan', description: 'Query & manage data', action: () => toast('Database tools opening...') },
+        { id: 'testing', title: 'Testing Framework', icon: TestTube, color: 'pink', description: 'Unit & integration tests', action: () => toast('Testing framework opening...') },
+        { id: 'docs', title: 'Documentation', icon: BookOpen, color: 'indigo', description: 'API documentation', action: () => toast('Documentation opening...') }
     ], [handleTabChange, navigateTo]);
 
     const getColorClasses = (color: string) => {
@@ -158,7 +158,7 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                             </button>
                             <button
                                 type="button"
-                                onClick={() => toast.info('Deploying...')}
+                                onClick={() => toast('Deploying...')}
                                 className="px-6 py-2 bg-white text-green-600 hover:bg-green-50 rounded-lg transition-all font-medium flex items-center space-x-2"
                             >
                                 <Rocket className="w-5 h-5" />
@@ -336,11 +336,11 @@ const DeveloperDashboardV2: React.FC<DeveloperDashboardV2Props> = React.memo(({
                                 </div>
                             }>
                                 <CodexAgent
-                                    projectId={currentUser.company_id}
+                                    projectId={currentUser.companyId}
                                     initialContext={{
                                         userId: currentUser.id,
                                         userName: currentUser.name,
-                                        companyId: currentUser.company_id,
+                                        companyId: currentUser.companyId,
                                     }}
                                     onResult={(result) => {
                                         if (result.success) {

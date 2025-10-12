@@ -5,10 +5,13 @@ export type UserRole =
     | 'company_admin'
     | 'developer'
     | 'Project Manager'
+    | 'project_manager'
     | 'Foreman'
+    | 'supervisor'
     | 'Safety Officer'
     | 'Accounting Clerk'
-    | 'operative';
+    | 'operative'
+    | 'field_worker';
 
 export type PermissionSubject = 
     | 'task'
@@ -230,10 +233,16 @@ export interface Drawing {
 
 export interface Document {
     id: string;
-    projectId: string;
+    projectId?: string;
     name: string;
-    url: string;
-    uploadedAt: string;
+    url?: string;
+    uploadedAt?: string;
+    type?: string;
+    size?: string;
+    project?: string;
+    uploadedBy?: string;
+    uploadDate?: string;
+    category?: string;
 }
 
 export interface SiteInstruction {

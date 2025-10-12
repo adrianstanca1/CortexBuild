@@ -452,6 +452,280 @@ class APIClient {
       throw err;
     }
   }
+
+  /**
+   * Create a daily log
+   */
+  async createDailyLog(dailyLogData: any, user: any): Promise<any> {
+    try {
+      if (!user || !user.id) {
+        Logger.warn('[APIClient] No user provided for createDailyLog');
+        throw new Error('User is required to create daily log');
+      }
+
+      const response = await this.post<any>('/daily-logs', dailyLogData);
+      return response;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to create daily log');
+      Logger.error('[APIClient] Error creating daily log', {
+        error: err.message,
+        userId: user?.id,
+        projectId: dailyLogData?.projectId
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Fetch daywork sheet by ID
+   */
+  async fetchDayworkSheetById(id: string): Promise<any> {
+    try {
+      if (!id) {
+        throw new Error('Daywork sheet ID is required');
+      }
+
+      const response = await this.get<any>(`/daywork-sheets/${id}`);
+      return response;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch daywork sheet');
+      Logger.error('[APIClient] Error fetching daywork sheet', {
+        error: err.message,
+        id
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Fetch users
+   */
+  async fetchUsers(): Promise<any[]> {
+    try {
+      const response = await this.get<any[]>('/users');
+      return response || [];
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch users');
+      Logger.error('[APIClient] Error fetching users', {
+        error: err.message
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Update daywork sheet status
+   */
+  async updateDayworkSheetStatus(id: string, status: string): Promise<any> {
+    try {
+      if (!id) {
+        throw new Error('Daywork sheet ID is required');
+      }
+
+      const response = await this.patch<any>(`/daywork-sheets/${id}/status`, { status });
+      return response;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to update daywork sheet status');
+      Logger.error('[APIClient] Error updating daywork sheet status', {
+        error: err.message,
+        id,
+        status
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Fetch daywork sheets for project
+   */
+  async fetchDayworkSheetsForProject(projectId: string): Promise<any[]> {
+    try {
+      if (!projectId) {
+        throw new Error('Project ID is required');
+      }
+
+      const response = await this.get<any[]>(`/projects/${projectId}/daywork-sheets`);
+      return response || [];
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch daywork sheets for project');
+      Logger.error('[APIClient] Error fetching daywork sheets for project', {
+        error: err.message,
+        projectId
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Fetch delivery items
+   */
+  async fetchDeliveryItems(projectId?: string): Promise<any[]> {
+    try {
+      const url = projectId ? `/deliveries?projectId=${projectId}` : '/deliveries';
+      const response = await this.get<any[]>(url);
+      return response || [];
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch delivery items');
+      Logger.error('[APIClient] Error fetching delivery items', {
+        error: err.message,
+        projectId
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Fetch drawings
+   */
+  async fetchDrawings(projectId?: string): Promise<any[]> {
+    try {
+      const url = projectId ? `/drawings?projectId=${projectId}` : '/drawings';
+      const response = await this.get<any[]>(url);
+      return response || [];
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch drawings');
+      Logger.error('[APIClient] Error fetching drawings', {
+        error: err.message,
+        projectId
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Create drawing
+   */
+  async createDrawing(drawingData: any): Promise<any> {
+    try {
+      const response = await this.post<any>('/drawings', drawingData);
+      return response;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to create drawing');
+      Logger.error('[APIClient] Error creating drawing', {
+        error: err.message,
+        projectId: drawingData?.projectId
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Fetch available AI agents
+   */
+  async fetchAvailableAIAgents(): Promise<any[]> {
+    try {
+      const response = await this.get<any[]>('/ai-agents');
+      return response || [];
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch AI agents');
+      Logger.error('[APIClient] Error fetching AI agents', {
+        error: err.message
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Create AI agent
+   */
+  async createAIAgent(user: any, agentData: any): Promise<any> {
+    try {
+      if (!user || !user.id) {
+        throw new Error('User is required to create AI agent');
+      }
+
+      const response = await this.post<any>('/ai-agents', agentData);
+      return response;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to create AI agent');
+      Logger.error('[APIClient] Error creating AI agent', {
+        error: err.message,
+        userId: user?.id
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Update AI agent
+   */
+  async updateAIAgent(user: any, agentId: string, agentData: any): Promise<any> {
+    try {
+      if (!user || !user.id) {
+        throw new Error('User is required to update AI agent');
+      }
+
+      if (!agentId) {
+        throw new Error('Agent ID is required');
+      }
+
+      const response = await this.put<any>(`/ai-agents/${agentId}`, agentData);
+      return response;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to update AI agent');
+      Logger.error('[APIClient] Error updating AI agent', {
+        error: err.message,
+        userId: user?.id,
+        agentId
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Toggle AI agent status
+   */
+  async toggleAIAgentStatus(user: any, agentId: string, isActive: boolean): Promise<any> {
+    try {
+      if (!user || !user.id) {
+        throw new Error('User is required to toggle AI agent status');
+      }
+
+      if (!agentId) {
+        throw new Error('Agent ID is required');
+      }
+
+      const response = await this.patch<any>(`/ai-agents/${agentId}/status`, { isActive });
+      return response;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to toggle AI agent status');
+      Logger.error('[APIClient] Error toggling AI agent status', {
+        error: err.message,
+        userId: user?.id,
+        agentId,
+        isActive
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Get platform audit logs
+   */
+  async getPlatformAuditLogs(user: any, limit?: number, offset?: number): Promise<any[]> {
+    try {
+      if (!user || !user.id) {
+        throw new Error('User is required to fetch audit logs');
+      }
+
+      const params = new URLSearchParams();
+      if (limit) params.append('limit', limit.toString());
+      if (offset) params.append('offset', offset.toString());
+
+      const url = `/admin/audit-logs${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await this.get<any[]>(url);
+      return response || [];
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to fetch audit logs');
+      Logger.error('[APIClient] Error fetching audit logs', {
+        error: err.message,
+        userId: user?.id,
+        limit,
+        offset
+      });
+      throw err;
+    }
+  }
 }
 
 /**

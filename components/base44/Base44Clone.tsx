@@ -52,7 +52,7 @@ export const Base44Clone: React.FC<Base44CloneProps> = ({ user, onLogout }) => {
                 {currentPage === 'reports' && <ReportsPage />}
                 {currentPage === 'ledger' && <LedgerPage />}
                 {currentPage === 'marketplace' && <MarketplacePage />}
-                {currentPage === 'settings' && <SettingsPage user={user} />}
+                {currentPage === 'settings' && <SettingsPage />}
             </main>
 
             {/* Global AI Chatbot - Available on all pages */}

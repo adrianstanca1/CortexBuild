@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
-import * as api from '../../../api';
+import apiClient from '../../../src/services/apiClient';
 
 interface AIAgentsManagementProps {
     currentUser: User;
 }
 
 const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) => {
-    const [agents, setAgents] = useState<apiClient.AIAgent[]>([]);
+    const [agents, setAgents] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [editingAgent, setEditingAgent] = useState<apiClient.AIAgent | null>(null);
+    const [editingAgent, setEditingAgent] = useState<any | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        category: 'safety' as apiClient.AIAgent['category'],
+        category: 'safety',
         priceMonthly: 0,
         priceYearly: 0,
         features: [] as string[],
@@ -24,7 +24,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         bannerUrl: '',
         isActive: true,
         isFeatured: false,
-        minPlan: 'basic' as apiClient.AIAgent['minPlan']
+        minPlan: 'basic'
     });
 
     useEffect(() => {
@@ -77,7 +77,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         }
     };
 
-    const handleEditAgent = (agent: apiClient.AIAgent) => {
+    const handleEditAgent = (agent: any) => {
         setEditingAgent(agent);
         setFormData({
             name: agent.name,
@@ -202,7 +202,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 </label>
                                 <select
                                     value={formData.category}
-                                    onChange={(e) => setFormData({...formData, category: e.target.value as apiClient.AIAgent['category']})}
+                                    onChange={(e) => setFormData({...formData, category: e.target.value})}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     title="Category"
                                 >
@@ -301,7 +301,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                             </label>
                             <select
                                 value={formData.minPlan}
-                                onChange={(e) => setFormData({...formData, minPlan: e.target.value as apiClient.AIAgent['minPlan']})}
+                                onChange={(e) => setFormData({...formData, minPlan: e.target.value})}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 title="Minimum Plan"
                             >

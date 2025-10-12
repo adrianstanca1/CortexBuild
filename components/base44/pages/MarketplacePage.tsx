@@ -86,7 +86,7 @@ export const MarketplacePage: React.FC = () => {
       });
       const data = await response.json();
       if (data.success) {
-        const installed = new Set(data.data.map((m: any) => m.module_id));
+        const installed = new Set<number>(data.data.map((m: any) => Number(m.module_id)));
         setInstalledModules(installed);
       }
     } catch (error) {

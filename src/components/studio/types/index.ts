@@ -192,17 +192,6 @@ export interface TerminalCommand {
   duration?: number;
 }
 
-export interface AITool {
-  id: string;
-  name: string;
-  description: string;
-  category: 'code-analysis' | 'optimization' | 'documentation' | 'testing' | 'debugging' | 'refactoring';
-  provider: 'openai' | 'anthropic' | 'gemini' | 'custom';
-  config: Record<string, any>;
-  usage_count: number;
-  last_used?: string;
-}
-
 export interface StudioError {
   id: string;
   type: 'compilation' | 'runtime' | 'deployment' | 'test' | 'collaboration';

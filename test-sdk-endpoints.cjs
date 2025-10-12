@@ -8,28 +8,10 @@ const axios = require('axios');
 // Configuration
 const BASE_URL = 'http://localhost:3001/api';
 
-// Use existing developer user
-const DEVELOPER_USER = {
-  id: 'user-5',
-  email: 'adrian.stanca1@icloud.com',
-  name: 'Adrian Stanca',
-  role: 'developer'
-};
-
-// Test data
-let authToken = '';
-let testWorkspaceId = '';
-let testSessionId = '';
-
 /**
  * API helper functions
  */
 const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000
-});
-
-const apiWithAuth = axios.create({
   baseURL: BASE_URL,
   timeout: 10000
 });
@@ -50,7 +32,7 @@ async function testPublicEndpoints() {
       console.log('✅ Available models retrieved:', response.data.models.length);
       return true;
     }
-  } catch (error) {
+  } catch {
     console.log('ℹ️ Models endpoint requires auth (expected)');
   }
 

@@ -123,9 +123,9 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ isDarkMode 
                         isDarkMode={isDarkMode}
                     />
                     <MetricCard
-                        title="FID"
-                        value={formatMetric(metrics.webVitals.FID)}
-                        rating={webVitals.FID?.rating || 'poor'}
+                        title="INP"
+                        value={formatMetric(metrics.webVitals.INP)}
+                        rating={webVitals.INP?.rating || 'poor'}
                         icon={<Clock />}
                         isDarkMode={isDarkMode}
                     />
@@ -166,7 +166,7 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ isDarkMode 
             {activeTab === 'vitals' && (
                 <div className="space-y-4">
                     <VitalRow title="LCP (Largest Contentful Paint)" value={metrics.webVitals.LCP} unit="ms" rating={webVitals.LCP?.rating} threshold="< 2.5s" isDarkMode={isDarkMode} />
-                    <VitalRow title="FID (First Input Delay)" value={metrics.webVitals.FID} unit="ms" rating={webVitals.FID?.rating} threshold="< 100ms" isDarkMode={isDarkMode} />
+                    <VitalRow title="INP (Interaction to Next Paint)" value={metrics.webVitals.INP} unit="ms" rating={webVitals.INP?.rating} threshold="< 200ms" isDarkMode={isDarkMode} />
                     <VitalRow title="CLS (Cumulative Layout Shift)" value={metrics.webVitals.CLS} unit="" rating={webVitals.CLS?.rating} threshold="< 0.1" isDarkMode={isDarkMode} />
                     <VitalRow title="FCP (First Contentful Paint)" value={metrics.webVitals.FCP} unit="ms" rating={webVitals.FCP?.rating} threshold="< 1.8s" isDarkMode={isDarkMode} />
                     <VitalRow title="TTFB (Time to First Byte)" value={metrics.webVitals.TTFB} unit="ms" rating={webVitals.TTFB?.rating} threshold="< 600ms" isDarkMode={isDarkMode} />

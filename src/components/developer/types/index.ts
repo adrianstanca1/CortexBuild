@@ -167,7 +167,7 @@ export interface APIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   description?: string;
   parameters: APIParameter[];
-  responses: APIResponse[];
+  responses: APIEndpointResponse[];
   status: 'active' | 'deprecated' | 'experimental';
   version: string;
   last_tested?: string;
@@ -182,7 +182,7 @@ export interface APIParameter {
   example?: any;
 }
 
-export interface APIResponse {
+export interface APIEndpointResponse {
   status_code: number;
   description?: string;
   schema?: Record<string, any>;

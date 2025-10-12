@@ -3,39 +3,149 @@
  * Version: 1.1.0 GOLDEN
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { InvoiceBuilder } from '../components/InvoiceBuilder';
 
 interface Invoice {
-    id: number;
-    invoice_number?: string;
-    client_name?: string;
-    project_name?: string;
+    id: number | string;
+    client: string;
+    project?: string;
     description?: string;
-    total?: number;
+    amount: number;
     status: string;
     type?: string;
-    issue_date?: string;
-    due_date?: string;
-    paid_amount?: number;
-    paid_date?: string;
+    issueDate?: string;
+    dueDate?: string;
+    paidAmount?: number;
+    paidDate?: string | null;
 }
+
+const formatDate = (value?: string | null) => {
+    if (!value) return undefined;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const parseAmount = (value: unknown): number => {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? numeric : 0;
+    }
+    return 0;
+};
+
+const normalizeInvoice = (raw: any): Invoice => {
+    const amount = parseAmount(raw.amount ?? raw.total ?? raw.invoice_total);
+    const paidAmount = parseAmount(raw.paidAmount ?? raw.paid_amount);
+
+    const id =
+        raw.id ??
+        raw.invoice_number ??
+        raw.invoiceNumber ??
+        raw.reference ??
+        `invoice-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    return {
+        id,
+        client: raw.client ?? raw.client_name ?? raw.clientName ?? 'Unknown client',
+        project: raw.project ?? raw.project_name ?? raw.projectName,
+        description: raw.description,
+        amount,
+        status: (raw.status ?? 'draft').toLowerCase(),
+        type: raw.type ?? raw.invoice_type ?? 'standard',
+        issueDate: formatDate(raw.issueDate ?? raw.issue_date),
+        dueDate: formatDate(raw.dueDate ?? raw.due_date),
+        paidAmount,
+        paidDate: formatDate(raw.paidDate ?? raw.paid_date) ?? null
+    };
+};
+
+const MOCK_INVOICES: Invoice[] = [
+    {
+        id: 'INV-2024-001',
+        client: 'Metro Construction Group',
+        project: 'Downtown Office Complex',
+        description: 'Progress billing - Phase 1 completion',
+        amount: 486000,
+        status: 'paid',
+        type: 'progress',
+        issueDate: 'Nov 1, 2024',
+        dueDate: 'Nov 30, 2024',
+        paidAmount: 486000,
+        paidDate: 'Nov 28, 2024'
+    },
+    {
+        id: 'INV-2024-002',
+        client: 'Green Valley Homes',
+        project: 'Riverside Luxury Apartments',
+        description: 'Progress billing - Foundation and framing',
+        amount: 302400,
+        status: 'sent',
+        type: 'progress',
+        issueDate: 'Dec 1, 2024',
+        dueDate: 'Dec 31, 2024',
+        paidAmount: 0,
+        paidDate: null
+    },
+    {
+        id: 'INV-2024-003',
+        client: 'Metro Construction Group',
+        project: 'Downtown Office Complex',
+        description: 'Progress billing - Phase 2 structural work',
+        amount: 561600,
+        status: 'viewed',
+        type: 'progress',
+        issueDate: 'Dec 15, 2024',
+        dueDate: 'Jan 15, 2025',
+        paidAmount: 0,
+        paidDate: null
+    },
+    {
+        id: 'INV-2024-004',
+        client: 'Green Valley Homes',
+        project: 'Riverside Apartments',
+        description: 'Progress payment - 50% completion',
+        amount: 172800,
+        status: 'sent',
+        type: 'progress',
+        issueDate: 'May 15, 2024',
+        dueDate: 'Jun 15, 2024',
+        paidAmount: 0,
+        paidDate: null
+    },
+    {
+        id: 'INV-2024-005',
+        client: 'Sunset Developments',
+        project: 'Downtown Office Complex',
+        description: 'Progress payment - Phase 1 completion',
+        amount: 486000,
+        status: 'paid',
+        type: 'progress',
+        issueDate: 'Feb 1, 2024',
+        dueDate: 'Mar 1, 2024',
+        paidAmount: 486000,
+        paidDate: 'Feb 28, 2024'
+    }
+];
 
 export const InvoicesPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [invoices, setInvoices] = useState<Invoice[]>(MOCK_INVOICES);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showInvoiceBuilder, setShowInvoiceBuilder] = useState(false);
 
-    useEffect(() => {
-        fetchInvoices();
-    }, [searchQuery, statusFilter]);
-
-    const fetchInvoices = async () => {
+    const fetchInvoices = useCallback(async () => {
         try {
             setLoading(true);
+            setError(null);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
@@ -44,87 +154,28 @@ export const InvoicesPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success) {
-                setInvoices(data.data);
+                const normalized = Array.isArray(data.data) ? data.data.map(normalizeInvoice) : [];
+                setInvoices(normalized.length > 0 ? normalized : MOCK_INVOICES);
+                if (!normalized.length) {
+                    setError('No invoices found for the selected filters.');
+                }
             } else {
-                setError(data.error);
+                setError(data.error ?? 'Unable to load invoices.');
+                setInvoices(MOCK_INVOICES);
             }
         } catch (err: any) {
-            setError(err.message);
-            setInvoices(mockInvoices);
+            setError(err.message ?? 'Failed to communicate with the invoices API.');
+            setInvoices(MOCK_INVOICES);
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery, statusFilter]);
 
-    const mockInvoices: Invoice[] = [
-        {
-            id: 'INV-2024-001',
-            client: 'Metro Construction Group',
-            project: 'Downtown Office Complex',
-            description: 'Progress billing - Phase 1 completion',
-            amount: 486000,
-            status: 'paid',
-            type: 'progress',
-            issueDate: 'Nov 1, 2024',
-            dueDate: 'Nov 30, 2024',
-            paidAmount: 486000,
-            paidDate: 'Nov 28, 2024'
-        },
-        {
-            id: 'INV-2024-002',
-            client: 'Green Valley Homes',
-            project: 'Riverside Luxury Apartments',
-            description: 'Progress billing - Foundation and framing',
-            amount: 302400,
-            status: 'sent',
-            type: 'progress',
-            issueDate: 'Dec 1, 2024',
-            dueDate: 'Dec 31, 2024',
-            paidAmount: 0,
-            paidDate: null
-        },
-        {
-            id: 'INV-2024-003',
-            client: 'Metro Construction Group',
-            project: 'Downtown Office Complex',
-            description: 'Progress billing - Phase 2 structural work',
-            amount: 561600,
-            status: 'viewed',
-            type: 'progress',
-            issueDate: 'Dec 15, 2024',
-            dueDate: 'Jan 15, 2025',
-            paidAmount: 0,
-            paidDate: null
-        },
-        {
-            id: 'INV-2024-002',
-            client: 'Green Valley Homes',
-            project: 'Riverside Apartments',
-            description: 'Progress payment - 50% completion',
-            amount: 172800,
-            status: 'sent',
-            type: 'progress',
-            issueDate: 'May 15, 2024',
-            dueDate: 'Jun 15, 2024',
-            paidAmount: 0,
-            paidDate: null
-        },
-        {
-            id: 'INV-2024-001',
-            client: 'Sunset Developments',
-            project: 'Downtown Office Complex',
-            description: 'Progress payment - Phase 1 completion',
-            amount: 486000,
-            status: 'paid',
-            type: 'progress',
-            issueDate: 'Feb 1, 2024',
-            dueDate: 'Mar 1, 2024',
-            paidAmount: 486000,
-            paidDate: 'Feb 28, 2024'
-        }
-    ];
+    useEffect(() => {
+        fetchInvoices();
+    }, [fetchInvoices]);
 
-    const formatCurrency = (amount?: number) => {
+    const formatCurrency = (amount?: number | null) => {
         if (amount === undefined || amount === null) return '£0.00';
         return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
@@ -205,6 +256,35 @@ export const InvoicesPage: React.FC = () => {
             </div>
 
             {/* Invoices List */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error}
+                </div>
+            )}
+
+            {loading && (
+                <div className="space-y-4 mb-6">
+                    {Array.from({ length: 3 }).map((_, skeletonIndex) => (
+                        <div
+                            key={`invoice-skeleton-${skeletonIndex}`}
+                            className="animate-pulse bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                        >
+                            <div className="h-6 bg-gray-200 rounded w-1/4 mb-4" />
+                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" />
+                            <div className="h-4 bg-gray-100 rounded w-full mb-2" />
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+                                {[...Array(4)].map((__, innerIndex) => (
+                                    <div key={`invoice-skeleton-section-${skeletonIndex}-${innerIndex}`}>
+                                        <div className="h-3 bg-gray-100 rounded w-1/2 mb-2" />
+                                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             <div className="space-y-4">
                 {invoices.map((invoice, index) => (
                     <div key={`${invoice.id}-${index}`} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -235,11 +315,11 @@ export const InvoicesPage: React.FC = () => {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
                                 <div>
                                     <span className="text-xs text-gray-500">Issue Date:</span>
-                                    <p className="text-sm font-medium text-gray-900">{invoice.issueDate}</p>
+                                    <p className="text-sm font-medium text-gray-900">{invoice.issueDate ?? '—'}</p>
                                 </div>
                                 <div>
                                     <span className="text-xs text-gray-500">Due Date:</span>
-                                    <p className="text-sm font-medium text-gray-900">{invoice.dueDate}</p>
+                                    <p className="text-sm font-medium text-gray-900">{invoice.dueDate ?? '—'}</p>
                                 </div>
                                 {invoice.paidAmount > 0 && (
                                     <div>
@@ -298,4 +378,3 @@ export const InvoicesPage: React.FC = () => {
         </div>
     );
 };
-

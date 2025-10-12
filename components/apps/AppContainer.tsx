@@ -13,7 +13,7 @@ export interface MiniApp {
     icon: string;
     version: string;
     author: string;
-    category: 'productivity' | 'finance' | 'health' | 'utilities' | 'entertainment';
+    category: 'productivity' | 'finance' | 'health' | 'utilities' | 'entertainment' | 'construction';
     component: React.ComponentType<any>;
     installed: boolean;
     free: boolean;

@@ -256,7 +256,7 @@ export class SubscriptionService {
     switch (event.type) {
       case 'customer.subscription.updated':
       case 'customer.subscription.created':
-      case 'customer.subscription.deleted':
+      case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata?.userId;
 
@@ -274,8 +274,9 @@ export class SubscriptionService {
           );
         }
         break;
+      }
 
-      case 'invoice.payment_succeeded':
+      case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
 
@@ -293,8 +294,9 @@ export class SubscriptionService {
           `).run(profile.user_id);
         }
         break;
+      }
 
-      case 'invoice.payment_failed':
+      case 'invoice.payment_failed': {
         const failedInvoice = event.data.object as Stripe.Invoice;
 
         // Find user and mark as past_due
@@ -319,6 +321,7 @@ export class SubscriptionService {
           );
         }
         break;
+      }
     }
   }
 

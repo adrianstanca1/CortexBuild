@@ -48,7 +48,7 @@ export const passwordSchema = Joi.string()
 
 // Phone number validation
 export const phoneSchema = Joi.string()
-  .pattern(/^\+?[\d\s\-\(\)]+$/)
+  .pattern(/^\+?[\d\s\-()]+$/)
   .min(10)
   .max(20)
   .messages({

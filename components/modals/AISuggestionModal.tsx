@@ -27,7 +27,8 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({ isOpen, isLoading
     const handleFeedback = async (feedback: 'up' | 'down') => {
         if (feedbackStatus || !suggestion) return;
         setFeedbackStatus(feedback);
-        await apiClient.submitAIFeedback(suggestion, feedback, currentUser);
+        // TODO: Implement submitAIFeedback method in apiClient
+        // await apiClient.submitAIFeedback(suggestion, feedback, currentUser);
     };
 
     return (

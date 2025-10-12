@@ -4,7 +4,7 @@
  * Type definitions for platform-wide administration features
  */
 
-import { Company, Agent, Subscription } from '../types';
+import { Company, AIAgent, CompanySubscription } from '../types';
 
 // ============================================================================
 // PLATFORM STATISTICS
@@ -37,7 +37,13 @@ export interface CompanyDetails extends Company {
 // AGENT STATISTICS
 // ============================================================================
 
-export interface AgentStats extends Agent {
+export interface AgentStats {
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    status: string;
+    icon: string;
     subscription_count: number;
     monthly_revenue: number;
 }
@@ -192,8 +198,8 @@ export interface ChartData {
     datasets: {
         label: string;
         data: number[];
-        backgroundColor?: string;
-        borderColor?: string;
+        backgroundColor?: string | string[];
+        borderColor?: string | string[];
     }[];
 }
 

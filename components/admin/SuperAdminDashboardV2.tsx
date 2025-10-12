@@ -58,7 +58,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo((
         if (onNavigate) {
             onNavigate(sectionId);
         } else {
-            toast.info(`Opening ${sectionId}...`);
+            toast.success(`Opening ${sectionId}...`);
         }
     }, [onNavigate]);
 

@@ -22,7 +22,7 @@ const ProjectSelectorModal: React.FC<ProjectSelectorModalProps> = ({ onSelectPro
     useEffect(() => {
         const loadProjects = async () => {
             setIsLoading(true);
-            const fetchedProjects = await apiClient.fetchAllProjects(currentUser);
+            const fetchedProjects = await apiClient.fetchProjects();
             setProjects(fetchedProjects);
             setIsLoading(false);
         };

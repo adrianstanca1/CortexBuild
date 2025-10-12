@@ -67,24 +67,28 @@ export {
 } from './utils/dashboardUtils';
 
 // ==================== DEFAULT EXPORT ====================
+import * as SharedComponents from './shared';
+import * as DashboardConfig from './config/dashboardConfig';
+import * as DashboardUtils from './utils/dashboardUtils';
+
 export default {
   // Components
-  DashboardCard,
-  DashboardHeader,
-  QuickStats,
-  SectionGrid,
-  DashboardTabs,
-  
+  DashboardCard: SharedComponents.DashboardCard,
+  DashboardHeader: SharedComponents.DashboardHeader,
+  QuickStats: SharedComponents.QuickStats,
+  SectionGrid: SharedComponents.SectionGrid,
+  DashboardTabs: SharedComponents.DashboardTabs,
+
   // Config
-  DASHBOARD_COLORS,
-  DASHBOARD_GRADIENTS,
-  ANIMATION_CONFIG,
-  GRID_CONFIGS,
-  
+  DASHBOARD_COLORS: DashboardConfig.DASHBOARD_COLORS,
+  DASHBOARD_GRADIENTS: DashboardConfig.DASHBOARD_GRADIENTS,
+  ANIMATION_CONFIG: DashboardConfig.ANIMATION_CONFIG,
+  GRID_CONFIGS: DashboardConfig.GRID_CONFIGS,
+
   // Utils
-  getColorClasses,
-  formatNumber,
-  formatCurrency,
-  calculateTrend,
+  getColorClasses: DashboardUtils.getColorClasses,
+  formatNumber: DashboardUtils.formatNumber,
+  formatCurrency: DashboardUtils.formatCurrency,
+  calculateTrend: DashboardUtils.calculateTrend,
 };
 

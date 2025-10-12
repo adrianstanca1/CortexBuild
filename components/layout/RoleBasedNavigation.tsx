@@ -205,9 +205,17 @@ export const RoleBasedNavigation: React.FC<RoleBasedNavigationProps> = ({
         name: 'Project Manager',
         description: 'Project oversight'
       },
+      project_manager: {
+        name: 'Project Manager',
+        description: 'Project oversight'
+      },
       Foreman: {
         name: 'Foreman',
         description: 'Site management'
+      },
+      supervisor: {
+        name: 'Supervisor',
+        description: 'Site supervision'
       },
       'Safety Officer': {
         name: 'Safety Officer',
@@ -220,6 +228,10 @@ export const RoleBasedNavigation: React.FC<RoleBasedNavigationProps> = ({
       operative: {
         name: 'Operative',
         description: 'Field operations'
+      },
+      field_worker: {
+        name: 'Field Worker',
+        description: 'On-site operations'
       }
     };
 

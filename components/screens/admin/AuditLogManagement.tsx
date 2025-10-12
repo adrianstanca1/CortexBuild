@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
-import * as api from '../../../api';
+import apiClient from '../../../src/services/apiClient';
 
 interface AuditLogManagementProps {
     currentUser: User;
 }
 
 const AuditLogManagement: React.FC<AuditLogManagementProps> = ({ currentUser }) => {
-    const [auditLogs, setAuditLogs] = useState<apiClient.AuditLogEntry[]>([]);
+    const [auditLogs, setAuditLogs] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
