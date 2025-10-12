@@ -1,7 +1,63 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card } from '../shared/Card';
-import { Button } from '../shared/Button';
-import { Badge } from '../ui/StatusBadge';
+import {
+  Users,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  Search,
+  Filter,
+  Crown,
+  DollarSign,
+  Calendar,
+  Activity
+} from 'lucide-react';
+
+// Simple Card component
+const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 ${className}`}>
+    {children}
+  </div>
+);
+
+// Simple Button component
+const Button: React.FC<{
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}> = ({ children, onClick, variant = 'primary', size = 'md', className = '' }) => {
+  const baseClasses = 'rounded-lg font-semibold transition-colors inline-flex items-center justify-center';
+  const variantClasses = {
+    primary: 'bg-emerald-600 text-white hover:bg-emerald-700',
+    secondary: 'bg-slate-200 text-slate-800 hover:bg-slate-300',
+    ghost: 'bg-transparent text-slate-600 hover:bg-slate-100'
+  };
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-base',
+    lg: 'px-6 py-3 text-lg'
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+    >
+      {children}
+    </button>
+  );
+};
+
+// Simple Badge component
+const Badge: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${className}`}>
+    {children}
+  </span>
+);
 import {
   Users,
   TrendingUp,
