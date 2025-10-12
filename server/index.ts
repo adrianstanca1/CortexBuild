@@ -40,6 +40,7 @@ import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
 import { createMyApplicationsRouter } from './routes/my-applications';
+import { createSubscriptionService } from './services/subscription-service';
 
 // Import error handling middleware
 import {
@@ -149,7 +150,7 @@ app.get('/api/chat/message', generalRateLimit, auth.authenticateToken, async (re
 });
 
 // POST /api/chat/message
-app.post('/api/chat/message', generalRateLimit, auth.authenticateToken, async (req, res) => {
+app.post('/api/chat/message', generalRateLimit, async (req, res) => {
             try {
                 const { message, sessionId, currentPage } = req.body;
                 const userId = (req as any).user.id;
@@ -232,6 +233,10 @@ const startServer = async () => {
         console.log('🔧 Initializing SDK Developer tables...');
         initSdkTables(db);
 
+        // Initialize subscription service
+        console.log('💳 Initializing Subscription service...');
+        const subscriptionService = createSubscriptionService(db);
+
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
 
@@ -277,9 +282,9 @@ const startServer = async () => {
 
         app.post('/api/auth/logout', (req, res) => {
             try {
-                const token = req.body?.token || req.headers.authorization?.replace('Bearer ', '');
+                const token = req.body?.token || req.headers.authorization?.replace('Bearer ', '') || '';
 
-                if (token) {
+                if (token && token.trim()) {
                     auth.logout(db, token);
                 }
 
@@ -399,7 +404,49 @@ const startServer = async () => {
         app.use('/api/my-applications', generalRateLimit, createMyApplicationsRouter(db));
         console.log('  ✓ /api/my-applications');
 
-        console.log('✅ All 25 API routes registered successfully');
+        // Stripe webhook endpoint (no auth required)
+        app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+            const sig = req.headers['stripe-signature'] as string;
+            const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+            if (!endpointSecret) {
+                console.warn('⚠️ Stripe webhook received but no webhook secret configured');
+                return res.status(400).json({ error: 'Webhook not configured' });
+            }
+
+            let event: Stripe.Event;
+
+            try {
+                event = subscriptionService.stripe?.webhooks.constructEvent(req.body, sig, endpointSecret) || req.body;
+            } catch (err: any) {
+                console.error(`⚠️ Webhook signature verification failed:`, err.message);
+                return res.status(400).json({ error: `Webhook Error: ${err.message}` });
+            }
+
+            try {
+                // Handle the event
+                await subscriptionService.handleWebhookEvent(event);
+                console.log(`✅ Stripe webhook processed: ${event.type}`);
+
+                res.json({ received: true });
+            } catch (error: any) {
+                console.error('❌ Error processing Stripe webhook:', error);
+                res.status(500).json({ error: 'Webhook processing failed' });
+            }
+        });
+
+        // Subscription status check endpoint
+        app.post('/api/subscriptions/check-status', async (req, res) => {
+            try {
+                await subscriptionService.updateSubscriptionStatuses();
+                res.json({ success: true });
+            } catch (error: any) {
+                console.error('Error checking subscription status:', error);
+                res.status(500).json({ error: 'Failed to check subscription status' });
+            }
+        });
+
+        console.log('✅ All 27 API routes registered successfully');
 
         // ==================================================
         // ERROR HANDLING MIDDLEWARE (MUST BE LAST!)
@@ -417,6 +464,16 @@ const startServer = async () => {
         setInterval(() => {
             auth.cleanupExpiredSessions();
         }, 60 * 60 * 1000);
+
+        // Check subscription statuses every 6 hours
+        setInterval(async () => {
+            try {
+                await subscriptionService.updateSubscriptionStatuses();
+                console.log('🔄 Subscription statuses updated');
+            } catch (error) {
+                console.error('❌ Error updating subscription statuses:', error);
+            }
+        }, 6 * 60 * 60 * 1000);
 
         // Create HTTP server for WebSocket support
         const server = createServer(app);

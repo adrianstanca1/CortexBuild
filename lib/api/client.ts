@@ -559,6 +559,56 @@ export const apiClient = {
     setAuth(token: string): void {
         localStorage.setItem('token', token);
     },
+
+    // ==================== AI AGENTS & SUBSCRIPTIONS ====================
+
+    /**
+     * Fetch available AI agents from marketplace
+     */
+    async fetchAvailableAIAgents(): Promise<any[]> {
+        try {
+            const response = await apiRequest<{ agents: any[] }>('/integrations/agents');
+            return response.agents || [];
+        } catch (error) {
+            console.error('[APIClient] Error fetching AI agents:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Fetch company subscriptions for a user
+     */
+    async fetchCompanySubscriptions(user: any): Promise<any[]> {
+        try {
+            if (!user || !user.companyId) {
+                console.warn('[APIClient] No user or companyId provided for fetchCompanySubscriptions');
+                return [];
+            }
+
+            const response = await apiRequest<{ subscriptions: any[] }>(
+                `/integrations/subscriptions?companyId=${user.companyId}`
+            );
+            return response.subscriptions || [];
+        } catch (error) {
+            console.error('[APIClient] Error fetching company subscriptions:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Subscribe to an AI agent
+     */
+    async subscribeToAIAgent(agentId: string, billingCycle: 'monthly' | 'yearly'): Promise<any> {
+        try {
+            return await apiRequest<any>('/integrations/subscribe', {
+                method: 'POST',
+                body: JSON.stringify({ agentId, billingCycle }),
+            });
+        } catch (error) {
+            console.error('[APIClient] Error subscribing to AI agent:', error);
+            throw error;
+        }
+    },
 };
 
 export default apiClient;

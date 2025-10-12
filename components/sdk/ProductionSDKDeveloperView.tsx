@@ -760,6 +760,67 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
     }
   };
 
+  // New subscription management functions
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const loadNotifications = useCallback(async () => {
+    try {
+      const response = await api.get('/sdk/notifications');
+      if (response.data.success) {
+        setNotifications(response.data.notifications);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  }, []);
+
+  const loadSubscriptionHistory = useCallback(async () => {
+    try {
+      const response = await api.get('/sdk/profile/subscription/history');
+      if (response.data.success) {
+        setSubscriptionHistory(response.data.history);
+      }
+    } catch (error) {
+      console.error('Failed to load subscription history:', error);
+    }
+  }, []);
+
+  const markNotificationAsRead = useCallback(async (notificationId: string) => {
+    try {
+      await api.patch(`/sdk/notifications/${notificationId}/read`);
+      setNotifications(prev =>
+        prev.map(n => n.id === notificationId ? { ...n, is_read: 1 } : n)
+      );
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  }, []);
+
+  const checkUsageLimits = useCallback(async () => {
+    try {
+      const response = await api.post('/sdk/check-usage-limits');
+      if (response.data.success) {
+        if (response.data.notifications.length > 0) {
+          await loadNotifications();
+          setShowNotifications(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check usage limits:', error);
+    }
+  }, [loadNotifications]);
+
+  // Load notifications and history on mount
+  useEffect(() => {
+    if (profile) {
+      loadNotifications();
+      loadSubscriptionHistory();
+      checkUsageLimits();
+    }
+  }, [profile, loadNotifications, loadSubscriptionHistory, checkUsageLimits]);
+
   const handleApiKeySave = async (value: string) => {
     if (!value.trim()) {
       toast.error('API key cannot be empty');
@@ -1762,6 +1823,56 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
 
   const renderSettingsTab = () => (
     <div className="space-y-6">
+      {/* Notifications Panel */}
+      {notifications.length > 0 && (
+        <Card className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-slate-900">Notifications</h3>
+            <Button variant="ghost" size="sm" onClick={() => setShowNotifications(!showNotifications)}>
+              {showNotifications ? 'Hide' : 'Show'} ({notifications.filter(n => !n.is_read).length} unread)
+            </Button>
+          </div>
+
+          {showNotifications && (
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {notifications.map(notification => (
+                <div
+                  key={notification.id}
+                  className={`border rounded-lg p-3 ${notification.is_read ? 'border-slate-200 bg-slate-50' : 'border-amber-200 bg-amber-50'}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold text-slate-900">{notification.title}</h4>
+                        {!notification.is_read && (
+                          <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-600 mt-1">{notification.message}</p>
+                      <p className="text-xs text-slate-400 mt-2">
+                        {formatDateTime(notification.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      {notification.action_url && (
+                        <Button variant="ghost" size="sm" onClick={() => window.location.href = notification.action_url}>
+                          View
+                        </Button>
+                      )}
+                      {!notification.is_read && (
+                        <Button variant="ghost" size="sm" onClick={() => markNotificationAsRead(notification.id)}>
+                          Mark Read
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+
       <Card className="space-y-4">
         <h3 className="text-lg font-semibold text-slate-900">Subscription Tier</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -1794,6 +1905,35 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
           </div>
         )}
       </Card>
+
+      {/* Subscription History */}
+      {subscriptionHistory.length > 0 && (
+        <Card className="space-y-4">
+          <h3 className="text-lg font-semibold text-slate-900">Subscription History</h3>
+          <div className="space-y-3">
+            {subscriptionHistory.slice(0, 5).map((entry: any) => (
+              <div key={entry.id} className="border border-slate-200 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-slate-900">
+                      {entry.old_tier} → {entry.new_tier}
+                    </p>
+                    <p className="text-sm text-slate-600">{entry.change_reason}</p>
+                    <p className="text-xs text-slate-400">
+                      {formatDateTime(entry.created_at)}
+                    </p>
+                  </div>
+                  {entry.metadata?.adminChange && (
+                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
+                      Admin Change
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <Card className="space-y-4">
         <h3 className="text-lg font-semibold text-slate-900">Gemini API Key</h3>

@@ -30,23 +30,67 @@ const requireAuth = (req: Request, res: Response, next: any) => {
 
 // Initialize SDK tables
 export const initSdkTables = (db: Database.Database) => {
-  // SDK Workflows table
+  // SDK Profiles table (Enhanced with subscription management)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sdk_profiles (
+      id TEXT PRIMARY KEY,
+      user_id TEXT UNIQUE NOT NULL,
+      subscription_tier TEXT DEFAULT 'free' CHECK(subscription_tier IN ('free', 'starter', 'pro', 'enterprise')),
+      api_requests_used INTEGER DEFAULT 0,
+      api_requests_limit INTEGER DEFAULT 100,
+      gemini_api_key TEXT,
+      stripe_customer_id TEXT,
+      subscription_status TEXT DEFAULT 'active' CHECK(subscription_status IN ('active', 'canceled', 'past_due', 'unpaid', 'trialing')),
+      current_period_start DATETIME,
+      current_period_end DATETIME,
+      cancel_at_period_end BOOLEAN DEFAULT 0,
+      trial_ends_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Subscription History table (Audit trail)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS subscription_history (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      old_tier TEXT,
+      new_tier TEXT NOT NULL,
+      change_reason TEXT,
+      changed_by TEXT,
+      stripe_event_id TEXT,
+      metadata TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  // SDK Workflows table (Enhanced)
   db.exec(`
     CREATE TABLE IF NOT EXISTS sdk_workflows (
       id TEXT PRIMARY KEY,
       developer_id TEXT NOT NULL,
       company_id TEXT,
       name TEXT NOT NULL,
+      description TEXT,
       definition TEXT NOT NULL,
       is_active INTEGER DEFAULT 0,
+      is_public INTEGER DEFAULT 0,
+      tags TEXT,
+      category TEXT,
+      downloads INTEGER DEFAULT 0,
+      rating DECIMAL(3, 2) DEFAULT 0,
+      reviews_count INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (developer_id) REFERENCES users(id),
-      FOREIGN KEY (company_id) REFERENCES companies(id)
+      FOREIGN KEY (developer_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
     )
   `);
 
-  // SDK Apps table
+  // SDK Apps table (Enhanced)
   db.exec(`
     CREATE TABLE IF NOT EXISTS sdk_apps (
       id TEXT PRIMARY KEY,
@@ -55,16 +99,25 @@ export const initSdkTables = (db: Database.Database) => {
       name TEXT NOT NULL,
       description TEXT,
       version TEXT DEFAULT '1.0.0',
-      status TEXT DEFAULT 'draft',
+      status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'pending_review', 'approved', 'rejected', 'published')),
       code TEXT,
+      repository_url TEXT,
+      documentation_url TEXT,
+      demo_url TEXT,
+      price DECIMAL(10, 2) DEFAULT 0,
+      is_free BOOLEAN DEFAULT 1,
+      downloads INTEGER DEFAULT 0,
+      rating DECIMAL(3, 2) DEFAULT 0,
+      reviews_count INTEGER DEFAULT 0,
+      published_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (developer_id) REFERENCES users(id),
-      FOREIGN KEY (company_id) REFERENCES companies(id)
+      FOREIGN KEY (developer_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
     )
   `);
 
-  // AI Agents table
+  // AI Agents table (Enhanced)
   db.exec(`
     CREATE TABLE IF NOT EXISTS ai_agents (
       id TEXT PRIMARY KEY,
@@ -72,49 +125,96 @@ export const initSdkTables = (db: Database.Database) => {
       company_id TEXT,
       name TEXT NOT NULL,
       description TEXT,
-      status TEXT DEFAULT 'stopped',
+      status TEXT DEFAULT 'stopped' CHECK(status IN ('running', 'paused', 'stopped', 'error')),
       config TEXT,
+      last_activity DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (developer_id) REFERENCES users(id),
-      FOREIGN KEY (company_id) REFERENCES companies(id)
+      FOREIGN KEY (developer_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
     )
   `);
 
-  // SDK Profiles table
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS sdk_profiles (
-      id TEXT PRIMARY KEY,
-      user_id TEXT UNIQUE NOT NULL,
-      subscription_tier TEXT DEFAULT 'free',
-      api_requests_used INTEGER DEFAULT 0,
-      api_requests_limit INTEGER DEFAULT 100,
-      gemini_api_key TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `);
-
-  // API Usage Logs table
+  // API Usage Logs table (Enhanced analytics)
   db.exec(`
     CREATE TABLE IF NOT EXISTS api_usage_logs (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
+      session_id TEXT,
       provider TEXT NOT NULL,
       model TEXT,
+      operation TEXT,
       prompt_tokens INTEGER DEFAULT 0,
       completion_tokens INTEGER DEFAULT 0,
       total_tokens INTEGER DEFAULT 0,
       cost REAL DEFAULT 0,
+      duration_ms INTEGER DEFAULT 0,
+      success BOOLEAN DEFAULT 1,
+      error_message TEXT,
+      metadata TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  // SDK Reviews table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sdk_reviews (
+      id TEXT PRIMARY KEY,
+      app_id TEXT,
+      workflow_id TEXT,
+      user_id TEXT NOT NULL,
+      rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+      review TEXT,
+      helpful_count INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (app_id) REFERENCES sdk_apps(id) ON DELETE CASCADE,
+      FOREIGN KEY (workflow_id) REFERENCES sdk_workflows(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CHECK (app_id IS NOT NULL OR workflow_id IS NOT NULL)
+    )
+  `);
+
+  // Subscription Notifications table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS subscription_notifications (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      type TEXT NOT NULL CHECK(type IN ('usage_warning', 'limit_reached', 'payment_failed', 'subscription_canceled', 'trial_ending', 'upgrade_available')),
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      data TEXT,
+      is_read BOOLEAN DEFAULT 0,
+      action_url TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
 
   // Initialize workspace and collaboration tables
   WorkspaceManager.initTables(db);
   CollaborationService.initTables(db);
+
+  // Create indexes for performance
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_profiles_user ON sdk_profiles(user_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_profiles_tier ON sdk_profiles(subscription_tier)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_profiles_status ON sdk_profiles(subscription_status)');
+
+  db.exec('CREATE INDEX IF NOT EXISTS idx_subscription_history_user ON subscription_history(user_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_subscription_history_date ON subscription_history(created_at)');
+
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_workflows_developer ON sdk_workflows(developer_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_workflows_public ON sdk_workflows(is_public)');
+
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_apps_developer ON sdk_apps(developer_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sdk_apps_status ON sdk_apps(status)');
+
+  db.exec('CREATE INDEX IF NOT EXISTS idx_api_usage_user ON api_usage_logs(user_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_api_usage_date ON api_usage_logs(created_at)');
+
+  db.exec('CREATE INDEX IF NOT EXISTS idx_subscription_notifications_user ON subscription_notifications(user_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_subscription_notifications_unread ON subscription_notifications(is_read)');
 };
 
 export const createSDKRouter = (db: Database.Database) => {
@@ -160,12 +260,15 @@ router.get('/profile', authenticateToken, requireAuth, (req: Request, res: Respo
   }
 });
 
-// Update subscription tier
+// Update subscription tier (Enhanced with history tracking)
 router.patch('/profile/subscription', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const db = (req as any).db;
-    const { tier } = req.body;
+    const { tier, paymentMethodId } = req.body;
+
+    // Get current profile
+    const currentProfile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(user.id);
 
     const limits: Record<string, number> = {
       free: 100,
@@ -175,12 +278,43 @@ router.patch('/profile/subscription', authenticateToken, requireDeveloper, (req:
     };
 
     const limit = limits[tier] || 100;
+    const now = new Date().toISOString();
 
+    // Update subscription
     db.prepare(`
-      UPDATE sdk_profiles 
+      UPDATE sdk_profiles
       SET subscription_tier = ?, api_requests_limit = ?, updated_at = CURRENT_TIMESTAMP
       WHERE user_id = ?
     `).run(tier, limit, user.id);
+
+    // Record subscription history
+    const historyId = `sub-history-${Date.now()}`;
+    db.prepare(`
+      INSERT INTO subscription_history (id, user_id, old_tier, new_tier, change_reason, changed_by, metadata)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      historyId,
+      user.id,
+      currentProfile?.subscription_tier || 'free',
+      tier,
+      'User requested tier change',
+      user.id,
+      JSON.stringify({ paymentMethodId, timestamp: now })
+    );
+
+    // Create notification for user
+    const notificationId = `notif-${Date.now()}`;
+    db.prepare(`
+      INSERT INTO subscription_notifications (id, user_id, type, title, message, data)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      notificationId,
+      user.id,
+      'subscription_change',
+      'Subscription Updated',
+      `Your subscription has been updated to ${tier} tier`,
+      JSON.stringify({ oldTier: currentProfile?.subscription_tier, newTier: tier })
+    );
 
     const profile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(user.id);
 
@@ -198,6 +332,142 @@ router.patch('/profile/subscription', authenticateToken, requireDeveloper, (req:
     res.status(500).json({ error: 'Failed to update subscription' });
   }
 });
+
+// Get subscription history
+router.get('/profile/subscription/history', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { limit = 10 } = req.query;
+
+    const history = db.prepare(`
+      SELECT * FROM subscription_history
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+      LIMIT ?
+    `).all(user.id, Number(limit));
+
+    res.json({
+      success: true,
+      history: history.map((h: any) => ({
+        ...h,
+        metadata: h.metadata ? JSON.parse(h.metadata) : {}
+      }))
+    });
+  } catch (error: any) {
+    console.error('Get subscription history error:', error);
+    res.status(500).json({ error: 'Failed to get subscription history' });
+  }
+});
+
+// Get subscription notifications
+router.get('/notifications', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { unreadOnly = false } = req.query;
+
+    let query = `
+      SELECT * FROM subscription_notifications
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `;
+
+    if (unreadOnly === 'true') {
+      query += ' AND is_read = 0';
+    }
+
+    const notifications = db.prepare(query).all(user.id);
+
+    res.json({
+      success: true,
+      notifications: notifications.map((n: any) => ({
+        ...n,
+        data: n.data ? JSON.parse(n.data) : {}
+      }))
+    });
+  } catch (error: any) {
+    console.error('Get notifications error:', error);
+    res.status(500).json({ error: 'Failed to get notifications' });
+  }
+});
+
+// Mark notification as read
+router.patch('/notifications/:id/read', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = (req as any).user;
+    const db = (req as any).db;
+
+    db.prepare(`
+      UPDATE subscription_notifications
+      SET is_read = 1, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND user_id = ?
+    `).run(id, user.id);
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Mark notification read error:', error);
+    res.status(500).json({ error: 'Failed to mark notification as read' });
+  }
+});
+
+// Enhanced usage validation middleware
+const validateUsageLimits = (req: Request, res: Response, next: any) => {
+  const user = (req as any).user;
+  const db = (req as any).db;
+
+  if (!user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const profile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(user.id);
+
+  if (!profile) {
+    return res.status(404).json({ error: 'Profile not found' });
+  }
+
+  // Check if subscription is active
+  if (profile.subscription_status !== 'active' && profile.subscription_status !== 'trialing') {
+    return res.status(403).json({
+      error: 'Subscription is not active',
+      subscriptionStatus: profile.subscription_status
+    });
+  }
+
+  // Check usage limits
+  if (profile.api_requests_used >= profile.api_requests_limit) {
+    // Create notification for user
+    const notificationId = `notif-${Date.now()}`;
+    db.prepare(`
+      INSERT INTO subscription_notifications (id, user_id, type, title, message, action_url)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      notificationId,
+      user.id,
+      'limit_reached',
+      'Usage Limit Reached',
+      `You have reached your ${profile.subscription_tier} plan limit of ${profile.api_requests_limit} requests.`,
+      '/settings?tab=subscription'
+    );
+
+    return res.status(429).json({
+      error: 'API request limit reached. Please upgrade your subscription.',
+      limit: profile.api_requests_limit,
+      used: profile.api_requests_used,
+      subscriptionTier: profile.subscription_tier
+    });
+  }
+
+  // Add usage info to request
+  (req as any).usageInfo = {
+    used: profile.api_requests_used,
+    limit: profile.api_requests_limit,
+    tier: profile.subscription_tier
+  };
+
+  next();
+};
 
 // Save API key
 router.post('/profile/api-key', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
@@ -511,8 +781,236 @@ router.post('/analytics/log', authenticateToken, requireDeveloper, (req: Request
   }
 });
 
-// Generate code with AI
-router.post('/generate', authenticateToken, requireDeveloper, async (req: Request, res: Response) => {
+// Enhanced usage analytics
+router.get('/analytics/detailed', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { period = '30d', groupBy = 'day' } = req.query;
+
+    // Calculate date range
+    const now = new Date();
+    const daysBack = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+    const startDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
+
+    // Get detailed usage data
+    const usage = db.prepare(`
+      SELECT
+        DATE(created_at) as date,
+        provider,
+        model,
+        COUNT(*) as requests,
+        SUM(total_tokens) as total_tokens,
+        SUM(cost) as total_cost,
+        AVG(duration_ms) as avg_duration_ms
+      FROM api_usage_logs
+      WHERE user_id = ? AND created_at >= ?
+      GROUP BY DATE(created_at), provider, model
+      ORDER BY date DESC, provider, model
+    `).all(user.id, startDate.toISOString());
+
+    // Get subscription tier changes
+    const tierChanges = db.prepare(`
+      SELECT * FROM subscription_history
+      WHERE user_id = ? AND created_at >= ?
+      ORDER BY created_at DESC
+    `).all(user.id, startDate.toISOString());
+
+    // Get current subscription status
+    const profile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(user.id);
+
+    res.json({
+      success: true,
+      analytics: {
+        usage,
+        tierChanges,
+        currentTier: profile?.subscription_tier,
+        currentLimit: profile?.api_requests_limit,
+        currentUsage: profile?.api_requests_used,
+        subscriptionStatus: profile?.subscription_status
+      }
+    });
+  } catch (error: any) {
+    console.error('Get detailed analytics error:', error);
+    res.status(500).json({ error: 'Failed to get detailed analytics' });
+  }
+});
+
+// Admin: Get all subscriptions (Super admin only)
+router.get('/admin/subscriptions', authenticateToken, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+
+    // Check if user is super admin
+    if (user.role !== 'super_admin') {
+      return res.status(403).json({ error: 'Super admin access required' });
+    }
+
+    const subscriptions = db.prepare(`
+      SELECT
+        sp.*,
+        u.email,
+        u.name,
+        c.name as company_name
+      FROM sdk_profiles sp
+      JOIN users u ON sp.user_id = u.id
+      LEFT JOIN companies c ON u.company_id = c.id
+      ORDER BY sp.updated_at DESC
+    `).all();
+
+    res.json({
+      success: true,
+      subscriptions: subscriptions.map((s: any) => ({
+        ...s,
+        apiRequestsUsed: s.api_requests_used,
+        apiRequestsLimit: s.api_requests_limit,
+        subscriptionTier: s.subscription_tier,
+        companyName: s.company_name
+      }))
+    });
+  } catch (error: any) {
+    console.error('Get admin subscriptions error:', error);
+    res.status(500).json({ error: 'Failed to get subscriptions' });
+  }
+});
+
+// Admin: Update user subscription (Super admin only)
+router.patch('/admin/subscriptions/:userId', authenticateToken, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+    const { userId } = req.params;
+    const { tier, status, reason } = req.body;
+
+    // Check if user is super admin
+    if (user.role !== 'super_admin') {
+      return res.status(403).json({ error: 'Super admin access required' });
+    }
+
+    // Get current profile
+    const currentProfile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(userId);
+
+    if (!currentProfile) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    const limits: Record<string, number> = {
+      free: 100,
+      starter: 1000,
+      pro: 10000,
+      enterprise: 100000
+    };
+
+    const limit = limits[tier] || currentProfile.api_requests_limit;
+    const now = new Date().toISOString();
+
+    // Update subscription
+    db.prepare(`
+      UPDATE sdk_profiles
+      SET subscription_tier = ?, api_requests_limit = ?, subscription_status = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ?
+    `).run(tier, limit, status, userId);
+
+    // Record admin change in history
+    const historyId = `admin-history-${Date.now()}`;
+    db.prepare(`
+      INSERT INTO subscription_history (id, user_id, old_tier, new_tier, change_reason, changed_by, metadata)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      historyId,
+      userId,
+      currentProfile.subscription_tier,
+      tier,
+      reason || 'Admin adjustment',
+      user.id,
+      JSON.stringify({ adminChange: true, timestamp: now })
+    );
+
+    // Create notification for user
+    const notificationId = `admin-notif-${Date.now()}`;
+    db.prepare(`
+      INSERT INTO subscription_notifications (id, user_id, type, title, message, data)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      notificationId,
+      userId,
+      'subscription_change',
+      'Subscription Updated',
+      `Your subscription has been updated by an administrator to ${tier} tier`,
+      JSON.stringify({ adminChange: true, changedBy: user.name })
+    );
+
+    const updatedProfile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(userId);
+
+    res.json({
+      success: true,
+      profile: {
+        ...updatedProfile,
+        apiRequestsUsed: updatedProfile.api_requests_used,
+        apiRequestsLimit: updatedProfile.api_requests_limit,
+        subscriptionTier: updatedProfile.subscription_tier
+      }
+    });
+  } catch (error: any) {
+    console.error('Admin update subscription error:', error);
+    res.status(500).json({ error: 'Failed to update subscription' });
+  }
+});
+
+// Usage warning system (creates notifications when approaching limits)
+router.post('/check-usage-limits', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+
+    const profile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(user.id);
+
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    const usagePercent = (profile.api_requests_used / profile.api_requests_limit) * 100;
+    const notifications = [];
+
+    // Check for warning thresholds
+    if (usagePercent >= 80 && usagePercent < 100) {
+      // Check if we've already sent a warning recently
+      const recentWarning = db.prepare(`
+        SELECT id FROM subscription_notifications
+        WHERE user_id = ? AND type = 'usage_warning' AND created_at > datetime('now', '-24 hours')
+      `).get(user.id);
+
+      if (!recentWarning) {
+        const notificationId = `warning-${Date.now()}`;
+        db.prepare(`
+          INSERT INTO subscription_notifications (id, user_id, type, title, message, action_url)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(
+          notificationId,
+          user.id,
+          'usage_warning',
+          'Usage Warning',
+          `You have used ${Math.round(usagePercent)}% of your ${profile.subscription_tier} plan limit.`,
+          '/settings?tab=subscription'
+        );
+        notifications.push('usage_warning');
+      }
+    }
+
+    res.json({
+      success: true,
+      usagePercent: Math.round(usagePercent),
+      notifications
+    });
+  } catch (error: any) {
+    console.error('Check usage limits error:', error);
+    res.status(500).json({ error: 'Failed to check usage limits' });
+  }
+});
+
+// Generate code with AI (Enhanced with better validation)
+router.post('/generate', authenticateToken, requireDeveloper, validateUsageLimits, async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const db = (req as any).db;

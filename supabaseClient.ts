@@ -2,12 +2,14 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { User } from './types';
 
 // Use environment variables directly - no global variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Configuration check
-if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseAnonKey === 'YOUR_SUPABASE_ANON_KEY') {
-    console.warn('Supabase not configured properly');
+// Configuration check - only warn if explicitly configured but invalid
+if (supabaseUrl && supabaseAnonKey) {
+    if (supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseAnonKey === 'YOUR_SUPABASE_ANON_KEY') {
+        console.warn('⚠️ Supabase is configured with placeholder values. Please update your environment variables.');
+    }
 }
 
 let supabaseInstance: SupabaseClient | null = null;
@@ -20,11 +22,14 @@ if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'YOUR_SUPABASE_URL' && sup
         console.log('✅ Supabase client initialized successfully!');
     } catch (e) {
         console.error("❌ Failed to initialize Supabase client:", e);
+        console.warn('⚠️ Supabase initialization failed. Application will use local authentication.');
     }
 } else {
-    console.warn('⚠️ Supabase is not configured. Falling back to mock auth.');
-    console.warn('Reason - URL valid:', supabaseUrl !== 'YOUR_SUPABASE_URL');
-    console.warn('Reason - Key valid:', supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY');
+    if (supabaseUrl || supabaseAnonKey) {
+        console.warn('⚠️ Supabase partially configured. Please provide both VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+    } else {
+        console.log('ℹ️ Supabase not configured - using local SQLite authentication');
+    }
 }
 
 export const supabase = supabaseInstance;
