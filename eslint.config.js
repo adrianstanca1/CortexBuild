@@ -30,7 +30,6 @@ export default [
     },
   },
   {
-<<<<<<< Updated upstream
     files: ['**/*.cjs'],
     languageOptions: {
       sourceType: 'commonjs',
@@ -51,8 +50,6 @@ export default [
     },
   },
   {
-=======
->>>>>>> Stashed changes
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsparser,

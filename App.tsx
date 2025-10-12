@@ -1,636 +1,185 @@
-// CortexBuild Main App Component
-// Task 2.1: Error Handling & Resilience - ErrorBoundary Applied
-import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion } from './types';
-import AuthScreen from './components/screens/AuthScreen';
-import AppLayout from './components/layout/AppLayout';
-import Sidebar from './components/layout/Sidebar';
-import AISuggestionModal from './components/modals/AISuggestionModal';
-import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
-import FloatingMenu from './components/layout/FloatingMenu';
-import ToastContainer from './components/ToastContainer';
-import { usePermissions } from './hooks/usePermissions';
-import * as authService from './auth/authService';
-import { useToast } from './src/hooks/useToast';
-import { useNavigation } from './hooks/useNavigation';
-import { logger } from './utils/logger';
-import { apiClient } from './lib/api/client';
-import ErrorBoundary from './components/ErrorBoundary';
-import OfflineIndicator from './src/components/OfflineIndicator';
-import { initWebVitals } from './src/monitoring/webVitals';
-import { initPerformanceObservers } from './src/monitoring/performanceObserver';
-import { initMetricsCollector } from './src/monitoring/metricsCollector';
-import { initPerformanceAlerting } from './src/monitoring/alerting';
-import { initializeModules, ModuleRegistry } from './src/modules';
-import { useModule } from './src/modules/useModule';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Lazily loaded screens and feature modules
-const ChatbotWidget = lazy(() =>
-    import('./components/chat/ChatbotWidget').then(module => ({
-        default: module.ChatbotWidget
-    }))
-);
-const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
-const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
-const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
-const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
-const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
-const TaskDetailScreen = lazy(() => import('./components/screens/TaskDetailScreen'));
-const NewTaskScreen = lazy(() => import('./components/screens/NewTaskScreen'));
-const DailyLogScreen = lazy(() => import('./components/screens/DailyLogScreen'));
-const PhotoGalleryScreen = lazy(() => import('./components/screens/PhotoGalleryScreen'));
-const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
-const RFIDetailScreen = lazy(() => import('./components/screens/RFIDetailScreen'));
-const NewRFIScreen = lazy(() => import('./components/screens/NewRFIScreen'));
-const ProductionSDKDeveloperView = lazy(() =>
-    import('./components/sdk/ProductionSDKDeveloperView').then(module => ({
-        default: module.ProductionSDKDeveloperView
-    }))
-);
-const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
-const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
-const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
-const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
-const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
-const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
-const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
-const NewPunchListItemScreen = lazy(() => import('./components/screens/NewPunchListItemScreen'));
-const DrawingsScreen = lazy(() => import('./components/screens/DrawingsScreen'));
-const PlansViewerScreen = lazy(() => import('./components/screens/PlansViewerScreen'));
-const DayworkSheetsListScreen = lazy(() => import('./components/screens/DayworkSheetsListScreen'));
-const DayworkSheetDetailScreen = lazy(() => import('./components/screens/DayworkSheetDetailScreen'));
-const NewDayworkSheetScreen = lazy(() => import('./components/screens/NewDayworkSheetScreen'));
-const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
-const DeliveryScreen = lazy(() => import('./components/screens/DeliveryScreen'));
-const DrawingComparisonScreen = lazy(() => import('./components/screens/DrawingComparisonScreen'));
-const AccountingScreen = lazy(() => import('./components/screens/modules/AccountingScreen'));
-const AIToolsScreen = lazy(() => import('./components/screens/modules/AIToolsScreen'));
-const DocumentManagementScreen = lazy(() => import('./components/screens/modules/DocumentManagementScreen'));
-const TimeTrackingScreen = lazy(() => import('./components/screens/modules/TimeTrackingScreen'));
-const ProjectOperationsScreen = lazy(() => import('./components/screens/modules/ProjectOperationsScreen'));
-const FinancialManagementScreen = lazy(() => import('./components/screens/modules/FinancialManagementScreen'));
-const BusinessDevelopmentScreen = lazy(() => import('./components/screens/modules/BusinessDevelopmentScreen'));
-const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/modules/AIAgentsMarketplaceScreen'));
-const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
-const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
-const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
-const AdminReviewInterface = lazy(() => import('./components/marketplace/AdminReviewInterface'));
-const DeveloperSubmissionInterface = lazy(() => import('./components/marketplace/DeveloperSubmissionInterface'));
-const Base44Clone = lazy(() =>
-    import('./components/base44/Base44Clone').then(module => ({
-        default: module.Base44Clone
-    }))
-);
-const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
-const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
-const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
-const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
-const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
-const N8nProcoreWorkflowBuilder = lazy(() => import('./components/sdk/N8nProcoreWorkflowBuilder'));
-const ConstructionOracle = lazy(() => import('./components/ai/ConstructionOracle'));
-const MyApplications = lazy(() => import('./components/applications/MyApplications'));
+// Components
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import ProjectManagement from './components/ProjectManagement';
+import ClientManagement from './components/ClientManagement';
+import DeveloperDashboard from './components/DeveloperDashboard';
+import AdminDashboard from './components/AdminDashboard';
+import SuperAdminDashboard from './components/SuperAdminDashboard';
+import Settings from './components/Settings';
 
-const ScreenLoader: React.FC = () => (
-    <div className="py-16 text-center text-slate-500">
-        Loading experience...
-    </div>
-);
+// Contexts
+import { TenantProvider } from './contexts/TenantContext';
 
-// Helper function to get default screen for user role
-const getDefaultScreenForRole = (role: string): Screen => {
-    switch (role) {
-        case 'developer':
-            return 'developer-console';
-        case 'super_admin':
-            return 'super-admin-dashboard';
-        case 'company_admin':
-        default:
-            return 'company-admin-dashboard';
-    }
-};
+// Services
+import { authService } from './auth/authService';
 
-// Initialize module system on app load
-initializeModules();
-
-// Helper function to get screen component from module registry
-const getScreenComponent = (screen: Screen): React.ComponentType<any> | null => {
-    const lazyComponent = ModuleRegistry.getLazyComponent(screen);
-    if (lazyComponent) {
-        return lazyComponent;
-    }
-
-    // Fallback to legacy components for screens not yet in module system
-    const legacyComponents: Partial<Record<Screen, React.ComponentType<any>>> = {
-        'task-detail': TaskDetailScreen,
-        'new-task': NewTaskScreen,
-        'daily-log': DailyLogScreen,
-        'photos': PhotoGalleryScreen,
-        'rfi-detail': RFIDetailScreen,
-        'new-rfi': NewRFIScreen,
-        'punch-list': PunchListScreen,
-        'punch-list-item-detail': PunchListItemDetailScreen,
-        'new-punch-list-item': NewPunchListItemScreen,
-        'drawings': DrawingsScreen,
-        'plans': PlansViewerScreen,
-        'daywork-sheets': DayworkSheetsListScreen,
-        'daywork-sheet-detail': DayworkSheetDetailScreen,
-        'new-daywork-sheet': NewDayworkSheetScreen,
-        'delivery': DeliveryScreen,
-        'drawing-comparison': DrawingComparisonScreen,
-    };
-
-    return legacyComponents[screen] || PlaceholderToolScreen;
-};
+// Types
+import { User } from './types';
 
 const App: React.FC = () => {
-    // All hooks must be called at the top, unconditionally, in the same order
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [sessionChecked, setSessionChecked] = useState(false);
-    const [allProjects, setAllProjects] = useState<Project[]>([]);
-    const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
-    const [isAISuggestionLoading, setIsAISuggestionLoading] = useState(false);
-    const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
-    const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
-    const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => () => { });
-    const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    // Custom hooks after state hooks
-    const {
-        navigationStack,
-        currentNavItem,
-        navigateTo,
-        navigateToModule,
-        goBack,
-        goHome,
-        selectProject,
-        handleDeepLink,
-        setNavigationStack
-    } = useNavigation();
-
-    // Destructure currentNavItem for use in hooks
-    const { screen, params, project } = currentNavItem || {};
-
-    const { can } = usePermissions(currentUser);
-    const { toasts, removeToast, showSuccess, showError } = useToast();
-
-    // Check for existing session on mount
-    useEffect(() => {
-        const checkSession = async () => {
-            try {
-                const user = await authService.getCurrentUser();
-
-                if (user) {
-                    setCurrentUser(user);
-                    if (navigationStack.length === 0) {
-                        const defaultScreen = getDefaultScreenForRole(user.role);
-                        navigateToModule(defaultScreen, {});
-                    }
-                    window.dispatchEvent(new CustomEvent('userLoggedIn'));
-                }
-            } catch (error: unknown) {
-                const err = error instanceof Error ? error : new Error('Session check failed');
-                logger.logError(err, { context: 'session_check' });
-
-                // Clear invalid session
-                await authService.logout().catch(() => {
-                    // Ignore logout errors during session check
-                });
-
-                // Show user-friendly message only if it's not a "no session" error
-                if (error instanceof Error && !error.message.includes('No token')) {
-                    showError('Session Expired', 'Please log in again');
-                }
-            } finally {
-                setSessionChecked(true);
-            }
-        };
-
-        checkSession();
-
-        // Initialize performance monitoring
-        initWebVitals();
-        initPerformanceObservers();
-        initMetricsCollector();
-        initPerformanceAlerting();
-
-    }, []); // Only run on mount
-
-    // Handle URL hash for dashboard navigation
-    useEffect(() => {
-        if (!currentUser) return;
-
-        const handleHashChange = () => {
-            const hash = window.location.hash;
-            if (hash === '#dashboard') {
-                const targetScreen = getDefaultScreenForRole(currentUser?.role || 'project_manager');
-                navigateToModule(targetScreen, {});
-                // Clean up the hash
-                window.history.replaceState(null, '', window.location.pathname);
-            }
-        };
-
-        // Check on mount
-        handleHashChange();
-
-        // Listen for hash changes
-        window.addEventListener('hashchange', handleHashChange);
-
-        return () => {
-            window.removeEventListener('hashchange', handleHashChange);
-        };
-    }, [currentUser, navigateToModule]);
-
-
-    // Load projects when user logs in
-    useEffect(() => {
-        if (!currentUser) {
-            setAllProjects([]);
-            return;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          // Verify token and get user data
+          const userData = await authService.verifyToken(token);
+          setUser(userData);
         }
-
-        const loadProjects = async () => {
-            try {
-                const projects = await apiClient.fetchProjects();
-                setAllProjects(projects);
-            } catch (error: unknown) {
-                const err = error instanceof Error ? error : new Error('Failed to load projects');
-                logger.logError(err, { context: 'load_projects' });
-                setAllProjects([]);
-            }
-        };
-        loadProjects();
-    }, [currentUser]);
-
-    // Ensure navigation to dashboard when user logs in
-    useEffect(() => {
-        if (currentUser && navigationStack.length === 0) {
-            const defaultScreen = getDefaultScreenForRole(currentUser.role || 'project_manager');
-            navigateToModule(defaultScreen, {});
-        }
-    }, [currentUser, navigationStack.length, navigateToModule]);
-
-    // Clear navigation when user logs out
-    useEffect(() => {
-        if (!currentUser && navigationStack.length > 0) {
-            setNavigationStack([]);
-        }
-    }, [currentUser, navigationStack.length, setNavigationStack]);
-
-    // Listen for logout trigger events
-    useEffect(() => {
-        const handleLogoutTrigger = () => {
-            handleLogout();
-        };
-        window.addEventListener('userLoggedOutTrigger', handleLogoutTrigger);
-        return () => window.removeEventListener('userLoggedOutTrigger', handleLogoutTrigger);
-
-    }, []); // handleLogout is stable
-
-    const handleLoginSuccess = (user: User) => {
-        setCurrentUser(user);
-        window.dispatchEvent(new CustomEvent('userLoggedIn'));
-        showSuccess('Welcome back!', `Hello ${user.name}`);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        localStorage.removeItem('authToken');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleLogout = useCallback(async () => {
-        try {
-            logger.logUserAction('logout_initiated', { userId: currentUser?.id }, currentUser?.id);
+    checkAuth();
+  }, []);
 
-            await authService.logout();
+  const handleLogin = (userData: User) => {
+    setUser(userData);
+  };
 
-            setCurrentUser(null);
-            setNavigationStack([]);
-            setAllProjects([]);
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    setUser(null);
+  };
 
-            window.dispatchEvent(new CustomEvent('userLoggedOut'));
-            showSuccess('Logged out', 'You have been successfully logged out');
-            logger.logUserAction('logout_successful', { userId: currentUser?.id }, currentUser?.id);
-        } catch (error: unknown) {
-            const err = error instanceof Error ? error : new Error('Logout failed');
-            logger.logError(err, { context: 'logout' });
-
-            // Force logout even if API call fails
-            setCurrentUser(null);
-            setNavigationStack([]);
-            setAllProjects([]);
-
-            showError('Logout Error', 'You have been logged out locally');
-        }
-    }, [currentUser, setNavigationStack, showSuccess, showError]);
-
-
-    const openProjectSelector = useCallback((title: string, onSelect: (projectId: string) => void) => {
-        setProjectSelectorTitle(title);
-        setProjectSelectorCallback(() => (projectId: string) => {
-            onSelect(projectId);
-            setIsProjectSelectorOpen(false);
-        });
-        setIsProjectSelectorOpen(true);
-    }, []);
-
-    const handleDeepLinkWrapper = useCallback((projectId: string, screen: Screen, params: any) => {
-        handleDeepLink(projectId, screen, params, allProjects);
-    }, [handleDeepLink, allProjects]);
-
-    const handleQuickAction = (action: Screen) => {
-        openProjectSelector(`Select a project for the new ${action.split('-')[1]}`, (projectId) => {
-            handleDeepLink(projectId, action, {}, allProjects);
-        });
-    };
-
-    const handleSuggestAction = async () => {
-        if (!currentUser) return;
-        setIsAISuggestionModalOpen(true);
-        setIsAISuggestionLoading(true);
-        setAiSuggestion(null);
-        try {
-            const suggestion = await apiClient.getAISuggestion(currentUser.id);
-            setAiSuggestion(suggestion);
-        } catch (error) {
-            console.error('Error getting AI suggestion:', error);
-        } finally {
-            setIsAISuggestionLoading(false);
-        }
-    };
-
-    const handleAISuggestionAction = (link: NotificationLink) => {
-        if (link.projectId) {
-            handleDeepLink(link.projectId, link.screen, link.params, allProjects);
-        }
-        setIsAISuggestionModalOpen(false);
-    };
-
-    // All hooks must be called before any conditional returns
-    const getSidebarProject = useMemo(() => {
-        if (project) {
-            return project;
-        }
-        // Return a minimal project object for global view
-        return {
-            id: '',
-            name: 'Global View',
-            location: `Welcome, ${currentUser?.name || 'User'}`,
-            companyId: currentUser?.companyId || '',
-            status: 'active' as const,
-            startDate: new Date().toISOString(),
-            budget: 0,
-            spent: 0,
-            image: '',
-            description: 'Global application view',
-            contacts: [],
-            snapshot: {
-                openRFIs: 0,
-                overdueTasks: 0,
-                pendingTMTickets: 0,
-                aiRiskLevel: 'low'
-            }
-        };
-    }, [project, currentUser?.name, currentUser?.companyId]);
-
-    const sidebarGoHome = useCallback(() => {
-        const defaultScreen = getDefaultScreenForRole(currentUser?.role || 'project_manager');
-        navigateToModule(defaultScreen);
-    }, [currentUser?.role, navigateToModule]);
-
-    // Handle app launch from My Applications
-    const handleLaunchApp = useCallback((appCode: string) => {
-        // Map app codes to screen names
-        const appScreenMap: Record<string, Screen> = {
-            'construction-oracle': 'construction-oracle',
-            'n8n-procore-builder': 'n8n-procore-builder',
-            'predictive-maintenance': 'ai-tools',
-            'intelligent-router': 'ai-tools',
-            'cost-optimizer': 'financial-management',
-            'safety-sentinel': 'ai-tools',
-            'quality-inspector': 'ai-tools',
-            'timeline-magic': 'project-operations',
-            'document-intelligence': 'document-management',
-            'reality-simulator': 'ai-tools'
-        };
-
-        const targetScreen = appScreenMap[appCode] || 'ai-tools';
-        navigateToModule(targetScreen);
-    }, [navigateToModule]);
-
-    if (!sessionChecked) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                <div className="bg-white p-8 rounded-xl shadow-2xl text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-700 font-medium">Loading session...</p>
-                    <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!sessionChecked) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                <div className="bg-white p-8 rounded-xl shadow-2xl text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-700 font-medium">Loading session...</p>
-                    <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!currentUser) {
-        return (
-            <div className="bg-slate-100 min-h-screen flex items-center justify-center">
-                <AuthScreen onLoginSuccess={handleLoginSuccess} />
-            </div>
-        );
-    }
-
-    // If no navigation stack, show dashboard directly
-    if (!currentNavItem || navigationStack.length === 0) {
-
-        const commonProps = {
-            currentUser,
-            navigateTo: navigateToModule,
-            isDarkMode: true
-        };
-
-        // Render role-specific dashboard
-        switch (currentUser?.role) {
-            case 'developer':
-                return (
-                    <ErrorBoundary>
-                        <div className="bg-slate-50">
-                            <Suspense fallback={<ScreenLoader />}>
-                                <DeveloperDashboardV2 {...commonProps} />
-                            </Suspense>
-                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-                            <Suspense fallback={null}>
-                                <ChatbotWidget />
-                            </Suspense>
-                            <OfflineIndicator position="bottom-right" />
-                        </div>
-                    </ErrorBoundary>
-                );
-
-            case 'super_admin':
-                return (
-                    <ErrorBoundary>
-                        <div className="bg-slate-50">
-                            <Suspense fallback={<ScreenLoader />}>
-                                <SuperAdminDashboardV2
-                                    isDarkMode={true}
-                                    onNavigate={(section) => {
-                                        showSuccess('Navigation', `Opening ${section}...`);
-                                    }}
-                                />
-                            </Suspense>
-                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-                            <Suspense fallback={null}>
-                                <ChatbotWidget />
-                            </Suspense>
-                            <OfflineIndicator position="bottom-right" />
-                        </div>
-                    </ErrorBoundary>
-                );
-
-            case 'company_admin':
-                return (
-                    <ErrorBoundary>
-                        <div className="bg-slate-50">
-                            <Suspense fallback={<ScreenLoader />}>
-                                <CompanyAdminDashboardV2 {...commonProps} />
-                            </Suspense>
-                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-                            <Suspense fallback={null}>
-                                <ChatbotWidget />
-                            </Suspense>
-                            <OfflineIndicator position="bottom-right" />
-                        </div>
-                    </ErrorBoundary>
-                );
-
-            default: {
-                // Fallback to unified dashboard
-                const dashboardProps = {
-                    currentUser,
-                    navigateTo,
-                    onDeepLink: handleDeepLinkWrapper,
-                    onQuickAction: handleQuickAction,
-                    onSuggestAction: handleSuggestAction,
-                    selectProject: (id: string) => {
-                        const project = allProjects.find(p => p.id === id);
-                        if (project) selectProject(project);
-                    },
-                    can,
-                    goBack
-                };
-                return (
-                    <ErrorBoundary>
-                        <div className="min-h-screen bg-gray-50">
-                            <Suspense fallback={<ScreenLoader />}>
-                                <UnifiedDashboardScreen {...dashboardProps} />
-                            </Suspense>
-                            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-                            <Suspense fallback={null}>
-                                <ChatbotWidget />
-                            </Suspense>
-                            <OfflineIndicator position="bottom-right" />
-                        </div>
-                    </ErrorBoundary>
-                );
-            }
-        }
-    }
-
-    // Get screen component from module registry
-    const ScreenComponent = getScreenComponent(screen || 'global-dashboard') || PlaceholderToolScreen;
-
-    if (screen === 'my-apps-desktop') {
-        return (
-            <ErrorBoundary>
-                <div className="bg-slate-50">
-                    <Suspense fallback={<ScreenLoader />}>
-                        <Base44Clone user={currentUser} onLogout={handleLogout} />
-                    </Suspense>
-                    <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-                    <Suspense fallback={null}>
-                        <ChatbotWidget />
-                    </Suspense>
-                    <OfflineIndicator position="bottom-right" />
-                </div>
-            </ErrorBoundary>
-        );
-    }
-
+  if (loading) {
     return (
-        <ErrorBoundary>
-            <div className="bg-slate-50">
-                <AppLayout
-                    sidebar={
-                        <Sidebar
-                            project={getSidebarProject}
-                            navigateTo={navigateTo}
-                            navigateToModule={navigateToModule}
-                            goHome={sidebarGoHome}
-                            currentUser={currentUser}
-                            onLogout={handleLogout}
-                        />
-                    }
-                    floatingMenu={<FloatingMenu
-                        currentUser={currentUser}
-                        navigateToModule={navigateToModule}
-                        openProjectSelector={openProjectSelector}
-                        onDeepLink={handleDeepLinkWrapper}
-                    />}
-                >
-                    <div className="p-8">
-                        <Suspense fallback={<ScreenLoader />}>
-                            <ScreenComponent
-                                currentUser={currentUser}
-                                selectProject={selectProject}
-                                navigateTo={navigateTo}
-                                onDeepLink={handleDeepLink}
-                                onQuickAction={handleQuickAction}
-                                onSuggestAction={handleSuggestAction}
-                                openProjectSelector={openProjectSelector}
-                                project={project}
-                                goBack={goBack}
-                                can={can}
-                                onLaunchApp={handleLaunchApp}
-                                {...params}
-                            />
-                        </Suspense>
-                    </div>
-                </AppLayout>
-
-                <AISuggestionModal
-                    isOpen={isAISuggestionModalOpen}
-                    isLoading={isAISuggestionLoading}
-                    suggestion={aiSuggestion}
-                    onClose={() => setIsAISuggestionModalOpen(false)}
-                    onAction={handleAISuggestionAction}
-                    currentUser={currentUser}
-                />
-                {isProjectSelectorOpen && (
-                    <ProjectSelectorModal
-                        title={projectSelectorTitle}
-                        onClose={() => setIsProjectSelectorOpen(false)}
-                        onSelectProject={projectSelectorCallback}
-                        currentUser={currentUser}
-                    />
-                )}
-
-                <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-
-                {/* Global AI Chatbot - Available on all pages when user is logged in */}
-                <Suspense fallback={null}>
-                    <ChatbotWidget />
-                </Suspense>
-
-                {/* Offline Indicator - Task 2.4: API Error Recovery */}
-                <OfflineIndicator position="bottom-right" />
-            </div>
-        </ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full"
+        />
+      </div>
     );
-}
+  }
+
+  return (
+    <TenantProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#363636',
+                color: '#fff',
+              },
+            }}
+          />
+
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route
+                path="/login"
+                element={
+                  user ? (
+                    <Navigate to="/dashboard" replace />
+                  ) : (
+                    <Login onLogin={handleLogin} />
+                  )
+                }
+              />
+
+              <Route
+                path="/dashboard"
+                element={
+                  user ? (
+                    <Dashboard user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+
+              <Route
+                path="/projects"
+                element={
+                  user ? (
+                    <ProjectManagement user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+
+              <Route
+                path="/clients"
+                element={
+                  user ? (
+                    <ClientManagement user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+
+              <Route
+                path="/developer"
+                element={
+                  user && (user.role === 'developer' || user.role === 'super_admin') ? (
+                    <DeveloperDashboard user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/dashboard" replace />
+                  )
+                }
+              />
+
+              <Route
+                path="/admin"
+                element={
+                  user && (user.role === 'admin' || user.role === 'super_admin') ? (
+                    <AdminDashboard user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/dashboard" replace />
+                  )
+                }
+              />
+
+              <Route
+                path="/super-admin"
+                element={
+                  user && user.role === 'super_admin' ? (
+                    <SuperAdminDashboard user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/dashboard" replace />
+                  )
+                }
+              />
+
+              <Route
+                path="/settings"
+                element={
+                  user ? (
+                    <Settings user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </AnimatePresence>
+        </div>
+      </Router>
+    </TenantProvider>
+  );
+};
 
 export default App;

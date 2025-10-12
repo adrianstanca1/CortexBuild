@@ -23,6 +23,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@genkit-ai/mcp": "1.21.0",
     "@google/genai": "^1.22.0",
     "@google/generative-ai": "0.24.1",
     "@monaco-editor/react": "4.7.0",
@@ -32,6 +33,7 @@
     "@types/express": "5.0.3",
     "@types/joi": "17.2.2",
     "@types/jsonwebtoken": "9.0.10",
+    "@types/react-router-dom": "5.3.3",
     "@types/uuid": "10.0.0",
     "@types/ws": "8.18.1",
     "@vercel/postgres": "0.10.0",
@@ -54,6 +56,7 @@
     "react-dom": "^19.2.0",
     "react-hot-toast": "2.6.0",
     "react-markdown": "10.1.0",
+    "react-router-dom": "7.9.4",
     "sqlite3": "5.1.7",
     "stripe": "19.1.0",
     "uuid": "13.0.0",

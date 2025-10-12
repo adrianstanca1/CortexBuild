@@ -40,6 +40,7 @@ import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
 import { createMyApplicationsRouter } from './routes/my-applications';
+import createCodexMCPRoutes from './routes/codex-mcp.js';
 import { createSubscriptionService, SubscriptionService } from './services/subscription-service';
 
 // Import error handling middleware
@@ -77,7 +78,7 @@ handleUncaughtException();
 handleUnhandledRejection();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
@@ -85,6 +86,14 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+
+// Serve static files from public directory
+app.use(express.static('public'));
+
+// Serve React app for all non-API routes
+app.get('/', (req, res) => {
+    res.sendFile('index.html', { root: 'public' });
+});
 
 // HTTP Request logging middleware
 app.use(logger.httpLogger());
@@ -404,6 +413,9 @@ const startServer = async () => {
         app.use('/api/my-applications', generalRateLimit, createMyApplicationsRouter(db));
         console.log('  ✓ /api/my-applications');
 
+        app.use('/api/codex-mcp', generalRateLimit, createCodexMCPRoutes(db));
+        console.log('  ✓ /api/codex-mcp');
+
         // Stripe webhook endpoint (no auth required)
         app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
             const sig = req.headers['stripe-signature'] as string;
@@ -446,7 +458,7 @@ const startServer = async () => {
             }
         });
 
-        console.log('✅ All 27 API routes registered successfully');
+        console.log('✅ All 28 API routes registered successfully');
 
         // ==================================================
         // ERROR HANDLING MIDDLEWARE (MUST BE LAST!)

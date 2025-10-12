@@ -2069,7 +2069,6 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         {activeTab === 'analytics' && renderAnalyticsTab()}
         {activeTab === 'settings' && renderSettingsTab()}
       </div>
-    </div >
+    </div>
   );
-};
 };

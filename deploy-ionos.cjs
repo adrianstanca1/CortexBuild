@@ -1,8 +1,5 @@
 /* eslint-env node */
-<<<<<<< Updated upstream
-=======
 /* global process, console */
->>>>>>> Stashed changes
 
 const ftp = require('ftp');
 const fs = require('fs');
