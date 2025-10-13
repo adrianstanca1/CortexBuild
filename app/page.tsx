@@ -57,14 +57,19 @@ export default function MainApp() {
   };
 
   const verifyUserSession = async (token: string): Promise<any> => {
-    // Mock verification
-    if (token === 'dev-token-123') {
-      return {
-        id: 'user_admin_1',
-        name: 'System Administrator',
-        email: 'admin@cortexbuild.com',
-        role: 'super_admin'
-      };
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.user;
+      }
+    } catch (error) {
+      console.error('Session verification failed:', error);
     }
     return null;
   };

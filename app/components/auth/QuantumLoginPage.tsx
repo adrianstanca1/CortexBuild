@@ -177,13 +177,32 @@ export default function QuantumLoginPage() {
   };
 
   const authenticateWithPassword = async () => {
-    // Password authentication
-    if (form.email === 'admin@cortexbuild.com' && form.password === 'admin123') {
-      const token = 'dev-token-123';
-      localStorage.setItem('authToken', token);
-      window.location.href = '/dashboard';
-    } else {
-      throw new Error('Invalid credentials');
+    // Password authentication - call actual API
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Store token and redirect
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = '/dashboard';
+      } else {
+        throw new Error(data.error || 'Login failed');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw new Error(error.message || 'Network error - please try again');
     }
   };
 
@@ -473,10 +492,13 @@ export default function QuantumLoginPage() {
               <h4 className="text-white font-medium mb-2">Demo Credentials</h4>
               <div className="space-y-2 text-sm">
                 <div className="text-gray-400">
-                  <span className="text-gray-500">Admin:</span> admin@cortexbuild.com / admin123
+                  <span className="text-gray-500">Super Admin:</span> adrian.stanca1@gmail.com / Cumparavinde1
                 </div>
                 <div className="text-gray-400">
-                  <span className="text-gray-500">Manager:</span> manager@constructco.com / manager123
+                  <span className="text-gray-500">Company Admin:</span> casey@constructco.com / password123
+                </div>
+                <div className="text-gray-400">
+                  <span className="text-gray-500">Developer:</span> dev@constructco.com / parola123
                 </div>
               </div>
             </div>
