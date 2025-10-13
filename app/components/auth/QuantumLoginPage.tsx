@@ -500,6 +500,9 @@ export default function QuantumLoginPage() {
                 <div className="text-gray-400">
                   <span className="text-gray-500">Developer:</span> dev@constructco.com / parola123
                 </div>
+                <div className="text-gray-400">
+                  <span className="text-gray-500">AS Cladding Admin:</span> adrian@ascladdingltd.co.uk / lolozania1
+                </div>
               </div>
             </div>
 
