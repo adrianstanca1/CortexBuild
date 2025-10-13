@@ -31,11 +31,11 @@ export default function MainApp() {
   }, []);
 
   const determineCurrentPage = (path: string) => {
-    if (path === '/') setCurrentPage('home');
+    if (path === '/' || path === '/home') setCurrentPage('home');
     else if (path === '/neural-network') setCurrentPage('neural-network');
-    else if (path === '/features') setCurrentPage('features');
+    else if (path === '/platform-features' || path === '/features') setCurrentPage('features');
     else if (path === '/connectivity') setCurrentPage('connectivity');
-    else if (path === '/developer') setCurrentPage('developer');
+    else if (path === '/developer-platform' || path === '/developer') setCurrentPage('developer');
     else if (path === '/get-started') setCurrentPage('get-started');
     else if (path === '/login') setCurrentPage('login');
     else if (path.startsWith('/dashboard')) setCurrentPage('dashboard');
@@ -75,7 +75,7 @@ export default function MainApp() {
       return <RootLayout children={undefined} />;
     }
 
-    // Public pages
+    // Public pages - all our main pages as requested
     switch (currentPage) {
       case 'home':
         return <HomePage />;
