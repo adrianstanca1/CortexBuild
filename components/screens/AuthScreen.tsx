@@ -10,16 +10,14 @@ interface AuthScreenProps {
 const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
     const [isLoginView, setIsLoginView] = useState(true);
 
-    console.log('🎨 AuthScreen rendering, isLoginView:', isLoginView);
-
     return (
-        <div className="w-full max-w-md mx-auto" style={{ zIndex: 9999 }}>
+        <div className="w-full max-w-md mx-auto">
             <div className="bg-white rounded-xl shadow-2xl p-8">
                 <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
                     {isLoginView ? 'Welcome Back' : 'Create Account'}
                 </h1>
                 <p className="text-center text-gray-500 mb-8">
-                    {isLoginView ? 'Sign in to continue to CortexBuild' : 'Get started with your new account'}
+                    {isLoginView ? 'Sign in to continue to ConstructAI' : 'Get started with your new account'}
                 </p>
 
                 {isLoginView ? (
