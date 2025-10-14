@@ -1,16 +1,31 @@
-// Minimal Supabase client stub for build-time type satisfaction
-// Replace with a real Supabase client configuration in production
+import { createClient } from '@supabase/supabase-js';
 
-export const supabase = {
-  storage: {
-    from: (_bucket: string) => ({
-      upload: async (_path: string, _file: any, _opts?: any) => ({ data: null as any, error: null as any }),
-      getPublicUrl: (_path: string) => ({ data: { publicUrl: _path }, error: null as any }),
-      remove: async (_paths: string[]) => ({ data: null as any, error: null as any }),
-    }),
+// Supabase configuration
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+// Create Supabase client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
   },
-  channel: (_name: string) => ({
-    on: (_event: any, _filter: any, _cb: any) => ({ subscribe: () => ({}) }),
-  }),
-} as const;
+  db: {
+    schema: 'public',
+  },
+  global: {
+    headers: {
+      'x-application-name': 'CortexBuild',
+    },
+  },
+});
+
+// Helper function to check if Supabase is configured
+export const isSupabaseConfigured = () => {
+  return Boolean(supabaseUrl && supabaseAnonKey);
+};
+
+// Export types
+export type { User, Session } from '@supabase/supabase-js';
 
