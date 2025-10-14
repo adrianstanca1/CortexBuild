@@ -360,29 +360,13 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Check for existing session on mount
+    // NO AUTO SESSION CHECK - User must explicitly login
+    // Marketing site stays visible until user clicks Login button
     const checkSession = async () => {
       try {
-        console.log('🔍 Checking for existing session...');
-        const user = await authService.getCurrentUser();
-
-        if (user) {
-          console.log('✅ Session found:', user.name);
-          setCurrentUser(user);
-          if (navigationStack.length === 0) {
-            console.log('🔄 Navigating to dashboard from session restore...');
-            const defaultScreenForRole: Screen = user.role === 'developer'
-              ? 'developer-console'
-              : user.role === 'super_admin'
-                ? 'super-admin-dashboard'
-                : 'company-admin-dashboard';
-            navigateToModule(defaultScreenForRole, {});
-          }
-          // DON'T hide marketing site on session restore - let user see marketing site first
-          // window.dispatchEvent(new CustomEvent('userLoggedIn'));
-        } else {
-          console.log('ℹ️ No active session');
-        }
+        console.log('🔍 Session check disabled - marketing site stays visible');
+        console.log('ℹ️ User must click Login button to authenticate');
+        // Don't check for existing session - always show marketing site first
       } catch (error) {
         console.error('Session check error:', error);
       } finally {
@@ -470,9 +454,15 @@ const App: React.FC = () => {
 
     setCurrentUser(null);
     setNavigationStack([]);
-    window.dispatchEvent(new CustomEvent('userLoggedOut'));
-    showSuccess('Logged out', 'You have been successfully logged out');
+
+    // Clear all cache and storage
+    localStorage.clear();
+    sessionStorage.clear();
+
     logger.logUserAction('logout_successful', { userId: currentUser?.id }, currentUser?.id);
+
+    // Force full page reload to reset everything and show marketing site
+    window.location.href = '/';
   };
 
 

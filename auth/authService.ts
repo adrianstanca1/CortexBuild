@@ -150,33 +150,15 @@ export const logout = async (): Promise<void> => {
 
 /**
  * Get current user profile
+ * DISABLED: Always returns null to prevent auto-login
+ * User must explicitly click Login button
  */
 export const getCurrentUser = async (): Promise<User | null> => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    console.log('🔍 [AuthService] getCurrentUser - AUTO-LOGIN DISABLED');
+    console.log('ℹ️ [AuthService] User must click Login button to authenticate');
 
-    console.log('🔍 [AuthService] getCurrentUser - Token in localStorage:', token ? 'EXISTS' : 'NULL');
-
-    if (!token) {
-        console.log('❌ [AuthService] No token found - returning null');
-        return null;
-    }
-
-    try {
-        console.log('📡 [AuthService] Calling /auth/me with token');
-        const response = await api.get('/auth/me');
-
-        if (response.data.success) {
-            console.log('✅ [AuthService] User found:', response.data.user.name);
-            return response.data.user;
-        }
-
-        console.log('❌ [AuthService] No user in response');
-        return null;
-    } catch (error) {
-        console.error('❌ [AuthService] Get current user error:', error);
-        localStorage.removeItem(TOKEN_KEY);
-        return null;
-    }
+    // Always return null - no auto-login from localStorage
+    return null;
 };
 
 /**
