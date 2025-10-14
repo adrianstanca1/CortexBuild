@@ -14,5 +14,9 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://cortex-build-9d882ymnj-adrian-b7e84541.vercel.app
+        value: https://cortex-build-mcnrk7yba-adrian-b7e84541.vercel.app
+      - key: VITE_SUPABASE_URL
+        value: https://qglvhxkgbzujglehewsa.supabase.co
+      - key: SUPABASE_SERVICE_KEY
+        sync: false # Must be set manually in Render dashboard
 
