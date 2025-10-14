@@ -13,7 +13,7 @@ export interface MiniApp {
     icon: string;
     version: string;
     author: string;
-    category: 'productivity' | 'finance' | 'health' | 'utilities' | 'entertainment';
+    category: 'productivity' | 'finance' | 'health' | 'utilities' | 'entertainment' | 'construction';
     component: React.ComponentType<any>;
     installed: boolean;
     free: boolean;
@@ -33,16 +33,14 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
 
     return (
         <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm ${isMinimized ? 'hidden' : ''}`}>
-            <div className={`${
-                isMaximized 
-                    ? 'w-full h-full rounded-none' 
+            <div className={`${isMaximized
+                    ? 'w-full h-full rounded-none'
                     : 'w-11/12 h-5/6 rounded-2xl'
-            } ${isDarkMode ? 'bg-gray-900' : 'bg-white'} shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}>
-                
+                } ${isDarkMode ? 'bg-gray-900' : 'bg-white'} shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}>
+
                 {/* App Window Header */}
-                <div className={`flex items-center justify-between px-6 py-4 border-b ${
-                    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
-                }`}>
+                <div className={`flex items-center justify-between px-6 py-4 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
+                    }`}>
                     <div className="flex items-center gap-3">
                         <span className="text-3xl">{app.icon}</span>
                         <div>
@@ -60,11 +58,10 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
                         <button
                             type="button"
                             onClick={() => setIsMinimized(true)}
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode 
-                                    ? 'hover:bg-gray-700 text-gray-400' 
+                            className={`p-2 rounded-lg transition-colors ${isDarkMode
+                                    ? 'hover:bg-gray-700 text-gray-400'
                                     : 'hover:bg-gray-200 text-gray-600'
-                            }`}
+                                }`}
                             title="Minimize"
                         >
                             <Minimize2 className="h-4 w-4" />
@@ -72,11 +69,10 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
                         <button
                             type="button"
                             onClick={() => setIsMaximized(!isMaximized)}
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode 
-                                    ? 'hover:bg-gray-700 text-gray-400' 
+                            className={`p-2 rounded-lg transition-colors ${isDarkMode
+                                    ? 'hover:bg-gray-700 text-gray-400'
                                     : 'hover:bg-gray-200 text-gray-600'
-                            }`}
+                                }`}
                             title={isMaximized ? "Restore" : "Maximize"}
                         >
                             <Maximize2 className="h-4 w-4" />

@@ -257,14 +257,14 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                             <button
                                 onClick={() => toast.success('Refreshing data...')}
                                 className={`px-4 py-2 rounded-lg ${isDarkMode
-                                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                                     } transition-colors`}
                             >
                                 <Activity className="w-4 h-4" />
                             </button>
                             <button
-                                onClick={() => toast.info('Downloading report...')}
+                                onClick={() => toast('Downloading report...', { icon: 'ℹ️' })}
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
                             >
                                 <Download className="w-4 h-4" />
@@ -280,8 +280,8 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex items-center space-x-2 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === tab.id
-                                        ? 'border-blue-500 text-blue-600'
-                                        : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
+                                    ? 'border-blue-500 text-blue-600'
+                                    : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
                                     }`}
                             >
                                 <tab.icon className="w-4 h-4" />
