@@ -1,14 +1,14 @@
 /**
  * Express Server with Real Authentication
- * JWT-based auth with SQLite database
+ * JWT-based auth with Supabase PostgreSQL database
  */
 
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
-import { db, initDatabase } from './database';
-import * as auth from './auth';
+import { supabase, verifyConnection } from './supabase';
+import * as auth from './auth-supabase';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
 import { setupWebSocket } from './websocket';
@@ -166,30 +166,21 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
  */
 const startServer = async () => {
     try {
-        // Initialize database
-        initDatabase();
-        auth.setDatabase(db);
-
-        // Initialize MCP tables
-        console.log('🧠 Initializing MCP (Model Context Protocol)...');
-        try {
-            mcp.initializeMCPTables(db);
-        } catch (error) {
-            console.warn('⚠️ MCP initialization failed, continuing without MCP:', error.message);
+        // Verify Supabase connection
+        console.log('🔌 Connecting to Supabase...');
+        const isConnected = await verifyConnection();
+        if (!isConnected) {
+            throw new Error('Failed to connect to Supabase');
         }
 
-        // Initialize deployment tables
-        console.log('🚀 Initializing Deployment tables...');
-        deploymentService.initDeploymentTables(db);
-
-        // Initialize SDK tables
-        console.log('🔧 Initializing SDK Developer tables...');
-        initSdkTables(db);
+        // Note: MCP, deployment, and SDK tables are already in Supabase
+        // No need to initialize them here
+        console.log('✅ Supabase connection verified');
 
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
 
-        app.post('/api/auth/login', (req, res) => {
+        app.post('/api/auth/login', async (req, res) => {
             try {
                 const { email, password } = req.body;
 
@@ -197,7 +188,14 @@ const startServer = async () => {
                     return res.status(400).json({ error: 'Email and password are required' });
                 }
 
-                const result = auth.login(db, email, password);
+                const result = await auth.login(email, password);
+
+                if (!result) {
+                    return res.status(401).json({
+                        success: false,
+                        error: 'Invalid email or password'
+                    });
+                }
 
                 res.json({
                     success: true,
@@ -213,17 +211,24 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/register', (req, res) => {
+        app.post('/api/auth/register', async (req, res) => {
             try {
-                const { email, password, name, companyName } = req.body;
+                const { email, password, firstName, lastName, role, companyId } = req.body;
 
-                if (!email || !password || !name || !companyName) {
+                if (!email || !password || !firstName || !lastName) {
                     return res.status(400).json({
-                        error: 'Email, password, name, and company name are required'
+                        error: 'Email, password, first name, and last name are required'
                     });
                 }
 
-                const result = auth.register(db, email, password, name, companyName);
+                const result = await auth.register(email, password, firstName, lastName, role, companyId);
+
+                if (!result) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Registration failed - email may already exist'
+                    });
+                }
 
                 res.json({
                     success: true,
