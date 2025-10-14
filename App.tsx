@@ -452,7 +452,8 @@ const App: React.FC = () => {
     console.log('🔄 Setting current user...');
     setCurrentUser(user);
 
-    window.dispatchEvent(new CustomEvent('userLoggedIn'));
+    // Don't dispatch userLoggedIn event - app-container is already visible
+    // window.dispatchEvent(new CustomEvent('userLoggedIn'));
     showSuccess('Welcome back!', `Hello ${user.name}`);
 
     console.log('✅ User set - dashboard will render automatically');
