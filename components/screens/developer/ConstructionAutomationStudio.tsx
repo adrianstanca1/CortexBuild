@@ -16,7 +16,7 @@ import {
     Rocket,
     Settings,
     Server,
-    Tool,
+    Wrench,
     BarChart3,
     ClipboardList,
     Puzzle,
@@ -1006,7 +1006,7 @@ const ConstructionAutomationStudio: React.FC<ConstructionAutomationStudioProps> 
                     <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <Tool className="h-5 w-5 text-slate-500" />
+                                <Wrench className="h-5 w-5 text-slate-500" />
                                 <div>
                                     <p className="text-sm font-semibold text-slate-900">Automation Graph</p>
                                     <p className="text-xs text-slate-500">Visually inspect the nodes and runtime wiring.</p>

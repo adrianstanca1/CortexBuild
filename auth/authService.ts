@@ -285,3 +285,23 @@ export const getWebhooks = async (): Promise<any> => {
     }
 };
 
+/**
+ * Get health status
+ */
+export const getHealthStatus = async (): Promise<any> => {
+    console.log('🏥 [AuthService] Fetching health status');
+
+    try {
+        const response = await api.get('/health');
+        console.log('✅ [AuthService] Health status fetched successfully');
+        return response.data;
+    } catch (error: any) {
+        console.error('❌ [AuthService] Failed to fetch health status:', error.message);
+        return {
+            status: 'error',
+            message: error.message,
+            timestamp: new Date().toISOString()
+        };
+    }
+};
+
