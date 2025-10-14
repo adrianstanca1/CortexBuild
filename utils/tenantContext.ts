@@ -5,7 +5,7 @@
  * user permissions, and active subscriptions.
  */
 
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase/client';
 import { User } from '../types';
 
 // ============================================================================

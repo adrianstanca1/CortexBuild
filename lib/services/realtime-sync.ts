@@ -3,7 +3,7 @@
  * Handles real-time updates for admin dashboard using Supabase Realtime
  */
 
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 // ============================================

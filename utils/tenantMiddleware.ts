@@ -5,7 +5,7 @@
  * enforcing data isolation, and logging tenant operations.
  */
 
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase/client';
 import { User } from '../types';
 import { TenantContext, validateTenantAccess } from './tenantContext';
 import { hasPermission, Permission } from './permissions';

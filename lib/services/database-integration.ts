@@ -3,7 +3,7 @@
  * Connects all admin components to the real database (Supabase + SQLite)
  */
 
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../supabase/client';
 
 // ============================================
 // USER MANAGEMENT
