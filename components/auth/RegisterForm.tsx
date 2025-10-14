@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User } from '../../types';
 import * as authService from '../../auth/authService';
 import { ArrowPathIcon } from '../Icons';
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../../lib/supabase/client';
 import { validateName, validateEmail, validatePassword, validateCompanyName, combineValidations } from '../../utils/validation';
 
 interface RegisterFormProps {
