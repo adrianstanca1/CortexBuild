@@ -1,7 +1,7 @@
 // CortexBuild Main App Component
 import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
-import * as api from './api';
+import * as api from './api.ts';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
 import Sidebar from './components/layout/Sidebar';
@@ -439,12 +439,17 @@ const App: React.FC = () => {
 
   // Listen for login button click from marketing site
   useEffect(() => {
+    console.log('🎧 [App.tsx] Setting up showLoginScreen event listener');
     const handleShowLogin = () => {
-      console.log('🔐 Login button clicked - showing login screen');
+      console.log('🔐 [App.tsx] Login button clicked - showing login screen');
       setShowLoginScreen(true);
     };
     window.addEventListener('showLoginScreen', handleShowLogin);
-    return () => window.removeEventListener('showLoginScreen', handleShowLogin);
+    console.log('✅ [App.tsx] showLoginScreen event listener registered');
+    return () => {
+      console.log('🗑️ [App.tsx] Removing showLoginScreen event listener');
+      window.removeEventListener('showLoginScreen', handleShowLogin);
+    };
   }, []);
 
   const handleLoginSuccess = (user: User) => {
@@ -527,12 +532,13 @@ const App: React.FC = () => {
   }
 
   if (!currentUser) {
-    console.log('🚫 No currentUser - checking if login screen should show');
-    console.log('📊 Show login screen:', showLoginScreen);
+    console.log('🚫 [App.tsx] No currentUser - checking if login screen should show');
+    console.log('📊 [App.tsx] Show login screen:', showLoginScreen);
+    console.log('📊 [App.tsx] Session checked:', sessionChecked);
 
     // If login button was clicked, show login screen
     if (showLoginScreen) {
-      console.log('🔐 Showing login screen');
+      console.log('🔐 [App.tsx] Showing login screen');
       return (
         <div className="bg-slate-100 min-h-screen flex items-center justify-center">
           <AuthScreen onLoginSuccess={handleLoginSuccess} />
@@ -541,7 +547,7 @@ const App: React.FC = () => {
     }
 
     // Otherwise, don't render anything - let marketing site show
-    console.log('📊 Marketing site visible - waiting for login click');
+    console.log('📊 [App.tsx] Marketing site visible - waiting for login click');
     return null;
   }
 

@@ -70,12 +70,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Prevent direct access to source files - redirect to main app
-app.get(/.*\.(tsx|ts)$/, (req, res) => {
-    console.log(`🚫 Blocked direct access to source file: ${req.path}`);
-    res.redirect('http://localhost:3000/');
-});
-
 /**
  * Auth Routes - Will be registered in startServer() after db initialization
  */
