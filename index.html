@@ -541,7 +541,7 @@
                             </span>
                         </div>
                     </div>
-                    <nav id="desktop-nav" class="hidden md:flex space-x-6">
+                    <nav id="desktop-nav" class="flex space-x-6">
                         <!-- Marketing Nav -->
                         <button data-target="home"
                             class="nav-item nav-active text-sm font-medium marketing-nav">Home</button>
@@ -568,7 +568,8 @@
                             </svg>
                             Logout
                         </button>
-                        <div class="md:hidden ml-4">
+                        <!-- Mobile menu button hidden - desktop nav always visible -->
+                        <div class="hidden">
                             <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800">
                                 <span class="sr-only">Open main menu</span>
                                 <div class="w-6 h-6 flex flex-col justify-around">
