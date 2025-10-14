@@ -420,6 +420,7 @@ export interface AgentCatalogItem {
     config: Record<string, unknown>;
     metadata: Record<string, unknown>;
     developerId?: string;
+    companyId?: string;  // Optional for catalog items, required for instances
     createdAt: string;
     updatedAt: string;
 }

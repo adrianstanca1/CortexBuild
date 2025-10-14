@@ -29,6 +29,28 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const model = 'gemini-2.5-flash';
 
+// Generic API request helper
+const apiRequest = async <T = any>(endpoint: string, options?: RequestInit): Promise<T> => {
+    try {
+        const response = await fetch(`/api${endpoint}`, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options?.headers
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`API request to ${endpoint} failed:`, error);
+        throw error;
+    }
+};
+
 const checkPermissions = (user: User, action: PermissionAction, subject: PermissionSubject) => {
     if (!can(user.role, action, subject)) {
         throw new Error(`Permission denied. Role '${user.role}' cannot perform '${action}' on '${subject}'.`);
