@@ -180,7 +180,7 @@ const App: React.FC = () => {
   const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => () => { });
   const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
 
-  const { can } = usePermissions(currentUser!);
+  const { can } = usePermissions(currentUser);
   const { toasts, removeToast, showSuccess, showError } = useToast();
 
   const handleOAuthCallback = async (hash: string) => {
