@@ -576,7 +576,24 @@ const App: React.FC = () => {
             isDarkMode={true}
             onNavigate={(section) => {
               console.log('Navigating to section:', section);
-              showSuccess(`Opening ${section}...`);
+              // Map section IDs to actual screens
+              const sectionScreenMap: Record<string, string> = {
+                'user-management': 'platform-admin',
+                'company-management': 'platform-admin',
+                'billing-payments': 'platform-admin',
+                'marketplace': 'marketplace',
+                'analytics-reports': 'platform-admin',
+                'system-settings': 'platform-admin',
+                'security-audit': 'platform-admin',
+                'database-management': 'platform-admin',
+                'activity-monitoring': 'platform-admin',
+                'content-management': 'platform-admin',
+                'notifications': 'platform-admin',
+                'permissions': 'platform-admin',
+                'integrations': 'platform-admin'
+              };
+              const targetScreen = sectionScreenMap[section] || 'platform-admin';
+              navigateToModule(targetScreen as any, { section });
             }}
           />
         </Suspense>
@@ -586,7 +603,34 @@ const App: React.FC = () => {
       console.log('🎯 COMPANY ADMIN ROLE DETECTED - Rendering Company Admin Dashboard V2');
       return (
         <Suspense fallback={<ScreenLoader />}>
-          <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
+          <CompanyAdminDashboardV2
+            currentUser={currentUser}
+            navigateTo={(screen: string, params?: any) => {
+              console.log('Company Admin navigating to:', screen, params);
+              // Map section IDs to actual screens
+              const sectionScreenMap: Record<string, string> = {
+                'projects': 'projects',
+                'teams': 'platform-admin',
+                'documents': 'documents',
+                'marketplace': 'marketplace',
+                'analytics': 'platform-admin',
+                'billing': 'platform-admin',
+                'clients': 'platform-admin',
+                'settings': 'platform-admin',
+                'daily-logs': 'daily-log',
+                'safety-reports': 'platform-admin',
+                'quality-control': 'platform-admin',
+                'time-tracking': 'platform-admin',
+                'equipment': 'platform-admin',
+                'procurement': 'platform-admin',
+                'inspections': 'platform-admin',
+                'workforce': 'platform-admin'
+              };
+              const targetScreen = sectionScreenMap[screen] || screen;
+              navigateToModule(targetScreen as any, params);
+            }}
+            isDarkMode={true}
+          />
         </Suspense>
       );
     }
