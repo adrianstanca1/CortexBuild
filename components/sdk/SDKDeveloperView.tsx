@@ -250,7 +250,7 @@ export const SDKDeveloperView: React.FC<SDKDeveloperViewProps> = ({ user, onNavi
         id: '',
         developerId,
         name: `Workflow ${new Date().toLocaleTimeString()}`,
-        companyId: user.company_id ?? undefined,
+        companyId: user.companyId ?? undefined,
         definition,
         isActive: !isDemo,
         createdAt: new Date(),

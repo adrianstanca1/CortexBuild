@@ -3,9 +3,21 @@
  * JWT-based auth with Supabase PostgreSQL database
  */
 
+// Load environment variables FIRST, before any other imports
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..');
+
+dotenv.config({ path: join(projectRoot, '.env.local') });
+dotenv.config({ path: join(projectRoot, '.env') });
+
+// Now import other modules after environment is configured
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { supabase, verifyConnection } from './supabase';
 import * as auth from './auth-supabase';
@@ -40,9 +52,7 @@ import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
 
-// Load environment variables from .env.local first, then .env
-dotenv.config({ path: '.env.local' });
-dotenv.config();
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -58,6 +68,12 @@ app.use(express.json());
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
+});
+
+// Prevent direct access to source files - redirect to main app
+app.get(/.*\.(tsx|ts)$/, (req, res) => {
+    console.log(`🚫 Blocked direct access to source file: ${req.path}`);
+    res.redirect('http://localhost:3000/');
 });
 
 /**
@@ -291,80 +307,80 @@ const startServer = async () => {
 
         // Register API routes
         console.log('📝 Registering API routes...');
-        const clientsRouter = createClientsRouter(db);
+        const clientsRouter = createClientsRouter(supabase);
         app.use('/api/clients', clientsRouter);
         console.log('  ✓ /api/clients');
 
-        app.use('/api/projects', createProjectsRouter(db));
+        app.use('/api/projects', createProjectsRouter(supabase));
         console.log('  ✓ /api/projects');
 
-        app.use('/api/rfis', createRFIsRouter(db));
+        app.use('/api/rfis', createRFIsRouter(supabase));
         console.log('  ✓ /api/rfis');
 
-        app.use('/api/invoices', createInvoicesRouter(db));
+        app.use('/api/invoices', createInvoicesRouter(supabase));
         console.log('  ✓ /api/invoices');
 
-        app.use('/api/time-entries', createTimeEntriesRouter(db));
+        app.use('/api/time-entries', createTimeEntriesRouter(supabase));
         console.log('  ✓ /api/time-entries');
 
-        app.use('/api/subcontractors', createSubcontractorsRouter(db));
+        app.use('/api/subcontractors', createSubcontractorsRouter(supabase));
         console.log('  ✓ /api/subcontractors');
 
-        app.use('/api/purchase-orders', createPurchaseOrdersRouter(db));
+        app.use('/api/purchase-orders', createPurchaseOrdersRouter(supabase));
         console.log('  ✓ /api/purchase-orders');
 
-        app.use('/api/tasks', createTasksRouter(db));
+        app.use('/api/tasks', createTasksRouter(supabase));
         console.log('  ✓ /api/tasks');
 
-        app.use('/api/milestones', createMilestonesRouter(db));
+        app.use('/api/milestones', createMilestonesRouter(supabase));
         console.log('  ✓ /api/milestones');
 
-        app.use('/api/documents', createDocumentsRouter(db));
+        app.use('/api/documents', createDocumentsRouter(supabase));
         console.log('  ✓ /api/documents');
 
-        app.use('/api/modules', createModulesRouter(db));
+        app.use('/api/modules', createModulesRouter(supabase));
         console.log('  ✓ /api/modules');
 
-        app.use('/api/admin', createAdminRouter(db));
+        app.use('/api/admin', createAdminRouter(supabase));
         console.log('  ✓ /api/admin');
 
-        app.use('/api/marketplace', createMarketplaceRouter(db));
+        app.use('/api/marketplace', createMarketplaceRouter(supabase));
         console.log('  ✓ /api/marketplace');
 
-        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(db));
+        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(supabase));
         console.log('  ✓ /api/global-marketplace');
 
-        app.use('/api/widgets', createWidgetsRouter(db));
+        app.use('/api/widgets', createWidgetsRouter(supabase));
         console.log('  ✓ /api/widgets');
 
-        app.use('/api/smart-tools', createSmartToolsRouter(db));
+        app.use('/api/smart-tools', createSmartToolsRouter(supabase));
         console.log('  ✓ /api/smart-tools');
 
-        app.use('/api/sdk', createSDKRouter(db));
+        app.use('/api/sdk', createSDKRouter(supabase));
         console.log('  ✓ /api/sdk');
 
         app.use('/api/admin/sdk', adminSDKRouter);
         console.log('  ✓ /api/admin/sdk');
 
-        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(db));
+        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(supabase));
         console.log('  ✓ /api/admin/enhanced');
 
-        app.use('/api/ai', createAIChatRoutes(db));
+        app.use('/api/ai', createAIChatRoutes(supabase));
         console.log('  ✓ /api/ai');
 
-        app.use('/api/developer', createDeveloperRoutes(db));
+        app.use('/api/developer', createDeveloperRoutes(supabase));
         console.log('  ✓ /api/developer');
 
-        app.use('/api/integrations', createIntegrationsRouter(db));
+        app.use('/api/integrations', createIntegrationsRouter(supabase));
         console.log('  ✓ /api/integrations');
 
-        app.use('/api/agentkit', createAgentKitRouter(db));
+        app.use('/api/agentkit', createAgentKitRouter(supabase));
         console.log('  ✓ /api/agentkit');
 
-        app.use('/api/workflows', createWorkflowsRouter(db));
+        app.use('/api/workflows', createWorkflowsRouter(supabase));
         console.log('  ✓ /api/workflows');
 
-        app.use('/api/automations', createAutomationsRouter(db));
+        app.use('/api/automations', createAutomationsRouter(supabase));
         console.log('  ✓ /api/automations');
 
         console.log('✅ All 24 API routes registered successfully');
@@ -393,7 +409,7 @@ const startServer = async () => {
         const server = createServer(app);
 
         // Setup WebSocket
-        setupWebSocket(server, db);
+        setupWebSocket(server, supabase);
 
         // Start listening
         server.listen(PORT, () => {

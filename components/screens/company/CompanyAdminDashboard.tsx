@@ -118,7 +118,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = ({
             icon: Briefcase,
             color: 'indigo',
             stats: '23 clients',
-            action: () => toast.info('Client management opening...')
+            action: () => toast('Client management opening...')
         },
         {
             id: 'settings',
@@ -127,7 +127,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = ({
             icon: Settings,
             color: 'gray',
             stats: 'Configuration',
-            action: () => toast.info('Settings opening...')
+            action: () => toast('Settings opening...')
         }
     ];
 
@@ -149,7 +149,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = ({
             icon: Shield,
             color: 'red',
             stats: `${stats.safetyIncidents} incidents`,
-            action: () => toast.info('Safety reports opening...')
+            action: () => toast('Safety reports opening...')
         },
         {
             id: 'quality',
@@ -158,7 +158,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = ({
             icon: CheckSquare,
             color: 'green',
             stats: `${stats.qualityIssues} issues`,
-            action: () => toast.info('Quality control opening...')
+            action: () => toast('Quality control opening...')
         },
         {
             id: 'time-tracking',
@@ -185,7 +185,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = ({
             icon: Hammer,
             color: 'orange',
             stats: '34 items',
-            action: () => toast.info('Equipment tracking opening...')
+            action: () => toast('Equipment tracking opening...')
         },
         {
             id: 'procurement',
@@ -194,7 +194,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = ({
             icon: ShoppingCart,
             color: 'cyan',
             stats: '12 orders',
-            action: () => toast.info('Procurement opening...')
+            action: () => toast('Procurement opening...')
         },
         {
             id: 'rfis',

@@ -3,13 +3,13 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../api/client';
+import * as api from '../../api';
 import { toast } from 'react-hot-toast';
 
 export function useProjects(params?: { status?: string; priority?: string; search?: string }) {
     return useQuery({
         queryKey: ['projects', params],
-        queryFn: () => apiClient.getProjects(params),
+        queryFn: () => api.fetchProjects(),
         staleTime: 30000, // 30 seconds
     });
 }
@@ -17,7 +17,7 @@ export function useProjects(params?: { status?: string; priority?: string; searc
 export function useProject(id: string) {
     return useQuery({
         queryKey: ['projects', id],
-        queryFn: () => apiClient.getProject(id),
+        queryFn: () => api.fetchProjectById(id),
         enabled: !!id,
     });
 }
@@ -26,7 +26,7 @@ export function useCreateProject() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: any) => apiClient.createProject(data),
+        mutationFn: (data: any) => api.createProject(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects'] });
             toast.success('Project created successfully');
@@ -42,7 +42,7 @@ export function useUpdateProject() {
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: any }) =>
-            apiClient.updateProject(id, data),
+            api.updateProject(id, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['projects'] });
             queryClient.invalidateQueries({ queryKey: ['projects', variables.id] });
@@ -58,7 +58,7 @@ export function useDeleteProject() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => apiClient.deleteProject(id),
+        mutationFn: (id: string) => api.deleteProject(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects'] });
             toast.success('Project deleted successfully');

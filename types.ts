@@ -150,6 +150,7 @@ export interface TaskHistoryEvent {
 export interface Task {
     id: string;
     projectId: string;
+    projectName?: string;
     title: string;
     description: string;
     status: 'To Do' | 'In Progress' | 'Done';

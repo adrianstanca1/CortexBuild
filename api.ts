@@ -3008,8 +3008,8 @@ export const getProjectPredictions = async (
 
         // Fetch related data
         const tasks = await fetchTasksForProject(projectId, currentUser);
-        const rfis = await fetchRFIsForProject(projectId, currentUser);
-        const punchItems = await fetchPunchListItemsForProject(projectId, currentUser);
+        const rfis = await fetchRFIsForProject(projectId);
+        const punchItems = await fetchPunchListItemsForProject(projectId);
 
         // Generate predictions using ML
         const predictor = getMLPredictor();
@@ -3040,8 +3040,8 @@ export const getAllProjectsPredictions = async (
         for (const project of projects.slice(0, 5)) { // Limit to 5 projects for performance
             try {
                 const tasks = await fetchTasksForProject(project.id, currentUser);
-                const rfis = await fetchRFIsForProject(project.id, currentUser);
-                const punchItems = await fetchPunchListItemsForProject(project.id, currentUser);
+                const rfis = await fetchRFIsForProject(project.id);
+                const punchItems = await fetchPunchListItemsForProject(project.id);
 
                 const predictor = getMLPredictor();
                 const prediction = await predictor.predictProjectOutcome(

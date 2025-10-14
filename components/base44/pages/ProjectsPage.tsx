@@ -17,8 +17,8 @@ interface Project {
     progress?: number;
     status: string;
     priority?: string;
-    start_date?: string;
-    end_date?: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export const ProjectsPage: React.FC = () => {

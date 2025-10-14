@@ -256,12 +256,14 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                         <div className="flex items-center space-x-3">
                             <button
                                 onClick={() => toast.success('Refreshing data...')}
+                                aria-label="Refresh data"
                                 className={`px-4 py-2 rounded-lg ${isDarkMode
                                     ? 'bg-gray-700 hover:bg-gray-600 text-white'
                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                                     } transition-colors`}
                             >
-                                <Activity className="w-4 h-4" />
+                                <span className="sr-only">Refresh data</span>
+                                <Activity className="w-4 h-4" aria-hidden="true" />
                             </button>
                             <button
                                 onClick={() => toast('Downloading report...', { icon: 'ℹ️' })}

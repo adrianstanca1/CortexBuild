@@ -87,7 +87,7 @@ const ModernDeveloperDashboard: React.FC<ModernDeveloperDashboardProps> = ({
             description: 'Manage dependencies and libraries',
             icon: Package,
             color: 'purple',
-            action: () => toast.info('Package manager coming soon')
+            action: () => toast('Package manager coming soon')
         },
         {
             id: 'api-builder',
@@ -119,7 +119,7 @@ const ModernDeveloperDashboard: React.FC<ModernDeveloperDashboardProps> = ({
             description: 'API docs and guides',
             icon: BookOpen,
             color: 'indigo',
-            action: () => toast.info('Documentation opening...')
+            action: () => toast('Documentation opening...')
         }
     ];
 
@@ -148,7 +148,7 @@ const ModernDeveloperDashboard: React.FC<ModernDeveloperDashboardProps> = ({
         {
             label: 'View Logs',
             icon: Activity,
-            action: () => toast.info('Opening logs...')
+            action: () => toast('Opening logs...')
         }
     ];
 
