@@ -1,7 +1,7 @@
 // CortexBuild Main App Component
 import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
-import * as api from './api.ts';
+import * as api from './api';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
 import Sidebar from './components/layout/Sidebar';
