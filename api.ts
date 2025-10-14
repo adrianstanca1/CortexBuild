@@ -20,7 +20,7 @@ import { APIError, withErrorHandling } from './utils/errorHandling';
 import { getMLPredictor } from './utils/mlPredictor';
 import { PredictionResult } from './utils/neuralNetwork';
 import * as authService from './auth/authService';
-import { supabase } from './supabaseClient';
+import { supabase } from './lib/supabase/client';
 
 // Simulate API latency
 const LATENCY = 200;
