@@ -519,7 +519,11 @@ const App: React.FC = () => {
     setIsAISuggestionModalOpen(false);
   };
 
+  // ALWAYS render something - never return null
+  // This ensures React is mounted and listening for events
+
   if (!sessionChecked) {
+    console.log('⏳ [App.tsx] Session not checked yet - showing loader');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="bg-white p-8 rounded-xl shadow-2xl text-center">
@@ -546,9 +550,9 @@ const App: React.FC = () => {
       );
     }
 
-    // Otherwise, don't render anything - let marketing site show
-    console.log('📊 [App.tsx] Marketing site visible - waiting for login click');
-    return null;
+    // Otherwise, render empty div (NOT null) - let marketing site show
+    console.log('📊 [App.tsx] Marketing site visible - rendering empty div');
+    return <div id="react-placeholder" style={{ display: 'none' }} />;
   }
 
   console.log('✅ Current user exists - showing app:', currentUser.name);
