@@ -527,10 +527,20 @@ const App: React.FC = () => {
     console.log('🚫 No currentUser - waiting for login from landing page');
     console.log('📊 Session checked:', sessionChecked);
     console.log('📊 Navigation stack:', navigationStack);
-    // Don't render anything - let the landing page in index.html show
-    // The landing page will trigger login via the Login button
+    console.log('🎨 Rendering AuthScreen now...');
+    // Show login screen when no user is logged in
     return (
-      <div className="bg-slate-100 min-h-screen flex items-center justify-center">
+      <div
+        className="bg-slate-100 min-h-screen flex items-center justify-center p-4"
+        style={{
+          width: '100%',
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f1f5f9'
+        }}
+      >
         <AuthScreen onLoginSuccess={handleLoginSuccess} />
       </div>
     );
