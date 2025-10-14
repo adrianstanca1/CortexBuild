@@ -112,11 +112,18 @@ export type Screen =
     | 'ai-agents-marketplace'
     | 'developer-dashboard'
     | 'automation-studio'
+    | 'developer-workspace'
     | 'developer-console'
     | 'company-admin-dashboard'
+    | 'company-admin-legacy'
     | 'super-admin-dashboard'
     | 'sdk-developer'
     | 'my-apps-desktop'
+    // Global Marketplace
+    | 'marketplace'
+    | 'my-applications'
+    | 'admin-review'
+    | 'developer-submissions'
     // Admin screens
     | 'platform-admin'
     | 'admin-control-panel'
