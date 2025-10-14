@@ -378,7 +378,8 @@ const App: React.FC = () => {
                 : 'company-admin-dashboard';
             navigateToModule(defaultScreenForRole, {});
           }
-          window.dispatchEvent(new CustomEvent('userLoggedIn'));
+          // DON'T hide marketing site on session restore - let user see marketing site first
+          // window.dispatchEvent(new CustomEvent('userLoggedIn'));
         } else {
           console.log('ℹ️ No active session');
         }
