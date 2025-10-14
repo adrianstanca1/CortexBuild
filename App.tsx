@@ -156,6 +156,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [showLoginScreen, setShowLoginScreen] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
   const {
@@ -436,6 +437,16 @@ const App: React.FC = () => {
     return () => window.removeEventListener('userLoggedOutTrigger', handleLogoutTrigger);
   }, []);
 
+  // Listen for login button click from marketing site
+  useEffect(() => {
+    const handleShowLogin = () => {
+      console.log('🔐 Login button clicked - showing login screen');
+      setShowLoginScreen(true);
+    };
+    window.addEventListener('showLoginScreen', handleShowLogin);
+    return () => window.removeEventListener('showLoginScreen', handleShowLogin);
+  }, []);
+
   const handleLoginSuccess = (user: User) => {
     console.log('✅ Login successful:', user.name);
     console.log('🔄 Setting current user...');
@@ -515,16 +526,22 @@ const App: React.FC = () => {
   }
 
   if (!currentUser) {
-    console.log('🚫 No currentUser - waiting for login from landing page');
-    console.log('📊 Session checked:', sessionChecked);
-    console.log('📊 Navigation stack:', navigationStack);
-    // Don't render anything - let the landing page in index.html show
-    // The landing page will trigger login via the Login button
-    return (
-      <div className="bg-slate-100 min-h-screen flex items-center justify-center">
-        <AuthScreen onLoginSuccess={handleLoginSuccess} />
-      </div>
-    );
+    console.log('🚫 No currentUser - checking if login screen should show');
+    console.log('📊 Show login screen:', showLoginScreen);
+
+    // If login button was clicked, show login screen
+    if (showLoginScreen) {
+      console.log('🔐 Showing login screen');
+      return (
+        <div className="bg-slate-100 min-h-screen flex items-center justify-center">
+          <AuthScreen onLoginSuccess={handleLoginSuccess} />
+        </div>
+      );
+    }
+
+    // Otherwise, don't render anything - let marketing site show
+    console.log('📊 Marketing site visible - waiting for login click');
+    return null;
   }
 
   console.log('✅ Current user exists - showing app:', currentUser.name);

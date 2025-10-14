@@ -2001,6 +2001,10 @@
                     console.log('✅ Root div configured');
                 }
             }
+
+            // Trigger React to show login screen
+            window.dispatchEvent(new CustomEvent('showLoginScreen'));
+            console.log('✅ showLoginScreen event dispatched');
         }
 
         function handleLogoutUI() {
