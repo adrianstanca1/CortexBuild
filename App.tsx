@@ -726,15 +726,15 @@ const App: React.FC = () => {
         />}
       >
         <div className="p-8">
-          <Suspense fallback={<ScreenLoader />}>
-            {currentUser?.role === 'developer' ? (
-              <ScreenComponent
-                currentUser={currentUser}
-                selectProject={selectProject}
-                navigateTo={navigateTo}
-                onLogout={handleLogout}
-              />
-            ) : (
+          {currentUser?.role === 'developer' ? (
+            <ScreenComponent
+              currentUser={currentUser}
+              selectProject={selectProject}
+              navigateTo={navigateTo}
+              onLogout={handleLogout}
+            />
+          ) : (
+            <Suspense fallback={<ScreenLoader />}>
               <ScreenComponent
                 currentUser={currentUser}
                 selectProject={selectProject}
@@ -749,8 +749,8 @@ const App: React.FC = () => {
                 can={can}
                 {...params}
               />
-            )}
-          </Suspense>
+            </Suspense>
+          )}
         </div>
       </AppLayout>
 
