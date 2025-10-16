@@ -730,6 +730,7 @@ const App: React.FC = () => {
               currentUser={currentUser}
               selectProject={selectProject}
               navigateTo={navigateTo}
+              onLogout={handleLogout}
               onDeepLink={handleDeepLink}
               onQuickAction={handleQuickAction}
               onSuggestAction={handleSuggestAction}
