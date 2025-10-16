@@ -38,7 +38,8 @@ const ProductionSDKDeveloperView = lazy(() =>
   }))
 );
 const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
-const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
+// Import EnhancedDeveloperConsole eagerly to avoid lazy loading issues
+import EnhancedDeveloperConsole from './components/screens/developer/EnhancedDeveloperConsole';
 const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
