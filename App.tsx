@@ -718,6 +718,18 @@ const App: React.FC = () => {
     );
   }
 
+  // For developer role, skip AppLayout entirely
+  if (currentUser?.role === 'developer') {
+    return (
+      <Suspense fallback={<ScreenLoader />}>
+        <MinimalDeveloperConsole
+          onLogout={handleLogout}
+          navigateTo={navigateTo}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="bg-slate-50">
       <AppLayout
