@@ -725,22 +725,24 @@ const App: React.FC = () => {
         />}
       >
         <div className="p-8">
-          <Suspense fallback={<ScreenLoader />}>
-            <ScreenComponent
-              currentUser={currentUser}
-              selectProject={selectProject}
-              navigateTo={navigateTo}
-              onLogout={handleLogout}
-              onDeepLink={handleDeepLink}
-              onQuickAction={handleQuickAction}
-              onSuggestAction={handleSuggestAction}
-              openProjectSelector={openProjectSelector}
-              project={project}
-              goBack={goBack}
-              can={can}
-              {...params}
-            />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<ScreenLoader />}>
+              <ScreenComponent
+                currentUser={currentUser}
+                selectProject={selectProject}
+                navigateTo={navigateTo}
+                onLogout={handleLogout}
+                onDeepLink={handleDeepLink}
+                onQuickAction={handleQuickAction}
+                onSuggestAction={handleSuggestAction}
+                openProjectSelector={openProjectSelector}
+                project={project}
+                goBack={goBack}
+                can={can}
+                {...params}
+              />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </AppLayout>
 
