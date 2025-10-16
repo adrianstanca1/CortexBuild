@@ -24,10 +24,10 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onSwitchToForg
     const [mfaCode, setMfaCode] = useState('');
     const [rememberMe, setRememberMe] = useState(initialRememberedEmail !== '');
     const [showPassword, setShowPassword] = useState(false);
-    
+
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string; mfa?: string }>({});
-    
+
     const [userId, setUserId] = useState<string | null>(null);
 
     const mfaInputRef = useRef<HTMLInputElement>(null);

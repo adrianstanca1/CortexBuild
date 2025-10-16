@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback, Rea
 import { User, Company, LoginCredentials, RegistrationPayload, AuthState, Permission } from '../types';
 import { authClient, type AuthenticatedSession } from '../services/authClient';
 import { hasPermission as checkPermission, authService } from '../services/auth';
-import { api } from '../services/mockApi';
+import { api, authApi } from '../services/mockApi';
 import { ValidationService } from '../services/validationService';
 import { analytics } from '../services/analyticsService';
 import { getStorage } from '../utils/storage';
@@ -82,20 +82,47 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             const { token: newToken } = await authClient.refreshToken(storedRefreshToken);
                             storage.setItem('token', newToken);
                             setAuthState(prev => ({ ...prev, token: newToken }));
-                            scheduleTokenRefresh(newToken); // Schedule the next refresh
+                            // Schedule the next refresh - but avoid infinite recursion
+                            if (newToken !== token) {
+                                scheduleTokenRefresh(newToken);
+                            }
                         } catch (error) {
                             console.error("Proactive token refresh failed", error);
-                            logout();
+                            // Use a direct logout call to avoid dependency issues
+                            storage.removeItem('token');
+                            storage.removeItem('refreshToken');
+                            if (tokenRefreshTimeout) clearTimeout(tokenRefreshTimeout);
+                            setAuthState({
+                                isAuthenticated: false,
+                                token: null,
+                                refreshToken: null,
+                                user: null,
+                                company: null,
+                                loading: false,
+                                error: null,
+                            });
                         }
                     }
                 }, expiresIn);
             } else {
                 // Token already expired or about to, attempt a reactive refresh or log out.
                 console.warn("Token is already expired or has less than a minute left. Logging out.");
-                logout();
+                // Use a direct logout call to avoid dependency issues
+                storage.removeItem('token');
+                storage.removeItem('refreshToken');
+                if (tokenRefreshTimeout) clearTimeout(tokenRefreshTimeout);
+                setAuthState({
+                    isAuthenticated: false,
+                    token: null,
+                    refreshToken: null,
+                    user: null,
+                    company: null,
+                    loading: false,
+                    error: null,
+                });
             }
         }
-    }, [logout]);
+    }, []); // Remove logout dependency to break the cycle
 
     const finalizeLogin = useCallback((data: { token: string, refreshToken: string, user: User, company: Company }) => {
         storage.setItem('token', data.token);
@@ -110,7 +137,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             error: null,
         });
         scheduleTokenRefresh(data.token);
-    }, [scheduleTokenRefresh]);
+    }, []); // Remove scheduleTokenRefresh dependency to break the cycle
 
     /**
      * Initializes authentication state on app load.
@@ -176,7 +203,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
 
         try {
-            const response = await api.login(validation.sanitizedData);
+            const response = await authApi.login(validation.sanitizedData);
 
             // Record successful login attempt
             authService.recordLoginAttempt(credentials.email, true, {
