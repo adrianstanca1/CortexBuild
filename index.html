@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CortexBuild - AI-Powered Construction Intelligence Platform</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!-- Prevent caching -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -509,7 +510,7 @@
 
 <body class="antialiased">
     <!-- Marketing Site (Hidden after login) -->
-    <div id="marketing-site">
+    <div id="marketing-site" style="display: none;">
         <header id="marketing-header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-200">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
@@ -1791,7 +1792,7 @@
     <!-- End Marketing Site -->
 
     <!-- React App Container -->
-    <div id="app-container" class="hidden">
+    <div id="app-container" style="display: block; visibility: visible; opacity: 1;">
         <div id="root"></div>
     </div>
 
@@ -2009,31 +2010,24 @@
         }
 
         function handleLogoutUI() {
-            console.log('🚪 handleLogoutUI called');
+            console.log('🚪 handleLogoutUI called - keeping React app visible');
             state.loggedIn = false;
             authButton.textContent = 'Login';
 
-            // Show ENTIRE marketing site again
-            const marketingSite = document.getElementById('marketing-site');
-            if (marketingSite) {
-                marketingSite.style.display = 'block';
-                console.log('✅ Marketing site shown again');
-            }
+            // Keep React app visible instead of showing marketing site
+            // This ensures users stay in the application and can log back in
 
-            // Hide app container
+            // Keep app container visible
             if (appContainer) {
-                appContainer.classList.add('hidden');
-                appContainer.style.display = 'none';
-                console.log('✅ App container hidden');
+                // Don't hide the app container - keep it visible
+                console.log('✅ App container kept visible for re-login');
             }
 
             // Show auth button
             authButton.classList.remove('hidden');
             logoutButton.classList.add('hidden');
-            document.querySelectorAll('.marketing-nav').forEach(el => el.style.display = 'flex');
-            navigateTo('home');
 
-            console.log('✅ handleLogoutUI complete - back to marketing site');
+            console.log('✅ handleLogoutUI complete - staying in React app');
         }
 
         function handleLoginUI() {
@@ -2483,7 +2477,8 @@
         }
 
         initializeSupabase();
-        handleLogoutUI(); // Ensure initial state is logged out
+        // Don't call handleLogoutUI() on init - keep React app visible
+        console.log('✅ Initialization complete - React app ready');
     </script>
 </body>
 
