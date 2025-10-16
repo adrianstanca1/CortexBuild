@@ -97,10 +97,12 @@ export default defineConfig(({ mode }) => {
           'axios',
           'uuid',
           '@google/genai',
-          'react-markdown'
-        ],
-        // Force re-optimization on every start
-        force: true
+          'react-markdown',
+          'react-hot-toast',
+          '@monaco-editor/react',
+          'lucide-react',
+          'react-router-dom'
+        ]
       },
       // Clear cache on startup
       cacheDir: 'node_modules/.vite'
