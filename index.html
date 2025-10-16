@@ -1795,6 +1795,42 @@
         <div id="root"></div>
     </div>
 
+    <!-- Global functions for marketing site interactions -->
+    <script>
+        // Define showAppForLogin globally so it's available immediately
+        window.showAppForLogin = function () {
+            console.log('🔐 showAppForLogin called - hiding marketing site');
+            // Hide ENTIRE marketing site
+            const marketingSite = document.getElementById('marketing-site');
+            if (marketingSite) {
+                marketingSite.style.display = 'none';
+                console.log('✅ Marketing site hidden');
+            }
+            // Show app container with React login screen
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                appContainer.classList.remove('hidden');
+                appContainer.style.display = 'block';
+                appContainer.style.visibility = 'visible';
+                appContainer.style.opacity = '1';
+                console.log('✅ App container shown');
+
+                // Ensure root div is visible
+                const rootDiv = document.getElementById('root');
+                if (rootDiv) {
+                    rootDiv.style.display = 'block';
+                    rootDiv.style.visibility = 'visible';
+                    rootDiv.style.minHeight = '100vh';
+                    console.log('✅ Root div configured');
+                }
+            }
+
+            // Trigger React to show login screen
+            window.dispatchEvent(new CustomEvent('showLoginScreen'));
+            console.log('✅ showLoginScreen event dispatched');
+        };
+    </script>
+
     <script type="module" src="/index.tsx"></script>
     <script type="module">
         import { createClient } from "@supabase/supabase-js";
@@ -1977,36 +2013,8 @@
             currentView: 'home',
         };
 
-        function showAppForLogin() {
-            console.log('🔐 showAppForLogin called - hiding marketing site');
-            // Hide ENTIRE marketing site
-            const marketingSite = document.getElementById('marketing-site');
-            if (marketingSite) {
-                marketingSite.style.display = 'none';
-                console.log('✅ Marketing site hidden');
-            }
-            // Show app container with React login screen
-            if (appContainer) {
-                appContainer.classList.remove('hidden');
-                appContainer.style.display = 'block';
-                appContainer.style.visibility = 'visible';
-                appContainer.style.opacity = '1';
-                console.log('✅ App container shown');
-
-                // Ensure root div is visible
-                const rootDiv = document.getElementById('root');
-                if (rootDiv) {
-                    rootDiv.style.display = 'block';
-                    rootDiv.style.visibility = 'visible';
-                    rootDiv.style.minHeight = '100vh';
-                    console.log('✅ Root div configured');
-                }
-            }
-
-            // Trigger React to show login screen
-            window.dispatchEvent(new CustomEvent('showLoginScreen'));
-            console.log('✅ showLoginScreen event dispatched');
-        }
+        // Note: showAppForLogin is now defined globally in a regular script tag above
+        // to ensure it's available immediately when the button is clicked
 
         function handleLogoutUI() {
             console.log('🚪 handleLogoutUI called');

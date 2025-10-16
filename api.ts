@@ -26,7 +26,18 @@ import { supabase } from './lib/supabase/client';
 const LATENCY = 200;
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize Google Generative AI only if API key is available
+let ai: any = null;
+const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (geminiApiKey) {
+  try {
+    ai = new GoogleGenAI({ apiKey: geminiApiKey });
+  } catch (error) {
+    console.warn('⚠️ Failed to initialize Google Generative AI:', error);
+  }
+} else {
+  console.warn('⚠️ VITE_GEMINI_API_KEY not configured - AI features will be limited');
+}
 const model = 'gemini-2.5-flash';
 
 // Generic API request helper
@@ -1374,6 +1385,12 @@ export const getAITaskSuggestions = async (description: string, allUsers: User[]
     `;
     
     try {
+        // Check if AI is initialized
+        if (!ai) {
+            console.warn("⚠️ Google Generative AI not configured - returning null");
+            return null;
+        }
+
         const response = await ai.models.generateContent({
             model: model,
             contents: prompt,
