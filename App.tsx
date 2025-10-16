@@ -578,14 +578,12 @@ const App: React.FC = () => {
       goBack
     };
 
+    // Developer role - use normal screen rendering instead of early return
+    // This allows the developer-console screen to be rendered properly
     if (currentUser.role === 'developer') {
-      console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Developer Dashboard V2');
+      console.log('🎯 DEVELOPER ROLE DETECTED - Using normal screen rendering');
       console.log('👤 Current user:', currentUser);
-      return (
-        <Suspense fallback={<ScreenLoader />}>
-          <DeveloperDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
-        </Suspense>
-      );
+      // Continue to normal screen rendering below
     }
     if (currentUser.role === 'super_admin') {
       console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
