@@ -1829,6 +1829,49 @@
             window.dispatchEvent(new CustomEvent('showLoginScreen'));
             console.log('✅ showLoginScreen event dispatched');
         };
+
+        // Setup navigation button handlers
+        window.setupNavigationButtons = function () {
+            console.log('🔧 Setting up navigation buttons...');
+
+            // Handle "Watch Demo" button
+            const demoButton = document.querySelector('[data-target="features"]');
+            if (demoButton) {
+                demoButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('📺 Watch Demo clicked');
+                    const featuresSection = document.getElementById('features');
+                    if (featuresSection) {
+                        featuresSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+                console.log('✅ Watch Demo button configured');
+            }
+
+            // Handle all navigation items
+            const navItems = document.querySelectorAll('[data-target]');
+            navItems.forEach(item => {
+                if (item.dataset.target && item.dataset.target !== 'features') {
+                    item.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const targetId = this.dataset.target;
+                        console.log('🔗 Navigating to:', targetId);
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                }
+            });
+            console.log('✅ Navigation buttons configured');
+        };
+
+        // Setup buttons when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', window.setupNavigationButtons);
+        } else {
+            window.setupNavigationButtons();
+        }
     </script>
 
     <script type="module" src="/index.tsx"></script>
