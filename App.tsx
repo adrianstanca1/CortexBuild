@@ -676,6 +676,18 @@ const App: React.FC = () => {
     );
   }
 
+  // Developer console should render without AppLayout to avoid hook issues
+  if (screen === 'developer-console' && currentUser?.role === 'developer') {
+    return (
+      <Suspense fallback={<ScreenLoader />}>
+        <MinimalDeveloperConsole
+          onLogout={handleLogout}
+          navigateTo={navigateTo}
+        />
+      </Suspense>
+    );
+  }
+
   const getSidebarProject = useMemo(() => {
     if (project) {
       return project;
@@ -726,27 +738,20 @@ const App: React.FC = () => {
       >
         <div className="p-8">
           <Suspense fallback={<ScreenLoader />}>
-            {currentUser?.role === 'developer' ? (
-              <MinimalDeveloperConsole
-                onLogout={handleLogout}
-                navigateTo={navigateTo}
-              />
-            ) : (
-              <ScreenComponent
-                currentUser={currentUser}
-                selectProject={selectProject}
-                navigateTo={navigateTo}
-                onLogout={handleLogout}
-                onDeepLink={handleDeepLink}
-                onQuickAction={handleQuickAction}
-                onSuggestAction={handleSuggestAction}
-                openProjectSelector={openProjectSelector}
-                project={project}
-                goBack={goBack}
-                can={can}
-                {...params}
-              />
-            )}
+            <ScreenComponent
+              currentUser={currentUser}
+              selectProject={selectProject}
+              navigateTo={navigateTo}
+              onLogout={handleLogout}
+              onDeepLink={handleDeepLink}
+              onQuickAction={handleQuickAction}
+              onSuggestAction={handleSuggestAction}
+              openProjectSelector={openProjectSelector}
+              project={project}
+              goBack={goBack}
+              can={can}
+              {...params}
+            />
           </Suspense>
         </div>
       </AppLayout>
