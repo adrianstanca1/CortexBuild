@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { LogOut, Home } from 'lucide-react';
 
 interface SimpleDeveloperConsoleProps {
@@ -7,7 +7,7 @@ interface SimpleDeveloperConsoleProps {
 }
 
 const SimpleDeveloperConsole: React.FC<SimpleDeveloperConsoleProps> = ({ onLogout, navigateTo }) => {
-  const [activeTab, setActiveTab] = useState<'console' | 'dashboard'>('dashboard');
+  const activeTab = 'dashboard';
 
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col">
@@ -34,22 +34,18 @@ const SimpleDeveloperConsole: React.FC<SimpleDeveloperConsoleProps> = ({ onLogou
       {/* Tabs */}
       <div className="bg-gray-800 border-b border-gray-700 flex">
         <button
-          onClick={() => setActiveTab('dashboard')}
-          className={`px-6 py-3 font-medium transition-colors ${
-            activeTab === 'dashboard'
-              ? 'border-b-2 border-purple-500 text-purple-400'
-              : 'text-gray-400 hover:text-gray-300'
-          }`}
+          className={`px-6 py-3 font-medium transition-colors ${activeTab === 'dashboard'
+            ? 'border-b-2 border-purple-500 text-purple-400'
+            : 'text-gray-400 hover:text-gray-300'
+            }`}
         >
           Dashboard
         </button>
         <button
-          onClick={() => setActiveTab('console')}
-          className={`px-6 py-3 font-medium transition-colors ${
-            activeTab === 'console'
-              ? 'border-b-2 border-purple-500 text-purple-400'
-              : 'text-gray-400 hover:text-gray-300'
-          }`}
+          className={`px-6 py-3 font-medium transition-colors ${activeTab === 'console'
+            ? 'border-b-2 border-purple-500 text-purple-400'
+            : 'text-gray-400 hover:text-gray-300'
+            }`}
         >
           Console
         </button>
