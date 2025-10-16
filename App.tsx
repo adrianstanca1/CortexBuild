@@ -38,9 +38,8 @@ const ProductionSDKDeveloperView = lazy(() =>
   }))
 );
 const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
-// Import EnhancedDeveloperConsole eagerly to avoid lazy loading issues
-// Use simple developer console to avoid hook issues
-import SimpleDeveloperConsole from './components/screens/developer/SimpleDeveloperConsole';
+// Import minimal developer console to avoid React hook issues
+import MinimalDeveloperConsole from './components/screens/developer/MinimalDeveloperConsole';
 const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
@@ -135,7 +134,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'developer-dashboard': ModernDeveloperDashboard,
   'automation-studio': ConstructionAutomationStudio,
   'developer-workspace': DeveloperWorkspaceScreen,
-  'developer-console': SimpleDeveloperConsole,
+  'developer-console': MinimalDeveloperConsole,
   'super-admin-dashboard': SuperAdminDashboardScreen,
   'sdk-developer': ProductionSDKDeveloperView,
   'my-apps-desktop': Base44Clone,
@@ -727,7 +726,7 @@ const App: React.FC = () => {
       >
         <div className="p-8">
           {currentUser?.role === 'developer' ? (
-            <SimpleDeveloperConsole
+            <MinimalDeveloperConsole
               onLogout={handleLogout}
               navigateTo={navigateTo}
             />

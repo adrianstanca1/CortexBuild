@@ -1,13 +1,11 @@
 import React from 'react';
-import { LogOut, Home } from 'lucide-react';
 
 interface SimpleDeveloperConsoleProps {
   onLogout?: () => void;
   navigateTo?: (screen: string, params?: any) => void;
 }
 
-const SimpleDeveloperConsole: React.FC<SimpleDeveloperConsoleProps> = ({ onLogout, navigateTo }) => {
-  const activeTab = 'dashboard';
+const SimpleDeveloperConsole: React.FC<SimpleDeveloperConsoleProps> = (props) => {
 
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col">
