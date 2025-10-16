@@ -668,26 +668,7 @@ const App: React.FC = () => {
   const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
   console.log('📺 Screen component:', ScreenComponent.name);
 
-  if (screen === 'my-apps-desktop') {
-    return (
-      <Suspense fallback={<ScreenLoader />}>
-        <Base44Clone user={currentUser} onLogout={handleLogout} />
-      </Suspense>
-    );
-  }
-
-  // Developer console should render without AppLayout to avoid hook issues
-  if (screen === 'developer-console' && currentUser?.role === 'developer') {
-    return (
-      <Suspense fallback={<ScreenLoader />}>
-        <MinimalDeveloperConsole
-          onLogout={handleLogout}
-          navigateTo={navigateTo}
-        />
-      </Suspense>
-    );
-  }
-
+  // IMPORTANT: Call hooks BEFORE any early returns to avoid React hook violations
   const getSidebarProject = useMemo(() => {
     if (project) {
       return project;
@@ -715,6 +696,27 @@ const App: React.FC = () => {
     }
     goHome();
   }, [currentUser.role, navigateToModule, goHome]);
+
+  // Now do early returns AFTER hooks are called
+  if (screen === 'my-apps-desktop') {
+    return (
+      <Suspense fallback={<ScreenLoader />}>
+        <Base44Clone user={currentUser} onLogout={handleLogout} />
+      </Suspense>
+    );
+  }
+
+  // Developer console should render without AppLayout to avoid hook issues
+  if (screen === 'developer-console' && currentUser?.role === 'developer') {
+    return (
+      <Suspense fallback={<ScreenLoader />}>
+        <MinimalDeveloperConsole
+          onLogout={handleLogout}
+          navigateTo={navigateTo}
+        />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="bg-slate-50">
