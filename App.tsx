@@ -727,20 +727,29 @@ const App: React.FC = () => {
       >
         <div className="p-8">
           <Suspense fallback={<ScreenLoader />}>
-            <ScreenComponent
-              currentUser={currentUser}
-              selectProject={selectProject}
-              navigateTo={navigateTo}
-              onLogout={handleLogout}
-              onDeepLink={handleDeepLink}
-              onQuickAction={handleQuickAction}
-              onSuggestAction={handleSuggestAction}
-              openProjectSelector={openProjectSelector}
-              project={project}
-              goBack={goBack}
-              can={can}
-              {...params}
-            />
+            {currentUser?.role === 'developer' ? (
+              <ScreenComponent
+                currentUser={currentUser}
+                selectProject={selectProject}
+                navigateTo={navigateTo}
+                onLogout={handleLogout}
+              />
+            ) : (
+              <ScreenComponent
+                currentUser={currentUser}
+                selectProject={selectProject}
+                navigateTo={navigateTo}
+                onLogout={handleLogout}
+                onDeepLink={handleDeepLink}
+                onQuickAction={handleQuickAction}
+                onSuggestAction={handleSuggestAction}
+                openProjectSelector={openProjectSelector}
+                project={project}
+                goBack={goBack}
+                can={can}
+                {...params}
+              />
+            )}
           </Suspense>
         </div>
       </AppLayout>
