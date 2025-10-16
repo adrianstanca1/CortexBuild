@@ -725,13 +725,13 @@ const App: React.FC = () => {
         />}
       >
         <div className="p-8">
-          {currentUser?.role === 'developer' ? (
-            <MinimalDeveloperConsole
-              onLogout={handleLogout}
-              navigateTo={navigateTo}
-            />
-          ) : (
-            <Suspense fallback={<ScreenLoader />}>
+          <Suspense fallback={<ScreenLoader />}>
+            {currentUser?.role === 'developer' ? (
+              <MinimalDeveloperConsole
+                onLogout={handleLogout}
+                navigateTo={navigateTo}
+              />
+            ) : (
               <ScreenComponent
                 currentUser={currentUser}
                 selectProject={selectProject}
@@ -746,8 +746,8 @@ const App: React.FC = () => {
                 can={can}
                 {...params}
               />
-            </Suspense>
-          )}
+            )}
+          </Suspense>
         </div>
       </AppLayout>
 
