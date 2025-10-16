@@ -303,13 +303,11 @@ export const fetchAllProjects = async (currentUser: User): Promise<Project[]> =>
                     name,
                     description,
                     status,
-                    start_date,
-                    end_date,
-                    budget,
-                    spent,
                     location,
+                    image,
                     company_id,
-                    project_manager_id,
+                    contacts,
+                    snapshot,
                     created_at,
                     updated_at
                 `)
