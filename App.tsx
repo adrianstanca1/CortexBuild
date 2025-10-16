@@ -727,11 +727,9 @@ const App: React.FC = () => {
       >
         <div className="p-8">
           {currentUser?.role === 'developer' ? (
-            <ScreenComponent
-              currentUser={currentUser}
-              selectProject={selectProject}
-              navigateTo={navigateTo}
+            <SimpleDeveloperConsole
               onLogout={handleLogout}
+              navigateTo={navigateTo}
             />
           ) : (
             <Suspense fallback={<ScreenLoader />}>
