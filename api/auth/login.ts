@@ -66,14 +66,14 @@ export default async function handler(
       });
     }
 
-    // Map user data
+    // Map user data - convert snake_case to camelCase for frontend
     const user = {
       id: dbUser.id,
       email: dbUser.email,
       name: dbUser.name || dbUser.email || 'User',
       role: dbUser.role,
       avatar: dbUser.avatar || '',
-      company_id: dbUser.company_id || undefined,
+      companyId: dbUser.company_id || undefined,
     };
 
     // Generate JWT token
