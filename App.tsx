@@ -39,18 +39,8 @@ const ProductionSDKDeveloperView = lazy(() =>
 );
 const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
 // Import EnhancedDeveloperConsole eagerly to avoid lazy loading issues
-// Import EnhancedDeveloperConsole with error handling
-import EnhancedDeveloperConsoleRaw from './components/screens/developer/EnhancedDeveloperConsole';
-
-// Wrap in error boundary component
-const EnhancedDeveloperConsole = (props: any) => {
-  try {
-    return <EnhancedDeveloperConsoleRaw {...props} />;
-  } catch (error) {
-    console.error('❌ Error rendering EnhancedDeveloperConsole:', error);
-    return <div className="p-8 text-red-500">Error loading developer console: {String(error)}</div>;
-  }
-};
+// Use simple developer console to avoid hook issues
+import SimpleDeveloperConsole from './components/screens/developer/SimpleDeveloperConsole';
 const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
@@ -145,7 +135,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'developer-dashboard': ModernDeveloperDashboard,
   'automation-studio': ConstructionAutomationStudio,
   'developer-workspace': DeveloperWorkspaceScreen,
-  'developer-console': EnhancedDeveloperConsole,
+  'developer-console': SimpleDeveloperConsole,
   'super-admin-dashboard': SuperAdminDashboardScreen,
   'sdk-developer': ProductionSDKDeveloperView,
   'my-apps-desktop': Base44Clone,
