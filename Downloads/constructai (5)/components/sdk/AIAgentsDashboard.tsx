@@ -154,7 +154,7 @@ export const AIAgentsDashboard: React.FC<{ subscriptionTier: string }> = ({ subs
   };
 
   const deleteAgent = async (agentId: string) => {
-    if (!confirm('Are you sure you want to delete this agent?')) return;
+    if (!confirm('Are you sure you want to delete this agent?')) {return;}
 
     try {
       const response = await fetch(`/api/sdk/agents/${agentId}`, {
@@ -164,7 +164,7 @@ export const AIAgentsDashboard: React.FC<{ subscriptionTier: string }> = ({ subs
 
       if (response.ok) {
         setAgents(agents.filter(a => a.id !== agentId));
-        if (selectedAgent?.id === agentId) setSelectedAgent(null);
+        if (selectedAgent?.id === agentId) {setSelectedAgent(null);}
       }
     } catch (error) {
       console.error('Failed to delete agent:', error);
@@ -214,7 +214,7 @@ export const AIAgentsDashboard: React.FC<{ subscriptionTier: string }> = ({ subs
 
   const exportAgent = (agent: Agent) => {
     const dataStr = JSON.stringify(agent, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const dataUri = `data:application/json;charset=utf-8,${ encodeURIComponent(dataStr)}`;
     const exportFileDefaultName = `agent-${agent.id}.json`;
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);

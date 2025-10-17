@@ -64,7 +64,7 @@ export const SDKDeveloperEnvironment: React.FC<{ user: User }> = ({ user }) => {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading SDK Environment...</p>
         </div>
       </div>
@@ -121,7 +121,7 @@ export const SDKDeveloperEnvironment: React.FC<{ user: User }> = ({ user }) => {
                     <div
                       className="bg-white rounded-full h-2"
                       style={{ width: `${usagePercentage}%` }}
-                    ></div>
+                     />
                   </div>
                   <span className="text-sm font-semibold">
                     {sdkDeveloper?.api_requests_used || 0} / {sdkDeveloper?.api_requests_limit === -1 ? '∞' : sdkDeveloper?.api_requests_limit || 0}

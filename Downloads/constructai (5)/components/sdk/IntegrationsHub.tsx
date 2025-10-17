@@ -237,7 +237,7 @@ export const IntegrationsHub: React.FC<{ subscriptionTier: string }> = ({ subscr
   };
 
   const disconnectIntegration = async (integrationId: string) => {
-    if (!confirm('Are you sure you want to disconnect this integration?')) return;
+    if (!confirm('Are you sure you want to disconnect this integration?')) {return;}
 
     try {
       const response = await fetch(`/api/sdk/integrations/${integrationId}`, {
@@ -276,7 +276,7 @@ export const IntegrationsHub: React.FC<{ subscriptionTier: string }> = ({ subscr
   };
 
   const deleteWebhook = async (webhookId: string) => {
-    if (!confirm('Are you sure you want to delete this webhook?')) return;
+    if (!confirm('Are you sure you want to delete this webhook?')) {return;}
 
     try {
       const response = await fetch(`/api/sdk/webhooks/${webhookId}`, {
@@ -334,7 +334,7 @@ export const IntegrationsHub: React.FC<{ subscriptionTier: string }> = ({ subscr
   };
 
   const revokeApiKey = async (keyId: string) => {
-    if (!confirm('Are you sure you want to revoke this API key? This cannot be undone.')) return;
+    if (!confirm('Are you sure you want to revoke this API key? This cannot be undone.')) {return;}
 
     try {
       const response = await fetch(`/api/sdk/api-keys/${keyId}`, {
@@ -436,11 +436,10 @@ export const IntegrationsHub: React.FC<{ subscriptionTier: string }> = ({ subscr
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium whitespace-nowrap ${
-                      selectedCategory === cat.id
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium whitespace-nowrap ${selectedCategory === cat.id
                         ? 'bg-blue-600 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-50 border'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{cat.name}</span>
@@ -491,7 +490,7 @@ export const IntegrationsHub: React.FC<{ subscriptionTier: string }> = ({ subscr
                           <button
                             onClick={() => {
                               const int = integrations.find(i => i.name.toLowerCase() === integration.id);
-                              if (int) disconnectIntegration(int.id);
+                              if (int) {disconnectIntegration(int.id);}
                             }}
                             className="flex-1 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-medium text-sm"
                           >
@@ -499,6 +498,7 @@ export const IntegrationsHub: React.FC<{ subscriptionTier: string }> = ({ subscr
                           </button>
                           <button className="px-4 py-2 border rounded-lg hover:bg-gray-50">
                             <Settings className="w-4 h-4" />
+                            <span className="sr-only">Manage {integration.name} settings</span>
                           </button>
                         </>
                       ) : (

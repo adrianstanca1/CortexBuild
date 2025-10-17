@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Database } from 'better-sqlite3';
+import type { Database } from 'better-sqlite3';
 import * as auth from '../auth';
 import crypto from 'crypto';
 

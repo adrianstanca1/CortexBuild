@@ -32,6 +32,7 @@ import adminSDKRouter from './routes/admin-sdk';
 import workflowRouter from './routes/workflows';
 import { createAgentsRouter } from './routes/agents';
 import { createIntegrationsRouter } from './routes/integrations';
+import aiRouter from './routes/ai';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -42,7 +43,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002', 'http://127.0.0.1:3003'],
     credentials: true
 }));
 app.use(express.json());
@@ -67,7 +68,7 @@ app.post('/api/auth/refresh', async (req, res) => {
         }
 
         const result = await auth.refreshToken(token);
-        
+
         res.json({
             success: true,
             user: result.user,
@@ -75,9 +76,9 @@ app.post('/api/auth/refresh', async (req, res) => {
         });
     } catch (error: any) {
         console.error('Refresh token error:', error);
-        res.status(401).json({ 
+        res.status(401).json({
             success: false,
-            error: error.message || 'Token refresh failed' 
+            error: error.message || 'Token refresh failed'
         });
     }
 });
@@ -174,7 +175,7 @@ const startServer = async () => {
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
 
-        app.post('/api/auth/login', (req, res) => {
+        app.post('/api/auth/login', async (req, res) => {
             try {
                 const { email, password } = req.body;
 
@@ -182,7 +183,7 @@ const startServer = async () => {
                     return res.status(400).json({ error: 'Email and password are required' });
                 }
 
-                const result = auth.login(db, email, password);
+                const result = await auth.login(email, password);
 
                 res.json({
                     success: true,
@@ -198,7 +199,7 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/register', (req, res) => {
+        app.post('/api/auth/register', async (req, res) => {
             try {
                 const { email, password, name, companyName } = req.body;
 
@@ -208,7 +209,12 @@ const startServer = async () => {
                     });
                 }
 
-                const result = auth.register(db, email, password, name, companyName);
+                const result = await auth.register({
+                    email,
+                    password,
+                    name,
+                    companyName
+                });
 
                 res.json({
                     success: true,
@@ -244,7 +250,7 @@ const startServer = async () => {
             }
         });
 
-        app.get('/api/auth/me', (req, res) => {
+        app.get('/api/auth/me', async (req, res) => {
             try {
                 const token = req.headers.authorization?.replace('Bearer ', '');
 
@@ -252,7 +258,7 @@ const startServer = async () => {
                     return res.status(401).json({ error: 'Token is required' });
                 }
 
-                const user = auth.getCurrentUser(db, token);
+                const user = await auth.verifyToken(token);
 
                 res.json({
                     success: true,
@@ -332,7 +338,10 @@ const startServer = async () => {
         app.use('/api/sdk', createIntegrationsRouter(db));
         console.log('  ✓ /api/sdk/integrations');
 
-        console.log('✅ All 20 API routes registered successfully');
+        app.use('/api/ai', aiRouter);
+        console.log('  ✓ /api/ai');
+
+        console.log('✅ All 21 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
@@ -385,8 +394,14 @@ const startServer = async () => {
             console.log(`  /api/documents - 5 endpoints`);
             console.log(`  /api/modules - 9 endpoints`);
             console.log('');
-            console.log('🤖 AI Chatbot Ready!');
+            console.log('🤖 AI Features:');
             console.log(`  POST   http://localhost:${PORT}/api/chat/message`);
+            console.log(`  POST   http://localhost:${PORT}/api/ai/generate-code`);
+            console.log(`  POST   http://localhost:${PORT}/api/ai/analyze-code`);
+            console.log(`  POST   http://localhost:${PORT}/api/ai/generate-tests`);
+            console.log(`  POST   http://localhost:${PORT}/api/ai/generate-documentation`);
+            console.log(`  POST   http://localhost:${PORT}/api/ai/calculate-cost`);
+            console.log(`  GET    http://localhost:${PORT}/api/ai/health`);
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);
