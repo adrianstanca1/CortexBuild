@@ -78,7 +78,7 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 setInstalledApps(data.apps);
             } else {
@@ -130,16 +130,16 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
     };
 
     const toggleMinimize = (windowId: string) => {
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === windowId 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === windowId
                 ? { ...ra, isMinimized: !ra.isMinimized }
                 : ra
         ));
     };
 
     const toggleMaximize = (windowId: string) => {
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === windowId 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === windowId
                 ? { ...ra, isMaximized: !ra.isMaximized }
                 : ra
         ));
@@ -147,8 +147,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
 
     const bringToFront = (windowId: string) => {
         const newZIndex = maxZIndex + 1;
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === windowId 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === windowId
                 ? { ...ra, zIndex: newZIndex }
                 : ra
         ));
@@ -173,8 +173,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
         const newX = e.clientX - dragOffset.x;
         const newY = e.clientY - dragOffset.y;
 
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === draggingWindow 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === draggingWindow
                 ? { ...ra, position: { x: newX, y: newY } }
                 : ra
         ));
@@ -202,11 +202,10 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                     <p className={`text-xs ${mutedClass}`}>v{app.version}</p>
                 </div>
                 {app.installation_type && (
-                    <div className={`text-xs px-2 py-1 rounded-full ${
-                        app.installation_type === 'company' 
-                            ? 'bg-purple-500/20 text-purple-400' 
-                            : 'bg-blue-500/20 text-blue-400'
-                    }`}>
+                    <div className={`text-xs px-2 py-1 rounded-full ${app.installation_type === 'company'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-blue-500/20 text-blue-400'
+                        }`}>
                         {app.installation_type === 'company' ? (
                             <div className="flex items-center space-x-1">
                                 <Building2 className="w-3 h-3" />
@@ -236,11 +235,10 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                     <h3 className={`font-semibold ${textClass}`}>{app.name}</h3>
                     <span className={`text-xs ${mutedClass}`}>v{app.version}</span>
                     {app.installation_type && (
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                            app.installation_type === 'company' 
-                                ? 'bg-purple-500/20 text-purple-400' 
-                                : 'bg-blue-500/20 text-blue-400'
-                        }`}>
+                        <span className={`text-xs px-2 py-1 rounded-full ${app.installation_type === 'company'
+                            ? 'bg-purple-500/20 text-purple-400'
+                            : 'bg-blue-500/20 text-blue-400'
+                            }`}>
                             {app.installation_type === 'company' ? 'Company' : 'Personal'}
                         </span>
                     )}
@@ -442,11 +440,10 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                                 }
                                 bringToFront(ra.windowId);
                             }}
-                            className={`px-3 py-2 rounded-lg transition-all ${
-                                ra.isMinimized 
-                                    ? `${cardClass} opacity-50` 
-                                    : 'bg-blue-600 text-white'
-                            } hover:scale-105`}
+                            className={`px-3 py-2 rounded-lg transition-all ${ra.isMinimized
+                                ? `${cardClass} opacity-50`
+                                : 'bg-blue-600 text-white'
+                                } hover:scale-105`}
                         >
                             <div className="flex items-center space-x-2">
                                 <span>{ra.app.icon}</span>

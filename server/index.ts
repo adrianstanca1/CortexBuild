@@ -39,7 +39,7 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
-import { createMyApplicationsRouter } from './routes/my-applications';
+import myApplicationsRouter from './routes/my-applications';
 import createCodexMCPRoutes from './routes/codex-mcp.js';
 import { createSubscriptionService, SubscriptionService } from './services/subscription-service';
 
@@ -82,7 +82,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true
 }));
 app.use(express.json());
@@ -90,10 +90,13 @@ app.use(express.json());
 // Serve static files from public directory
 app.use(express.static('public'));
 
-// Serve React app for all non-API routes
-app.get('/', (req, res) => {
-    res.sendFile('index.html', { root: 'public' });
-});
+// Only serve the React app for non-API routes when not in development
+// In development, Vite handles the frontend on port 3001
+if (process.env.NODE_ENV !== 'development') {
+    app.get('/', (req, res) => {
+        res.sendFile('index.html', { root: '.' });
+    });
+}
 
 // HTTP Request logging middleware
 app.use(logger.httpLogger());
@@ -411,7 +414,7 @@ const startServer = async () => {
         app.use('/api/automations', generalRateLimit, createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
-        app.use('/api/my-applications', generalRateLimit, createMyApplicationsRouter(db));
+        app.use('/api/my-apps', generalRateLimit, myApplicationsRouter);
         console.log('  ✓ /api/my-applications');
 
         app.use('/api/codex-mcp', generalRateLimit, createCodexMCPRoutes(db));
