@@ -20,6 +20,18 @@ export default defineConfig(({ mode }) => {
           '/api': {
             target: apiUrl,
             changeOrigin: true,
+            secure: false,
+            configure: (proxy, options) => {
+              proxy.on('error', (err, req, res) => {
+                console.log('proxy error', err);
+              });
+              proxy.on('proxyReq', (proxyReq, req, res) => {
+                console.log('Sending Request to the Target:', req.method, req.url);
+              });
+              proxy.on('proxyRes', (proxyRes, req, res) => {
+                console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+              });
+            },
           }
         },
         // Force HMR to always reload
@@ -44,8 +56,9 @@ export default defineConfig(({ mode }) => {
               if (id.includes('node_modules/@monaco-editor')) {
                 return 'monaco';
               }
-              if (id.includes('components/sdk/') || id.includes('components/screens/developer/')) {
-                return 'developer-tools';
+              // Fix: Don't separate developer tools to avoid circular dependencies
+              if (id.includes('components/sdk/')) {
+                return 'sdk-tools';
               }
               if (id.includes('components/marketplace/')) {
                 return 'marketplace';

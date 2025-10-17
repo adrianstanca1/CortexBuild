@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "server": "tsx --env-file=.env server/index.ts",
+    "api-server": "node api-server.cjs",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
+    "dev:with-api": "concurrently \"npm run dev\" \"npm run api-server\"",
     "build": "vite build",
     "preview": "vite preview",
     "deploy:ionos": "npm run build && node deploy-ionos.cjs",
