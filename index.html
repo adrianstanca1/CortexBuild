@@ -1782,7 +1782,17 @@
 
     <!-- React App Container -->
     <div id="app-container" style="display: block; visibility: visible; opacity: 1;">
-        <div id="root"></div>
+        <div id="root">
+            <!-- Fallback content while React loads -->
+            <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: Arial, sans-serif;">
+                <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 40px; border-radius: 15px; backdrop-filter: blur(10px);">
+                    <div style="font-size: 3em; margin-bottom: 20px;">🏗️</div>
+                    <h1 style="font-size: 2em; margin-bottom: 10px;">CortexBuild</h1>
+                    <p style="font-size: 1.2em; margin-bottom: 20px;">AI-Powered Construction Management</p>
+                    <div style="font-size: 1em; opacity: 0.8;">Loading application...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="/index.tsx"></script>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexBuild - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .status-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: white;
+            color: #667eea;
+        }
+        .test-results {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏗️ CortexBuild</div>
+            <h1>System Test Page</h1>
+            <p>Let's diagnose what's happening with your application</p>
+        </div>
+
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-icon">🌐</div>
+                <h3>Frontend Server</h3>
+                <p id="frontend-status">Testing...</p>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">🔌</div>
+                <h3>API Server</h3>
+                <p id="api-status">Testing...</p>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">🔐</div>
+                <h3>Authentication</h3>
+                <p id="auth-status">Testing...</p>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">⚛️</div>
+                <h3>React App</h3>
+                <p id="react-status">Testing...</p>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="btn" onclick="testEverything()">🧪 Run All Tests</button>
+            <button class="btn" onclick="testLogin()">🔐 Test Login</button>
+            <button class="btn" onclick="goToMainApp()">🚀 Go to Main App</button>
+            <button class="btn" onclick="goToSimpleApp()">📱 Go to Simple App</button>
+        </div>
+
+        <div class="test-results" id="results">
+            <h3>🔍 Test Results:</h3>
+            <div id="log">Click "Run All Tests" to start diagnostics...</div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testFrontend() {
+            try {
+                const response = await fetch('http://localhost:3002/');
+                if (response.ok) {
+                    document.getElementById('frontend-status').innerHTML = '✅ Online';
+                    log('✅ Frontend server responding on port 3002', 'success');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                document.getElementById('frontend-status').innerHTML = '❌ Offline';
+                log(`❌ Frontend server error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testAPI() {
+            try {
+                const response = await fetch('http://localhost:3001/api/health');
+                const data = await response.json();
+                if (data.status === 'ok') {
+                    document.getElementById('api-status').innerHTML = '✅ Online';
+                    log('✅ API server healthy on port 3001', 'success');
+                    return true;
+                } else {
+                    throw new Error('API unhealthy');
+                }
+            } catch (error) {
+                document.getElementById('api-status').innerHTML = '❌ Offline';
+                log(`❌ API server error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testAuth() {
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'demo@cortexbuild.com',
+                        password: 'demo-password'
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('auth-status').innerHTML = '✅ Working';
+                    log('✅ Authentication working with demo credentials', 'success');
+                    return true;
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+            } catch (error) {
+                document.getElementById('auth-status').innerHTML = '❌ Failed';
+                log(`❌ Authentication error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testReact() {
+            try {
+                // Check if React is loaded
+                if (typeof React !== 'undefined') {
+                    document.getElementById('react-status').innerHTML = '✅ Loaded';
+                    log('✅ React is available globally', 'success');
+                    return true;
+                } else {
+                    // Try to check if React app mounted
+                    const rootElement = document.querySelector('#root');
+                    if (rootElement && rootElement.children.length > 0) {
+                        document.getElementById('react-status').innerHTML = '✅ Mounted';
+                        log('✅ React app appears to be mounted', 'success');
+                        return true;
+                    } else {
+                        document.getElementById('react-status').innerHTML = '⚠️ Not Mounted';
+                        log('⚠️ React app not mounted or visible', 'warning');
+                        return false;
+                    }
+                }
+            } catch (error) {
+                document.getElementById('react-status').innerHTML = '❌ Error';
+                log(`❌ React error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testEverything() {
+            clearLog();
+            log('🧪 Starting comprehensive system test...', 'info');
+            
+            const frontendOK = await testFrontend();
+            const apiOK = await testAPI();
+            const authOK = await testAuth();
+            const reactOK = await testReact();
+            
+            log('', 'info');
+            log('📊 Test Summary:', 'info');
+            log(`Frontend Server: ${frontendOK ? '✅ PASS' : '❌ FAIL'}`, frontendOK ? 'success' : 'error');
+            log(`API Server: ${apiOK ? '✅ PASS' : '❌ FAIL'}`, apiOK ? 'success' : 'error');
+            log(`Authentication: ${authOK ? '✅ PASS' : '❌ FAIL'}`, authOK ? 'success' : 'error');
+            log(`React App: ${reactOK ? '✅ PASS' : '❌ FAIL'}`, reactOK ? 'success' : 'error');
+            
+            if (frontendOK && apiOK && authOK) {
+                log('', 'info');
+                log('🎉 Core systems are working! The issue might be with React app mounting.', 'success');
+                log('💡 Try the "Go to Simple App" button for a guaranteed working version.', 'info');
+            } else {
+                log('', 'info');
+                log('🚨 Some core systems are not working. Check server status.', 'error');
+            }
+        }
+
+        async function testLogin() {
+            clearLog();
+            log('🔐 Testing login flow...', 'info');
+            await testAuth();
+        }
+
+        function goToMainApp() {
+            log('🚀 Redirecting to main application...', 'info');
+            window.location.href = 'http://localhost:3002/';
+        }
+
+        function goToSimpleApp() {
+            log('📱 Redirecting to simple working app...', 'info');
+            window.location.href = 'file:///Users/admin/CortexBuild/simple-app.html';
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(testEverything, 1000);
+        });
+    </script>
+</body>
+</html>
