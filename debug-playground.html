@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 CortexBuild Debug Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #fff; }
+            to { text-shadow: 0 0 30px #fff, 0 0 40px #fff; }
+        }
+        .debug-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .debug-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        .debug-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .debug-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        .status-online { background: #4ade80; }
+        .status-offline { background: #ef4444; }
+        .status-warning { background: #fbbf24; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .debug-content {
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .console {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #333;
+        }
+        .console-line {
+            margin: 5px 0;
+            animation: typewriter 0.5s ease-in;
+        }
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        .success { color: #4ade80; }
+        .error { color: #ef4444; }
+        .warning { color: #fbbf24; }
+        .info { color: #3b82f6; }
+        .fun-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4ade80;
+        }
+        .easter-egg {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5em;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 CortexBuild Debug Playground</h1>
+            <p>Where debugging meets fun! 🚀</p>
+        </div>
+
+        <div class="debug-grid">
+            <div class="debug-card">
+                <div class="debug-title">
+                    🌐 Server Status
+                    <div class="status-indicator status-online" id="server-status"></div>
+                </div>
+                <div class="debug-content">
+                    <p><strong>API Server:</strong> <span id="api-status">Checking...</span></p>
+                    <p><strong>Frontend:</strong> <span id="frontend-status">Checking...</span></p>
+                    <p><strong>Database:</strong> <span id="db-status">Simulated</span></p>
+                    <button class="btn" onclick="checkAllServers()">🔄 Refresh Status</button>
+                </div>
+            </div>
+
+            <div class="debug-card">
+                <div class="debug-title">
+                    🔐 Authentication Test
+                    <div class="status-indicator status-warning" id="auth-status"></div>
+                </div>
+                <div class="debug-content">
+                    <p><strong>Login Test:</strong> <span id="login-result">Ready</span></p>
+                    <p><strong>Token:</strong> <span id="token-status">None</span></p>
+                    <button class="btn" onclick="testLogin()">🚀 Test Login</button>
+                    <button class="btn" onclick="testDashboard()">📊 Test Dashboard</button>
+                </div>
+            </div>
+
+            <div class="debug-card">
+                <div class="debug-title">
+                    🎯 API Endpoints
+                    <div class="status-indicator status-online" id="api-endpoints-status"></div>
+                </div>
+                <div class="debug-content">
+                    <p><strong>Health:</strong> <span id="health-status">❓</span></p>
+                    <p><strong>Dashboard:</strong> <span id="dashboard-status">❓</span></p>
+                    <p><strong>Projects:</strong> <span id="projects-status">❓</span></p>
+                    <button class="btn" onclick="testAllEndpoints()">🧪 Test All APIs</button>
+                </div>
+            </div>
+
+            <div class="debug-card">
+                <div class="debug-title">
+                    🎮 Fun Tools
+                    <div class="status-indicator status-online"></div>
+                </div>
+                <div class="debug-content">
+                    <button class="btn" onclick="generateRandomData()">🎲 Random Data</button>
+                    <button class="btn" onclick="stressTest()">💪 Stress Test</button>
+                    <button class="btn" onclick="easterEgg()">🥚 Easter Egg</button>
+                    <button class="btn" onclick="clearConsole()">🧹 Clear Console</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="fun-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="requests-count">0</div>
+                <div>API Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="success-rate">100%</div>
+                <div>Success Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="response-time">0ms</div>
+                <div>Avg Response</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="fun-level">🔥</div>
+                <div>Fun Level</div>
+            </div>
+        </div>
+
+        <div class="console" id="debug-console">
+            <div class="console-line success">🎮 Debug Playground initialized!</div>
+            <div class="console-line info">💡 Click buttons above to start debugging...</div>
+            <div class="console-line warning">⚡ Pro tip: Check the easter egg button!</div>
+        </div>
+    </div>
+
+    <div class="easter-egg" onclick="secretMode()">🎪</div>
+
+    <script>
+        let requestCount = 0;
+        let successCount = 0;
+        let responseTimes = [];
+        let currentToken = null;
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('debug-console');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function updateStats() {
+            document.getElementById('requests-count').textContent = requestCount;
+            document.getElementById('success-rate').textContent = 
+                requestCount > 0 ? Math.round((successCount / requestCount) * 100) + '%' : '100%';
+            document.getElementById('response-time').textContent = 
+                responseTimes.length > 0 ? 
+                Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length) + 'ms' : '0ms';
+        }
+
+        async function makeRequest(url, options = {}) {
+            requestCount++;
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(url, options);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                responseTimes.push(responseTime);
+                
+                if (response.ok) {
+                    successCount++;
+                    log(`✅ ${options.method || 'GET'} ${url} - ${response.status} (${responseTime}ms)`, 'success');
+                } else {
+                    log(`❌ ${options.method || 'GET'} ${url} - ${response.status} (${responseTime}ms)`, 'error');
+                }
+                
+                updateStats();
+                return response;
+            } catch (error) {
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                responseTimes.push(responseTime);
+                log(`💥 ${options.method || 'GET'} ${url} - Error: ${error.message}`, 'error');
+                updateStats();
+                throw error;
+            }
+        }
+
+        async function checkAllServers() {
+            log('🔍 Checking all servers...', 'info');
+            
+            try {
+                const apiResponse = await makeRequest('http://localhost:3001/api/health');
+                document.getElementById('api-status').textContent = '✅ Online';
+                document.getElementById('server-status').className = 'status-indicator status-online';
+            } catch {
+                document.getElementById('api-status').textContent = '❌ Offline';
+                document.getElementById('server-status').className = 'status-indicator status-offline';
+            }
+
+            try {
+                await makeRequest('http://localhost:3005/');
+                document.getElementById('frontend-status').textContent = '✅ Online';
+            } catch {
+                document.getElementById('frontend-status').textContent = '❌ Offline';
+            }
+        }
+
+        async function testLogin() {
+            log('🔐 Testing login...', 'info');
+            
+            try {
+                const response = await makeRequest('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'demo@cortexbuild.com',
+                        password: 'demo-password'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    currentToken = data.token;
+                    document.getElementById('login-result').textContent = '✅ Success';
+                    document.getElementById('token-status').textContent = '🎫 Valid';
+                    document.getElementById('auth-status').className = 'status-indicator status-online';
+                    log(`🎉 Login successful! Welcome ${data.user.name}`, 'success');
+                } else {
+                    throw new Error('Login failed');
+                }
+            } catch (error) {
+                document.getElementById('login-result').textContent = '❌ Failed';
+                document.getElementById('auth-status').className = 'status-indicator status-offline';
+                log('💀 Login failed!', 'error');
+            }
+        }
+
+        async function testDashboard() {
+            if (!currentToken) {
+                log('⚠️ Please login first!', 'warning');
+                return;
+            }
+            
+            log('📊 Testing dashboard access...', 'info');
+            
+            try {
+                const response = await makeRequest('http://localhost:3001/api/dashboard/stats', {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    log(`🎯 Dashboard loaded! ${data.stats.totalProjects} projects, ${data.stats.totalTasks} tasks`, 'success');
+                } else {
+                    throw new Error('Dashboard access failed');
+                }
+            } catch (error) {
+                log('💥 Dashboard access failed!', 'error');
+            }
+        }
+
+        async function testAllEndpoints() {
+            log('🧪 Testing all API endpoints...', 'info');
+            
+            const endpoints = [
+                { url: 'http://localhost:3001/api/health', id: 'health-status' },
+                { url: 'http://localhost:3001/api/dashboard/stats', id: 'dashboard-status', auth: true },
+                { url: 'http://localhost:3001/api/dashboard/projects', id: 'projects-status', auth: true }
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const options = endpoint.auth && currentToken ? 
+                        { headers: { 'Authorization': `Bearer ${currentToken}` } } : {};
+                    
+                    const response = await makeRequest(endpoint.url, options);
+                    document.getElementById(endpoint.id).textContent = '✅';
+                } catch {
+                    document.getElementById(endpoint.id).textContent = '❌';
+                }
+            }
+        }
+
+        function generateRandomData() {
+            const funMessages = [
+                '🎲 Generated 42 random construction projects!',
+                '🏗️ Created a skyscraper made of marshmallows!',
+                '🎪 Built a circus tent in the database!',
+                '🚀 Launched a rocket-powered crane!',
+                '🦄 Added unicorn-powered bulldozers!',
+                '🍕 Constructed a pizza-shaped building!',
+                '🎮 Generated a Minecraft construction site!'
+            ];
+            
+            const randomMessage = funMessages[Math.floor(Math.random() * funMessages.length)];
+            log(randomMessage, 'success');
+            
+            // Update fun level
+            const funLevels = ['🔥', '💥', '⚡', '🌟', '🎉', '🚀', '💎'];
+            document.getElementById('fun-level').textContent = 
+                funLevels[Math.floor(Math.random() * funLevels.length)];
+        }
+
+        async function stressTest() {
+            log('💪 Starting stress test...', 'warning');
+            
+            const promises = [];
+            for (let i = 0; i < 10; i++) {
+                promises.push(makeRequest('http://localhost:3001/api/health'));
+            }
+            
+            try {
+                await Promise.all(promises);
+                log('🏆 Stress test completed! Your server is strong! 💪', 'success');
+            } catch {
+                log('😵 Server got tired during stress test!', 'error');
+            }
+        }
+
+        function easterEgg() {
+            const eggs = [
+                '🥚 You found the secret debug mode!',
+                '🎪 Welcome to the construction circus!',
+                '🦄 Unicorns are now managing your projects!',
+                '🎮 Achievement unlocked: Debug Master!',
+                '🍕 Pizza break! Your code deserves it!',
+                '🚀 Launching debug rockets!',
+                '💎 You are a debugging gem!'
+            ];
+            
+            const randomEgg = eggs[Math.floor(Math.random() * eggs.length)];
+            log(randomEgg, 'success');
+            
+            // Add some visual fun
+            document.body.style.animation = 'none';
+            setTimeout(() => {
+                document.body.style.animation = 'hue-rotate 2s infinite linear';
+            }, 10);
+        }
+
+        function secretMode() {
+            log('🎪 SECRET MODE ACTIVATED! 🎪', 'success');
+            log('🌈 Rainbow mode enabled!', 'info');
+            log('🎵 Playing construction site symphony...', 'warning');
+            log('🦄 Unicorns are now debugging your code!', 'success');
+            
+            // Add rainbow animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes hue-rotate {
+                    0% { filter: hue-rotate(0deg); }
+                    100% { filter: hue-rotate(360deg); }
+                }
+                body { animation: hue-rotate 3s infinite linear; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function clearConsole() {
+            document.getElementById('debug-console').innerHTML = 
+                '<div class="console-line info">🧹 Console cleared! Ready for more debugging fun!</div>';
+        }
+
+        // Initialize
+        checkAllServers();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(checkAllServers, 30000);
+    </script>
+</body>
+</html>
