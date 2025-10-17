@@ -16,24 +16,14 @@ export default defineConfig(({ mode }) => {
           'Pragma': 'no-cache',
           'Expires': '0',
         },
-        proxy: {
-          '/api': {
-            target: apiUrl,
-            changeOrigin: true,
-            secure: false,
-            configure: (proxy, options) => {
-              proxy.on('error', (err, req, res) => {
-                console.log('proxy error', err);
-              });
-              proxy.on('proxyReq', (proxyReq, req, res) => {
-                console.log('Sending Request to the Target:', req.method, req.url);
-              });
-              proxy.on('proxyRes', (proxyRes, req, res) => {
-                console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-              });
-            },
-          }
-        },
+        // Disable proxy for now - use direct API calls
+        // proxy: {
+        //   '/api': {
+        //     target: apiUrl,
+        //     changeOrigin: true,
+        //     secure: false,
+        //   }
+        // },
         // Force HMR to always reload
         hmr: {
           overlay: true,

@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage, ToolResultMessage } from './ChatMessage';
 import { v4 as uuidv4 } from 'uuid';
+import { mockApi } from '../../api/mockApi';
 
 interface Message {
     id: string;
@@ -51,22 +52,17 @@ export const ChatbotWidget: React.FC = () => {
 
     const loadChatHistory = async () => {
         try {
-            const response = await fetch(`/api/chat/message?sessionId=${sessionId}`, {
-                headers: getAuthHeaders(),
-            });
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.data.length > 0) {
-                    setMessages(
-                        data.data.map((msg: any) => ({
-                            id: msg.id,
-                            role: msg.role,
-                            content: msg.content,
-                            timestamp: new Date(msg.created_at),
-                            toolResults: msg.metadata?.toolResults,
-                        }))
-                    );
-                }
+            const data = await mockApi.getChatMessages(sessionId);
+            if (data.messages && data.messages.length > 0) {
+                setMessages(
+                    data.messages.map((msg: any) => ({
+                        id: msg.id,
+                        role: msg.role,
+                        content: msg.content,
+                        timestamp: new Date(msg.timestamp),
+                        toolResults: msg.toolResults,
+                    }))
+                );
             }
         } catch (error) {
             console.error('Failed to load chat history:', error);
@@ -88,35 +84,17 @@ export const ChatbotWidget: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/chat/message', {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({
-                    message: inputValue,
-                    sessionId,
-                    currentPage: window.location.pathname,
-                }),
-            });
+            const data = await mockApi.sendChatMessage(sessionId, inputValue);
 
-            if (!response.ok) {
-                throw new Error('Failed to send message');
-            }
+            const assistantMessage: Message = {
+                id: data.message.id,
+                role: 'assistant',
+                content: data.message.content,
+                timestamp: new Date(data.message.timestamp),
+                toolResults: undefined,
+            };
 
-            const data = await response.json();
-
-            if (data.success) {
-                const assistantMessage: Message = {
-                    id: uuidv4(),
-                    role: 'assistant',
-                    content: data.data.message,
-                    timestamp: new Date(),
-                    toolResults: data.data.toolResults,
-                };
-
-                setMessages((prev) => [...prev, assistantMessage]);
-            } else {
-                throw new Error(data.error || 'Unknown error');
-            }
+            setMessages((prev) => [...prev, assistantMessage]);
         } catch (error: any) {
             console.error('Chat error:', error);
             const errorMessage: Message = {
@@ -139,11 +117,9 @@ export const ChatbotWidget: React.FC = () => {
     };
 
     const clearChat = async () => {
-        if (confirm('Ești sigur că vrei să ștergi conversația?')) {
+        if (confirm('Are you sure you want to clear the conversation?')) {
             try {
-                await fetch(`/api/chat/message?sessionId=${sessionId}`, {
-                    method: 'DELETE',
-                });
+                // Clear local messages (mock API doesn't need server call)
                 setMessages([]);
             } catch (error) {
                 console.error('Failed to clear chat:', error);

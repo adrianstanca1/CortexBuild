@@ -1,17 +1,24 @@
-// Simple API Server for CortexBuild Development
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
+// Mock API for CortexBuild Development
+// This provides working API responses without requiring a backend server
 
-const app = express();
-const PORT = 3001;
+export interface ChatMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  timestamp: string;
+  sessionId: string;
+}
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+export interface ChatSession {
+  id: string;
+  userId: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 // Mock chat sessions storage
-const chatSessions = new Map();
+const chatSessions = new Map<string, ChatSession>();
 
 // Mock chat responses
 const mockResponses = [
@@ -28,7 +35,7 @@ const mockResponses = [
 ];
 
 // Generate AI response based on user input
-function generateAIResponse(userMessage, conversationHistory) {
+function generateAIResponse(userMessage: string, conversationHistory: ChatMessage[]): string {
   const lowerMessage = userMessage.toLowerCase();
   
   // Context-aware responses based on keywords
@@ -57,47 +64,16 @@ function generateAIResponse(userMessage, conversationHistory) {
   return randomResponse;
 }
 
-// Chat API endpoints
-app.get('/api/chat/message', async (req, res) => {
-  try {
-    const { sessionId } = req.query;
-
-    if (!sessionId) {
-      return res.status(400).json({ error: 'Session ID is required' });
-    }
-
-    // Get chat history
+// Mock API functions
+export const mockApi = {
+  // Chat API
+  async getChatMessages(sessionId: string): Promise<{ messages: ChatMessage[] }> {
     const session = chatSessions.get(sessionId);
     const messages = session ? session.messages : [];
+    return { messages };
+  },
 
-    res.json({ messages });
-  } catch (error) {
-    console.error('Chat API error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Add OPTIONS handler for CORS preflight
-app.options('/api/chat/message', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.sendStatus(200);
-});
-
-app.post('/api/chat/message', async (req, res) => {
-  try {
-    const { sessionId } = req.query;
-    const { message } = req.body;
-    
-    if (!sessionId) {
-      return res.status(400).json({ error: 'Session ID is required' });
-    }
-    
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
-
+  async sendChatMessage(sessionId: string, message: string): Promise<{ message: ChatMessage }> {
     // Get or create session
     let session = chatSessions.get(sessionId);
     if (!session) {
@@ -112,7 +88,7 @@ app.post('/api/chat/message', async (req, res) => {
     }
 
     // Add user message
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: `msg-${Date.now()}-user`,
       content: message,
       role: 'user',
@@ -123,7 +99,7 @@ app.post('/api/chat/message', async (req, res) => {
 
     // Generate AI response
     const responseContent = generateAIResponse(message, session.messages);
-    const aiMessage = {
+    const aiMessage: ChatMessage = {
       id: `msg-${Date.now()}-ai`,
       content: responseContent,
       role: 'assistant',
@@ -134,86 +110,60 @@ app.post('/api/chat/message', async (req, res) => {
 
     session.updatedAt = new Date().toISOString();
 
-    res.json({ message: aiMessage });
-  } catch (error) {
-    console.error('Chat API error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return { message: aiMessage };
+  },
+
+  // Health check
+  async getHealth(): Promise<{ status: string; timestamp: string; service: string }> {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'CortexBuild Mock API'
+    };
+  },
+
+  // Platform admin
+  async getPlatformAdmin(): Promise<{ message: string; timestamp: string; status: string }> {
+    return {
+      message: 'Platform Admin API is working (Mock)',
+      timestamp: new Date().toISOString(),
+      status: 'ok'
+    };
+  },
+
+  // Auth endpoints
+  async login(email: string, password: string): Promise<{ success: boolean; token: string; user: any }> {
+    return {
+      success: true,
+      token: 'demo-token-' + Date.now(),
+      user: {
+        id: 'demo-user-123',
+        email: email,
+        name: 'Demo User',
+        role: 'admin'
+      }
+    };
+  },
+
+  async getCurrentUser(): Promise<{ success: boolean; user: any }> {
+    return {
+      success: true,
+      user: {
+        id: 'demo-user-123',
+        email: 'demo@cortexbuild.com',
+        name: 'Demo User',
+        role: 'admin'
+      }
+    };
   }
-});
+};
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
-    timestamp: new Date().toISOString(),
-    service: 'CortexBuild API Server'
-  });
-});
+// Export individual functions for compatibility
+export const getChatMessages = mockApi.getChatMessages;
+export const sendChatMessage = mockApi.sendChatMessage;
+export const getHealth = mockApi.getHealth;
+export const getPlatformAdmin = mockApi.getPlatformAdmin;
+export const login = mockApi.login;
+export const getCurrentUser = mockApi.getCurrentUser;
 
-// Platform admin endpoints
-app.get('/api/platformAdmin', (req, res) => {
-  res.json({
-    message: 'Platform Admin API is working',
-    timestamp: new Date().toISOString(),
-    status: 'ok'
-  });
-});
-
-app.post('/api/platformAdmin', (req, res) => {
-  res.json({
-    message: 'Platform Admin POST endpoint',
-    timestamp: new Date().toISOString(),
-    status: 'ok',
-    data: req.body
-  });
-});
-
-// Add general API endpoints
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    service: 'CortexBuild API Server',
-    version: '2.0.0'
-  });
-});
-
-// Add auth endpoints for demo
-app.post('/api/auth/login', (req, res) => {
-  res.json({
-    success: true,
-    token: 'demo-token-' + Date.now(),
-    user: {
-      id: 'demo-user-123',
-      email: 'demo@cortexbuild.com',
-      name: 'Demo User',
-      role: 'admin'
-    }
-  });
-});
-
-app.get('/api/auth/me', (req, res) => {
-  res.json({
-    success: true,
-    user: {
-      id: 'demo-user-123',
-      email: 'demo@cortexbuild.com',
-      name: 'Demo User',
-      role: 'admin'
-    }
-  });
-});
-
-// Simple fallback for unknown routes
-app.use((req, res) => {
-  res.status(404).json({ error: 'API endpoint not found' });
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 CortexBuild API Server running on http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`💬 Chat API: http://localhost:${PORT}/api/chat/message`);
-});
-
-module.exports = app;
+export default mockApi;
