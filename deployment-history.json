@@ -1,0 +1,139 @@
+{
+  "environments": {
+    "development": {
+      "name": "Development",
+      "url": "http://localhost:3005",
+      "apiUrl": "http://localhost:3001",
+      "checks": [
+        "build",
+        "test",
+        "security"
+      ]
+    },
+    "staging": {
+      "name": "Staging",
+      "url": "https://staging.cortexbuild.com",
+      "apiUrl": "https://api-staging.cortexbuild.com",
+      "checks": [
+        "build",
+        "test",
+        "security",
+        "performance"
+      ]
+    },
+    "production": {
+      "name": "Production",
+      "url": "https://cortexbuild.com",
+      "apiUrl": "https://api.cortexbuild.com",
+      "checks": [
+        "build",
+        "test",
+        "security",
+        "performance",
+        "approval"
+      ]
+    }
+  },
+  "currentDeployment": {
+    "id": "deploy-1760673926968",
+    "environment": "development",
+    "startTime": "2025-10-17T04:05:26.968Z",
+    "steps": [
+      {
+        "name": "Pre-deployment Checks",
+        "status": "SUCCESS",
+        "duration": 144,
+        "result": [
+          {
+            "name": "Git Status",
+            "status": "WARNING",
+            "message": "Uncommitted changes detected",
+            "recommendation": "Commit or stash changes before deployment"
+          },
+          {
+            "name": "Node.js Version",
+            "status": "PASS",
+            "message": "Node.js v22.20.0 detected"
+          },
+          {
+            "name": "Dependencies",
+            "status": "PASS",
+            "message": "package.json found"
+          }
+        ]
+      },
+      {
+        "name": "Build Application",
+        "status": "SUCCESS",
+        "duration": 53812,
+        "result": {
+          "success": true,
+          "stats": {
+            "files": 48,
+            "totalSize": "1.49 MB",
+            "sizeBytes": 1561225
+          }
+        }
+      },
+      {
+        "name": "Run Tests",
+        "status": "FAILED",
+        "duration": 2937
+      }
+    ],
+    "status": "FAILED",
+    "endTime": "2025-10-17T04:06:23.862Z"
+  },
+  "deploymentHistory": [
+    {
+      "id": "deploy-1760673926968",
+      "environment": "development",
+      "startTime": "2025-10-17T04:05:26.968Z",
+      "steps": [
+        {
+          "name": "Pre-deployment Checks",
+          "status": "SUCCESS",
+          "duration": 144,
+          "result": [
+            {
+              "name": "Git Status",
+              "status": "WARNING",
+              "message": "Uncommitted changes detected",
+              "recommendation": "Commit or stash changes before deployment"
+            },
+            {
+              "name": "Node.js Version",
+              "status": "PASS",
+              "message": "Node.js v22.20.0 detected"
+            },
+            {
+              "name": "Dependencies",
+              "status": "PASS",
+              "message": "package.json found"
+            }
+          ]
+        },
+        {
+          "name": "Build Application",
+          "status": "SUCCESS",
+          "duration": 53812,
+          "result": {
+            "success": true,
+            "stats": {
+              "files": 48,
+              "totalSize": "1.49 MB",
+              "sizeBytes": 1561225
+            }
+          }
+        },
+        {
+          "name": "Run Tests",
+          "status": "FAILED",
+          "duration": 2937
+        }
+      ],
+      "status": "FAILED",
+      "endTime": "2025-10-17T04:06:23.862Z"
+    }
+  ]
+}

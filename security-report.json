@@ -1,0 +1,80 @@
+{
+  "timestamp": "2025-10-17T04:05:21.425Z",
+  "overall": "VULNERABLE",
+  "checks": {
+    "CORS Configuration": {
+      "status": "FAIL",
+      "severity": "MEDIUM",
+      "message": "CORS headers not configured",
+      "recommendation": "Configure proper CORS headers to prevent cross-origin attacks"
+    },
+    "HTTP Headers": {
+      "status": "FAIL",
+      "severity": "HIGH",
+      "message": "Missing security headers: x-content-type-options, x-frame-options, x-xss-protection, strict-transport-security",
+      "recommendation": "Add security headers to prevent common web vulnerabilities"
+    },
+    "API Authentication": {
+      "status": "FAIL",
+      "severity": "CRITICAL",
+      "message": "Authentication bypass vulnerabilities detected",
+      "details": [
+        "http://localhost:3001/api/platformAdmin - unexpected response: Request failed with status code 404"
+      ],
+      "recommendation": "Implement proper authentication for all protected endpoints"
+    },
+    "Input Validation": {
+      "status": "PASS",
+      "message": "Input validation appears secure"
+    },
+    "SSL/TLS Configuration": {
+      "status": "WARNING",
+      "severity": "HIGH",
+      "message": "SSL/TLS not configured (development environment)",
+      "recommendation": "Configure SSL/TLS certificates for production deployment"
+    },
+    "Dependency Vulnerabilities": {
+      "status": "WARNING",
+      "severity": "MEDIUM",
+      "message": "Potentially vulnerable dependencies detected",
+      "details": [
+        "Potentially vulnerable dependency: axios@1.12.2",
+        "Potentially vulnerable dependency: express@5.1.0",
+        "Potentially vulnerable dependency: lodash@4.17.21"
+      ],
+      "recommendation": "Run npm audit and update vulnerable dependencies"
+    },
+    "File Permissions": {
+      "status": "WARNING",
+      "severity": "MEDIUM",
+      "message": "File permission issues detected",
+      "details": [
+        "package.json may be world-readable",
+        ".env may be world-readable",
+        ".env.local may be world-readable",
+        "api-server.cjs may be world-readable"
+      ],
+      "recommendation": "Restrict file permissions for sensitive files"
+    },
+    "Environment Variables": {
+      "status": "PASS",
+      "message": "Environment configuration appears secure"
+    }
+  },
+  "vulnerabilities": [
+    {
+      "test": "API Authentication",
+      "severity": "CRITICAL",
+      "message": "Authentication bypass vulnerabilities detected",
+      "recommendation": "Implement proper authentication for all protected endpoints"
+    }
+  ],
+  "recommendations": [],
+  "compliance": {},
+  "summary": {
+    "total": 8,
+    "passed": 2,
+    "warnings": 3,
+    "failed": 3
+  }
+}
