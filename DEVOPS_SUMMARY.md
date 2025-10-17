@@ -38,22 +38,21 @@
 
 ### **🚀 Available Commands**
 ```bash
-# Start full development environment
-npm run dev:full
+# Development Environment
+npm run dev:full         # Complete development environment
+npm run dev             # Frontend only
+npm run api-server      # API server only
+npm run devtools        # React DevTools only
 
-# Run DevOps monitoring
-npm run devops:monitor
-
-# Run DevOps tests
-npm run devops:test
-
-# Open DevOps dashboard
-npm run devops:dashboard
-
-# Individual services
-npm run dev          # Frontend only
-npm run api-server   # API server only
-npm run devtools     # React DevTools only
+# DevOps Operations
+npm run devops:center    # Interactive command center
+npm run devops:dashboard # Dashboard HTTP server
+npm run devops:monitor   # Basic monitoring
+npm run devops:status    # Quick status check
+npm run devops:health    # Health check system
+npm run devops:performance # Performance analysis
+npm run devops:automate  # Automated monitoring
+npm run devops:open      # Open dashboard in browser
 ```
 
 ---

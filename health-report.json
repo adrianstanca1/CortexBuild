@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-10-17T03:57:57.297Z",
+  "overall": "HEALTHY",
+  "services": {
+    "Frontend Application": {
+      "name": "Frontend Application",
+      "status": "HEALTHY",
+      "responseTime": 58,
+      "statusCode": 200,
+      "critical": true,
+      "url": "http://localhost:3005",
+      "lastCheck": "2025-10-17T03:57:57.357Z",
+      "details": "Service responding correctly"
+    },
+    "API Health Endpoint": {
+      "name": "API Health Endpoint",
+      "status": "HEALTHY",
+      "responseTime": 13,
+      "statusCode": 200,
+      "critical": true,
+      "url": "http://localhost:3001/api/health",
+      "lastCheck": "2025-10-17T03:57:57.332Z",
+      "details": "Service responding correctly"
+    },
+    "DevOps Dashboard": {
+      "name": "DevOps Dashboard",
+      "status": "HEALTHY",
+      "responseTime": 11,
+      "statusCode": 200,
+      "critical": false,
+      "url": "http://localhost:3006",
+      "lastCheck": "2025-10-17T03:57:57.330Z",
+      "details": "Service responding correctly"
+    },
+    "DevOps Report API": {
+      "name": "DevOps Report API",
+      "status": "HEALTHY",
+      "responseTime": 11,
+      "statusCode": 200,
+      "critical": false,
+      "url": "http://localhost:3006/devops-report.json",
+      "lastCheck": "2025-10-17T03:57:57.331Z",
+      "details": "Service responding correctly"
+    },
+    "Chat API": {
+      "name": "Chat API",
+      "status": "HEALTHY",
+      "responseTime": 11,
+      "statusCode": 401,
+      "critical": false,
+      "url": "http://localhost:3001/api/chat/message?sessionId=health-check",
+      "lastCheck": "2025-10-17T03:57:57.332Z",
+      "details": "Service responding correctly"
+    }
+  },
+  "summary": {
+    "total": 5,
+    "healthy": 5,
+    "unhealthy": 0,
+    "critical_failures": 0
+  },
+  "uptime": {
+    "seconds": 0.076519667,
+    "formatted": "0h 0m 0s"
+  },
+  "recommendations": [],
+  "nextCheck": "2025-10-17T03:58:27.358Z"
+}

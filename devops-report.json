@@ -1,15 +1,15 @@
 {
-  "timestamp": "2025-10-17T03:42:38.053Z",
+  "timestamp": "2025-10-17T03:52:06.973Z",
   "services": {
     "frontend": {
       "status": "HEALTHY",
-      "responseTime": 327,
+      "responseTime": 147,
       "statusCode": 200,
       "url": "http://localhost:3005"
     },
     "api": {
       "status": "HEALTHY",
-      "responseTime": 14,
+      "responseTime": 6,
       "statusCode": 200,
       "url": "http://localhost:3001/api/health"
     },
@@ -26,23 +26,23 @@
   },
   "performance": {
     "Frontend Load": {
-      "average": 238,
-      "min": 124,
-      "max": 347,
+      "average": 69,
+      "min": 49,
+      "max": 80,
       "samples": [
-        124,
-        244,
-        347
+        78,
+        49,
+        80
       ]
     },
     "API Response": {
-      "average": 9,
-      "min": 5,
-      "max": 13,
+      "average": 4,
+      "min": 3,
+      "max": 6,
       "samples": [
-        5,
-        13,
-        8
+        3,
+        6,
+        4
       ]
     }
   },
