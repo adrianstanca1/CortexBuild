@@ -9,7 +9,7 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && node deploy-ionos.cjs",
+    "deploy:ionos": "npm run build && node deploy-ionos.cjs",
     "vercel:dev": "vercel dev",
     "vercel:deploy": "vercel",
     "vercel:prod": "vercel --prod",
@@ -34,7 +34,15 @@
     "showcase": "npm run demo && npm run verify:quick",
     "build:verify": "node scripts/buildVerification.cjs",
     "build:full": "npm run build && npm run build:verify",
-    "build:test": "npm run build:full && npm run preview"
+    "build:test": "npm run build:full && npm run preview",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:vercel": "./scripts/deploy.sh vercel production",
+    "deploy:netlify": "./scripts/deploy.sh netlify production",
+    "deploy:aws": "./scripts/deploy.sh aws production",
+    "deploy:docker": "./scripts/deploy.sh docker production",
+    "deploy:gh-pages": "./scripts/deploy.sh github-pages production",
+    "deploy:local": "./scripts/deploy.sh local production",
+    "deploy:staging": "./scripts/deploy.sh vercel staging"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",
