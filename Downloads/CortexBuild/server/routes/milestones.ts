@@ -47,7 +47,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
       }
 
       if (search) {
-        query += ' AND (m.title LIKE ? OR m.description LIKE ?)';
+        query += ' AND (m.name LIKE ? OR m.description LIKE ?)';
         const searchTerm = `%${search}%`;
         params.push(searchTerm, searchTerm);
       }
@@ -103,7 +103,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
       // Get associated tasks
       const tasks = db.prepare(`
         SELECT t.*, 
-               u.first_name || ' ' || u.last_name as assigned_to_name
+               u.name as assigned_to_name
         FROM tasks t
         LEFT JOIN users u ON t.assigned_to = u.id
         WHERE t.milestone_id = ?
@@ -145,7 +145,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
 
       const result = db.prepare(`
         INSERT INTO milestones (
-          project_id, title, description, due_date, status
+          project_id, name, description, due_date, status
         ) VALUES (?, ?, ?, ?, ?)
       `).run(project_id, title, description, due_date, status);
 

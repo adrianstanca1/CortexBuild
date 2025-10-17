@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Database from 'better-sqlite3';
+import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '../auth';
 
 export function createEnhancedAdminRoutes(db: Database.Database) {
@@ -137,7 +138,6 @@ export function createEnhancedAdminRoutes(db: Database.Database) {
       }
 
       // Hash password (using bcrypt in production)
-      const bcrypt = require('bcrypt');
       const hashedPassword = bcrypt.hashSync(password, 10);
 
       // Create user

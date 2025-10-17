@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 // Fix: Added .ts extension to import
-import { Project } from '../../types.ts';
+import { Project } from '../../types';
 // Fix: Added .tsx extension to import
-import { ChevronLeftIcon, PlusIcon } from '../Icons.tsx';
-import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox.tsx';
+import { ChevronLeftIcon, PlusIcon } from '../Icons';
+import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
 
 
 interface PhotoGalleryScreenProps {

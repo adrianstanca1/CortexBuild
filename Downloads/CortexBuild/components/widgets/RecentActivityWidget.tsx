@@ -1,11 +1,11 @@
 import React from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { ActivityEvent, Screen } from '../../types.ts';
+import { ActivityEvent, Screen } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Fix: Added ClipboardDocumentListIcon for 'log_submitted' and removed unused QuestionMarkCircleIcon.
-import { CheckBadgeIcon, CameraIcon, ChatBubbleBottomCenterTextIcon, ClipboardDocumentListIcon } from '../Icons.tsx';
+import { CheckBadgeIcon, CameraIcon, ChatBubbleBottomCenterTextIcon, ClipboardDocumentListIcon } from '../Icons';
 
 interface RecentActivityWidgetProps {
     activities: ActivityEvent[];

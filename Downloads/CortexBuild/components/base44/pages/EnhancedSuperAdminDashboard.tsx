@@ -1,162 +1,251 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Users, Building2, TrendingUp, DollarSign, Activity, Shield, Database,
-  Settings, Zap, Code, BarChart3, AlertCircle, CheckCircle, Clock,
-  Package, Cpu, HardDrive, Globe, Lock, UserPlus, RefreshCw, Download
+  Activity,
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
+  Building2,
+  CheckCircle,
+  Code,
+  Cpu,
+  Database,
+  DollarSign,
+  Download,
+  Globe,
+  HardDrive,
+  Layers,
+  Lock,
+  Package,
+  RefreshCw,
+  Settings,
+  Shield,
+  UserPlus,
+  Users,
+  Zap
 } from 'lucide-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { AddUserModal } from '../../admin/AddUserModal';
+import { AddCompanyModal } from '../../admin/AddCompanyModal';
+import { AddProjectModal } from '../../admin/AddProjectModal';
+import { FullUsersManagement } from '../../admin/FullUsersManagement';
+import { FullCompaniesManagement } from '../../admin/FullCompaniesManagement';
 
-interface DashboardStats {
-  users: { total: number; active: number; new: number };
-  companies: { total: number; active: number };
-  projects: { total: number; active: number };
-  revenue: { total: number; monthly: number; growth: number };
-  sdk: { developers: number; requests: number; cost: number };
-  system: { uptime: number; cpu: number; memory: number; storage: number };
+interface ProviderUsage {
+  provider: string;
+  requests: number;
+  cost: number;
+  tokens: number;
 }
 
+interface TenantUsage {
+  companyId: string;
+  companyName: string;
+  projects: number;
+  users: number;
+  apiCost: number;
+  tokens: number;
+}
+
+interface ActivityEntry {
+  id: string;
+  action: string;
+  description: string;
+  createdAt: string;
+  userName?: string;
+  companyName?: string;
+}
+
+interface PendingApproval {
+  id: string;
+  name: string;
+  status: string;
+  updatedAt: string;
+  developerName?: string;
+  companyName?: string;
+}
+
+interface AppSummary {
+  id: string;
+  name: string;
+  status: string;
+  updatedAt: string;
+  developerName?: string;
+  companyName?: string;
+}
+
+interface DashboardData {
+  totals: {
+    users: number;
+    companies: number;
+    projects: number;
+    clients: number;
+  };
+  userStats: {
+    total: number;
+    active: number;
+    newThisWeek: number;
+    superAdmins: number;
+    developers: number;
+  };
+  companyStats: {
+    total: number;
+    active: number;
+    newThisMonth: number;
+  };
+  projectStats: {
+    total: number;
+    active: number;
+    byStatus: Array<{ status: string; count: number }>;
+  };
+  sdkStats: {
+    developers: number;
+    requestsThisMonth: number;
+    costThisMonth: number;
+    tokensThisMonth: number;
+    topProviders: ProviderUsage[];
+  };
+  systemStats: {
+    uptime: number;
+    cpu: number;
+    memory: number;
+    storage: number;
+  };
+  tenantUsage: TenantUsage[];
+  recentActivity: ActivityEntry[];
+  pendingApprovals: PendingApproval[];
+  recentApps: AppSummary[];
+}
+
+type Section = 'overview' | 'users' | 'companies' | 'sdk' | 'system';
+
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: { 'Content-Type': 'application/json' }
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('constructai_token') || localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
+
+const formatDateTime = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+};
+
+const StatCard: React.FC<{
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  icon: React.ComponentType<any>;
+  color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'teal';
+  onClick?: () => void;
+}> = ({ title, value, subtitle, icon: Icon, color, onClick }) => {
+  const palette = {
+    blue: { bg: 'bg-blue-50', icon: 'text-blue-600' },
+    green: { bg: 'bg-green-50', icon: 'text-green-600' },
+    purple: { bg: 'bg-purple-50', icon: 'text-purple-600' },
+    orange: { bg: 'bg-orange-50', icon: 'text-orange-600' },
+    red: { bg: 'bg-red-50', icon: 'text-red-600' },
+    teal: { bg: 'bg-teal-50', icon: 'text-teal-600' }
+  }[color];
+
+  return (
+    <div
+      onClick={onClick}
+      className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-lg ${palette.bg}`}>
+          <Icon className={`w-6 h-6 ${palette.icon}`} />
+        </div>
+      </div>
+      <h3 className="text-3xl font-bold text-gray-900 mb-1">{value}</h3>
+      <p className="text-sm font-medium text-gray-600">{title}</p>
+      {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+    </div>
+  );
+};
+
+const QuickAction: React.FC<{
+  icon: React.ComponentType<any>;
+  label: string;
+  onClick: () => void;
+  color: string;
+}> = ({ icon: Icon, label, onClick, color }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed ${color} hover:bg-opacity-10 transition-all`}
+  >
+    <Icon className="w-6 h-6 mb-2" />
+    <span className="text-sm font-medium">{label}</span>
+  </button>
+);
+
 export const EnhancedSuperAdminDashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [summary, setSummary] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState<'overview' | 'users' | 'companies' | 'sdk' | 'system'>('overview');
   const [refreshing, setRefreshing] = useState(false);
+  const [activeSection, setActiveSection] = useState<Section>('overview');
 
-  useEffect(() => {
-    fetchDashboardStats();
-  }, []);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboard = async () => {
+    setRefreshing(true);
     try {
-      setRefreshing(true);
-      const token = localStorage.getItem('token');
-      
-      // Fetch all stats in parallel
-      const [usersRes, companiesRes, projectsRes, sdkRes] = await Promise.all([
-        fetch('http://localhost:3001/api/admin/users', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('http://localhost:3001/api/admin/companies', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('http://localhost:3001/api/projects', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('http://localhost:3001/api/admin/sdk/usage', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-      ]);
-
-      const users = await usersRes.json();
-      const companies = await companiesRes.json();
-      const projects = await projectsRes.json();
-      const sdk = await sdkRes.json();
-
-      setStats({
-        users: {
-          total: users.data?.length || 0,
-          active: users.data?.filter((u: any) => u.last_login).length || 0,
-          new: users.data?.filter((u: any) => {
-            const created = new Date(u.created_at);
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            return created > weekAgo;
-          }).length || 0
-        },
-        companies: {
-          total: companies.data?.length || 0,
-          active: companies.data?.length || 0
-        },
-        projects: {
-          total: projects.data?.length || 0,
-          active: projects.data?.filter((p: any) => p.status === 'active').length || 0
-        },
-        revenue: {
-          total: 125000,
-          monthly: 15000,
-          growth: 12.5
-        },
-        sdk: {
-          developers: sdk.data?.totalDevelopers || 0,
-          requests: sdk.data?.totalRequests || 0,
-          cost: sdk.data?.totalCost || 0
-        },
-        system: {
-          uptime: 99.9,
-          cpu: 45,
-          memory: 62,
-          storage: 38
-        }
-      });
+      const response = await api.get('/admin/dashboard');
+      if (response.data?.success) {
+        setSummary(response.data.data);
+      } else {
+        toast.error('Unable to load super admin dashboard data');
+      }
     } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error);
+      console.error('Failed to load dashboard summary', error);
+      toast.error('Failed to load dashboard summary');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const StatCard: React.FC<{
-    title: string;
-    value: string | number;
-    subtitle?: string;
-    icon: any;
-    color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'teal';
-    trend?: number;
-    onClick?: () => void;
-  }> = ({ title, value, subtitle, icon: Icon, color, trend, onClick }) => {
-    const colorClasses = {
-      blue: 'bg-blue-500 text-blue-600 bg-blue-50',
-      green: 'bg-green-500 text-green-600 bg-green-50',
-      purple: 'bg-purple-500 text-purple-600 bg-purple-50',
-      orange: 'bg-orange-500 text-orange-600 bg-orange-50',
-      red: 'bg-red-500 text-red-600 bg-red-50',
-      teal: 'bg-teal-500 text-teal-600 bg-teal-50'
-    };
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
 
-    return (
-      <div
-        onClick={onClick}
-        className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-lg ${colorClasses[color].split(' ')[2]}`}>
-            <Icon className={`w-6 h-6 ${colorClasses[color].split(' ')[1]}`} />
-          </div>
-          {trend !== undefined && (
-            <div className={`flex items-center space-x-1 text-sm font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              <TrendingUp className={`w-4 h-4 ${trend < 0 ? 'rotate-180' : ''}`} />
-              <span>{Math.abs(trend)}%</span>
-            </div>
-          )}
-        </div>
-        <h3 className="text-3xl font-bold text-gray-900 mb-1">{value}</h3>
-        <p className="text-sm font-medium text-gray-600">{title}</p>
-        {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
-      </div>
-    );
-  };
+  const statusBreakdown = useMemo(() => summary?.projectStats.byStatus ?? [], [summary]);
 
-  const QuickAction: React.FC<{
-    icon: any;
-    label: string;
-    onClick: () => void;
-    color: string;
-  }> = ({ icon: Icon, label, onClick, color }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed ${color} hover:bg-opacity-10 transition-all`}
-    >
-      <Icon className="w-6 h-6 mb-2" />
-      <span className="text-sm font-medium">{label}</span>
-    </button>
-  );
+  const topProviders = useMemo(() => summary?.sdkStats.topProviders ?? [], [summary]);
+
+  const tenantUsage = useMemo(() => summary?.tenantUsage ?? [], [summary]);
+
+  const pendingApprovals = useMemo(() => summary?.pendingApprovals ?? [], [summary]);
+
+  const recentActivity = useMemo(() => summary?.recentActivity ?? [], [summary]);
+
+  const recentApps = useMemo(() => summary?.recentApps ?? [], [summary]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600">Preparing super admin console…</p>
         </div>
       </div>
     );
@@ -164,209 +253,407 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-1">Super Admin Dashboard</h1>
-              <p className="text-gray-600">Complete platform control and management</p>
+              <div className="flex items-center gap-2 text-sm font-semibold text-blue-600 uppercase tracking-wide">
+                <Shield className="h-4 w-4" />
+                Platform Oversight
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
+              <p className="text-gray-600 mt-1">Unified control over tenants, usage, and system health.</p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={fetchDashboardStats}
+                onClick={fetchDashboard}
                 disabled={refreshing}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 transition-colors disabled:opacity-60"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
               </button>
               <button
                 type="button"
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
               >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
+                <Download className="h-4 w-4" />
+                Export Report
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex space-x-8">
-            {[
-              { id: 'overview', label: 'Overview', icon: BarChart3 },
-              { id: 'users', label: 'Users', icon: Users },
-              { id: 'companies', label: 'Companies', icon: Building2 },
-              { id: 'sdk', label: 'SDK Platform', icon: Code },
-              { id: 'system', label: 'System', icon: Database }
-            ].map(tab => (
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {/* Stats Overview */}
+        <div className="grid gap-6 lg:grid-cols-4">
+          <StatCard
+            title="Total Users"
+            value={formatNumber(summary?.userStats.total ?? 0)}
+            subtitle={`${formatNumber(summary?.userStats.newThisWeek ?? 0)} joined this week`}
+            icon={Users}
+            color="blue"
+            onClick={() => setActiveSection('users')}
+          />
+          <StatCard
+            title="Active Tenants"
+            value={formatNumber(summary?.companyStats.active ?? 0)}
+            subtitle={`${formatNumber(summary?.companyStats.newThisMonth ?? 0)} new this month`}
+            icon={Building2}
+            color="green"
+            onClick={() => setActiveSection('companies')}
+          />
+          <StatCard
+            title="Live Projects"
+            value={formatNumber(summary?.projectStats.active ?? 0)}
+            subtitle={`${formatNumber(summary?.projectStats.total ?? 0)} total projects`}
+            icon={Layers}
+            color="purple"
+            onClick={() => setActiveSection('overview')}
+          />
+          <StatCard
+            title="SDK Requests"
+            value={formatNumber(summary?.sdkStats.requestsThisMonth ?? 0)}
+            subtitle={formatCurrency(summary?.sdkStats.costThisMonth ?? 0) + ' spend this month'}
+            icon={Code}
+            color="orange"
+            onClick={() => setActiveSection('sdk')}
+          />
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
+            <p className="text-sm text-gray-500">Manage global resources across tenants.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-4">
+            <QuickAction icon={UserPlus} label="Invite User" onClick={() => setShowAddUserModal(true)} color="border-blue-300 text-blue-600" />
+            <QuickAction icon={Building2} label="Add Company" onClick={() => setShowAddCompanyModal(true)} color="border-green-300 text-green-600" />
+            <QuickAction icon={Package} label="Create Project" onClick={() => setShowAddProjectModal(true)} color="border-purple-300 text-purple-600" />
+            <QuickAction icon={Settings} label="Platform Admin" onClick={() => setActiveSection('system')} color="border-gray-300 text-gray-600" />
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap gap-2 text-sm font-semibold">
+          {[
+            { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'users', label: 'Users', icon: Users },
+            { id: 'companies', label: 'Companies', icon: Building2 },
+            { id: 'sdk', label: 'SDK Platform', icon: Code },
+            { id: 'system', label: 'System Health', icon: Shield }
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
               <button
                 key={tab.id}
-                type="button"
-                onClick={() => setActiveSection(tab.id as any)}
-                className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${
-                  activeSection === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                onClick={() => setActiveSection(tab.id as Section)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                  activeSection === tab.id ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <tab.icon className="w-5 h-5" />
-                <span className="font-medium">{tab.label}</span>
+                <Icon className="h-4 w-4" />
+                {tab.label}
               </button>
-            ))}
-          </nav>
+            );
+          })}
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Section Content */}
         {activeSection === 'overview' && (
-          <div className="space-y-8">
-            {/* Key Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard
-                title="Total Users"
-                value={stats?.users.total || 0}
-                subtitle={`${stats?.users.active || 0} active • ${stats?.users.new || 0} new this week`}
-                icon={Users}
-                color="blue"
-                trend={8.2}
-                onClick={() => setActiveSection('users')}
-              />
-              <StatCard
-                title="Companies"
-                value={stats?.companies.total || 0}
-                subtitle={`${stats?.companies.active || 0} active companies`}
-                icon={Building2}
-                color="green"
-                trend={5.1}
-                onClick={() => setActiveSection('companies')}
-              />
-              <StatCard
-                title="Active Projects"
-                value={stats?.projects.active || 0}
-                subtitle={`${stats?.projects.total || 0} total projects`}
-                icon={Package}
-                color="purple"
-                trend={12.3}
-              />
-              <StatCard
-                title="Monthly Revenue"
-                value={`$${(stats?.revenue.monthly || 0).toLocaleString()}`}
-                subtitle={`$${(stats?.revenue.total || 0).toLocaleString()} total`}
-                icon={DollarSign}
-                color="orange"
-                trend={stats?.revenue.growth || 0}
-              />
-            </div>
-
-            {/* SDK Platform Stats */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                  <Code className="w-6 h-6 mr-2 text-blue-600" />
-                  SDK Developer Platform
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection('sdk')}
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
-                  View Details →
-                </button>
+          <div className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Tenant Breakdown</h3>
+                    <p className="text-sm text-gray-500">Top tenants by usage this month.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                    onClick={() => setActiveSection('companies')}
+                  >
+                    Manage Tenants <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-xs uppercase text-gray-500 border-b">
+                        <th className="py-2">Company</th>
+                        <th className="py-2">Projects</th>
+                        <th className="py-2">Users</th>
+                        <th className="py-2">Tokens</th>
+                        <th className="py-2 text-right">API Spend</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tenantUsage.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-6 text-center text-gray-500">
+                            No tenant usage recorded yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        tenantUsage.map((tenant) => (
+                          <tr key={tenant.companyId} className="border-b last:border-none">
+                            <td className="py-3 font-medium text-gray-900">{tenant.companyName}</td>
+                            <td className="py-3 text-gray-600">{formatNumber(tenant.projects)}</td>
+                            <td className="py-3 text-gray-600">{formatNumber(tenant.users)}</td>
+                            <td className="py-3 text-gray-600">{formatNumber(tenant.tokens)}</td>
+                            <td className="py-3 text-right text-gray-900 font-semibold">{formatCurrency(tenant.apiCost)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">
-                    {stats?.sdk.developers || 0}
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Project Status</h3>
+                    <p className="text-sm text-gray-500">Current pipeline across all tenants.</p>
                   </div>
-                  <div className="text-sm text-gray-600">SDK Developers</div>
+                  <Layers className="h-5 w-5 text-purple-500" />
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-3xl font-bold text-purple-600 mb-1">
-                    {(stats?.sdk.requests || 0).toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600">API Requests</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-3xl font-bold text-green-600 mb-1">
-                    ${(stats?.sdk.cost || 0).toFixed(2)}
-                  </div>
-                  <div className="text-sm text-gray-600">Total Cost</div>
+                <div className="space-y-3">
+                  {statusBreakdown.length === 0 ? (
+                    <p className="text-sm text-gray-500">No projects found.</p>
+                  ) : (
+                    statusBreakdown.map((status) => (
+                      <div key={status.status} className="flex items-center justify-between">
+                        <div className="text-sm font-medium text-gray-700 capitalize">{status.status || 'unspecified'}</div>
+                        <div className="text-sm font-semibold text-gray-900">{formatNumber(status.count)}</div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* System Health */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <Activity className="w-6 h-6 mr-2 text-green-600" />
-                System Health
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">Uptime</span>
-                    <span className="text-sm font-bold text-green-600">{stats?.system.uptime}%</span>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Pending SDK Approvals</h3>
+                    <p className="text-sm text-gray-500">Modules awaiting review before tenant release.</p>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${stats?.system.uptime}%` }} />
-                  </div>
+                  <Package className="h-5 w-5 text-amber-500" />
                 </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">CPU Usage</span>
-                    <span className="text-sm font-bold text-blue-600">{stats?.system.cpu}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${stats?.system.cpu}%` }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">Memory</span>
-                    <span className="text-sm font-bold text-purple-600">{stats?.system.memory}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${stats?.system.memory}%` }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">Storage</span>
-                    <span className="text-sm font-bold text-orange-600">{stats?.system.storage}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${stats?.system.storage}%` }} />
-                  </div>
+                <div className="space-y-3">
+                  {pendingApprovals.length === 0 ? (
+                    <p className="text-sm text-gray-500">No modules awaiting approval.</p>
+                  ) : (
+                    pendingApprovals.map((item) => (
+                      <div key={item.id} className="flex items-start justify-between border border-gray-100 rounded-lg p-3">
+                        <div>
+                          <div className="text-sm font-semibold text-gray-900">{item.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {item.companyName || 'Unassigned'} • {item.developerName || 'Unknown developer'}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">Updated {formatDateTime(item.updatedAt)}</div>
+                        </div>
+                        <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full capitalize">
+                          {item.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
-            </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                <Zap className="w-6 h-6 mr-2 text-yellow-600" />
-                Quick Actions
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <QuickAction icon={UserPlus} label="Add User" onClick={() => {}} color="border-blue-300 text-blue-600" />
-                <QuickAction icon={Building2} label="Add Company" onClick={() => {}} color="border-green-300 text-green-600" />
-                <QuickAction icon={Package} label="New Project" onClick={() => {}} color="border-purple-300 text-purple-600" />
-                <QuickAction icon={Code} label="SDK Access" onClick={() => {}} color="border-orange-300 text-orange-600" />
-                <QuickAction icon={Shield} label="Security" onClick={() => {}} color="border-red-300 text-red-600" />
-                <QuickAction icon={Settings} label="Settings" onClick={() => {}} color="border-gray-300 text-gray-600" />
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Recent Platform Activity</h3>
+                    <p className="text-sm text-gray-500">Key changes performed by administrators.</p>
+                  </div>
+                  <Activity className="h-5 w-5 text-green-500" />
+                </div>
+                <div className="space-y-3">
+                  {recentActivity.length === 0 ? (
+                    <p className="text-sm text-gray-500">No activity recorded.</p>
+                  ) : (
+                    recentActivity.map((event) => (
+                      <div key={event.id} className="border border-gray-100 rounded-lg p-3">
+                        <div className="text-sm font-semibold text-gray-900">{event.action}</div>
+                        <div className="text-xs text-gray-500">
+                          {event.description || 'No description'}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          {event.userName ? `${event.userName} • ` : ''}
+                          {formatDateTime(event.createdAt)}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
-      </div>
+
+        {activeSection === 'users' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <FullUsersManagement />
+          </div>
+        )}
+
+        {activeSection === 'companies' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <FullCompaniesManagement />
+          </div>
+        )}
+
+        {activeSection === 'sdk' && (
+          <div className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-4">
+              <StatCard
+                title="SDK Developers"
+                value={formatNumber(summary?.sdkStats.developers ?? 0)}
+                subtitle={`${formatNumber(summary?.userStats.developers ?? 0)} active developer accounts`}
+                icon={Users}
+                color="purple"
+              />
+              <StatCard
+                title="Requests This Month"
+                value={formatNumber(summary?.sdkStats.requestsThisMonth ?? 0)}
+                subtitle={`${formatNumber(summary?.sdkStats.tokensThisMonth ?? 0)} tokens processed`}
+                icon={Zap}
+                color="orange"
+              />
+              <StatCard
+                title="API Spend"
+                value={formatCurrency(summary?.sdkStats.costThisMonth ?? 0)}
+                subtitle="Tracked across all tenants"
+                icon={DollarSign}
+                color="teal"
+              />
+              <StatCard
+                title="Pending Reviews"
+                value={formatNumber(pendingApprovals.length)}
+                subtitle="Modules awaiting approval"
+                icon={AlertCircle}
+                color="red"
+              />
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Top Providers</h3>
+                    <p className="text-sm text-gray-500">Usage split by AI provider this month.</p>
+                  </div>
+                  <Code className="h-5 w-5 text-indigo-500" />
+                </div>
+                <div className="space-y-3">
+                  {topProviders.length === 0 ? (
+                    <p className="text-sm text-gray-500">No provider usage recorded.</p>
+                  ) : (
+                    topProviders.map((provider) => (
+                      <div key={provider.provider} className="border border-gray-100 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm font-semibold text-gray-900 capitalize">{provider.provider}</div>
+                          <div className="text-sm font-semibold text-gray-700">{formatNumber(provider.requests)} calls</div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+                          <span>{formatNumber(provider.tokens)} tokens</span>
+                          <span>{formatCurrency(provider.cost)}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Latest Releases</h3>
+                    <p className="text-sm text-gray-500">Recently updated modules across tenants.</p>
+                  </div>
+                  <Package className="h-5 w-5 text-blue-500" />
+                </div>
+                <div className="space-y-3">
+                  {recentApps.length === 0 ? (
+                    <p className="text-sm text-gray-500">No recent module activity.</p>
+                  ) : (
+                    recentApps.slice(0, 6).map((app) => (
+                      <div key={app.id} className="border border-gray-100 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm font-semibold text-gray-900">{app.name}</div>
+                          <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full capitalize">
+                            {app.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {app.companyName || 'Unassigned'} • {app.developerName || 'Unknown'}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">Updated {formatDateTime(app.updatedAt)}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'system' && (
+          <div className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-4">
+              <StatCard title="Platform Uptime" value={`${summary?.systemStats.uptime ?? 0}%`} icon={Shield} color="green" subtitle="Trailing 30 days" />
+              <StatCard title="CPU Utilisation" value={`${summary?.systemStats.cpu ?? 0}%`} icon={Cpu} color="orange" subtitle="Platform services" />
+              <StatCard title="Memory Usage" value={`${summary?.systemStats.memory ?? 0}%`} icon={Database} color="purple" subtitle="Aggregate usage" />
+              <StatCard title="Storage Utilisation" value={`${summary?.systemStats.storage ?? 0}%`} icon={HardDrive} color="blue" subtitle="Object store" />
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                  <p className="text-sm text-gray-500">Audit trail of administrative operations.</p>
+                </div>
+                <Lock className="h-5 w-5 text-gray-500" />
+              </div>
+              <div className="space-y-3">
+                {recentActivity.length === 0 ? (
+                  <p className="text-sm text-gray-500">No logged activity yet.</p>
+                ) : (
+                  recentActivity.map((event) => (
+                    <div key={event.id} className="flex items-start gap-3 border border-gray-100 rounded-lg p-3">
+                      <div className="mt-1">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">{event.action}</div>
+                        <div className="text-xs text-gray-500">{event.description || 'No description provided.'}</div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          {event.userName ? `${event.userName} • ` : ''}
+                          {formatDateTime(event.createdAt)}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <AddUserModal isOpen={showAddUserModal} onClose={() => setShowAddUserModal(false)} onSuccess={fetchDashboard} />
+      <AddCompanyModal isOpen={showAddCompanyModal} onClose={() => setShowAddCompanyModal(false)} onSuccess={fetchDashboard} />
+      <AddProjectModal isOpen={showAddProjectModal} onClose={() => setShowAddProjectModal(false)} onSuccess={fetchDashboard} />
     </div>
   );
 };
 
+export default EnhancedSuperAdminDashboard;

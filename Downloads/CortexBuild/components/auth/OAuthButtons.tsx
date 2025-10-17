@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../../lib/supabase/client';
 
 interface OAuthButtonsProps {
     mode: 'login' | 'signup';

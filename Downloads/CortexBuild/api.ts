@@ -4,28 +4,178 @@ import {
     Comment, Notification, ActivityEvent, Company, AISuggestion, AIInsight, AIFeedback, DailyLog, LogItem, Attachment,
     TimeEntry,
     PermissionAction,
-    PermissionSubject
+    PermissionSubject,
+    AgentCatalogItem,
+    AgentExecution,
+    Workflow,
+    WorkflowRun,
+    WorkflowTemplate,
+    AutomationRule,
+    AutomationEvent
 } from './types';
-import * as db from './db.ts';
-import { can } from './permissions.ts';
-import { validateName, validateEmail, validatePassword, validateCompanyName } from './utils/validation.ts';
-import { APIError, withErrorHandling } from './utils/errorHandling.ts';
-import { getMLPredictor } from './utils/mlPredictor.ts';
-import { PredictionResult } from './utils/neuralNetwork.ts';
-import * as authService from './auth/authService.ts';
+import * as db from './db';
+import { can } from './permissions';
+import { validateName, validateEmail, validatePassword, validateCompanyName } from './utils/validation';
+import { APIError, withErrorHandling } from './utils/errorHandling';
+import { getMLPredictor } from './utils/mlPredictor';
+import { PredictionResult } from './utils/neuralNetwork';
+import * as authService from './auth/authService';
+import { supabase } from './lib/supabase/client';
 
 // Simulate API latency
 const LATENCY = 200;
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize Google Generative AI only if API key is available
+let ai: any = null;
+const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (geminiApiKey) {
+  try {
+    ai = new GoogleGenAI({ apiKey: geminiApiKey });
+  } catch (error) {
+    console.warn('⚠️ Failed to initialize Google Generative AI:', error);
+  }
+} else {
+  console.warn('⚠️ VITE_GEMINI_API_KEY not configured - AI features will be limited');
+}
 const model = 'gemini-2.5-flash';
+
+// Generic API request helper
+const apiRequest = async <T = any>(endpoint: string, options?: RequestInit): Promise<T> => {
+    try {
+        const response = await fetch(`/api${endpoint}`, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options?.headers
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`API request to ${endpoint} failed:`, error);
+        throw error;
+    }
+};
 
 const checkPermissions = (user: User, action: PermissionAction, subject: PermissionSubject) => {
     if (!can(user.role, action, subject)) {
         throw new Error(`Permission denied. Role '${user.role}' cannot perform '${action}' on '${subject}'.`);
     }
 };
+
+const parseJsonIfNeeded = <T>(value: unknown, fallback: T): T => {
+    if (value === undefined || value === null) {
+        return fallback;
+    }
+    if (typeof value === 'string') {
+        try {
+            return JSON.parse(value) as T;
+        } catch {
+            return fallback;
+        }
+    }
+    return value as T;
+};
+
+const mapWorkflowRecord = (record: any): Workflow => ({
+    id: String(record.id),
+    companyId: String(record.companyId ?? record.company_id ?? ''),
+    name: record.name ?? 'Workflow',
+    description: record.description ?? '',
+    version: record.version ?? '1.0.0',
+    definition: parseJsonIfNeeded(record.definition, {} as Record<string, unknown>),
+    isActive: Boolean(record.isActive ?? record.is_active ?? true),
+    createdBy: record.createdBy ?? record.created_by ?? undefined,
+    createdAt: record.createdAt ?? record.created_at ?? new Date().toISOString(),
+    updatedAt: record.updatedAt ?? record.updated_at ?? new Date().toISOString()
+});
+
+const mapWorkflowRunRecord = (record: any): WorkflowRun => ({
+    id: String(record.id),
+    workflowId: String(record.workflowId ?? record.workflow_id ?? ''),
+    companyId: String(record.companyId ?? record.company_id ?? ''),
+    status: record.status ?? 'running',
+    trigger: parseJsonIfNeeded(record.trigger ?? record.trigger_payload, {} as Record<string, unknown>),
+    input: parseJsonIfNeeded(record.input ?? record.input_payload, {} as Record<string, unknown>),
+    output: parseJsonIfNeeded(record.output ?? record.output_payload, {} as Record<string, unknown>),
+    error: record.error ?? record.error_message ?? undefined,
+    startedAt: record.startedAt ?? record.started_at ?? new Date().toISOString(),
+    completedAt: record.completedAt ?? record.completed_at ?? undefined,
+    createdAt: record.createdAt ?? record.created_at ?? new Date().toISOString(),
+    updatedAt: record.updatedAt ?? record.updated_at ?? new Date().toISOString(),
+    steps: Array.isArray(record.steps) ? record.steps : undefined
+});
+
+const mapWorkflowTemplateRecord = (record: any): WorkflowTemplate => ({
+    id: String(record.id),
+    name: record.name ?? 'Template',
+    category: record.category ?? 'General',
+    description: record.description ?? '',
+    icon: record.icon ?? '⚙️',
+    difficulty: record.difficulty ?? 'intermediate',
+    definition: parseJsonIfNeeded(record.definition, {} as Record<string, unknown>)
+});
+
+const mapAutomationRuleRecord = (record: any): AutomationRule => ({
+    id: String(record.id),
+    companyId: String(record.companyId ?? record.company_id ?? ''),
+    name: record.name ?? 'Automation',
+    description: record.description ?? '',
+    triggerType: record.triggerType ?? record.trigger_type ?? 'event',
+    triggerConfig: parseJsonIfNeeded(record.triggerConfig ?? record.trigger_config, {} as Record<string, unknown>),
+    actionType: record.actionType ?? record.action_type ?? 'notification',
+    actionConfig: parseJsonIfNeeded(record.actionConfig ?? record.action_config, {} as Record<string, unknown>),
+    isActive: Boolean(record.isActive ?? record.is_active ?? true),
+    lastTriggeredAt: record.lastTriggeredAt ?? record.last_triggered_at ?? undefined,
+    createdAt: record.createdAt ?? record.created_at ?? new Date().toISOString(),
+    updatedAt: record.updatedAt ?? record.updated_at ?? new Date().toISOString()
+});
+
+const mapAutomationEventRecord = (record: any): AutomationEvent => ({
+    id: String(record.id),
+    ruleId: String(record.ruleId ?? record.rule_id ?? ''),
+    status: record.status ?? 'success',
+    payload: parseJsonIfNeeded(record.payload, {} as Record<string, unknown>),
+    error: record.error ?? record.error_message ?? undefined,
+    createdAt: record.createdAt ?? record.created_at ?? new Date().toISOString()
+});
+
+const mapAgentCatalogRecord = (record: any): AgentCatalogItem => ({
+    id: String(record.id),
+    slug: record.slug ?? '',
+    name: record.name ?? 'Agent',
+    description: record.description ?? '',
+    icon: record.icon ?? record.iconUrl ?? '🤖',
+    status: record.status ?? 'inactive',
+    isGlobal: Boolean(record.isGlobal ?? record.is_global ?? false),
+    tags: parseJsonIfNeeded(record.tags, [] as string[]),
+    capabilities: parseJsonIfNeeded(record.capabilities, {} as Record<string, unknown>),
+    config: parseJsonIfNeeded(record.config, {} as Record<string, unknown>),
+    metadata: parseJsonIfNeeded(record.metadata, {} as Record<string, unknown>),
+    developerId: record.developerId ?? record.developer_id ?? undefined,
+    companyId: record.companyId ?? record.company_id ?? undefined,
+    createdAt: record.createdAt ?? record.created_at ?? new Date().toISOString(),
+    updatedAt: record.updatedAt ?? record.updated_at ?? new Date().toISOString()
+});
+
+const mapAgentExecutionRecord = (record: any): AgentExecution => ({
+    id: String(record.id),
+    agentId: String(record.agentId ?? record.agent_id ?? ''),
+    companyId: String(record.companyId ?? record.company_id ?? ''),
+    triggeredBy: record.triggeredBy ?? record.triggered_by ?? undefined,
+    input: parseJsonIfNeeded(record.input ?? record.input_payload, {} as Record<string, unknown>),
+    output: parseJsonIfNeeded(record.output ?? record.output_payload, {} as Record<string, unknown>),
+    status: record.status ?? 'success',
+    durationMs: record.durationMs ?? record.duration_ms ?? undefined,
+    error: record.error ?? record.error_message ?? undefined,
+    startedAt: record.startedAt ?? record.started_at ?? new Date().toISOString(),
+    completedAt: record.completedAt ?? record.completed_at ?? undefined
+});
 
 
 // --- Auth ---
@@ -153,13 +303,11 @@ export const fetchAllProjects = async (currentUser: User): Promise<Project[]> =>
                     name,
                     description,
                     status,
-                    start_date,
-                    end_date,
-                    budget,
-                    spent,
                     location,
+                    image,
                     company_id,
-                    project_manager_id,
+                    contacts,
+                    snapshot,
                     created_at,
                     updated_at
                 `)
@@ -1235,6 +1383,12 @@ export const getAITaskSuggestions = async (description: string, allUsers: User[]
     `;
     
     try {
+        // Check if AI is initialized
+        if (!ai) {
+            console.warn("⚠️ Google Generative AI not configured - returning null");
+            return null;
+        }
+
         const response = await ai.models.generateContent({
             model: model,
             contents: prompt,
@@ -1258,6 +1412,197 @@ export const getAITaskSuggestions = async (description: string, allUsers: User[]
         console.error("Gemini API call failed", e);
         return null;
     }
+};
+
+// --- BuilderKit & Automations ---
+
+export const fetchWorkflowTemplates = async (): Promise<WorkflowTemplate[]> => {
+    const response = await apiRequest<{ success?: boolean; templates?: unknown[] }>('/workflows/templates');
+    const templates = Array.isArray(response?.templates) ? response.templates : Array.isArray(response) ? response : [];
+    return templates.map(mapWorkflowTemplateRecord);
+};
+
+export const fetchBuilderBlocks = async (): Promise<any[]> => {
+    const response = await apiRequest<{ success?: boolean; blocks?: any[] }>('/workflows/builder/blocks');
+    return Array.isArray(response?.blocks) ? response.blocks : [];
+};
+
+export const fetchCompanyWorkflows = async (options: { includeInactive?: boolean; companyId?: string } = {}): Promise<Workflow[]> => {
+    const params = new URLSearchParams();
+    if (options.includeInactive === false) {
+        params.set('includeInactive', 'false');
+    }
+    if (options.companyId) {
+        params.set('companyId', options.companyId);
+    }
+    const response = await apiRequest<{ success?: boolean; workflows?: unknown[] }>(`/workflows${params.toString() ? `?${params.toString()}` : ''}`);
+    const workflows = Array.isArray(response?.workflows) ? response.workflows : Array.isArray(response) ? response : [];
+    return workflows.map(mapWorkflowRecord);
+};
+
+export const createCompanyWorkflow = async (payload: { name: string; description?: string; definition: Record<string, unknown> }): Promise<Workflow> => {
+    const response = await apiRequest<{ success?: boolean; workflow?: unknown }>(
+        '/workflows',
+        {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        }
+    );
+    const workflow = (response as any).workflow ?? response;
+    return mapWorkflowRecord(workflow);
+};
+
+export const updateCompanyWorkflow = async (
+    workflowId: string,
+    updates: Partial<{ name: string; description: string; definition: Record<string, unknown>; version: string; isActive: boolean }>
+): Promise<Workflow> => {
+    const response = await apiRequest<{ success?: boolean; workflow?: unknown }>(
+        `/workflows/${workflowId}`,
+        {
+            method: 'PUT',
+            body: JSON.stringify(updates)
+        }
+    );
+    const workflow = (response as any).workflow ?? response;
+    return mapWorkflowRecord(workflow);
+};
+
+export const toggleWorkflowActivation = async (workflowId: string, isActive: boolean): Promise<Workflow> => {
+    const endpoint = isActive ? `/workflows/${workflowId}/activate` : `/workflows/${workflowId}/deactivate`;
+    const response = await apiRequest<{ success?: boolean; workflow?: unknown }>(endpoint, { method: 'POST' });
+    const workflow = (response as any).workflow ?? response;
+    return mapWorkflowRecord(workflow);
+};
+
+export const runWorkflowNow = async (
+    workflowId: string,
+    payload: { input?: Record<string, unknown>; trigger?: Record<string, unknown> } = {}
+): Promise<WorkflowRun> => {
+    const response = await apiRequest<{ success?: boolean; run?: unknown }>(
+        `/workflows/${workflowId}/run`,
+        {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        }
+    );
+    const run = (response as any).run ?? response;
+    return mapWorkflowRunRecord(run);
+};
+
+export const fetchWorkflowRuns = async (workflowId: string, limit = 20): Promise<WorkflowRun[]> => {
+    const response = await apiRequest<{ success?: boolean; runs?: unknown[] }>(`/workflows/${workflowId}/runs?limit=${limit}`);
+    const runs = Array.isArray(response?.runs) ? response.runs : Array.isArray(response) ? response : [];
+    return runs.map(mapWorkflowRunRecord);
+};
+
+export const fetchAutomationRules = async (): Promise<AutomationRule[]> => {
+    const response = await apiRequest<{ success?: boolean; rules?: unknown[] }>('/automations');
+    const rules = Array.isArray(response?.rules) ? response.rules : Array.isArray(response) ? response : [];
+    return rules.map(mapAutomationRuleRecord);
+};
+
+export const createAutomationRule = async (payload: {
+    name: string;
+    description?: string;
+    triggerType: string;
+    triggerConfig?: Record<string, unknown>;
+    actionType: string;
+    actionConfig?: Record<string, unknown>;
+}): Promise<AutomationRule> => {
+    const response = await apiRequest<{ success?: boolean; rule?: unknown }>(
+        '/automations',
+        {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        }
+    );
+    const rule = (response as any).rule ?? response;
+    return mapAutomationRuleRecord(rule);
+};
+
+export const updateAutomationRule = async (
+    ruleId: string,
+    updates: Partial<{ name: string; description: string; triggerType: string; triggerConfig: Record<string, unknown>; actionType: string; actionConfig: Record<string, unknown>; isActive: boolean }>
+): Promise<AutomationRule> => {
+    const response = await apiRequest<{ success?: boolean; rule?: unknown }>(
+        `/automations/${ruleId}`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify(updates)
+        }
+    );
+    const rule = (response as any).rule ?? response;
+    return mapAutomationRuleRecord(rule);
+};
+
+export const deleteAutomationRule = async (ruleId: string): Promise<void> => {
+    await apiRequest(`/automations/${ruleId}`, { method: 'DELETE' });
+};
+
+export const testAutomationRule = async (ruleId: string, payload?: Record<string, unknown>): Promise<{ eventId: string; status: string }> => {
+    const response = await apiRequest<{ success?: boolean; result?: { eventId: string; status: string } }>(
+        `/automations/${ruleId}/test`,
+        {
+            method: 'POST',
+            body: JSON.stringify({ payload })
+        }
+    );
+    return (response as any).result ?? { eventId: '', status: 'success' };
+};
+
+export const fetchAutomationEvents = async (ruleId: string): Promise<AutomationEvent[]> => {
+    const response = await apiRequest<{ success?: boolean; events?: unknown[] }>(`/automations/${ruleId}/events`);
+    const events = Array.isArray(response?.events) ? response.events : Array.isArray(response) ? response : [];
+    return events.map(mapAutomationEventRecord);
+};
+
+export const fetchAgentCatalog = async (): Promise<AgentCatalogItem[]> => {
+    const response = await apiRequest<{ success?: boolean; agents?: unknown[] }>('/agentkit/catalog');
+    const agents = Array.isArray(response?.agents) ? response.agents : Array.isArray(response) ? response : [];
+    return agents.map(mapAgentCatalogRecord);
+};
+
+export const fetchCompanyAgents = async (): Promise<{ agents: AgentCatalogItem[]; subscriptions: any[] }> => {
+    const response = await apiRequest<{ success?: boolean; agents?: unknown[]; subscriptions?: any[] }>('/agentkit/agents');
+    const agents = Array.isArray(response?.agents) ? response.agents : [];
+    return {
+        agents: agents.map(mapAgentCatalogRecord),
+        subscriptions: Array.isArray(response?.subscriptions) ? response.subscriptions : []
+    };
+};
+
+export const subscribeAgentViaApi = async (agentId: string, options: { companyId?: string } = {}): Promise<AgentCatalogItem> => {
+    const response = await apiRequest<{ success?: boolean; agent?: unknown }>(
+        `/agentkit/agents/${agentId}/subscribe`,
+        {
+            method: 'POST',
+            body: JSON.stringify(options)
+        }
+    );
+    const agent = (response as any).agent ?? response;
+    return mapAgentCatalogRecord(agent);
+};
+
+export const unsubscribeAgent = async (agentId: string): Promise<void> => {
+    await apiRequest(`/agentkit/agents/${agentId}`, { method: 'DELETE' });
+};
+
+export const runAgentExecution = async (agentId: string, payload: { input?: Record<string, unknown>; trigger?: Record<string, unknown> } = {}): Promise<AgentExecution> => {
+    const response = await apiRequest<{ success?: boolean; execution?: unknown }>(
+        `/agentkit/agents/${agentId}/run`,
+        {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        }
+    );
+    const execution = (response as any).execution ?? response;
+    return mapAgentExecutionRecord(execution);
+};
+
+export const fetchAgentExecutions = async (agentId: string, limit = 25): Promise<AgentExecution[]> => {
+    const response = await apiRequest<{ success?: boolean; executions?: unknown[] }>(`/agentkit/agents/${agentId}/executions?limit=${limit}`);
+    const executions = Array.isArray(response?.executions) ? response.executions : Array.isArray(response) ? response : [];
+    return executions.map(mapAgentExecutionRecord);
 };
 
 export const getAIRFISuggestions = async (subject: string, question: string, possibleAssignees: string[]): Promise<{ suggestedAssignee: string, suggestedDueDate: string } | null> => {
@@ -2678,8 +3023,8 @@ export const getProjectPredictions = async (
 
         // Fetch related data
         const tasks = await fetchTasksForProject(projectId, currentUser);
-        const rfis = await fetchRFIsForProject(projectId, currentUser);
-        const punchItems = await fetchPunchListItemsForProject(projectId, currentUser);
+        const rfis = await fetchRFIsForProject(projectId);
+        const punchItems = await fetchPunchListItemsForProject(projectId);
 
         // Generate predictions using ML
         const predictor = getMLPredictor();
@@ -2710,8 +3055,8 @@ export const getAllProjectsPredictions = async (
         for (const project of projects.slice(0, 5)) { // Limit to 5 projects for performance
             try {
                 const tasks = await fetchTasksForProject(project.id, currentUser);
-                const rfis = await fetchRFIsForProject(project.id, currentUser);
-                const punchItems = await fetchPunchListItemsForProject(project.id, currentUser);
+                const rfis = await fetchRFIsForProject(project.id);
+                const punchItems = await fetchPunchListItemsForProject(project.id);
 
                 const predictor = getMLPredictor();
                 const prediction = await predictor.predictProjectOutcome(

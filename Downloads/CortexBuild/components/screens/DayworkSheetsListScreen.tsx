@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Project, DayworkSheet, Screen, User } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, PlusIcon, TicketIcon } from '../Icons.tsx';
+import { Project, DayworkSheet, Screen, User } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon, PlusIcon, TicketIcon } from '../Icons';
 
 interface DayworkSheetsListScreenProps {
     project: Project;

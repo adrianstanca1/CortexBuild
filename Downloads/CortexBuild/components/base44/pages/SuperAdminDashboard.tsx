@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Building2, Activity, Database, TrendingUp, AlertCircle, FileText, BarChart3, Code, Package, Zap, Webhook, Grid, Star, Cpu, Shield, HardDrive } from 'lucide-react';
+import { Users, Building2, Activity, Database, TrendingUp, AlertCircle, FileText, BarChart3, Code, Package, Zap, Webhook, Grid, Star, Cpu, Shield, HardDrive, Sparkles } from 'lucide-react';
 import { EnhancedSuperAdminDashboard } from './EnhancedSuperAdminDashboard';
 import { UserManagement } from '../admin/UserManagement';
 import { CompanyManagement } from '../admin/CompanyManagement';
@@ -17,6 +17,9 @@ import { SDKDeveloperEnvironment } from '../../sdk/SDKDeveloperEnvironment';
 import { UserAccessControl } from '../../admin/UserAccessControl';
 import { UsageMonitoringDashboard } from '../../admin/UsageMonitoringDashboard';
 import { DatabaseCapabilityManager } from '../../admin/DatabaseCapabilityManager';
+import { AICollaborationHub } from './AICollaborationHub';
+import { DeveloperHub } from '../../developer/DeveloperHub';
+import { DeveloperDashboard } from '../../admin/DeveloperDashboard';
 
 interface DashboardStats {
   totalUsers: { count: number };
@@ -30,7 +33,7 @@ interface DashboardStats {
 export const SuperAdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'companies' | 'system' | 'analytics' | 'logs' | 'developer' | 'marketplace' | 'dashboards' | 'sdk' | 'automation' | 'webhooks' | 'reviews' | 'sdk-env' | 'access-control' | 'usage-monitoring' | 'database-manager'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'companies' | 'system' | 'analytics' | 'logs' | 'developer' | 'marketplace' | 'dashboards' | 'sdk' | 'automation' | 'webhooks' | 'reviews' | 'sdk-env' | 'access-control' | 'usage-monitoring' | 'database-manager' | 'ai-collab' | 'developer-hub' | 'developer-dashboard'>('overview');
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -101,6 +104,9 @@ export const SuperAdminDashboard: React.FC = () => {
         <nav className="flex space-x-8">
           {[
             { id: 'overview', label: 'Overview', icon: TrendingUp },
+            { id: 'ai-collab', label: '🤖 AI & Collaboration', icon: Sparkles },
+            { id: 'developer-hub', label: '💻 Developer Hub', icon: Code },
+            { id: 'developer-dashboard', label: '📊 Developer Dashboard', icon: BarChart3 },
             { id: 'users', label: 'User Management', icon: Users },
             { id: 'companies', label: 'Company Management', icon: Building2 },
             { id: 'marketplace', label: 'Marketplace', icon: Package },
@@ -196,6 +202,15 @@ export const SuperAdminDashboard: React.FC = () => {
 
       {/* Marketplace Tab */}
       {activeTab === 'marketplace' && <MarketplacePage />}
+
+      {/* AI & Collaboration Hub Tab */}
+      {activeTab === 'ai-collab' && <AICollaborationHub />}
+
+      {/* Developer Hub Tab */}
+      {activeTab === 'developer-hub' && <DeveloperHub />}
+
+      {/* Developer Dashboard Tab */}
+      {activeTab === 'developer-dashboard' && <DeveloperDashboard />}
 
       {/* SDK Developer Environment Tab */}
       {activeTab === 'sdk-env' && currentUser && <SDKDeveloperEnvironment user={currentUser} />}

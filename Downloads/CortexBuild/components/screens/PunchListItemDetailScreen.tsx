@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Project, PunchListItem, User, Comment } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, PaperClipIcon, UsersIcon, MapPinIcon, ClockIcon } from '../Icons.tsx';
-import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox.tsx';
+import { Project, PunchListItem, User, Comment } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon, PaperClipIcon, UsersIcon, MapPinIcon, ClockIcon } from '../Icons';
+import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
 
 
 interface PunchListItemDetailScreenProps {

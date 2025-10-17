@@ -28,7 +28,7 @@ export function createModulesRouter(db: Database.Database): Router {
 
       let query = `
         SELECT m.*, 
-               u.first_name || ' ' || u.last_name as developer_name,
+               u.name as developer_name,
                AVG(mr.rating) as avg_rating,
                COUNT(DISTINCT mr.id) as review_count
         FROM modules m
@@ -89,7 +89,7 @@ export function createModulesRouter(db: Database.Database): Router {
 
       const module = db.prepare(`
         SELECT m.*, 
-               u.first_name || ' ' || u.last_name as developer_name,
+               u.name as developer_name,
                u.email as developer_email
         FROM modules m
         LEFT JOIN users u ON m.developer_id = u.id
@@ -106,7 +106,7 @@ export function createModulesRouter(db: Database.Database): Router {
       // Get reviews
       const reviews = db.prepare(`
         SELECT mr.*, 
-               u.first_name || ' ' || u.last_name as reviewer_name
+               u.name as reviewer_name
         FROM module_reviews mr
         LEFT JOIN users u ON mr.user_id = u.id
         WHERE mr.module_id = ?
@@ -371,4 +371,3 @@ export function createModulesRouter(db: Database.Database): Router {
 
   return router;
 }
-

@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CortexBuild - AI-Powered Construction Intelligence Platform</title>
+
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,6 +31,113 @@
             background-color: #f1f5f9;
             /* slate-100 */
             color: #3d3d3d;
+        }
+
+        /* Utility class for hiding elements */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Modern Animated Gradient Background */
+        .gradient-bg-modern {
+            background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradient-modern 15s ease infinite;
+        }
+
+        @keyframes gradient-modern {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Glassmorphism Effects */
+        .glass-modern {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-dark-modern {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Floating Animation */
+        @keyframes float-modern {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .float-modern {
+            animation: float-modern 6s ease-in-out infinite;
+        }
+
+        /* Pulse Glow Effect */
+        @keyframes pulse-glow-modern {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+            }
+        }
+
+        .pulse-glow-modern {
+            animation: pulse-glow-modern 2s ease-in-out infinite;
+        }
+
+        /* Particle Background */
+        .particles-modern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle-modern {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: rise-modern 10s infinite ease-in;
+        }
+
+        @keyframes rise-modern {
+            0% {
+                bottom: -10%;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                bottom: 110%;
+                opacity: 0;
+            }
         }
 
         .nav-active {
@@ -374,8 +486,8 @@
         // These would be set by your build/deployment environment.
         // In a real app, these should be secured.
         // IMPORTANT: Replace with your actual Supabase project URL and anon key.
-        var __supabase_url = 'https://jkpeuejmhlccnpyorxfz.supabase.co';
-        var __supabase_anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprcGV1ZWptaGxjY25weW9yeGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NjkyNDcsImV4cCI6MjA3NTM0NTI0N30.vPLMIfL5rfWdoNealtviBQRfrPuSLq9siPs23oiV9FE';
+        var __supabase_url = 'https://zpbuvuxpfemldsknerew.supabase.co';
+        var __supabase_anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTQzMTcsImV4cCI6MjA3MTY5MDMxN30.4wb8_qMaJ0hpkLEv51EWh0pRtVXD3GWWOsuCmZsOx6A';
 
         // Firebase config for demo form - replace with your actual Firebase config
         var __firebase_config = undefined; // Set to valid Firebase config JSON string when needed
@@ -429,7 +541,7 @@
                             </span>
                         </div>
                     </div>
-                    <nav id="desktop-nav" class="hidden md:flex space-x-6">
+                    <nav id="desktop-nav" class="flex space-x-6">
                         <!-- Marketing Nav -->
                         <button data-target="home"
                             class="nav-item nav-active text-sm font-medium marketing-nav">Home</button>
@@ -456,7 +568,8 @@
                             </svg>
                             Logout
                         </button>
-                        <div class="md:hidden ml-4">
+                        <!-- Mobile menu button hidden - desktop nav always visible -->
+                        <div class="hidden">
                             <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800">
                                 <span class="sr-only">Open main menu</span>
                                 <div class="w-6 h-6 flex flex-col justify-around">
@@ -494,52 +607,62 @@
         </header>
 
         <main id="marketing-container" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <section id="home" class="content-section active">
+            <section id="home"
+                class="content-section active relative gradient-bg-modern overflow-hidden rounded-3xl p-12 mb-12">
+                <!-- Particles Background -->
+                <div class="particles-modern">
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 10%; animation-delay: 0s;"></div>
+                    <div class="particle-modern" style="width: 6px; height: 6px; left: 20%; animation-delay: 2s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 30%; animation-delay: 4s;"></div>
+                    <div class="particle-modern" style="width: 8px; height: 8px; left: 40%; animation-delay: 1s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 50%; animation-delay: 3s;"></div>
+                    <div class="particle-modern" style="width: 6px; height: 6px; left: 60%; animation-delay: 5s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 70%; animation-delay: 2s;"></div>
+                    <div class="particle-modern" style="width: 8px; height: 8px; left: 80%; animation-delay: 4s;"></div>
+                    <div class="particle-modern" style="width: 4px; height: 4px; left: 90%; animation-delay: 1s;"></div>
+                </div>
+
                 <!-- Hero Section with Visual -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20 relative z-10">
                     <!-- Left: Hero Content -->
                     <div class="text-left">
-                        <div
-                            class="inline-block px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full mb-6 shadow-lg border-2 border-blue-200 animate-pulse-slow">
-                            <span class="text-blue-600 font-bold text-lg flex items-center gap-2">
+                        <div class="inline-block px-6 py-3 glass-modern rounded-full mb-6 shadow-lg animate-pulse-slow">
+                            <span class="text-white font-bold text-lg flex items-center gap-2">
                                 <span class="text-2xl">🚀</span>
                                 <span>The Future of Construction Intelligence</span>
                             </span>
                         </div>
-                        <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6">
+                        <h1 class="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 leading-tight">
                             Build Smarter,<br />
-                            <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Not
-                                Harder</span>
+                            <span class="text-yellow-300">Not Harder</span>
                         </h1>
-                        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                            CortexBuild is the all-in-one AI-powered platform that gives construction SMBs the power of
-                            a
-                            large
-                            enterprise.
-                            We unify project management and accounting with a suite of powerful AI agents to boost
-                            profitability and reduce risk.
+                        <p class="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+                            AI-powered construction intelligence platform that gives SMBs the power of enterprise-level
+                            tools
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4">
-                            <button data-target="get-started"
-                                class="nav-item-direct bg-blue-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-blue-700 transition-all hover:scale-105 shadow-lg">
-                                Request a Demo
+                            <button onclick="showAppForLogin()" type="button"
+                                class="glass-dark-modern text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-white/30 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-2">
+                                <span>Start Free Trial</span>
+                                <span>→</span>
                             </button>
-                            <button data-target="features"
-                                class="nav-item-direct bg-white text-blue-600 font-bold py-4 px-8 rounded-lg hover:bg-gray-50 transition-all border-2 border-blue-600">
-                                Explore Features
+                            <button data-target="features" type="button"
+                                class="glass-modern text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-white/30 transition-all transform hover:scale-105 shadow-2xl">
+                                Watch Demo
                             </button>
                         </div>
                     </div>
 
                     <!-- Right: Visual Representation -->
-                    <div class="relative">
+                    <div class="relative float-modern">
                         <!-- Animated Background -->
                         <div
-                            class="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 rounded-3xl opacity-50 blur-3xl">
+                            class="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-white/5 rounded-3xl opacity-50 blur-3xl">
                         </div>
 
                         <!-- Main Visual Card -->
-                        <div class="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
+                        <div
+                            class="relative glass-modern rounded-3xl shadow-2xl p-8 border border-white/30 pulse-glow-modern">
                             <!-- AI Brain Visualization -->
                             <div class="text-center mb-6">
                                 <div class="inline-block relative">
@@ -569,11 +692,10 @@
                                 </div>
                             </div>
 
-                            <h3
-                                class="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <h3 class="text-2xl font-bold text-center mb-4 text-white">
                                 AI-Powered Construction Intelligence
                             </h3>
-                            <p class="text-gray-600 text-center mb-6">
+                            <p class="text-white/80 text-center mb-6">
                                 Integrating artificial intelligence into every aspect of construction management
                             </p>
 
@@ -1673,6 +1795,85 @@
         <div id="root"></div>
     </div>
 
+    <!-- Global functions for marketing site interactions -->
+    <script>
+        // Define showAppForLogin globally so it's available immediately
+        window.showAppForLogin = function () {
+            console.log('🔐 showAppForLogin called - hiding marketing site');
+            // Hide ENTIRE marketing site
+            const marketingSite = document.getElementById('marketing-site');
+            if (marketingSite) {
+                marketingSite.style.display = 'none';
+                console.log('✅ Marketing site hidden');
+            }
+            // Show app container with React login screen
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                appContainer.classList.remove('hidden');
+                appContainer.style.display = 'block';
+                appContainer.style.visibility = 'visible';
+                appContainer.style.opacity = '1';
+                console.log('✅ App container shown');
+
+                // Ensure root div is visible
+                const rootDiv = document.getElementById('root');
+                if (rootDiv) {
+                    rootDiv.style.display = 'block';
+                    rootDiv.style.visibility = 'visible';
+                    rootDiv.style.minHeight = '100vh';
+                    console.log('✅ Root div configured');
+                }
+            }
+
+            // Trigger React to show login screen
+            window.dispatchEvent(new CustomEvent('showLoginScreen'));
+            console.log('✅ showLoginScreen event dispatched');
+        };
+
+        // Setup navigation button handlers
+        window.setupNavigationButtons = function () {
+            console.log('🔧 Setting up navigation buttons...');
+
+            // Handle "Watch Demo" button
+            const demoButton = document.querySelector('[data-target="features"]');
+            if (demoButton) {
+                demoButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log('📺 Watch Demo clicked');
+                    const featuresSection = document.getElementById('features');
+                    if (featuresSection) {
+                        featuresSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+                console.log('✅ Watch Demo button configured');
+            }
+
+            // Handle all navigation items
+            const navItems = document.querySelectorAll('[data-target]');
+            navItems.forEach(item => {
+                if (item.dataset.target && item.dataset.target !== 'features') {
+                    item.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const targetId = this.dataset.target;
+                        console.log('🔗 Navigating to:', targetId);
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                }
+            });
+            console.log('✅ Navigation buttons configured');
+        };
+
+        // Setup buttons when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', window.setupNavigationButtons);
+        } else {
+            window.setupNavigationButtons();
+        }
+    </script>
+
     <script type="module" src="/index.tsx"></script>
     <script type="module">
         import { createClient } from "@supabase/supabase-js";
@@ -1855,21 +2056,8 @@
             currentView: 'home',
         };
 
-        function showAppForLogin() {
-            console.log('🔐 showAppForLogin called - hiding marketing site');
-            // Hide ENTIRE marketing site
-            const marketingSite = document.getElementById('marketing-site');
-            if (marketingSite) {
-                marketingSite.style.display = 'none';
-                console.log('✅ Marketing site hidden');
-            }
-            // Show app container
-            if (appContainer) {
-                appContainer.classList.remove('hidden');
-                appContainer.style.display = 'block';
-                console.log('✅ App container shown');
-            }
-        }
+        // Note: showAppForLogin is now defined globally in a regular script tag above
+        // to ensure it's available immediately when the button is clicked
 
         function handleLogoutUI() {
             console.log('🚪 handleLogoutUI called');

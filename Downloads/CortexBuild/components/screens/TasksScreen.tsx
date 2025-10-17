@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Project, Task, Screen, User } from '../../types.ts';
-import * as api from '../../api.ts';
-import { usePermissions } from '../../hooks/usePermissions.ts';
-import { ChevronLeftIcon, PlusIcon, PaperClipIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, ChevronDownIcon } from '../Icons.tsx';
+import { Project, Task, Screen, User } from '../../types';
+import * as api from '../../api';
+import { usePermissions } from '../../hooks/usePermissions';
+import { ChevronLeftIcon, PlusIcon, PaperClipIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, ChevronDownIcon } from '../Icons';
 
 interface TasksScreenProps {
     project: Project;
@@ -115,18 +115,24 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
             filteredTasks = filteredTasks.filter(t => new Date(t.dueDate) <= endDate);
         }
 
-        // Apply sorting
+        const selectedSort = sortBy;
         filteredTasks.sort((a, b) => {
-            switch (sortBy) {
-                case 'dueDate-desc':
-                    return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
-                case 'status':
-                    const statusOrder = { 'To Do': 1, 'In Progress': 2, 'Done': 3 };
-                    return (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99);
-                case 'dueDate-asc':
-                default:
-                    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            if (selectedSort === 'dueDate-desc') {
+                return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
             }
+
+            if (selectedSort === 'status') {
+                const statusOrder: Record<Task['status'], number> = {
+                    'To Do': 1,
+                    'In Progress': 2,
+                    Done: 3,
+                };
+                const aRank = statusOrder[a.status] ?? 99;
+                const bRank = statusOrder[b.status] ?? 99;
+                return aRank - bRank;
+            }
+
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         });
 
         return filteredTasks;

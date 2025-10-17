@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { Project, DeliveryItem } from '../../types.ts';
+import { Project, DeliveryItem } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, QRCodeIcon, CheckIcon } from '../Icons.tsx';
+import * as api from '../../api';
+import { ChevronLeftIcon, QRCodeIcon, CheckIcon } from '../Icons';
 
 interface DeliveryScreenProps {
     project: Project;

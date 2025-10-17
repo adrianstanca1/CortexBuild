@@ -5,7 +5,11 @@
 import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import * as bcrypt from 'bcryptjs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DB_PATH = path.join(__dirname, 'cortexbuild.db');
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
@@ -21,10 +25,37 @@ export async function initializeDatabase(): Promise<Database.Database> {
   // Read and execute schema
   console.log('📋 Creating database schema...');
   const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8');
-  db.exec(schema);
-  
+
+  // Split schema into individual statements and execute them
+  const statements = schema.split(';').filter(stmt => stmt.trim().length > 0);
+  for (const statement of statements) {
+    if (statement.trim()) {
+      try {
+        db.exec(statement + ';');
+      } catch (error) {
+        console.error('Error executing statement:', statement.trim());
+        console.error('Error:', error);
+        throw error;
+      }
+    }
+  }
+
   console.log('✅ Database schema created successfully!');
   
+  // Ensure sessions table exists for auth module
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);');
+
   return db;
 }
 
@@ -171,20 +202,4 @@ export async function seedDatabase(db: Database.Database): Promise<void> {
   }
 }
 
-// Run if executed directly
-if (require.main === module) {
-  (async () => {
-    try {
-      const db = await initializeDatabase();
-      await seedDatabase(db);
-      db.close();
-      console.log('🎉 Database initialization complete!');
-    } catch (error) {
-      console.error('❌ Database initialization failed:', error);
-      process.exit(1);
-    }
-  })();
-}
-
 export default { initializeDatabase, seedDatabase };
-

@@ -13,7 +13,7 @@ import * as authService from '../../auth/authService';
 import { RealtimeStats } from './RealtimeStats';
 import { RecentActivity } from './RecentActivity';
 import { NotificationCenter } from './NotificationCenter';
-import { PerformanceCharts } from './PerformanceCharts';
+import { DeveloperDashboard } from '../developer/DeveloperDashboard';
 
 interface DashboardStats {
   totalProjects: number;
@@ -126,6 +126,10 @@ export const EnhancedDashboard: React.FC = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  if (currentUser?.role === 'developer') {
+    return <DeveloperDashboard />;
   }
 
   return (

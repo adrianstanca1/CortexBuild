@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
-import { Notification, Screen, User } from '../../types.ts';
+import { Notification, Screen, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api.ts';
+import * as api from '../../api';
 // Fix: Corrected icon import to use CheckCircleIcon and remove unused CheckIcon.
-import { BellIcon, CheckCircleIcon } from '../Icons.tsx';
+import { BellIcon, CheckCircleIcon } from '../Icons';
 
 interface NotificationsWidgetProps {
     onDeepLink: (projectId: string, screen: Screen, params: any) => void;

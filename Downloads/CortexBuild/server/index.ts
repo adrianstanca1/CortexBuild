@@ -1,16 +1,29 @@
 /**
  * Express Server with Real Authentication
- * JWT-based auth with SQLite database
+ * JWT-based auth with Supabase PostgreSQL database
  */
 
+// Load environment variables FIRST, before any other imports
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..');
+
+dotenv.config({ path: join(projectRoot, '.env.local') });
+dotenv.config({ path: join(projectRoot, '.env') });
+
+// Now import other modules after environment is configured
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import Database from 'better-sqlite3';
-import { initDatabase } from './database';
-import * as auth from './auth';
+import { createServer } from 'http';
+import { supabase, verifyConnection } from './supabase';
+import * as auth from './auth-supabase';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
+import { setupWebSocket } from './websocket';
 
 // Import API route creators
 import { createClientsRouter } from './routes/clients';
@@ -26,15 +39,20 @@ import { createDocumentsRouter } from './routes/documents';
 import { createModulesRouter } from './routes/modules';
 import { createAdminRouter } from './routes/admin';
 import { createMarketplaceRouter } from './routes/marketplace';
+import { createGlobalMarketplaceRouter } from './routes/global-marketplace';
 import { createWidgetsRouter } from './routes/widgets';
 import { createSmartToolsRouter } from './routes/smart-tools';
-import { createSDKRouter } from './routes/sdk';
+import { createSDKRouter, initSdkTables } from './routes/sdk';
 import adminSDKRouter from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
+import { createAIChatRoutes } from './routes/ai-chat';
+import { createDeveloperRoutes } from './routes/developer';
+import { createIntegrationsRouter } from './routes/integrations';
+import { createAgentKitRouter } from './routes/agentkit';
+import { createWorkflowsRouter } from './routes/workflows';
+import { createAutomationsRouter } from './routes/automations';
 
-// Load environment variables from .env.local first, then .env
-dotenv.config({ path: '.env.local' });
-dotenv.config();
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -158,26 +176,21 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
  */
 const startServer = async () => {
     try {
-        // Initialize database
-        await initDatabase();
+        // Verify Supabase connection
+        console.log('🔌 Connecting to Supabase...');
+        const isConnected = await verifyConnection();
+        if (!isConnected) {
+            throw new Error('Failed to connect to Supabase');
+        }
 
-        // Connect to database for API routes
-        const db = new Database('cortexbuild.db');
-        db.pragma('journal_mode = WAL');
-        db.pragma('foreign_keys = ON');
-
-        // Initialize MCP tables
-        console.log('🧠 Initializing MCP (Model Context Protocol)...');
-        mcp.initializeMCPTables(db);
-
-        // Initialize deployment tables
-        console.log('🚀 Initializing Deployment tables...');
-        deploymentService.initDeploymentTables(db);
+        // Note: MCP, deployment, and SDK tables are already in Supabase
+        // No need to initialize them here
+        console.log('✅ Supabase connection verified');
 
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
 
-        app.post('/api/auth/login', (req, res) => {
+        app.post('/api/auth/login', async (req, res) => {
             try {
                 const { email, password } = req.body;
 
@@ -185,7 +198,14 @@ const startServer = async () => {
                     return res.status(400).json({ error: 'Email and password are required' });
                 }
 
-                const result = auth.login(db, email, password);
+                const result = await auth.login(email, password);
+
+                if (!result) {
+                    return res.status(401).json({
+                        success: false,
+                        error: 'Invalid email or password'
+                    });
+                }
 
                 res.json({
                     success: true,
@@ -201,17 +221,24 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/register', (req, res) => {
+        app.post('/api/auth/register', async (req, res) => {
             try {
-                const { email, password, name, companyName } = req.body;
+                const { email, password, firstName, lastName, role, companyId } = req.body;
 
-                if (!email || !password || !name || !companyName) {
+                if (!email || !password || !firstName || !lastName) {
                     return res.status(400).json({
-                        error: 'Email, password, name, and company name are required'
+                        error: 'Email, password, first name, and last name are required'
                     });
                 }
 
-                const result = auth.register(db, email, password, name, companyName);
+                const result = await auth.register(email, password, firstName, lastName, role, companyId);
+
+                if (!result) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Registration failed - email may already exist'
+                    });
+                }
 
                 res.json({
                     success: true,
@@ -255,7 +282,7 @@ const startServer = async () => {
                     return res.status(401).json({ error: 'Token is required' });
                 }
 
-                const user = auth.getCurrentUser(db, token);
+                const user = auth.getCurrentUserByToken(db, token);
 
                 res.json({
                     success: true,
@@ -274,62 +301,83 @@ const startServer = async () => {
 
         // Register API routes
         console.log('📝 Registering API routes...');
-        const clientsRouter = createClientsRouter(db);
+        const clientsRouter = createClientsRouter(supabase);
         app.use('/api/clients', clientsRouter);
         console.log('  ✓ /api/clients');
 
-        app.use('/api/projects', createProjectsRouter(db));
+        app.use('/api/projects', createProjectsRouter(supabase));
         console.log('  ✓ /api/projects');
 
-        app.use('/api/rfis', createRFIsRouter(db));
+        app.use('/api/rfis', createRFIsRouter(supabase));
         console.log('  ✓ /api/rfis');
 
-        app.use('/api/invoices', createInvoicesRouter(db));
+        app.use('/api/invoices', createInvoicesRouter(supabase));
         console.log('  ✓ /api/invoices');
 
-        app.use('/api/time-entries', createTimeEntriesRouter(db));
+        app.use('/api/time-entries', createTimeEntriesRouter(supabase));
         console.log('  ✓ /api/time-entries');
 
-        app.use('/api/subcontractors', createSubcontractorsRouter(db));
+        app.use('/api/subcontractors', createSubcontractorsRouter(supabase));
         console.log('  ✓ /api/subcontractors');
 
-        app.use('/api/purchase-orders', createPurchaseOrdersRouter(db));
+        app.use('/api/purchase-orders', createPurchaseOrdersRouter(supabase));
         console.log('  ✓ /api/purchase-orders');
 
-        app.use('/api/tasks', createTasksRouter(db));
+        app.use('/api/tasks', createTasksRouter(supabase));
         console.log('  ✓ /api/tasks');
 
-        app.use('/api/milestones', createMilestonesRouter(db));
+        app.use('/api/milestones', createMilestonesRouter(supabase));
         console.log('  ✓ /api/milestones');
 
-        app.use('/api/documents', createDocumentsRouter(db));
+        app.use('/api/documents', createDocumentsRouter(supabase));
         console.log('  ✓ /api/documents');
 
-        app.use('/api/modules', createModulesRouter(db));
+        app.use('/api/modules', createModulesRouter(supabase));
         console.log('  ✓ /api/modules');
 
-        app.use('/api/admin', createAdminRouter(db));
+        app.use('/api/admin', createAdminRouter(supabase));
         console.log('  ✓ /api/admin');
 
-        app.use('/api/marketplace', createMarketplaceRouter(db));
+        app.use('/api/marketplace', createMarketplaceRouter(supabase));
         console.log('  ✓ /api/marketplace');
 
-        app.use('/api/widgets', createWidgetsRouter(db));
+        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(supabase));
+        console.log('  ✓ /api/global-marketplace');
+
+        app.use('/api/widgets', createWidgetsRouter(supabase));
         console.log('  ✓ /api/widgets');
 
-        app.use('/api/smart-tools', createSmartToolsRouter(db));
+        app.use('/api/smart-tools', createSmartToolsRouter(supabase));
         console.log('  ✓ /api/smart-tools');
 
-        app.use('/api/sdk', createSDKRouter(db));
+        app.use('/api/sdk', createSDKRouter(supabase));
         console.log('  ✓ /api/sdk');
 
         app.use('/api/admin/sdk', adminSDKRouter);
         console.log('  ✓ /api/admin/sdk');
 
-        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(db));
+        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(supabase));
         console.log('  ✓ /api/admin/enhanced');
 
-        console.log('✅ All 18 API routes registered successfully');
+        app.use('/api/ai', createAIChatRoutes(supabase));
+        console.log('  ✓ /api/ai');
+
+        app.use('/api/developer', createDeveloperRoutes(supabase));
+        console.log('  ✓ /api/developer');
+
+        app.use('/api/integrations', createIntegrationsRouter(supabase));
+        console.log('  ✓ /api/integrations');
+
+        app.use('/api/agentkit', createAgentKitRouter(supabase));
+        console.log('  ✓ /api/agentkit');
+
+        app.use('/api/workflows', createWorkflowsRouter(supabase));
+        console.log('  ✓ /api/workflows');
+
+        app.use('/api/automations', createAutomationsRouter(supabase));
+        console.log('  ✓ /api/automations');
+
+        console.log('✅ All 24 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
@@ -351,12 +399,19 @@ const startServer = async () => {
             auth.cleanupExpiredSessions();
         }, 60 * 60 * 1000);
 
+        // Create HTTP server for WebSocket support
+        const server = createServer(app);
+
+        // Setup WebSocket
+        setupWebSocket(server, supabase);
+
         // Start listening
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log('');
             console.log('🚀 CortexBuild AI Platform Server');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log(`✅ Server running on http://localhost:${PORT}`);
+            console.log(`✅ WebSocket server on ws://localhost:${PORT}/ws`);
             console.log(`✅ Database initialized`);
             console.log(`✅ Ready to accept requests`);
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -369,7 +424,7 @@ const startServer = async () => {
             console.log(`  POST   http://localhost:${PORT}/api/auth/logout`);
             console.log(`  GET    http://localhost:${PORT}/api/auth/me`);
             console.log('');
-            console.log('📊 API Routes (64 endpoints):');
+            console.log('📊 API Routes (70+ endpoints):');
             console.log(`  /api/clients - 5 endpoints`);
             console.log(`  /api/projects - 5 endpoints`);
             console.log(`  /api/rfis - 6 endpoints`);
@@ -381,9 +436,15 @@ const startServer = async () => {
             console.log(`  /api/milestones - 5 endpoints`);
             console.log(`  /api/documents - 5 endpoints`);
             console.log(`  /api/modules - 9 endpoints`);
+            console.log(`  /api/ai - 4 endpoints`);
             console.log('');
-            console.log('🤖 AI Chatbot Ready!');
-            console.log(`  POST   http://localhost:${PORT}/api/chat/message`);
+            console.log('🤖 AI Features:');
+            console.log(`  POST   http://localhost:${PORT}/api/ai/chat`);
+            console.log(`  POST   http://localhost:${PORT}/api/ai/suggest`);
+            console.log(`  GET    http://localhost:${PORT}/api/ai/usage`);
+            console.log('');
+            console.log('🔴 Live Collaboration:');
+            console.log(`  WS     ws://localhost:${PORT}/ws`);
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);
@@ -392,4 +453,3 @@ const startServer = async () => {
 };
 
 startServer();
-

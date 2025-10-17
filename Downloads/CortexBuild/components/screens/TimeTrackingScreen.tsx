@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Screen, User, Task, TimeEntry, Project } from '../../types.ts';
-import * as api from '../../api.ts';
-import { ChevronLeftIcon, ClockIcon } from '../Icons.tsx';
+import { Screen, User, Task, TimeEntry, Project } from '../../types';
+import * as api from '../../api';
+import { ChevronLeftIcon, ClockIcon } from '../Icons';
 
 interface TimeTrackingScreenProps {
     currentUser: User;

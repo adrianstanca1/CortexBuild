@@ -2,7 +2,7 @@ import React from 'react';
 import { 
     QuestionMarkCircleIcon, AlertTriangleIcon, DocumentIcon, SparklesIcon 
 // Fix: Added file extension to import path.
-} from '../Icons.tsx';
+} from '../Icons';
 
 type StatCardType = 'rfi' | 'overdue' | 'tm-ticket' | 'ai-risk';
 

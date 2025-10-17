@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
-import { User, PermissionAction, PermissionSubject } from '../types.ts';
-import { can as canCheck } from '../permissions.ts';
+import { User, PermissionAction, PermissionSubject } from '../types';
+import { can as canCheck } from '../permissions';
 
 /**
  * Custom hook to provide a convenient 'can' function for the current user.
- * @param currentUser The currently logged-in user object.
+ * @param currentUser The currently logged-in user object (can be null).
  * @returns An object with a 'can' function.
  */
-export const usePermissions = (currentUser: User) => {
+export const usePermissions = (currentUser: User | null) => {
     const permissions = useMemo(() => {
         /**
          * Checks if the current user can perform a given action on a subject.

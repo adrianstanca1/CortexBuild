@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeftIcon } from '../Icons.tsx';
+import { ChevronLeftIcon } from '../Icons';
 
 interface TMTicketScreenProps {
     goBack: () => void;

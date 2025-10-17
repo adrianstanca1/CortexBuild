@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Screen, User } from '../../types.ts';
-import { MENU_ITEMS, MenuItem } from '../../navigation.ts';
-import { usePermissions } from '../../hooks/usePermissions.ts';
-import { ChevronDownIcon } from '../Icons.tsx';
+import { Screen, User } from '../../types';
+import { MENU_ITEMS, MenuItem } from '../../navigation';
+import { usePermissions } from '../../hooks/usePermissions';
+import { ChevronDownIcon } from '../Icons';
 
 interface FloatingMenuProps {
     currentUser: User;
@@ -29,7 +29,30 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
         return true;
     };
 
-    const visibleMenuItems = MENU_ITEMS.filter(isVisible);
+    const developerMenuItems: MenuItem[] = [
+        { label: 'Developer Console', screen: 'developer-console' },
+        { label: 'SDK Workspace', screen: 'sdk-developer' },
+        { label: 'Marketplace', screen: 'ai-agents-marketplace' }
+    ];
+
+    const superAdminMenuItems: MenuItem[] = [
+        { label: 'Super Admin Dashboard', screen: 'super-admin-dashboard' },
+        { label: 'Platform Admin', screen: 'platform-admin' }
+    ];
+
+    const companyAdminMenuItems: MenuItem[] = [
+        { label: 'Developer Tools', screen: 'developer-dashboard' },
+        { label: 'SDK Workspace', screen: 'sdk-developer' }
+    ];
+
+    const sourceMenu = currentUser.role === 'developer'
+        ? developerMenuItems
+        : currentUser.role === 'super_admin'
+            ? superAdminMenuItems
+            : currentUser.role === 'company_admin'
+                ? companyAdminMenuItems
+                : MENU_ITEMS;
+    const visibleMenuItems = sourceMenu.filter(isVisible);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

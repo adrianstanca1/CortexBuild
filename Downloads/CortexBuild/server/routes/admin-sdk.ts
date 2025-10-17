@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
 import { getCurrentUser } from '../auth';
@@ -401,9 +403,6 @@ router.get('/user-quotas', getCurrentUser, checkSuperAdmin, async (req: Request,
 // POST /api/admin/sdk/database-backup - Create database backup
 router.post('/database-backup', getCurrentUser, checkSuperAdmin, async (req: Request, res: Response) => {
   try {
-    const fs = require('fs');
-    const path = require('path');
-    
     const backupPath = path.join(__dirname, '../../cortexbuild-backup.db');
     
     // Use SQLite backup API
@@ -420,6 +419,147 @@ router.post('/database-backup', getCurrentUser, checkSuperAdmin, async (req: Req
   } catch (error: any) {
     console.error('Database backup error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// DEVELOPER DASHBOARD ENDPOINTS
+// ============================================
+
+// GET /api/admin/sdk/stats - Get comprehensive SDK statistics
+router.get('/stats', getCurrentUser, checkSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    // Get total developers from sdk_profiles
+    const totalDevelopers = db.prepare(`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM sdk_profiles
+    `).get() as { count: number };
+
+    // Get active developers (used API in last 30 days)
+    const activeDevelopers = db.prepare(`
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM api_usage_logs
+      WHERE created_at >= datetime('now', '-30 days')
+    `).get() as { count: number };
+
+    // Get total apps
+    const totalApps = db.prepare(`
+      SELECT COUNT(*) as count FROM sdk_apps
+    `).get() as { count: number };
+
+    // Get total workflows
+    const totalWorkflows = db.prepare(`
+      SELECT COUNT(*) as count FROM sdk_workflows
+    `).get() as { count: number };
+
+    // Get total agents
+    const totalAgents = db.prepare(`
+      SELECT COUNT(*) as count FROM ai_agents
+    `).get() as { count: number };
+
+    // Get API requests today
+    const apiRequestsToday = db.prepare(`
+      SELECT COUNT(*) as count
+      FROM api_usage_logs
+      WHERE DATE(created_at) = DATE('now')
+    `).get() as { count: number };
+
+    // Get API requests this month
+    const apiRequestsMonth = db.prepare(`
+      SELECT COUNT(*) as count
+      FROM api_usage_logs
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+    `).get() as { count: number };
+
+    // Get total cost this month
+    const totalCostResult = db.prepare(`
+      SELECT COALESCE(SUM(cost), 0) as total
+      FROM api_usage_logs
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+    `).get() as { total: number };
+
+    // Average response time (mock for now)
+    const avgResponseTime = 245;
+
+    const stats = {
+      totalDevelopers: totalDevelopers.count,
+      activeDevelopers: activeDevelopers.count,
+      totalApps: totalApps.count,
+      totalWorkflows: totalWorkflows.count,
+      totalAgents: totalAgents.count,
+      apiRequestsToday: apiRequestsToday.count,
+      apiRequestsMonth: apiRequestsMonth.count,
+      totalCost: totalCostResult.total,
+      avgResponseTime
+    };
+
+    res.json({ success: true, stats });
+  } catch (error: any) {
+    console.error('Get SDK stats error:', error);
+    res.status(500).json({ error: 'Failed to get SDK stats' });
+  }
+});
+
+// GET /api/admin/sdk/developers - Get all developer profiles
+router.get('/developers', getCurrentUser, checkSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    const developers = db.prepare(`
+      SELECT
+        sp.*,
+        u.name as userName,
+        u.email as userEmail
+      FROM sdk_profiles sp
+      JOIN users u ON sp.user_id = u.id
+      ORDER BY sp.created_at DESC
+    `).all();
+
+    res.json({ success: true, developers });
+  } catch (error: any) {
+    console.error('Get developers error:', error);
+    res.status(500).json({ error: 'Failed to get developers' });
+  }
+});
+
+// GET /api/admin/sdk/usage-logs - Get API usage logs
+router.get('/usage-logs', getCurrentUser, checkSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50;
+
+    const logs = db.prepare(`
+      SELECT
+        aul.*,
+        u.name as userName,
+        u.email as userEmail
+      FROM api_usage_logs aul
+      JOIN users u ON aul.user_id = u.id
+      ORDER BY aul.created_at DESC
+      LIMIT ?
+    `).all(limit);
+
+    res.json({ success: true, logs });
+  } catch (error: any) {
+    console.error('Get usage logs error:', error);
+    res.status(500).json({ error: 'Failed to get usage logs' });
+  }
+});
+
+// GET /api/admin/sdk/apps - Get all SDK apps
+router.get('/apps', getCurrentUser, checkSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    const apps = db.prepare(`
+      SELECT
+        sa.*,
+        u.name as developer_name,
+        u.email as developer_email
+      FROM sdk_apps sa
+      JOIN users u ON sa.developer_id = u.id
+      ORDER BY sa.created_at DESC
+    `).all();
+
+    res.json({ success: true, apps });
+  } catch (error: any) {
+    console.error('Get SDK apps error:', error);
+    res.status(500).json({ error: 'Failed to get SDK apps' });
   }
 });
 

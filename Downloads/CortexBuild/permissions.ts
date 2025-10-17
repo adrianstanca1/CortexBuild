@@ -1,4 +1,4 @@
-import { UserRole, PermissionAction, PermissionSubject } from './types.ts';
+import { UserRole, PermissionAction, PermissionSubject } from './types';
 
 // Define what actions are permitted for each role on each subject.
 // 'all' means all actions (create, read, update, delete).
@@ -69,6 +69,13 @@ const ROLES: Record<UserRole, { can: Partial<Record<PermissionSubject, Permissio
             dailyLog: ['create', 'read'],
             photo: ['create', 'read'],
             timeEntry: ['create', 'read'],
+        },
+    },
+    developer: {
+        can: {
+            task: ['read'],
+            document: ['read'],
+            user: ['read'],
         },
     },
 };

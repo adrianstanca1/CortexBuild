@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { User, Screen, Project, Task } from '../../../types.ts';
+import { User, Screen, Project, Task } from '../../../types';
 // Fix: Added .ts extension to import
-import * as api from '../../../api.ts';
+import * as api from '../../../api';
 // Fix: Added .tsx extension to widget imports
-import QuickActionsWidget from '../../widgets/QuickActionsWidget.tsx';
-import NotificationsWidget from '../../widgets/NotificationsWidget.tsx';
-import ProjectsOverviewWidget from '../../widgets/ProjectsOverviewWidget.tsx';
-import GlobalStatsWidget from '../../widgets/GlobalStatsWidget.tsx';
-import UpcomingDeadlinesWidget from '../../widgets/UpcomingDeadlinesWidget.tsx';
-import AIAgentsWidget from '../../widgets/AIAgentsWidget.tsx';
-import SmartMetricsWidget from '../../widgets/SmartMetricsWidget.tsx';
-import SmartInsightsWidget from '../../widgets/SmartInsightsWidget.tsx';
-import { processDashboardData, DashboardData } from '../../../utils/dashboardLogic.ts';
+import QuickActionsWidget from '../../widgets/QuickActionsWidget';
+import NotificationsWidget from '../../widgets/NotificationsWidget';
+import ProjectsOverviewWidget from '../../widgets/ProjectsOverviewWidget';
+import GlobalStatsWidget from '../../widgets/GlobalStatsWidget';
+import UpcomingDeadlinesWidget from '../../widgets/UpcomingDeadlinesWidget';
+import AIAgentsWidget from '../../widgets/AIAgentsWidget';
+import SmartMetricsWidget from '../../widgets/SmartMetricsWidget';
+import SmartInsightsWidget from '../../widgets/SmartInsightsWidget';
+import { processDashboardData, DashboardData } from '../../../utils/dashboardLogic';
 
 interface CompanyAdminDashboardProps {
     currentUser: User;
