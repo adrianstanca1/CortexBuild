@@ -21,7 +21,13 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({
-  origin: ['http://localhost:3005', 'http://localhost:3006'],
+  origin: [
+    'http://localhost:3005',
+    'http://localhost:3006',
+    'http://localhost:4173',  // Production preview server
+    'http://localhost:3000',  // Alternative frontend port
+    'http://192.168.1.140:4173' // Network access
+  ],
   credentials: true
 }));
 app.use(express.json());

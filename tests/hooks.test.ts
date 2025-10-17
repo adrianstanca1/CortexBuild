@@ -1,6 +1,11 @@
 // React Hooks Unit Tests
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { useNavigation } from '../hooks/useNavigation';
+import { useToast } from '../hooks/useToast';
+import { usePermissions } from '../hooks/usePermissions';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useDebounce } from '../hooks/useDebounce';
 
 describe('Custom Hooks', () => {
   beforeEach(() => {
@@ -10,7 +15,6 @@ describe('Custom Hooks', () => {
 
   describe('useNavigation Hook', () => {
     it('should initialize with default screen', () => {
-      const { useNavigation } = require('../hooks/useNavigation');
       const { result } = renderHook(() => useNavigation());
       
       expect(result.current.currentScreen).toBe('dashboard');
@@ -19,7 +23,6 @@ describe('Custom Hooks', () => {
     });
 
     it('should navigate to new screen', () => {
-      const { useNavigation } = require('../hooks/useNavigation');
       const { result } = renderHook(() => useNavigation());
       
       act(() => {
