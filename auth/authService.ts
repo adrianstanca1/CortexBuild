@@ -37,7 +37,7 @@ const MOCK_USERS = [
         email: 'adrian.stanca1@gmail.com',
         password: 'parola123',
         name: 'Adrian Stanca',
-        role: 'super-admin' as const,
+        role: 'super_admin' as const,
         companyId: 'company-1',
         permissions: ['*']
     },
@@ -46,7 +46,7 @@ const MOCK_USERS = [
         email: 'adrian@ascladdingltd.co.uk',
         password: 'lolozania1',
         name: 'Adrian ASC',
-        role: 'company-admin' as const,
+        role: 'company_admin' as const,
         companyId: 'company-2',
         permissions: ['company:*']
     },

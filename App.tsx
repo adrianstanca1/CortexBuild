@@ -47,16 +47,7 @@ const TimeTrackingScreen = lazy(() => import('./components/screens/TimeTrackingS
 const NotificationsScreen = lazy(() => import('./components/screens/NotificationsScreen'));
 const ProjectPlanningScreen = lazy(() => import('./components/screens/ProjectPlanningScreen'));
 
-// Missing core screen imports
-const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
-const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
-const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
-const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
-const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
-const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
-const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
-
-// Core feature screens
+// Additional core screen imports
 const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
 const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
 const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
@@ -129,7 +120,7 @@ const App: React.FC = () => {
 
   const { toasts, addToast, removeToast } = useToast();
   const { navigationStack, currentNavItem, navigateTo, goBack, canGoBack } = useNavigation();
-  const { hasPermission } = usePermissions(currentUser);
+  const { can: hasPermission } = usePermissions(currentUser);
 
   // Check for existing session on app load
   useEffect(() => {
@@ -232,43 +223,43 @@ const App: React.FC = () => {
       <InfiniteLoopErrorBoundary>
         <div className="min-h-screen bg-gray-50">
         <AppLayout
-          onLogout={handleLogout}
-          canGoBack={canGoBack}
-          onGoBack={goBack}
-        >
-          <div className="flex h-full">
+          sidebar={
             <MainSidebar
               currentUser={currentUser}
               onNavigate={navigateTo}
               currentScreen={screen}
               hasPermission={hasPermission}
             />
-            <main className="flex-1 overflow-auto">
-              <Suspense fallback={<ScreenLoader />}>
-                <ScreenComponent
-                  currentUser={currentUser}
-                  navigateTo={navigateTo}
-                  goBack={goBack}
-                  project={project}
-                  params={params}
-                  allProjects={allProjects}
-                  hasPermission={hasPermission}
-                />
-              </Suspense>
-            </main>
-          </div>
+          }
+          floatingMenu={
+            <FloatingMenu
+              currentUser={currentUser}
+              navigateToModule={navigateTo}
+              openProjectSelector={(title: string, onSelect: (projectId: string) => void) => {
+                setIsProjectSelectorOpen(true);
+              }}
+              onDeepLink={(projectId: string | null, screen: Screen, params: any) => {
+                navigateTo(screen, params);
+              }}
+            />
+          }
+        >
+          <main className="flex-1 overflow-auto">
+            <Suspense fallback={<ScreenLoader />}>
+              <ScreenComponent
+                currentUser={currentUser}
+                navigateTo={navigateTo}
+                goBack={goBack}
+                project={project}
+                params={params}
+                allProjects={allProjects}
+                hasPermission={hasPermission}
+              />
+            </Suspense>
+          </main>
         </AppLayout>
 
-        <FloatingMenu
-          currentUser={currentUser}
-          navigateToModule={navigateTo}
-          openProjectSelector={(title: string, onSelect: (projectId: string) => void) => {
-            setIsProjectSelectorOpen(true);
-          }}
-          onDeepLink={(projectId: string | null, screen: Screen, params: any) => {
-            navigateTo(screen, params);
-          }}
-        />
+
 
         <ChatbotWidget currentUser={currentUser} />
 
