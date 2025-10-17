@@ -23,10 +23,13 @@ export const useNavigation = () => {
     }, []);
 
     const goBack = useCallback(() => {
-        if (navigationStack.length > 1) {
-            setNavigationStack(prev => prev.slice(0, -1));
-        }
-    }, [navigationStack]);
+        setNavigationStack(prev => {
+            if (prev.length > 1) {
+                return prev.slice(0, -1);
+            }
+            return prev;
+        });
+    }, []);
 
     const goHome = useCallback((currentProject?: Project) => {
         if (currentProject) {

@@ -3,7 +3,7 @@
  * Global AI assistant present on all pages
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChatMessage, ToolResultMessage } from './ChatMessage';
 import { v4 as uuidv4 } from 'uuid';
 import { mockApi } from '../../api/mockApi';
@@ -37,11 +37,6 @@ export const ChatbotWidget: React.FC = () => {
         }
     }, [isOpen]);
 
-    // Load chat history on mount
-    useEffect(() => {
-        loadChatHistory();
-    }, []);
-
     const getAuthHeaders = () => {
         const token = localStorage.getItem('constructai_token');
         return {
@@ -50,7 +45,7 @@ export const ChatbotWidget: React.FC = () => {
         };
     };
 
-    const loadChatHistory = async () => {
+    const loadChatHistory = useCallback(async () => {
         try {
             const data = await mockApi.getChatMessages(sessionId);
             if (data.messages && data.messages.length > 0) {
@@ -67,7 +62,12 @@ export const ChatbotWidget: React.FC = () => {
         } catch (error) {
             console.error('Failed to load chat history:', error);
         }
-    };
+    }, [sessionId]);
+
+    // Load chat history on mount
+    useEffect(() => {
+        loadChatHistory();
+    }, [loadChatHistory]);
 
     const sendMessage = async () => {
         if (!inputValue.trim() || isLoading) return;

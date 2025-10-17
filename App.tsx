@@ -10,6 +10,7 @@ import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
 import FloatingMenu from './components/layout/FloatingMenu';
 import ErrorBoundary from './components/ErrorBoundary';
 import ToastContainer from './components/ToastContainer';
+import { InfiniteLoopErrorBoundary } from './utils/reactDebugger';
 import { usePermissions } from './hooks/usePermissions';
 import * as authService from './auth/authService';
 import { useToast } from './hooks/useToast';
@@ -219,7 +220,8 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
+      <InfiniteLoopErrorBoundary>
+        <div className="min-h-screen bg-gray-50">
         <AppLayout
           onLogout={handleLogout}
           canGoBack={canGoBack}
@@ -287,7 +289,8 @@ const App: React.FC = () => {
         />
 
         <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-      </div>
+        </div>
+      </InfiniteLoopErrorBoundary>
     </ErrorBoundary>
   );
 };

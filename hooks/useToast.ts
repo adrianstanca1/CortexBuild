@@ -4,6 +4,10 @@ import { ToastMessage } from '../components/Toast';
 export const useToast = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
   const addToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newToast: ToastMessage = { ...toast, id };
@@ -14,11 +18,9 @@ export const useToast = () => {
     setTimeout(() => {
       removeToast(id);
     }, toast.duration || 5000);
-  }, []);
+  }, [removeToast]);
 
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+
 
   const showSuccess = useCallback((title: string, message?: string) => {
     addToast({ type: 'success', title, message });

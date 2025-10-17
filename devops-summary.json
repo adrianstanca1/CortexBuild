@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-17T04:23:40.427Z",
+  "timestamp": "2025-10-17T05:05:24.135Z",
   "overall": "CRITICAL",
   "scores": {
     "health": 100,
@@ -25,7 +25,7 @@
     {
       "level": "CRITICAL",
       "message": "1 critical security vulnerabilities detected",
-      "timestamp": "2025-10-17T04:23:40.430Z"
+      "timestamp": "2025-10-17T05:05:24.137Z"
     }
   ]
 }
