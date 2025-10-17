@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(sqlite3:*)",
+      "Read(//Users/admin/Downloads/CortexBuild/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
