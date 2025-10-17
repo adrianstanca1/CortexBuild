@@ -13,6 +13,7 @@ import * as authService from '../../auth/authService';
 import { RealtimeStats } from './RealtimeStats';
 import { RecentActivity } from './RecentActivity';
 import { NotificationCenter } from './NotificationCenter';
+import { PerformanceCharts } from './PerformanceCharts';
 import { DeveloperDashboard } from '../developer/DeveloperDashboard';
 
 interface DashboardStats {

@@ -17,14 +17,14 @@ export default defineConfig(({ mode }) => {
           'Pragma': 'no-cache',
           'Expires': '0',
         },
-        // Disable proxy for now - use direct API calls
-        // proxy: {
-        //   '/api': {
-        //     target: apiUrl,
-        //     changeOrigin: true,
-        //     secure: false,
-        //   }
-        // },
+        // Enable proxy for API calls
+        proxy: {
+          '/api': {
+            target: apiUrl,
+            changeOrigin: true,
+            secure: false,
+          }
+        },
         // Force HMR to always reload
         hmr: {
           overlay: true,
@@ -33,6 +33,17 @@ export default defineConfig(({ mode }) => {
         watch: {
           usePolling: true,
           interval: 100,
+        }
+      },
+      preview: {
+        port: 4173,
+        host: '0.0.0.0',
+        proxy: {
+          '/api': {
+            target: apiUrl,
+            changeOrigin: true,
+            secure: false,
+          }
         }
       },
       plugins: [react()],
