@@ -275,18 +275,20 @@ const App: React.FC = () => {
           currentUser={currentUser}
         />
 
-        <ProjectSelectorModal
-          onSelectProject={(projectId: string) => {
-            const selectedProject = allProjects.find(p => p.id === projectId);
-            if (selectedProject) {
-              navigateTo('project-home', { projectId }, selectedProject);
-            }
-            setIsProjectSelectorOpen(false);
-          }}
-          onClose={() => setIsProjectSelectorOpen(false)}
-          title="Select Project"
-          currentUser={currentUser}
-        />
+        {isProjectSelectorOpen && (
+          <ProjectSelectorModal
+            onSelectProject={(projectId: string) => {
+              const selectedProject = allProjects.find(p => p.id === projectId);
+              if (selectedProject) {
+                navigateTo('project-home', { projectId }, selectedProject);
+              }
+              setIsProjectSelectorOpen(false);
+            }}
+            onClose={() => setIsProjectSelectorOpen(false)}
+            title="Select Project"
+            currentUser={currentUser}
+          />
+        )}
 
         <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
         </div>
