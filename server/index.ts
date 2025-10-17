@@ -39,7 +39,7 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
-import myApplicationsRouter from './routes/my-applications';
+import { createMyApplicationsRouter } from './routes/my-applications';
 import createCodexMCPRoutes from './routes/codex-mcp.js';
 import { createSubscriptionService, SubscriptionService } from './services/subscription-service';
 
@@ -82,7 +82,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3005'],
     credentials: true
 }));
 app.use(express.json());
@@ -414,7 +414,7 @@ const startServer = async () => {
         app.use('/api/automations', generalRateLimit, createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
-        app.use('/api/my-apps', generalRateLimit, myApplicationsRouter);
+        app.use('/api/my-apps', generalRateLimit, createMyApplicationsRouter(db));
         console.log('  ✓ /api/my-applications');
 
         app.use('/api/codex-mcp', generalRateLimit, createCodexMCPRoutes(db));
