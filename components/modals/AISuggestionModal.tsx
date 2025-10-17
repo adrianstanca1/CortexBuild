@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { AISuggestion, NotificationLink, User } from '../../types';
 import { XMarkIcon, WandSparklesIcon, ArrowPathIcon, HandThumbUpIcon, HandThumbDownIcon } from '../Icons';
-import * as api from '../../api';
+// API functions moved to App.tsx - remove this import
 
 interface AISuggestionModalProps {
     isOpen: boolean;

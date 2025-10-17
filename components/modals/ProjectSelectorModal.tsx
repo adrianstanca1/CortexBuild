@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+// API functions moved to App.tsx - remove this import
 import { XMarkIcon, MapPinIcon } from '../Icons';
 
 interface ProjectSelectorModalProps {

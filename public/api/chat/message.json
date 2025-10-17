@@ -1,0 +1,7 @@
+{
+  "id": "msg-default",
+  "content": "Hello! I'm your AI construction assistant. How can I help you today?",
+  "role": "assistant",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "sessionId": "default-session"
+}

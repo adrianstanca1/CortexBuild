@@ -493,18 +493,7 @@
         // Firebase config for demo form - replace with your actual Firebase config
         var __firebase_config = undefined; // Set to valid Firebase config JSON string when needed
     </script>
-    <script type="importmap">
-{
-  "imports": {
-    "react-dom/client": "https://aistudiocdn.com/react-dom@19.2.0/client",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/+esm"
-  }
-}
-</script>
+    <!-- Removed CDN imports to prevent React conflicts - using npm packages instead -->
     <link rel="stylesheet" href="/index.css">
 </head>
 
@@ -1808,6 +1797,13 @@
                 if (window.supabaseClient) {
                     supabaseClient = window.supabaseClient;
                     console.log('Using existing Supabase client for demo form');
+                    return;
+                }
+
+                // Also check if React app has already created a client
+                if (window.reactSupabaseClient) {
+                    supabaseClient = window.reactSupabaseClient;
+                    console.log('Using React app Supabase client for demo form');
                     return;
                 }
 

@@ -8,7 +8,9 @@ export interface NavigationItem {
 }
 
 export const useNavigation = () => {
-    const [navigationStack, setNavigationStack] = useState<NavigationItem[]>([]);
+    const [navigationStack, setNavigationStack] = useState<NavigationItem[]>([
+        { screen: 'global-dashboard', params: {}, project: undefined }
+    ]);
 
     const navigateTo = useCallback((screen: Screen, params: any = {}, project?: Project) => {
         setNavigationStack(prev => [...prev, { screen, params, project }]);
@@ -52,7 +54,13 @@ export const useNavigation = () => {
         }
     }, [navigateTo]);
 
-    const currentNavItem = navigationStack[navigationStack.length - 1];
+    const currentNavItem = navigationStack[navigationStack.length - 1] || {
+        screen: 'global-dashboard' as Screen,
+        params: {},
+        project: undefined
+    };
+
+    const canGoBack = navigationStack.length > 1;
 
     return {
         navigationStack,
@@ -63,6 +71,7 @@ export const useNavigation = () => {
         goHome,
         selectProject,
         handleDeepLink,
-        setNavigationStack
+        setNavigationStack,
+        canGoBack
     };
 };
