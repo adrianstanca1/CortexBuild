@@ -1,12 +1,12 @@
 {
-  "timestamp": "2025-10-17T04:22:49.808Z",
+  "timestamp": "2025-10-17T05:04:43.394Z",
   "overall": "VULNERABLE",
   "checks": {
     "CORS Configuration": {
-      "status": "FAIL",
-      "severity": "MEDIUM",
-      "message": "CORS headers not configured",
-      "recommendation": "Configure proper CORS headers to prevent cross-origin attacks"
+      "status": "ERROR",
+      "severity": "HIGH",
+      "message": "Unable to check CORS configuration",
+      "error": "Error"
     },
     "HTTP Headers": {
       "status": "FAIL",
@@ -19,7 +19,8 @@
       "severity": "CRITICAL",
       "message": "Authentication bypass vulnerabilities detected",
       "details": [
-        "http://localhost:3001/api/platformAdmin - unexpected response: Request failed with status code 404"
+        "http://localhost:3001/api/chat/message - unexpected response: Error",
+        "http://localhost:3001/api/platformAdmin - unexpected response: Error"
       ],
       "recommendation": "Implement proper authentication for all protected endpoints"
     },
