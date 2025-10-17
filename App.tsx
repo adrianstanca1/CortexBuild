@@ -35,7 +35,7 @@ const api = {
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
-const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
+const SuperAdminDashboardV2 = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
 const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
 const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
 
@@ -46,6 +46,15 @@ const TeamManagementScreen = lazy(() => import('./components/screens/TeamManagem
 const TimeTrackingScreen = lazy(() => import('./components/screens/TimeTrackingScreen'));
 const NotificationsScreen = lazy(() => import('./components/screens/NotificationsScreen'));
 const ProjectPlanningScreen = lazy(() => import('./components/screens/ProjectPlanningScreen'));
+
+// Missing core screen imports
+const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
+const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
+const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
+const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
+const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
+const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
+const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
 
 // Core feature screens
 const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
