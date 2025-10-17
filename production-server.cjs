@@ -15,13 +15,13 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Content-Security-Policy', 
+  res.setHeader('Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; " +
     "img-src 'self' data: https:; " +
-    "font-src 'self' https:; " +
-    "connect-src 'self' https:; " +
+    "font-src 'self' https: https://fonts.gstatic.com https://fonts.googleapis.com; " +
+    "connect-src 'self' https: wss: https://*.supabase.co https://api.openai.com https://generativelanguage.googleapis.com; " +
     "frame-ancestors 'none';"
   );
   next();

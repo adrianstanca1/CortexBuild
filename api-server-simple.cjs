@@ -10,9 +10,47 @@ const PORT = 3001;
 // Initialize authentication middleware
 const auth = new AuthMiddleware();
 
-// Basic middleware
+// Basic middleware with enhanced CSP
 app.use(helmet({
-  frameguard: { action: 'deny' }
+  frameguard: { action: 'deny' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+        "https://cdn.jsdelivr.net"
+      ],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "https://cdn.jsdelivr.net",
+        "https://unpkg.com"
+      ],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: [
+        "'self'",
+        "https:",
+        "wss:",
+        "https://*.supabase.co",
+        "https://api.openai.com",
+        "https://generativelanguage.googleapis.com"
+      ],
+      fontSrc: [
+        "'self'",
+        "https:",
+        "https://fonts.gstatic.com",
+        "https://fonts.googleapis.com"
+      ],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false
 }));
 
 // Add XSS protection manually since Helmet deprecated it
