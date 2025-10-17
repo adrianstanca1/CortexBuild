@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0 --port 3002",
+    "dev:react": "vite --host 0.0.0.0 --port 3002 --open",
     "server": "tsx --env-file=.env server/index.ts",
     "api-server": "node api-server.cjs",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",

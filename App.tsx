@@ -109,6 +109,7 @@ const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'system-admin': SystemAdminScreen,
 };
 
+// CortexBuild 2.0 - Powered by Vite + React with HMR
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);

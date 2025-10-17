@@ -46,7 +46,14 @@ export default defineConfig(({ mode }) => {
           }
         }
       },
-      plugins: [react()],
+      plugins: [
+        react({
+          // Enable Fast Refresh for optimal React development
+          fastRefresh: true,
+          // Include TypeScript React files
+          include: "**/*.{jsx,tsx}",
+        })
+      ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
