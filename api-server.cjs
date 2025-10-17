@@ -1,17 +1,148 @@
-// Simple API Server for CortexBuild Development
+// Secure API Server for CortexBuild Development
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const { AuthMiddleware, authHelpers } = require('./middleware/auth.cjs');
 
 const app = express();
 const PORT = 3001;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Initialize authentication middleware
+const auth = new AuthMiddleware();
+
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3005', 'http://localhost:3006'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-CSRF-Token']
+}));
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Rate limiting
+app.use('/api/', auth.rateLimit(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
+
+// Authentication middleware for protected routes (applied after public routes)
+// This will be applied selectively to protected endpoints
 
 // Mock chat sessions storage
 const chatSessions = new Map();
+
+// Authentication endpoints
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email and password are required'
+      });
+    }
+
+    const user = authHelpers.findUserByEmail(email);
+    console.log('Login attempt:', { email, userFound: !!user });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password'
+      });
+    }
+
+    const isValidPassword = authHelpers.validatePassword(password, user.password);
+    console.log('Password validation:', { isValid: isValidPassword });
+
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password'
+      });
+    }
+
+    const token = auth.generateToken(user);
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
+app.get('/api/auth/me', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Not authenticated'
+      });
+    }
+
+    const user = authHelpers.findUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logged out successfully'
+  });
+});
 
 // Mock chat responses
 const mockResponses = [
@@ -57,23 +188,33 @@ function generateAIResponse(userMessage, conversationHistory) {
   return randomResponse;
 }
 
-// Chat API endpoints
-app.get('/api/chat/message', async (req, res) => {
+// Chat API endpoints (protected)
+app.get('/api/chat/message', auth.requireUser(), async (req, res) => {
   try {
     const { sessionId } = req.query;
 
     if (!sessionId) {
-      return res.status(400).json({ error: 'Session ID is required' });
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required'
+      });
     }
 
-    // Get chat history
-    const session = chatSessions.get(sessionId);
+    // Ensure user can only access their own sessions
+    const userSessionId = `${req.user.id}-${sessionId}`;
+    const session = chatSessions.get(userSessionId);
     const messages = session ? session.messages : [];
 
-    res.json({ messages });
+    res.json({
+      success: true,
+      messages
+    });
   } catch (error) {
     console.error('Chat API error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
   }
 });
 
@@ -85,30 +226,45 @@ app.options('/api/chat/message', (req, res) => {
   res.sendStatus(200);
 });
 
-app.post('/api/chat/message', async (req, res) => {
+app.post('/api/chat/message', auth.requireUser(), async (req, res) => {
   try {
     const { sessionId } = req.query;
     const { message } = req.body;
-    
+
     if (!sessionId) {
-      return res.status(400).json({ error: 'Session ID is required' });
-    }
-    
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required'
+      });
     }
 
-    // Get or create session
-    let session = chatSessions.get(sessionId);
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message is required'
+      });
+    }
+
+    // Input validation and sanitization
+    if (message.length > 1000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message too long (max 1000 characters)'
+      });
+    }
+
+    // Ensure user can only access their own sessions
+    const userSessionId = `${req.user.id}-${sessionId}`;
+    let session = chatSessions.get(userSessionId);
     if (!session) {
       session = {
-        id: sessionId,
-        userId: 'demo-user-123',
+        id: userSessionId,
+        userId: req.user.id,
         messages: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      chatSessions.set(sessionId, session);
+      chatSessions.set(userSessionId, session);
     }
 
     // Add user message
@@ -150,21 +306,25 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Platform admin endpoints
-app.get('/api/platformAdmin', (req, res) => {
+// Platform admin endpoints (admin only)
+app.get('/api/platformAdmin', auth.requireAdmin(), (req, res) => {
   res.json({
+    success: true,
     message: 'Platform Admin API is working',
     timestamp: new Date().toISOString(),
-    status: 'ok'
+    status: 'ok',
+    user: req.user.email
   });
 });
 
-app.post('/api/platformAdmin', (req, res) => {
+app.post('/api/platformAdmin', auth.requireAdmin(), (req, res) => {
   res.json({
+    success: true,
     message: 'Platform Admin POST endpoint',
     timestamp: new Date().toISOString(),
     status: 'ok',
-    data: req.body
+    data: req.body,
+    user: req.user.email
   });
 });
 

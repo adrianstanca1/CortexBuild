@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-17T04:05:21.425Z",
+  "timestamp": "2025-10-17T04:22:49.808Z",
   "overall": "VULNERABLE",
   "checks": {
     "CORS Configuration": {
