@@ -32,6 +32,9 @@ import DeveloperMetricsWidget from '../../widgets/DeveloperMetricsWidget';
 import DeveloperInsightsWidget from '../../widgets/DeveloperInsightsWidget';
 import DeveloperFocusWidget from '../../widgets/DeveloperFocusWidget';
 import { processDeveloperDashboardData } from '../../../utils/developerDashboardLogic';
+import { mockApi } from '../../../api/mockApi';
+
+// Note: Using existing axios-based api object defined later in the file
 
 interface DeveloperDashboardScreenProps {
   currentUser: User;
@@ -502,6 +505,29 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     }
   }, [buildManifestFromEditor, builderEditor]);
 
+  // Sandbox run function - moved here to fix initialization order
+  const handleSandboxRun = useCallback(async (options: { appId?: string; workflowId?: string; definition?: any; name?: string; payload?: any } = {}) => {
+    if (sandboxRunning) return;
+    setSandboxRunning(true);
+    try {
+      const endpoint = options.definition ? '/developer/builder/run' : '/developer/sandbox/run';
+      const response = await api.post(endpoint, options);
+      if (response.data?.success) {
+        const resultPayload = response.data.run ?? response.data.simulation ?? null;
+        setSandboxResult(resultPayload);
+        toast.success('Sandbox simulation completed');
+        await loadDashboardData(false);
+      } else {
+        toast.error(response.data?.error || 'Sandbox simulation failed');
+      }
+    } catch (error) {
+      console.error('Sandbox run failed', error);
+      toast.error('Sandbox run failed');
+    } finally {
+      setSandboxRunning(false);
+    }
+  }, [sandboxRunning, loadDashboardData]);
+
   const handleRunBuilderModule = useCallback(async (module: BuilderModule) => {
     const payload = module.manifest?.metadata?.testPayload ?? {};
     await handleSandboxRun({ name: module.name, definition: module.manifest, payload });
@@ -663,27 +689,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     toast.success('Developer insights refreshed');
   };
 
-  const handleSandboxRun = useCallback(async (options: { appId?: string; workflowId?: string; definition?: any; name?: string; payload?: any } = {}) => {
-    if (sandboxRunning) return;
-    setSandboxRunning(true);
-    try {
-      const endpoint = options.definition ? '/developer/builder/run' : '/developer/sandbox/run';
-      const response = await api.post(endpoint, options);
-      if (response.data?.success) {
-        const resultPayload = response.data.run ?? response.data.simulation ?? null;
-        setSandboxResult(resultPayload);
-        toast.success('Sandbox simulation completed');
-        await loadDashboardData(false);
-      } else {
-        toast.error(response.data?.error || 'Sandbox simulation failed');
-      }
-    } catch (error) {
-      console.error('Sandbox run failed', error);
-      toast.error('Sandbox run failed');
-    } finally {
-      setSandboxRunning(false);
-    }
-  }, [sandboxRunning, loadDashboardData]);
+  // handleSandboxRun moved to earlier in the file to fix initialization order
 
   const handleQuickAction = useCallback(
     async (action: RoleExperienceQuickAction) => {
