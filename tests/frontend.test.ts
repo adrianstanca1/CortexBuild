@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 
 describe('Frontend Integration Tests', () => {
-  const FRONTEND_URL = 'http://localhost:3005';
+  const FRONTEND_URL = 'http://localhost:3002';
 
   beforeAll(async () => {
     console.log('🌐 Starting frontend integration tests...');
@@ -167,7 +167,7 @@ describe('Frontend Integration Tests', () => {
       expect(html).toContain('<!DOCTYPE html>');
       expect(html).toContain('<html');
       expect(html).toContain('<head>');
-      expect(html).toContain('<body>');
+      expect(html).toMatch(/<body[^>]*>/); // Match body tag with any attributes
     });
   });
 

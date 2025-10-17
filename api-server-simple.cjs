@@ -11,7 +11,15 @@ const PORT = 3001;
 const auth = new AuthMiddleware();
 
 // Basic middleware
-app.use(helmet());
+app.use(helmet({
+  frameguard: { action: 'deny' }
+}));
+
+// Add XSS protection manually since Helmet deprecated it
+app.use((req, res, next) => {
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 app.use(cors({
   origin: ['http://localhost:3005', 'http://localhost:3006'],
   credentials: true
@@ -91,7 +99,7 @@ app.get('/api/test-protected', auth.requireUser(), (req, res) => {
   });
 });
 
-// Chat endpoint (protected)
+// Chat endpoints (protected)
 app.get('/api/chat/message', auth.authenticate(), auth.requireUser(), (req, res) => {
   res.json({
     success: true,
@@ -100,8 +108,46 @@ app.get('/api/chat/message', auth.authenticate(), auth.requireUser(), (req, res)
   });
 });
 
+app.post('/api/chat/message', auth.authenticate(), auth.requireUser(), (req, res) => {
+  try {
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message is required'
+      });
+    }
+
+    if (message.length > 1000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message too long (max 1000 characters)'
+      });
+    }
+
+    // Simulate message processing
+    const response = {
+      success: true,
+      message: {
+        id: `msg-${Date.now()}`,
+        content: message,
+        timestamp: new Date().toISOString(),
+        user: req.user.email
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 // Platform admin endpoint (admin only)
-app.get('/api/platformAdmin', auth.requireAdmin(), (req, res) => {
+app.get('/api/platformAdmin', auth.authenticate(), auth.requireAdmin(), (req, res) => {
   res.json({
     success: true,
     message: 'Platform Admin API accessed',
@@ -109,9 +155,27 @@ app.get('/api/platformAdmin', auth.requireAdmin(), (req, res) => {
   });
 });
 
+app.post('/api/platformAdmin', auth.authenticate(), auth.requireAdmin(), (req, res) => {
+  res.json({
+    success: true,
+    message: 'Platform Admin POST endpoint',
+    data: req.body,
+    user: req.user.email
+  });
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error('Server error:', error);
+
+  // Handle JSON parsing errors
+  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid JSON format'
+    });
+  }
+
   res.status(500).json({
     success: false,
     error: 'Internal server error'

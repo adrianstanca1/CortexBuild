@@ -38,8 +38,10 @@ describe('Infinite Re-render Loop Prevention', () => {
       expect(response.status).toBe(200);
       
       const html = await response.text();
-      expect(html).not.toContain('error');
+      // Check for actual React error indicators, not just the word "error"
       expect(html).not.toContain('Maximum update depth');
+      expect(html).not.toContain('React error boundary');
+      expect(html).not.toContain('Something went wrong');
     });
   });
 
