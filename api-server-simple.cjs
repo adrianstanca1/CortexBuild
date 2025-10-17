@@ -190,6 +190,95 @@ app.post('/api/chat/message', auth.authenticate(), auth.requireUser(), (req, res
   }
 });
 
+// Dashboard endpoints (protected)
+app.get('/api/dashboard/stats', auth.authenticate(), auth.requireUser(), (req, res) => {
+  res.json({
+    success: true,
+    stats: {
+      totalProjects: 12,
+      activeProjects: 8,
+      completedProjects: 4,
+      totalTasks: 156,
+      completedTasks: 89,
+      pendingTasks: 67,
+      totalUsers: 24,
+      activeUsers: 18,
+      totalRevenue: 2450000,
+      monthlyRevenue: 245000
+    },
+    user: req.user.email
+  });
+});
+
+app.get('/api/dashboard/projects', auth.authenticate(), auth.requireUser(), (req, res) => {
+  res.json({
+    success: true,
+    projects: [
+      {
+        id: 1,
+        name: "Office Complex Alpha",
+        status: "active",
+        progress: 75,
+        budget: 2500000,
+        spent: 1875000,
+        deadline: "2025-03-15"
+      },
+      {
+        id: 2,
+        name: "Residential Tower Beta",
+        status: "active",
+        progress: 45,
+        budget: 3200000,
+        spent: 1440000,
+        deadline: "2025-06-30"
+      },
+      {
+        id: 3,
+        name: "Shopping Center Gamma",
+        status: "planning",
+        progress: 15,
+        budget: 1800000,
+        spent: 270000,
+        deadline: "2025-09-20"
+      }
+    ],
+    user: req.user.email
+  });
+});
+
+app.get('/api/dashboard/tasks', auth.authenticate(), auth.requireUser(), (req, res) => {
+  res.json({
+    success: true,
+    tasks: [
+      {
+        id: 1,
+        title: "Foundation Inspection",
+        project: "Office Complex Alpha",
+        status: "pending",
+        priority: "high",
+        dueDate: "2025-01-20"
+      },
+      {
+        id: 2,
+        title: "Electrical Wiring Review",
+        project: "Residential Tower Beta",
+        status: "in-progress",
+        priority: "medium",
+        dueDate: "2025-01-25"
+      },
+      {
+        id: 3,
+        title: "Material Procurement",
+        project: "Shopping Center Gamma",
+        status: "completed",
+        priority: "low",
+        dueDate: "2025-01-15"
+      }
+    ],
+    user: req.user.email
+  });
+});
+
 // Platform admin endpoint (admin only)
 app.get('/api/platformAdmin', auth.authenticate(), auth.requireAdmin(), (req, res) => {
   res.json({
@@ -205,6 +294,70 @@ app.post('/api/platformAdmin', auth.authenticate(), auth.requireAdmin(), (req, r
     message: 'Platform Admin POST endpoint',
     data: req.body,
     user: req.user.email
+  });
+});
+
+// User profile endpoints
+app.get('/api/user/profile', auth.authenticate(), auth.requireUser(), (req, res) => {
+  res.json({
+    success: true,
+    profile: {
+      id: req.user.id,
+      email: req.user.email,
+      name: req.user.name || 'Demo User',
+      role: req.user.role,
+      avatar: null,
+      preferences: {
+        theme: 'light',
+        notifications: true,
+        language: 'en'
+      }
+    }
+  });
+});
+
+app.put('/api/user/profile', auth.authenticate(), auth.requireUser(), (req, res) => {
+  res.json({
+    success: true,
+    message: 'Profile updated successfully',
+    profile: {
+      ...req.body,
+      id: req.user.id,
+      email: req.user.email
+    }
+  });
+});
+
+// Admin user management endpoints
+app.get('/api/admin/users', auth.authenticate(), auth.requireAdmin(), (req, res) => {
+  res.json({
+    success: true,
+    users: [
+      {
+        id: 'demo-user-123',
+        email: 'demo@cortexbuild.com',
+        name: 'Demo User',
+        role: 'admin',
+        status: 'active',
+        lastLogin: new Date().toISOString()
+      },
+      {
+        id: 'user-456',
+        email: 'john.doe@example.com',
+        name: 'John Doe',
+        role: 'user',
+        status: 'active',
+        lastLogin: '2025-01-16T10:30:00Z'
+      },
+      {
+        id: 'user-789',
+        email: 'jane.smith@example.com',
+        name: 'Jane Smith',
+        role: 'user',
+        status: 'inactive',
+        lastLogin: '2025-01-10T14:20:00Z'
+      }
+    ]
   });
 });
 
