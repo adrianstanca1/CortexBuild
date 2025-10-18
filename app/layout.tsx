@@ -340,22 +340,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setNeuralMode(!neuralMode)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      neuralMode
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${neuralMode
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
                   >
                     <Brain className="w-4 h-4 inline mr-1" />
                     Neural
                   </button>
                   <button
                     onClick={() => setQuantumView(!quantumView)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      quantumView
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${quantumView
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
                   >
                     <Zap className="w-4 h-4 inline mr-1" />
                     Quantum
@@ -446,11 +444,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       <button
                         key={item.id}
                         onClick={() => setCurrentView(item.id)}
-                        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                          currentView === item.id
-                            ? 'bg-blue-600 text-white'
-                            : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                        }`}
+                        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${currentView === item.id
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                          }`}
                       >
                         {item.icon}
                         <span>{item.name}</span>

@@ -409,18 +409,16 @@ export default function PlatformFeaturesPage() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setViewMode('overview')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    viewMode === 'overview' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${viewMode === 'overview' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   <Eye className="w-4 h-4 inline mr-1" />
                   Overview
                 </button>
                 <button
                   onClick={() => setViewMode('technical')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    viewMode === 'technical' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${viewMode === 'technical' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   <Settings className="w-4 h-4 inline mr-1" />
                   Technical
@@ -447,11 +445,10 @@ export default function PlatformFeaturesPage() {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                    selectedCategory === category.id
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${selectedCategory === category.id
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   <div className="flex items-center space-x-3">
                     {category.icon}
@@ -503,17 +500,16 @@ export default function PlatformFeaturesPage() {
                     className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all duration-200"
                   >
                     <div className="flex items-start space-x-4">
-                      <div className={`p-3 rounded-lg ${
-                        feature.status === 'available' ? 'bg-green-500/20' :
+                      <div className={`p-3 rounded-lg ${feature.status === 'available' ? 'bg-green-500/20' :
                         feature.status === 'beta' ? 'bg-yellow-500/20' :
-                        feature.status === 'coming-soon' ? 'bg-gray-500/20' :
-                        'bg-purple-500/20'
-                      }`}>
+                          feature.status === 'coming-soon' ? 'bg-gray-500/20' :
+                            'bg-purple-500/20'
+                        }`}>
                         <div className={
                           feature.status === 'available' ? 'text-green-400' :
-                          feature.status === 'beta' ? 'text-yellow-400' :
-                          feature.status === 'coming-soon' ? 'text-gray-400' :
-                          'text-purple-400'
+                            feature.status === 'beta' ? 'text-yellow-400' :
+                              feature.status === 'coming-soon' ? 'text-gray-400' :
+                                'text-purple-400'
                         }>
                           {feature.icon}
                         </div>
@@ -522,12 +518,11 @@ export default function PlatformFeaturesPage() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
                           <h3 className="text-xl font-semibold text-white">{feature.name}</h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            feature.status === 'available' ? 'bg-green-500/20 text-green-400' :
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${feature.status === 'available' ? 'bg-green-500/20 text-green-400' :
                             feature.status === 'beta' ? 'bg-yellow-500/20 text-yellow-400' :
-                            feature.status === 'coming-soon' ? 'bg-gray-500/20 text-gray-400' :
-                            'bg-purple-500/20 text-purple-400'
-                          }`}>
+                              feature.status === 'coming-soon' ? 'bg-gray-500/20 text-gray-400' :
+                                'bg-purple-500/20 text-purple-400'
+                            }`}>
                             {feature.status}
                           </span>
                         </div>

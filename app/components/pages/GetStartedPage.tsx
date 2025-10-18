@@ -351,18 +351,16 @@ export default function GetStartedPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative p-6 rounded-xl border transition-all duration-200 ${
-                    completedSteps.includes(step.id)
-                      ? 'bg-green-500/10 border-green-500/20'
-                      : 'bg-black/20 border-white/10 hover:border-white/20'
-                  }`}
+                  className={`relative p-6 rounded-xl border transition-all duration-200 ${completedSteps.includes(step.id)
+                    ? 'bg-green-500/10 border-green-500/20'
+                    : 'bg-black/20 border-white/10 hover:border-white/20'
+                    }`}
                 >
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className={`p-3 rounded-lg ${
-                      completedSteps.includes(step.id)
-                        ? 'bg-green-500/20'
-                        : 'bg-blue-500/20'
-                    }`}>
+                    <div className={`p-3 rounded-lg ${completedSteps.includes(step.id)
+                      ? 'bg-green-500/20'
+                      : 'bg-blue-500/20'
+                      }`}>
                       <div className={
                         completedSteps.includes(step.id)
                           ? 'text-green-400'
@@ -393,11 +391,10 @@ export default function GetStartedPage() {
                   <button
                     onClick={() => handleStepComplete(step.id)}
                     disabled={completedSteps.includes(step.id)}
-                    className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                      completedSteps.includes(step.id)
-                        ? 'bg-green-600 text-white cursor-default'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                    }`}
+                    className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${completedSteps.includes(step.id)
+                      ? 'bg-green-600 text-white cursor-default'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
                   >
                     {completedSteps.includes(step.id) ? 'Completed' : step.action}
                   </button>
@@ -446,11 +443,10 @@ export default function GetStartedPage() {
                     </div>
                     <div className="flex items-center justify-between text-sm mb-2">
                       <span className="text-gray-400">Difficulty</span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        quickStart.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${quickStart.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
                         quickStart.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
+                          'bg-red-500/20 text-red-400'
+                        }`}>
                         {quickStart.difficulty}
                       </span>
                     </div>
@@ -522,11 +518,10 @@ export default function GetStartedPage() {
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400">Level</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      path.level === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${path.level === 'beginner' ? 'bg-green-500/20 text-green-400' :
                       path.level === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-red-500/20 text-red-400'
-                    }`}>
+                        'bg-red-500/20 text-red-400'
+                      }`}>
                       {path.level}
                     </span>
                   </div>

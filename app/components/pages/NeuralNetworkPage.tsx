@@ -269,18 +269,16 @@ export default function NeuralNetworkPage() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setViewMode('visualization')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    viewMode === 'visualization' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${viewMode === 'visualization' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   <Eye className="w-4 h-4 inline mr-1" />
                   Visualization
                 </button>
                 <button
                   onClick={() => setViewMode('details')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    viewMode === 'details' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${viewMode === 'details' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   <Settings className="w-4 h-4 inline mr-1" />
                   Details
@@ -315,11 +313,10 @@ export default function NeuralNetworkPage() {
                 <button
                   key={item.id}
                   onClick={() => setViewMode(item.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    viewMode === item.id
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${viewMode === item.id
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   {item.icon}
                   <span>{item.name}</span>
@@ -488,12 +485,11 @@ export default function NeuralNetworkPage() {
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
                             <span className="text-white font-medium">{layer.name}</span>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              layer.type === 'input' ? 'bg-blue-500/20 text-blue-400' :
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${layer.type === 'input' ? 'bg-blue-500/20 text-blue-400' :
                               layer.type === 'hidden' ? 'bg-purple-500/20 text-purple-400' :
-                              layer.type === 'output' ? 'bg-green-500/20 text-green-400' :
-                              'bg-yellow-500/20 text-yellow-400'
-                            }`}>
+                                layer.type === 'output' ? 'bg-green-500/20 text-green-400' :
+                                  'bg-yellow-500/20 text-yellow-400'
+                              }`}>
                               {layer.type}
                             </span>
                           </div>

@@ -208,18 +208,16 @@ export default function ConnectivityPage() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setQuantumView(!quantumView)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    quantumView ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${quantumView ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   <Zap className="w-4 h-4 inline mr-1" />
                   Quantum
                 </button>
                 <button
                   onClick={() => setNeuralSync(!neuralSync)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    neuralSync ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${neuralSync ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   <Brain className="w-4 h-4 inline mr-1" />
                   Neural
@@ -253,11 +251,10 @@ export default function ConnectivityPage() {
                 <button
                   key={item.id}
                   onClick={() => setSelectedView(item.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    selectedView === item.id
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  }`}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${selectedView === item.id
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                    }`}
                 >
                   {item.icon}
                   <span>{item.name}</span>
@@ -280,21 +277,19 @@ export default function ConnectivityPage() {
                 {metrics.map((metric) => (
                   <div key={metric.id} className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                     <div className="text-center">
-                      <div className={`text-2xl font-bold ${
-                        metric.status === 'optimal' ? 'text-green-400' :
+                      <div className={`text-2xl font-bold ${metric.status === 'optimal' ? 'text-green-400' :
                         metric.status === 'warning' ? 'text-yellow-400' :
-                        'text-red-400'
-                      }`}>
+                          'text-red-400'
+                        }`}>
                         {metric.value}{metric.unit}
                       </div>
                       <div className="text-gray-400 text-sm">{metric.name}</div>
                       <div className="w-full bg-gray-700 rounded-full h-1 mt-2">
                         <div
-                          className={`h-1 rounded-full ${
-                            metric.status === 'optimal' ? 'bg-green-500' :
+                          className={`h-1 rounded-full ${metric.status === 'optimal' ? 'bg-green-500' :
                             metric.status === 'warning' ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }`}
+                              'bg-red-500'
+                            }`}
                           style={{ width: `${metric.value * 100}%` }}
                         />
                       </div>
@@ -332,11 +327,10 @@ export default function ConnectivityPage() {
                     {nodes.map((node) => (
                       <div key={node.id} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
                         <div className="flex items-center space-x-4">
-                          <div className={`w-3 h-3 rounded-full ${
-                            node.status === 'connected' ? 'bg-green-400' :
+                          <div className={`w-3 h-3 rounded-full ${node.status === 'connected' ? 'bg-green-400' :
                             node.status === 'syncing' ? 'bg-yellow-400' :
-                            'bg-red-400'
-                          }`} />
+                              'bg-red-400'
+                            }`} />
                           <div>
                             <h3 className="text-white font-medium">{node.name}</h3>
                             <p className="text-gray-400 text-sm">{node.location}</p>
