@@ -14,7 +14,12 @@ if (supabaseUrl && supabaseAnonKey) {
 
 let supabaseInstance: SupabaseClient | null = null;
 
-if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'YOUR_SUPABASE_URL' && supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY') {
+// Only initialize Supabase if both URL and key are properly configured
+if (supabaseUrl && supabaseAnonKey && 
+    supabaseUrl !== 'YOUR_SUPABASE_URL' && 
+    supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY' &&
+    supabaseUrl.startsWith('http') &&
+    supabaseAnonKey.length > 20) {
     try {
         supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
         // Store globally to avoid multiple client instances
@@ -23,6 +28,7 @@ if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'YOUR_SUPABASE_URL' && sup
     } catch (e) {
         console.error("❌ Failed to initialize Supabase client:", e);
         console.warn('⚠️ Supabase initialization failed. Application will use local authentication.');
+        supabaseInstance = null;
     }
 } else {
     if (supabaseUrl || supabaseAnonKey) {
