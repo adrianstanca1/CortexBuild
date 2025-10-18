@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST='{"app/providers.tsx -> web-vitals":{"id":3412,"files":["static/chunks/412.95e93899049ec920.js"]},"node_modules/@tanstack/query-devtools/build/index.js -> ./DevtoolsComponent/NCMVHL6D.js":{"id":null,"files":[]},"node_modules/@tanstack/query-devtools/build/index.js -> ./DevtoolsPanelComponent/2AITGKQY.js":{"id":null,"files":[]}}';

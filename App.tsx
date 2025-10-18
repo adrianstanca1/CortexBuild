@@ -43,7 +43,7 @@ const EnhancedDeveloperConsole = lazy(() => import('./components/screens/develop
 const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
-const CompanyAdminDashboardScreen = lazy(() => import('./components/screens/company/CompanyAdminDashboardScreen'));
+// Removed CompanyAdminDashboardScreen - has missing dependencies
 const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
 const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
 const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
@@ -98,7 +98,7 @@ type NavigationItem = {
 const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'global-dashboard': UnifiedDashboardScreen,
   'company-admin-dashboard': CompanyAdminDashboard,
-  'company-admin-legacy': CompanyAdminDashboardScreen,
+  'company-admin-legacy': CompanyAdminDashboard, // Use same as main company admin
   'projects': ProjectsListScreen,
   'project-home': ProjectHomeScreen,
   'my-day': MyDayScreen,
