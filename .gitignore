@@ -58,3 +58,4 @@ firebase-debug.log
 *.bak3
 *.bak4
 
+.next

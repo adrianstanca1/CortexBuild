@@ -651,7 +651,7 @@ export default function HomePage() {
               className="border-2 border-white/20 hover:border-white/40 text-white px-8 py-4 rounded-xl text-lg font-medium transition-all duration-200"
             >
               Watch Demo
-            </button>
+            </motion.button>
           </div>
 
           {/* Feature Highlights */}
