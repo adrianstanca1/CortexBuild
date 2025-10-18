@@ -45,7 +45,7 @@ import {
   Grid,
   List,
   Atom,
-  Infinity,
+  Infinity as InfinityIcon,
   Sparkles,
   Heart,
   Star,

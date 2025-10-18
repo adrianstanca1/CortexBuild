@@ -33,7 +33,7 @@ import {
   Lightbulb,
   Sparkles,
   Atom,
-  Infinity,
+  Infinity as InfinityIcon,
   Globe,
   Smartphone,
   Monitor,

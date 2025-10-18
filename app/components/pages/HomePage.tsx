@@ -41,7 +41,7 @@ import {
   Hand,
   Sparkles as SparklesIcon,
   Atom,
-  Infinity,
+  Infinity as InfinityIcon,
   Lightbulb,
   Cog,
   Database,

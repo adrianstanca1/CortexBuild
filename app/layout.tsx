@@ -18,7 +18,7 @@ import {
   X,
   ChevronDown,
   LogOut,
-  User,
+  User as UserIcon,
   Shield,
   Activity,
   Brain,
@@ -402,7 +402,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </div>
                     <div className="py-2">
                       <button className="w-full text-left px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 flex items-center space-x-2">
-                        <User className="w-4 h-4" />
+                        <UserIcon className="w-4 h-4" />
                         <span>Profile</span>
                       </button>
                       <button className="w-full text-left px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 flex items-center space-x-2">

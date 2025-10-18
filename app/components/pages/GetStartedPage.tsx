@@ -96,7 +96,7 @@ import {
   Battery,
   Signal,
   Atom,
-  Infinity,
+  Infinity as InfinityIcon,
   Cloud,
   Sun,
   Moon,

@@ -12,7 +12,7 @@ import {
   Zap,
   Brain,
   Users,
-  Infinity,
+  Infinity as InfinityIcon,
   Atom,
   Radio,
   Satellite,

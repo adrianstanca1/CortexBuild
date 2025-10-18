@@ -6,7 +6,29 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
-    ignores: ['dist/**'],
+    ignores: [
+      'dist/**',
+      '.next/**',
+      'apps/**',
+      'node_modules/**',
+      'build/**',
+      'coverage/**',
+      '*.min.js',
+      '*.bundle.js',
+      '**/*.bundle.js',
+      '**/*.min.js',
+      '**/vendor-*.js',
+      '**/admin-vendor-*.js',
+      '**/base44-vendor-*.js',
+      '**/react-vendor-*.js',
+      '**/ai-vendor-*.js',
+      '**/http-vendor-*.js',
+      '**/ui-vendor-*.js',
+      '**/modules-vendor-*.js',
+      '**/utils-vendor-*.js',
+      '**/monaco-vendor-*.js',
+      '**/supabase-vendor-*.js',
+    ],
   },
   js.configs.recommended,
   {
