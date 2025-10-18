@@ -166,7 +166,7 @@ export const registerUser = async (details: { name: string, email: string, compa
 
         if (supabase) {
             // This is a simplified registration flow. A real app would have more robust company handling.
-            const { data: companies } = await supabase.from('companies').select('id').eq('name', details.companyName.trim()).limit(1);
+            const { data: companies } = supabase ? await supabase.from('companies').select('id').eq('name', details.companyName.trim()).limit(1) : { data: [] };
             let companyId;
 
             if (companies && companies.length > 0) {

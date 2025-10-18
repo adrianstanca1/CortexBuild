@@ -59,6 +59,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(({ onLoginSuccess }
     const handleOAuthSignup = async (provider: 'google' | 'github') => {
         if (!supabase) {
             setError('OAuth authentication is not available. Supabase is not configured.');
+            setIsOAuthLoading(null);
             return;
         }
 

@@ -38,7 +38,21 @@ if (supabaseUrl && supabaseAnonKey &&
     }
 }
 
-export const supabase = supabaseInstance;
+// Create a safe wrapper that prevents errors when Supabase is not available
+export const safeSupabase = {
+    auth: {
+        signUp: async () => ({ data: null, error: { message: 'Supabase not configured' } }),
+        signInWithOAuth: async () => ({ data: null, error: { message: 'Supabase not configured' } }),
+        getSession: async () => ({ data: { session: null }, error: null }),
+        signOut: async () => ({ error: null })
+    },
+    from: () => ({
+        select: () => ({ eq: () => ({ limit: () => ({ data: [], error: null }) }) }),
+        insert: () => ({ select: () => ({ single: () => ({ data: null, error: { message: 'Supabase not configured' } }) }) })
+    })
+};
+
+export const supabase = supabaseInstance || safeSupabase;
 
 export const getMyProfile = async (): Promise<User | null> => {
     if (!supabase) {
