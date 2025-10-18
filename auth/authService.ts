@@ -39,7 +39,7 @@ class AuthService {
   async login(email: string, password: string): Promise<User> {
     console.log("🔐 [AuthService] Login attempt:", email);
     try {
-      const response = await this.api.post('/api/auth/login', {
+      const response = await this.api.post('/auth/login', {
         email,
         password,
       });
@@ -58,7 +58,7 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      await this.api.post('/api/auth/logout');
+      await this.api.post('/auth/logout');
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -68,7 +68,7 @@ class AuthService {
 
   async verifyToken(token: string): Promise<User> {
     try {
-      const response = await this.api.post('/api/auth/verify', { token });
+      const response = await this.api.post('/auth/verify', { token });
       return response.data.user;
     } catch (error) {
       throw new Error("Token verification failed");
@@ -94,7 +94,7 @@ class AuthService {
     role?: string;
   }): Promise<User> {
     try {
-      const response = await this.api.post('/api/auth/register', userData);
+      const response = await this.api.post('/auth/register', userData);
       if (response.data.success) {
         localStorage.setItem('authToken', response.data.token);
         return response.data.user;
@@ -107,7 +107,7 @@ class AuthService {
 
   async updateProfile(userData: Partial<User>): Promise<User> {
     try {
-      const response = await this.api.put('/api/auth/profile', userData);
+      const response = await this.api.put('/auth/profile', userData);
       return response.data.user;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || "Profile update failed");
@@ -116,7 +116,7 @@ class AuthService {
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
-      await this.api.post('/api/auth/change-password', {
+      await this.api.post('/auth/change-password', {
         currentPassword,
         newPassword,
       });
