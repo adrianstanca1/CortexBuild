@@ -279,7 +279,11 @@ export default function GetStartedPage() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="text-gray-400 hover:text-white transition-colors">
+              <button 
+                className="text-gray-400 hover:text-white transition-colors"
+                title="Learn more or get help"
+                aria-label="Help"
+              >
                 <HelpCircle className="w-5 h-5" />
               </button>
               <button
