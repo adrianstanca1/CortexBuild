@@ -94,6 +94,13 @@ export class DatabaseError extends AppError {
     }
 }
 
+export class APIError extends AppError {
+    constructor(message: string, statusCode: number = 500, context?: Record<string, any>) {
+        super(message, 'API_ERROR', statusCode, true, context);
+        this.name = 'APIError';
+    }
+}
+
 /**
  * Error Logger
  * Logs errors to console with proper formatting
@@ -309,6 +316,28 @@ export const isOperationalError = (error: Error): boolean => {
         return error.isOperational;
     }
     return false;
+};
+
+/**
+ * Error handling wrapper for API calls
+ */
+export const withErrorHandling = async <T>(
+    fn: () => Promise<T>,
+    errorMessage?: string
+): Promise<T> => {
+    try {
+        return await fn();
+    } catch (error) {
+        const appError = error instanceof AppError 
+            ? error 
+            : GlobalErrorHandler.handleApiError(error);
+        
+        if (errorMessage) {
+            appError.message = errorMessage;
+        }
+        
+        throw appError;
+    }
 };
 
 /**

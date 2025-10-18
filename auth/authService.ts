@@ -135,3 +135,14 @@ class AuthService {
 }
 
 export const authService = new AuthService();
+
+// Export individual methods for easier imports
+export const login = authService.login.bind(authService);
+export const logout = authService.logout.bind(authService);
+export const register = authService.register.bind(authService);
+export const getCurrentUser = authService.getCurrentUser.bind(authService);
+export const verifyToken = authService.verifyToken.bind(authService);
+export const updateProfile = authService.updateProfile.bind(authService);
+export const changePassword = authService.changePassword.bind(authService);
+export const isAuthenticated = authService.isAuthenticated.bind(authService);
+export const getToken = authService.getToken.bind(authService);
