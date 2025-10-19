@@ -51,23 +51,25 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
-
-
+import tendersRouter from './routes/tenders';
+import bidsRouter from './routes/bids';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors({
+app.use(
+  cors({
     origin: 'http://localhost:3000',
-    credentials: true
-}));
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Request logging
 app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path}`);
-    next();
+  console.log(`${req.method} ${req.path}`);
+  next();
 });
 
 /**
@@ -76,37 +78,37 @@ app.use((req, res, next) => {
 
 // POST /api/auth/refresh
 app.post('/api/auth/refresh', async (req, res) => {
-    try {
-        const token = req.headers.authorization?.replace('Bearer ', '');
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
 
-        if (!token) {
-            return res.status(400).json({ error: 'Token is required' });
-        }
-
-        const result = await auth.refreshToken(token);
-        
-        res.json({
-            success: true,
-            user: result.user,
-            token: result.token
-        });
-    } catch (error: any) {
-        console.error('Refresh token error:', error);
-        res.status(401).json({ 
-            success: false,
-            error: error.message || 'Token refresh failed' 
-        });
+    if (!token) {
+      return res.status(400).json({ error: 'Token is required' });
     }
+
+    const result = await auth.refreshToken(token);
+
+    res.json({
+      success: true,
+      user: result.user,
+      token: result.token,
+    });
+  } catch (error: any) {
+    console.error('Refresh token error:', error);
+    res.status(401).json({
+      success: false,
+      error: error.message || 'Token refresh failed',
+    });
+  }
 });
 
 /**
  * Health check
  */
 app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        timestamp: new Date().toISOString()
-    });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 /**
@@ -115,341 +117,351 @@ app.get('/api/health', (req, res) => {
 
 // GET /api/chat/message - Get chat history
 app.get('/api/chat/message', auth.authenticateToken, async (req, res) => {
-    try {
-        // For now, return empty history
-        // TODO: Implement chat history from database
-        res.json({
-            success: true,
-            data: [],
-        });
-    } catch (error: any) {
-        console.error('Chat history error:', error);
-        res.status(500).json({ error: error.message || 'Failed to load chat history' });
-    }
+  try {
+    // For now, return empty history
+    // TODO: Implement chat history from database
+    res.json({
+      success: true,
+      data: [],
+    });
+  } catch (error: any) {
+    console.error('Chat history error:', error);
+    res.status(500).json({ error: error.message || 'Failed to load chat history' });
+  }
 });
 
 // POST /api/chat/message
 app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
-            try {
-                const { message, sessionId, currentPage } = req.body;
-                const userId = (req as any).user.id;
-                const companyId = (req as any).user.company_id;
+  try {
+    const { message, sessionId, currentPage } = req.body;
+    const userId = (req as any).user.id;
+    const companyId = (req as any).user.company_id;
 
-                // Import chatbot dynamically
-                const { GeminiChatbot } = await import('../lib/ai/gemini-client');
-                const { ChatTools } = await import('../lib/ai/chat-tools');
+    // Import chatbot dynamically
+    const { GeminiChatbot } = await import('../lib/ai/gemini-client');
+    const { ChatTools } = await import('../lib/ai/chat-tools');
 
-                // Build context
-                const chatContext = {
-                    userId,
-                    companyId,
-                    userName: (req as any).user.name,
-                    companyName: (req as any).user.company?.name || 'Company',
-                    userRole: (req as any).user.role,
-                    currentPage,
-                    availableData: {},
-                };
+    // Build context
+    const chatContext = {
+      userId,
+      companyId,
+      userName: (req as any).user.name,
+      companyName: (req as any).user.company?.name || 'Company',
+      userRole: (req as any).user.role,
+      currentPage,
+      availableData: {},
+    };
 
-                // Initialize chatbot
-                const chatbot = new GeminiChatbot();
-                await chatbot.initializeChat(chatContext, []);
+    // Initialize chatbot
+    const chatbot = new GeminiChatbot();
+    await chatbot.initializeChat(chatContext, []);
 
-                // Send message
-                const response = await chatbot.sendMessage(message, chatContext);
+    // Send message
+    const response = await chatbot.sendMessage(message, chatContext);
 
-                res.json({
-                    success: true,
-                    data: {
-                        message: response.message,
-                        toolResults: [],
-                        pendingConfirmations: [],
-                    },
-                });
-            } catch (error: any) {
-                console.error('Chat error:', error.message);
-                res.status(500).json({ error: error.message || 'Chat failed' });
-            }
-        });
+    res.json({
+      success: true,
+      data: {
+        message: response.message,
+        toolResults: [],
+        pendingConfirmations: [],
+      },
+    });
+  } catch (error: any) {
+    console.error('Chat error:', error.message);
+    res.status(500).json({ error: error.message || 'Chat failed' });
+  }
+});
 
 /**
  * Start server
  */
 const startServer = async () => {
-    try {
-        // Verify Supabase connection
-        console.log('🔌 Connecting to Supabase...');
-        const isConnected = await verifyConnection();
-        if (!isConnected) {
-            throw new Error('Failed to connect to Supabase');
+  try {
+    // Verify Supabase connection
+    console.log('🔌 Connecting to Supabase...');
+    const isConnected = await verifyConnection();
+    if (!isConnected) {
+      throw new Error('Failed to connect to Supabase');
+    }
+
+    // Note: MCP, deployment, and SDK tables are already in Supabase
+    // No need to initialize them here
+    console.log('✅ Supabase connection verified');
+
+    // Register Auth routes
+    console.log('🔐 Registering Auth routes...');
+
+    app.post('/api/auth/login', async (req, res) => {
+      try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+          return res.status(400).json({ error: 'Email and password are required' });
         }
 
-        // Note: MCP, deployment, and SDK tables are already in Supabase
-        // No need to initialize them here
-        console.log('✅ Supabase connection verified');
+        const result = await auth.login(email, password);
 
-        // Register Auth routes
-        console.log('🔐 Registering Auth routes...');
+        if (!result) {
+          return res.status(401).json({
+            success: false,
+            error: 'Invalid email or password',
+          });
+        }
 
-        app.post('/api/auth/login', async (req, res) => {
-            try {
-                const { email, password } = req.body;
-
-                if (!email || !password) {
-                    return res.status(400).json({ error: 'Email and password are required' });
-                }
-
-                const result = await auth.login(email, password);
-
-                if (!result) {
-                    return res.status(401).json({
-                        success: false,
-                        error: 'Invalid email or password'
-                    });
-                }
-
-                res.json({
-                    success: true,
-                    user: result.user,
-                    token: result.token
-                });
-            } catch (error: any) {
-                console.error('Login error:', error);
-                res.status(401).json({
-                    success: false,
-                    error: error.message || 'Login failed'
-                });
-            }
+        res.json({
+          success: true,
+          user: result.user,
+          token: result.token,
         });
-
-        app.post('/api/auth/register', async (req, res) => {
-            try {
-                const { email, password, firstName, lastName, role, companyId } = req.body;
-
-                if (!email || !password || !firstName || !lastName) {
-                    return res.status(400).json({
-                        error: 'Email, password, first name, and last name are required'
-                    });
-                }
-
-                const result = await auth.register(email, password, firstName, lastName, role, companyId);
-
-                if (!result) {
-                    return res.status(400).json({
-                        success: false,
-                        error: 'Registration failed - email may already exist'
-                    });
-                }
-
-                res.json({
-                    success: true,
-                    user: result.user,
-                    token: result.token
-                });
-            } catch (error: any) {
-                console.error('Registration error:', error);
-                res.status(400).json({
-                    success: false,
-                    error: error.message || 'Registration failed'
-                });
-            }
+      } catch (error: any) {
+        console.error('Login error:', error);
+        res.status(401).json({
+          success: false,
+          error: error.message || 'Login failed',
         });
+      }
+    });
 
-        app.post('/api/auth/logout', (req, res) => {
-            try {
-                const token = req.headers.authorization?.replace('Bearer ', '');
+    app.post('/api/auth/register', async (req, res) => {
+      try {
+        const { email, password, firstName, lastName, role, companyId } = req.body;
 
-                if (!token) {
-                    return res.status(400).json({ error: 'Token is required' });
-                }
+        if (!email || !password || !firstName || !lastName) {
+          return res.status(400).json({
+            error: 'Email, password, first name, and last name are required',
+          });
+        }
 
-                auth.logout(db, token);
+        const result = await auth.register(email, password, firstName, lastName, role, companyId);
 
-                res.json({ success: true });
-            } catch (error: any) {
-                console.error('Logout error:', error);
-                res.status(400).json({
-                    success: false,
-                    error: error.message || 'Logout failed'
-                });
-            }
+        if (!result) {
+          return res.status(400).json({
+            success: false,
+            error: 'Registration failed - email may already exist',
+          });
+        }
+
+        res.json({
+          success: true,
+          user: result.user,
+          token: result.token,
         });
-
-        app.get('/api/auth/me', (req, res) => {
-            try {
-                const token = req.headers.authorization?.replace('Bearer ', '');
-
-                if (!token) {
-                    return res.status(401).json({ error: 'Token is required' });
-                }
-
-                const user = auth.getCurrentUserByToken(db, token);
-
-                res.json({
-                    success: true,
-                    user
-                });
-            } catch (error: any) {
-                console.error('Verify token error:', error);
-                res.status(401).json({
-                    success: false,
-                    error: error.message || 'Invalid token'
-                });
-            }
+      } catch (error: any) {
+        console.error('Registration error:', error);
+        res.status(400).json({
+          success: false,
+          error: error.message || 'Registration failed',
         });
+      }
+    });
 
-        console.log('  ✓ Auth routes registered');
+    app.post('/api/auth/logout', (req, res) => {
+      try {
+        const token = req.headers.authorization?.replace('Bearer ', '');
 
-        // Register API routes
-        console.log('📝 Registering API routes...');
-        const clientsRouter = createClientsRouter(supabase);
-        app.use('/api/clients', clientsRouter);
-        console.log('  ✓ /api/clients');
+        if (!token) {
+          return res.status(400).json({ error: 'Token is required' });
+        }
 
-        app.use('/api/projects', createProjectsRouter(supabase));
-        console.log('  ✓ /api/projects');
+        auth.logout(db, token);
 
-        app.use('/api/rfis', createRFIsRouter(supabase));
-        console.log('  ✓ /api/rfis');
-
-        app.use('/api/invoices', createInvoicesRouter(supabase));
-        console.log('  ✓ /api/invoices');
-
-        app.use('/api/time-entries', createTimeEntriesRouter(supabase));
-        console.log('  ✓ /api/time-entries');
-
-        app.use('/api/subcontractors', createSubcontractorsRouter(supabase));
-        console.log('  ✓ /api/subcontractors');
-
-        app.use('/api/purchase-orders', createPurchaseOrdersRouter(supabase));
-        console.log('  ✓ /api/purchase-orders');
-
-        app.use('/api/tasks', createTasksRouter(supabase));
-        console.log('  ✓ /api/tasks');
-
-        app.use('/api/milestones', createMilestonesRouter(supabase));
-        console.log('  ✓ /api/milestones');
-
-        app.use('/api/documents', createDocumentsRouter(supabase));
-        console.log('  ✓ /api/documents');
-
-        app.use('/api/modules', createModulesRouter(supabase));
-        console.log('  ✓ /api/modules');
-
-        app.use('/api/admin', createAdminRouter(supabase));
-        console.log('  ✓ /api/admin');
-
-        app.use('/api/marketplace', createMarketplaceRouter(supabase));
-        console.log('  ✓ /api/marketplace');
-
-        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(supabase));
-        console.log('  ✓ /api/global-marketplace');
-
-        app.use('/api/widgets', createWidgetsRouter(supabase));
-        console.log('  ✓ /api/widgets');
-
-        app.use('/api/smart-tools', createSmartToolsRouter(supabase));
-        console.log('  ✓ /api/smart-tools');
-
-        app.use('/api/sdk', createSDKRouter(supabase));
-        console.log('  ✓ /api/sdk');
-
-        app.use('/api/admin/sdk', adminSDKRouter);
-        console.log('  ✓ /api/admin/sdk');
-
-        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(supabase));
-        console.log('  ✓ /api/admin/enhanced');
-
-        app.use('/api/ai', createAIChatRoutes(supabase));
-        console.log('  ✓ /api/ai');
-
-        app.use('/api/developer', createDeveloperRoutes(supabase));
-        console.log('  ✓ /api/developer');
-
-        app.use('/api/integrations', createIntegrationsRouter(supabase));
-        console.log('  ✓ /api/integrations');
-
-        app.use('/api/agentkit', createAgentKitRouter(supabase));
-        console.log('  ✓ /api/agentkit');
-
-        app.use('/api/workflows', createWorkflowsRouter(supabase));
-        console.log('  ✓ /api/workflows');
-
-        app.use('/api/automations', createAutomationsRouter(supabase));
-        console.log('  ✓ /api/automations');
-
-        console.log('✅ All 24 API routes registered successfully');
-
-        // Register 404 handler AFTER all routes
-        app.use((req, res) => {
-            console.log(`❌ 404 Not Found: ${req.method} ${req.path}`);
-            res.status(404).json({ error: 'Not found' });
+        res.json({ success: true });
+      } catch (error: any) {
+        console.error('Logout error:', error);
+        res.status(400).json({
+          success: false,
+          error: error.message || 'Logout failed',
         });
+      }
+    });
 
-        // Register error handler LAST
-        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-            console.error('Server error:', err);
-            res.status(500).json({
-                error: 'Internal server error',
-                message: err.message
-            });
+    app.get('/api/auth/me', (req, res) => {
+      try {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+
+        if (!token) {
+          return res.status(401).json({ error: 'Token is required' });
+        }
+
+        const user = auth.getCurrentUserByToken(db, token);
+
+        res.json({
+          success: true,
+          user,
         });
-
-        // Clean up expired sessions every hour
-        setInterval(() => {
-            auth.cleanupExpiredSessions();
-        }, 60 * 60 * 1000);
-
-        // Create HTTP server for WebSocket support
-        const server = createServer(app);
-
-        // Setup WebSocket
-        setupWebSocket(server, supabase);
-
-        // Start listening
-        server.listen(PORT, () => {
-            console.log('');
-            console.log('🚀 CortexBuild AI Platform Server');
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log(`✅ Server running on http://localhost:${PORT}`);
-            console.log(`✅ WebSocket server on ws://localhost:${PORT}/ws`);
-            console.log(`✅ Database initialized`);
-            console.log(`✅ Ready to accept requests`);
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('');
-            console.log('Available endpoints:');
-            console.log('');
-            console.log('🔐 Auth:');
-            console.log(`  POST   http://localhost:${PORT}/api/auth/login`);
-            console.log(`  POST   http://localhost:${PORT}/api/auth/register`);
-            console.log(`  POST   http://localhost:${PORT}/api/auth/logout`);
-            console.log(`  GET    http://localhost:${PORT}/api/auth/me`);
-            console.log('');
-            console.log('📊 API Routes (70+ endpoints):');
-            console.log(`  /api/clients - 5 endpoints`);
-            console.log(`  /api/projects - 5 endpoints`);
-            console.log(`  /api/rfis - 6 endpoints`);
-            console.log(`  /api/invoices - 7 endpoints`);
-            console.log(`  /api/time-entries - 6 endpoints`);
-            console.log(`  /api/subcontractors - 5 endpoints`);
-            console.log(`  /api/purchase-orders - 6 endpoints`);
-            console.log(`  /api/tasks - 6 endpoints`);
-            console.log(`  /api/milestones - 5 endpoints`);
-            console.log(`  /api/documents - 5 endpoints`);
-            console.log(`  /api/modules - 9 endpoints`);
-            console.log(`  /api/ai - 4 endpoints`);
-            console.log('');
-            console.log('🤖 AI Features:');
-            console.log(`  POST   http://localhost:${PORT}/api/ai/chat`);
-            console.log(`  POST   http://localhost:${PORT}/api/ai/suggest`);
-            console.log(`  GET    http://localhost:${PORT}/api/ai/usage`);
-            console.log('');
-            console.log('🔴 Live Collaboration:');
-            console.log(`  WS     ws://localhost:${PORT}/ws`);
+      } catch (error: any) {
+        console.error('Verify token error:', error);
+        res.status(401).json({
+          success: false,
+          error: error.message || 'Invalid token',
         });
-    } catch (error) {
-        console.error('❌ Failed to start server:', error);
-        process.exit(1);
-    }
+      }
+    });
+
+    console.log('  ✓ Auth routes registered');
+
+    // Register API routes
+    console.log('📝 Registering API routes...');
+    const clientsRouter = createClientsRouter(supabase);
+    app.use('/api/clients', clientsRouter);
+    console.log('  ✓ /api/clients');
+
+    app.use('/api/projects', createProjectsRouter(supabase));
+    console.log('  ✓ /api/projects');
+
+    app.use('/api/rfis', createRFIsRouter(supabase));
+    console.log('  ✓ /api/rfis');
+
+    app.use('/api/invoices', createInvoicesRouter(supabase));
+    console.log('  ✓ /api/invoices');
+
+    app.use('/api/time-entries', createTimeEntriesRouter(supabase));
+    console.log('  ✓ /api/time-entries');
+
+    app.use('/api/subcontractors', createSubcontractorsRouter(supabase));
+    console.log('  ✓ /api/subcontractors');
+
+    app.use('/api/purchase-orders', createPurchaseOrdersRouter(supabase));
+    console.log('  ✓ /api/purchase-orders');
+
+    app.use('/api/tasks', createTasksRouter(supabase));
+    console.log('  ✓ /api/tasks');
+
+    app.use('/api/milestones', createMilestonesRouter(supabase));
+    console.log('  ✓ /api/milestones');
+
+    app.use('/api/documents', createDocumentsRouter(supabase));
+    console.log('  ✓ /api/documents');
+
+    app.use('/api/modules', createModulesRouter(supabase));
+    console.log('  ✓ /api/modules');
+
+    app.use('/api/admin', createAdminRouter(supabase));
+    console.log('  ✓ /api/admin');
+
+    app.use('/api/marketplace', createMarketplaceRouter(supabase));
+    console.log('  ✓ /api/marketplace');
+
+    app.use('/api/global-marketplace', createGlobalMarketplaceRouter(supabase));
+    console.log('  ✓ /api/global-marketplace');
+
+    app.use('/api/widgets', createWidgetsRouter(supabase));
+    console.log('  ✓ /api/widgets');
+
+    app.use('/api/smart-tools', createSmartToolsRouter(supabase));
+    console.log('  ✓ /api/smart-tools');
+
+    app.use('/api/sdk', createSDKRouter(supabase));
+    console.log('  ✓ /api/sdk');
+
+    app.use('/api/admin/sdk', adminSDKRouter);
+    console.log('  ✓ /api/admin/sdk');
+
+    app.use('/api/admin/enhanced', createEnhancedAdminRoutes(supabase));
+    console.log('  ✓ /api/admin/enhanced');
+
+    app.use('/api/ai', createAIChatRoutes(supabase));
+    console.log('  ✓ /api/ai');
+
+    app.use('/api/developer', createDeveloperRoutes(supabase));
+    console.log('  ✓ /api/developer');
+
+    app.use('/api/integrations', createIntegrationsRouter(supabase));
+    console.log('  ✓ /api/integrations');
+
+    app.use('/api/agentkit', createAgentKitRouter(supabase));
+    console.log('  ✓ /api/agentkit');
+
+    app.use('/api/workflows', createWorkflowsRouter(supabase));
+    console.log('  ✓ /api/workflows');
+
+    app.use('/api/automations', createAutomationsRouter(supabase));
+    console.log('  ✓ /api/automations');
+
+    // UK Tender Assistant routes
+    app.use('/api/tenders', tendersRouter);
+    console.log('  ✓ /api/tenders');
+
+    app.use('/api/bids', bidsRouter);
+    console.log('  ✓ /api/bids');
+
+    console.log('✅ All 26 API routes registered successfully');
+
+    // Register 404 handler AFTER all routes
+    app.use((req, res) => {
+      console.log(`❌ 404 Not Found: ${req.method} ${req.path}`);
+      res.status(404).json({ error: 'Not found' });
+    });
+
+    // Register error handler LAST
+    app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+      console.error('Server error:', err);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: err.message,
+      });
+    });
+
+    // Clean up expired sessions every hour
+    setInterval(
+      () => {
+        auth.cleanupExpiredSessions();
+      },
+      60 * 60 * 1000
+    );
+
+    // Create HTTP server for WebSocket support
+    const server = createServer(app);
+
+    // Setup WebSocket
+    setupWebSocket(server, supabase);
+
+    // Start listening
+    server.listen(PORT, () => {
+      console.log('');
+      console.log('🚀 CortexBuild AI Platform Server');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log(`✅ Server running on http://localhost:${PORT}`);
+      console.log(`✅ WebSocket server on ws://localhost:${PORT}/ws`);
+      console.log(`✅ Database initialized`);
+      console.log(`✅ Ready to accept requests`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('');
+      console.log('Available endpoints:');
+      console.log('');
+      console.log('🔐 Auth:');
+      console.log(`  POST   http://localhost:${PORT}/api/auth/login`);
+      console.log(`  POST   http://localhost:${PORT}/api/auth/register`);
+      console.log(`  POST   http://localhost:${PORT}/api/auth/logout`);
+      console.log(`  GET    http://localhost:${PORT}/api/auth/me`);
+      console.log('');
+      console.log('📊 API Routes (70+ endpoints):');
+      console.log(`  /api/clients - 5 endpoints`);
+      console.log(`  /api/projects - 5 endpoints`);
+      console.log(`  /api/rfis - 6 endpoints`);
+      console.log(`  /api/invoices - 7 endpoints`);
+      console.log(`  /api/time-entries - 6 endpoints`);
+      console.log(`  /api/subcontractors - 5 endpoints`);
+      console.log(`  /api/purchase-orders - 6 endpoints`);
+      console.log(`  /api/tasks - 6 endpoints`);
+      console.log(`  /api/milestones - 5 endpoints`);
+      console.log(`  /api/documents - 5 endpoints`);
+      console.log(`  /api/modules - 9 endpoints`);
+      console.log(`  /api/ai - 4 endpoints`);
+      console.log('');
+      console.log('🤖 AI Features:');
+      console.log(`  POST   http://localhost:${PORT}/api/ai/chat`);
+      console.log(`  POST   http://localhost:${PORT}/api/ai/suggest`);
+      console.log(`  GET    http://localhost:${PORT}/api/ai/usage`);
+      console.log('');
+      console.log('🔴 Live Collaboration:');
+      console.log(`  WS     ws://localhost:${PORT}/ws`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
 };
 
 startServer();

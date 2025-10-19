@@ -1,6 +1,14 @@
 // CortexBuild Main App Component
 import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
+import {
+  Screen,
+  User,
+  Project,
+  NotificationLink,
+  AISuggestion,
+  PermissionAction,
+  PermissionSubject,
+} from './types';
 import * as api from './api'; // Fixed: removed .ts extension
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
@@ -33,61 +41,95 @@ const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
 const RFIDetailScreen = lazy(() => import('./components/screens/RFIDetailScreen'));
 const NewRFIScreen = lazy(() => import('./components/screens/NewRFIScreen'));
 const ProductionSDKDeveloperView = lazy(() =>
-  import('./components/sdk/ProductionSDKDeveloperView').then(module => ({
-    default: module.ProductionSDKDeveloperView
+  import('./components/sdk/ProductionSDKDeveloperView').then((module) => ({
+    default: module.ProductionSDKDeveloperView,
   }))
 );
-const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
+const DeveloperWorkspaceScreen = lazy(
+  () => import('./components/screens/developer/DeveloperWorkspaceScreen')
+);
 // Import minimal developer console to avoid React hook issues
 import MinimalDeveloperConsole from './components/screens/developer/MinimalDeveloperConsole';
-const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
-const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
-const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
-const CompanyAdminDashboardScreen = lazy(() => import('./components/screens/company/CompanyAdminDashboardScreen'));
-const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
-const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
+const ModernDeveloperDashboard = lazy(
+  () => import('./components/screens/developer/ModernDeveloperDashboard')
+);
+const DeveloperDashboardV2 = lazy(
+  () => import('./components/screens/developer/DeveloperDashboardV2')
+);
+const ConstructionAutomationStudio = lazy(
+  () => import('./components/screens/developer/ConstructionAutomationStudio')
+);
+const CompanyAdminDashboardScreen = lazy(
+  () => import('./components/screens/company/CompanyAdminDashboardScreen')
+);
+const CompanyAdminDashboard = lazy(
+  () => import('./components/screens/company/CompanyAdminDashboard')
+);
+const CompanyAdminDashboardV2 = lazy(
+  () => import('./components/screens/company/CompanyAdminDashboardV2')
+);
 const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
-const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
+const PunchListItemDetailScreen = lazy(
+  () => import('./components/screens/PunchListItemDetailScreen')
+);
 const NewPunchListItemScreen = lazy(() => import('./components/screens/NewPunchListItemScreen'));
 const DrawingsScreen = lazy(() => import('./components/screens/DrawingsScreen'));
 const PlansViewerScreen = lazy(() => import('./components/screens/PlansViewerScreen'));
 const DayworkSheetsListScreen = lazy(() => import('./components/screens/DayworkSheetsListScreen'));
-const DayworkSheetDetailScreen = lazy(() => import('./components/screens/DayworkSheetDetailScreen'));
+const DayworkSheetDetailScreen = lazy(
+  () => import('./components/screens/DayworkSheetDetailScreen')
+);
 const NewDayworkSheetScreen = lazy(() => import('./components/screens/NewDayworkSheetScreen'));
 const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
 const DeliveryScreen = lazy(() => import('./components/screens/DeliveryScreen'));
 const DrawingComparisonScreen = lazy(() => import('./components/screens/DrawingComparisonScreen'));
 const AccountingScreen = lazy(() => import('./components/screens/modules/AccountingScreen'));
 const AIToolsScreen = lazy(() => import('./components/screens/modules/AIToolsScreen'));
-const DocumentManagementScreen = lazy(() => import('./components/screens/modules/DocumentManagementScreen'));
+const DocumentManagementScreen = lazy(
+  () => import('./components/screens/modules/DocumentManagementScreen')
+);
 const TimeTrackingScreen = lazy(() => import('./components/screens/modules/TimeTrackingScreen'));
-const ProjectOperationsScreen = lazy(() => import('./components/screens/modules/ProjectOperationsScreen'));
-const FinancialManagementScreen = lazy(() => import('./components/screens/modules/FinancialManagementScreen'));
-const BusinessDevelopmentScreen = lazy(() => import('./components/screens/modules/BusinessDevelopmentScreen'));
-const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/modules/AIAgentsMarketplaceScreen'));
+const ProjectOperationsScreen = lazy(
+  () => import('./components/screens/modules/ProjectOperationsScreen')
+);
+const FinancialManagementScreen = lazy(
+  () => import('./components/screens/modules/FinancialManagementScreen')
+);
+const BusinessDevelopmentScreen = lazy(
+  () => import('./components/screens/modules/BusinessDevelopmentScreen')
+);
+const AIAgentsMarketplaceScreen = lazy(
+  () => import('./components/screens/modules/AIAgentsMarketplaceScreen')
+);
 const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
-const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
+const PlaceholderToolScreen = lazy(
+  () => import('./components/screens/tools/PlaceholderToolScreen')
+);
+const UKTenderAssistant = lazy(() => import('./components/screens/UKTenderAssistant'));
 const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
 const MyApplicationsDesktop = lazy(() => import('./components/desktop/MyApplicationsDesktop'));
 const AdminReviewInterface = lazy(() => import('./components/marketplace/AdminReviewInterface'));
-const DeveloperSubmissionInterface = lazy(() => import('./components/marketplace/DeveloperSubmissionInterface'));
+const DeveloperSubmissionInterface = lazy(
+  () => import('./components/marketplace/DeveloperSubmissionInterface')
+);
 const Base44Clone = lazy(() =>
-  import('./components/base44/Base44Clone').then(module => ({
-    default: module.Base44Clone
+  import('./components/base44/Base44Clone').then((module) => ({
+    default: module.Base44Clone,
   }))
 );
 const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
-const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
+const SuperAdminDashboardScreen = lazy(
+  () => import('./components/screens/admin/SuperAdminDashboardScreen')
+);
 const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
-const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
-
-const ScreenLoader: React.FC = () => (
-  <div className="py-16 text-center text-slate-500">
-    Loading experience...
-  </div>
+const AdvancedMLDashboard = lazy(
+  () => import('./components/screens/dashboards/AdvancedMLDashboard')
 );
 
+const ScreenLoader: React.FC = () => (
+  <div className="py-16 text-center text-slate-500">Loading experience...</div>
+);
 
 type NavigationItem = {
   screen: Screen;
@@ -99,31 +141,31 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'global-dashboard': UnifiedDashboardScreen,
   'company-admin-dashboard': CompanyAdminDashboard,
   'company-admin-legacy': CompanyAdminDashboardScreen,
-  'projects': ProjectsListScreen,
+  projects: ProjectsListScreen,
   'project-home': ProjectHomeScreen,
   'my-day': MyDayScreen,
-  'tasks': TasksScreen,
+  tasks: TasksScreen,
   'my-tasks': MyTasksScreen,
   'task-detail': TaskDetailScreen,
   'new-task': NewTaskScreen,
   'daily-log': DailyLogScreen,
-  'photos': PhotoGalleryScreen,
-  'rfis': RFIsScreen,
+  photos: PhotoGalleryScreen,
+  rfis: RFIsScreen,
   'rfi-detail': RFIDetailScreen,
   'new-rfi': NewRFIScreen,
   'punch-list': PunchListScreen,
   'punch-list-item-detail': PunchListItemDetailScreen,
   'new-punch-list-item': NewPunchListItemScreen,
-  'drawings': DrawingsScreen,
-  'plans': PlansViewerScreen,
+  drawings: DrawingsScreen,
+  plans: PlansViewerScreen,
   'daywork-sheets': DayworkSheetsListScreen,
   'daywork-sheet-detail': DayworkSheetDetailScreen,
   'new-daywork-sheet': NewDayworkSheetScreen,
-  'documents': DocumentsScreen,
-  'delivery': DeliveryScreen,
+  documents: DocumentsScreen,
+  delivery: DeliveryScreen,
   'drawing-comparison': DrawingComparisonScreen,
   // Modules
-  'accounting': AccountingScreen,
+  accounting: AccountingScreen,
   'ai-tools': AIToolsScreen,
   'document-management': DocumentManagementScreen,
   'time-tracking': TimeTrackingScreen,
@@ -131,6 +173,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'financial-management': FinancialManagementScreen,
   'business-development': BusinessDevelopmentScreen,
   'ai-agents-marketplace': AIAgentsMarketplaceScreen,
+  'uk-tender-assistant': UKTenderAssistant,
   'developer-dashboard': ModernDeveloperDashboard,
   'automation-studio': ConstructionAutomationStudio,
   'developer-workspace': DeveloperWorkspaceScreen,
@@ -139,7 +182,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'sdk-developer': ProductionSDKDeveloperView,
   'my-apps-desktop': Base44Clone,
   // Global Marketplace
-  'marketplace': GlobalMarketplace,
+  marketplace: GlobalMarketplace,
   'my-applications': MyApplicationsDesktop,
   'admin-review': AdminReviewInterface,
   'developer-submissions': DeveloperSubmissionInterface,
@@ -169,16 +212,17 @@ const App: React.FC = () => {
     goHome,
     selectProject,
     handleDeepLink,
-    setNavigationStack
+    setNavigationStack,
   } = useNavigation();
-
 
   const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
   const [isAISuggestionLoading, setIsAISuggestionLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
 
   const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
-  const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => () => { });
+  const [projectSelectorCallback, setProjectSelectorCallback] = useState<
+    (projectId: string) => void
+  >(() => () => {});
   const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
 
   const { can } = usePermissions(currentUser);
@@ -215,7 +259,7 @@ const App: React.FC = () => {
           logger.info('Setting OAuth session');
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
-            refresh_token: refreshToken
+            refresh_token: refreshToken,
           });
 
           if (sessionError) {
@@ -225,7 +269,10 @@ const App: React.FC = () => {
             logger.info('OAuth session set successfully');
           }
         } else {
-          logger.warn('OAuth callback missing tokens', { hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
+          logger.warn('OAuth callback missing tokens', {
+            hasAccessToken: !!accessToken,
+            hasRefreshToken: !!refreshToken,
+          });
         }
       } else {
         logger.warn('No token part found in OAuth callback hash');
@@ -294,25 +341,29 @@ const App: React.FC = () => {
         finalProfile = {
           id: user.id,
           email: user.email || '',
-          name: user.user_metadata?.full_name ||
+          name:
+            user.user_metadata?.full_name ||
             user.user_metadata?.name ||
-            user.email?.split('@')[0] || 'User',
+            user.email?.split('@')[0] ||
+            'User',
           role: user.email === 'adrian.stanca1@gmail.com' ? 'super_admin' : 'company_admin',
           avatar: user.user_metadata?.avatar_url || user.user_metadata?.picture,
-          company_id: undefined
+          company_id: undefined,
         };
         console.log('✅ Created profile from metadata:', finalProfile);
       }
 
       // Convert snake_case to camelCase
-      const userProfile = finalProfile ? {
-        id: finalProfile.id,
-        name: finalProfile.name,
-        email: finalProfile.email,
-        role: finalProfile.role,
-        avatar: finalProfile.avatar,
-        companyId: finalProfile.company_id
-      } : null;
+      const userProfile = finalProfile
+        ? {
+            id: finalProfile.id,
+            name: finalProfile.name,
+            email: finalProfile.email,
+            role: finalProfile.role,
+            avatar: finalProfile.avatar,
+            companyId: finalProfile.company_id,
+          }
+        : null;
 
       console.log('👤 Final user profile:', userProfile);
       console.log('🎯 User role from profile:', userProfile?.role);
@@ -325,17 +376,22 @@ const App: React.FC = () => {
         // Navigate to dashboard after successful login
         console.log('🚀 Navigating to dashboard...');
         console.log('📍 Current navigation stack before:', navigationStack);
-        const defaultScreenForRole: Screen = userProfile.role === 'developer'
-          ? 'developer-console'
-          : userProfile.role === 'super_admin'
-            ? 'super-admin-dashboard'
-            : 'company-admin-dashboard';
+        const defaultScreenForRole: Screen =
+          userProfile.role === 'developer'
+            ? 'developer-console'
+            : userProfile.role === 'super_admin'
+              ? 'super-admin-dashboard'
+              : 'company-admin-dashboard';
         navigateToModule(defaultScreenForRole, {});
         console.log('📍 Navigation stack set to', defaultScreenForRole);
 
         window.dispatchEvent(new CustomEvent('userLoggedIn'));
         showSuccess('Welcome back!', `Hello ${userProfile.name}`);
-        logger.logUserAction('login_successful', { userId: userProfile.id, userEmail: userProfile.email }, userProfile.id);
+        logger.logUserAction(
+          'login_successful',
+          { userId: userProfile.id, userEmail: userProfile.email },
+          userProfile.id
+        );
         console.log('✅ User sign in completed successfully');
         console.log('👤 Current user should now be:', userProfile);
       }
@@ -348,15 +404,16 @@ const App: React.FC = () => {
         email: user.email || '',
         role: (user.email === 'adrian.stanca1@gmail.com' ? 'super_admin' : 'company_admin') as any,
         avatar: null,
-        companyId: undefined
+        companyId: undefined,
       };
       console.log('🔄 Using fallback profile:', fallbackProfile);
       setCurrentUser(fallbackProfile);
-      const fallbackScreen: Screen = fallbackProfile.role === 'developer'
-        ? 'developer-console'
-        : fallbackProfile.role === 'super_admin'
-          ? 'super-admin-dashboard'
-          : 'company-admin-dashboard';
+      const fallbackScreen: Screen =
+        fallbackProfile.role === 'developer'
+          ? 'developer-console'
+          : fallbackProfile.role === 'super_admin'
+            ? 'super-admin-dashboard'
+            : 'company-admin-dashboard';
       navigateToModule(fallbackScreen, {});
     }
   };
@@ -384,7 +441,12 @@ const App: React.FC = () => {
     const handleHashChange = () => {
       const hash = window.location.hash;
       if (hash === '#dashboard' && currentUser) {
-        const targetScreen: Screen = currentUser.role === 'developer' ? 'developer-console' : currentUser.role === 'super_admin' ? 'super-admin-dashboard' : 'company-admin-dashboard';
+        const targetScreen: Screen =
+          currentUser.role === 'developer'
+            ? 'developer-console'
+            : currentUser.role === 'super_admin'
+              ? 'super-admin-dashboard'
+              : 'company-admin-dashboard';
         navigateToModule(targetScreen, {});
         // Clean up the hash
         window.history.replaceState(null, '', window.location.pathname);
@@ -402,7 +464,6 @@ const App: React.FC = () => {
     };
   }, [currentUser]);
 
-
   useEffect(() => {
     if (currentUser) {
       const loadProjects = async () => {
@@ -414,11 +475,12 @@ const App: React.FC = () => {
       // Ensure user is navigated to dashboard if no navigation exists
       if (navigationStack.length === 0) {
         console.log('🔄 No navigation stack - navigating to dashboard...');
-        const defaultScreen: Screen = currentUser.role === 'developer'
-          ? 'developer-console'
-          : currentUser.role === 'super_admin'
-            ? 'super-admin-dashboard'
-            : 'company-admin-dashboard';
+        const defaultScreen: Screen =
+          currentUser.role === 'developer'
+            ? 'developer-console'
+            : currentUser.role === 'super_admin'
+              ? 'super-admin-dashboard'
+              : 'company-admin-dashboard';
         navigateToModule(defaultScreen, {});
       }
     } else {
@@ -483,19 +545,24 @@ const App: React.FC = () => {
     window.location.href = '/';
   };
 
+  const openProjectSelector = useCallback(
+    (title: string, onSelect: (projectId: string) => void) => {
+      setProjectSelectorTitle(title);
+      setProjectSelectorCallback(() => (projectId: string) => {
+        onSelect(projectId);
+        setIsProjectSelectorOpen(false);
+      });
+      setIsProjectSelectorOpen(true);
+    },
+    []
+  );
 
-  const openProjectSelector = useCallback((title: string, onSelect: (projectId: string) => void) => {
-    setProjectSelectorTitle(title);
-    setProjectSelectorCallback(() => (projectId: string) => {
-      onSelect(projectId);
-      setIsProjectSelectorOpen(false);
-    });
-    setIsProjectSelectorOpen(true);
-  }, []);
-
-  const handleDeepLinkWrapper = useCallback((projectId: string, screen: Screen, params: any) => {
-    handleDeepLink(projectId, screen, params, allProjects);
-  }, [handleDeepLink, allProjects]);
+  const handleDeepLinkWrapper = useCallback(
+    (projectId: string, screen: Screen, params: any) => {
+      handleDeepLink(projectId, screen, params, allProjects);
+    },
+    [handleDeepLink, allProjects]
+  );
 
   const handleQuickAction = (action: Screen) => {
     openProjectSelector(`Select a project for the new ${action.split('-')[1]}`, (projectId) => {
@@ -572,11 +639,11 @@ const App: React.FC = () => {
       onQuickAction: handleQuickAction,
       onSuggestAction: handleSuggestAction,
       selectProject: (id: string) => {
-        const project = allProjects.find(p => p.id === id);
+        const project = allProjects.find((p) => p.id === id);
         if (project) selectProject(project);
       },
       can: () => true, // Simple permission check - allow all for now
-      goBack
+      goBack,
     };
 
     // Developer role - use normal screen rendering instead of early return
@@ -599,16 +666,16 @@ const App: React.FC = () => {
                 'user-management': 'platform-admin',
                 'company-management': 'platform-admin',
                 'billing-payments': 'platform-admin',
-                'marketplace': 'marketplace',
+                marketplace: 'marketplace',
                 'analytics-reports': 'platform-admin',
                 'system-settings': 'platform-admin',
                 'security-audit': 'platform-admin',
                 'database-management': 'platform-admin',
                 'activity-monitoring': 'platform-admin',
                 'content-management': 'platform-admin',
-                'notifications': 'platform-admin',
-                'permissions': 'platform-admin',
-                'integrations': 'platform-admin'
+                notifications: 'platform-admin',
+                permissions: 'platform-admin',
+                integrations: 'platform-admin',
               };
               const targetScreen = sectionScreenMap[section] || 'platform-admin';
               navigateToModule(targetScreen as any, { section });
@@ -627,22 +694,22 @@ const App: React.FC = () => {
               console.log('Company Admin navigating to:', screen, params);
               // Map section IDs to actual screens
               const sectionScreenMap: Record<string, string> = {
-                'projects': 'projects',
-                'teams': 'platform-admin',
-                'documents': 'documents',
-                'marketplace': 'marketplace',
-                'analytics': 'platform-admin',
-                'billing': 'platform-admin',
-                'clients': 'platform-admin',
-                'settings': 'platform-admin',
+                projects: 'projects',
+                teams: 'platform-admin',
+                documents: 'documents',
+                marketplace: 'marketplace',
+                analytics: 'platform-admin',
+                billing: 'platform-admin',
+                clients: 'platform-admin',
+                settings: 'platform-admin',
                 'daily-logs': 'daily-log',
                 'safety-reports': 'platform-admin',
                 'quality-control': 'platform-admin',
                 'time-tracking': 'platform-admin',
-                'equipment': 'platform-admin',
-                'procurement': 'platform-admin',
-                'inspections': 'platform-admin',
-                'workforce': 'platform-admin'
+                equipment: 'platform-admin',
+                procurement: 'platform-admin',
+                inspections: 'platform-admin',
+                workforce: 'platform-admin',
               };
               const targetScreen = sectionScreenMap[screen] || screen;
               navigateToModule(targetScreen as any, params);
@@ -717,19 +784,18 @@ const App: React.FC = () => {
             onLogout={handleLogout}
           />
         }
-        floatingMenu={<FloatingMenu
-          currentUser={currentUser}
-          navigateToModule={navigateToModule}
-          openProjectSelector={openProjectSelector}
-          onDeepLink={handleDeepLinkWrapper}
-        />}
+        floatingMenu={
+          <FloatingMenu
+            currentUser={currentUser}
+            navigateToModule={navigateToModule}
+            openProjectSelector={openProjectSelector}
+            onDeepLink={handleDeepLinkWrapper}
+          />
+        }
       >
         <div className="p-8">
           {currentUser?.role === 'developer' ? (
-            <MinimalDeveloperConsole
-              onLogout={handleLogout}
-              navigateTo={navigateTo}
-            />
+            <MinimalDeveloperConsole onLogout={handleLogout} navigateTo={navigateTo} />
           ) : (
             <Suspense fallback={<ScreenLoader />}>
               <ScreenComponent
@@ -774,6 +840,6 @@ const App: React.FC = () => {
       {currentUser && <ChatbotWidget />}
     </div>
   );
-}
+};
 
 export default App;
