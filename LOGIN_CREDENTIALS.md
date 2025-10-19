@@ -1,6 +1,32 @@
 # 🔐 CortexBuild - Login Credentials
 
-## 📋 Active Users
+## 📋 Active Demo Account (NEW - Supabase)
+
+### 🟢 Demo Company Admin
+
+```
+Email:    demo@cortexbuild.ai
+Password: demo1234
+Role:     company_admin
+Company:  company-1
+User ID:  user-292a5961-8021-4948-b4bd-c8a4ac8b052a
+```
+
+**Access:**
+
+- ✅ UK Tender Assistant (6 sample tenders)
+- ✅ Company Dashboard
+- ✅ Innovation Sandbox
+- ✅ All company admin features
+- ✅ Bid generation and management
+
+**Created**: October 19, 2025
+**Backend**: Supabase PostgreSQL + bcrypt
+**Status**: ✅ WORKING
+
+---
+
+## 📋 Legacy Users (SQLite - May Not Work with Supabase)
 
 ### 🔴 Super Admin
 
@@ -11,15 +37,7 @@ Role:     super_admin
 Company:  ConstructCo (company-1)
 ```
 
-**Access:**
-
-- ✅ Full system access
-- ✅ Super Admin Dashboard
-- ✅ All admin features
-- ✅ User management
-- ✅ System settings
-- ✅ Database access
-- ✅ Developer tools
+⚠️ **Note**: This account was from the old SQLite database. May not exist in Supabase.
 
 ---
 
@@ -32,15 +50,7 @@ Role:     company_admin
 Company:  ASC Cladding Ltd (company-2)
 ```
 
-**Access:**
-
-- ✅ Company dashboard
-- ✅ User management (company only)
-- ✅ Project management
-- ✅ Team collaboration
-- ✅ Reports & analytics
-- ❌ System settings
-- ❌ Super admin features
+⚠️ **Note**: This account was from the old SQLite database. May not exist in Supabase.
 
 ---
 
@@ -53,55 +63,7 @@ Role:     developer
 Company:  ConstructCo (company-1)
 ```
 
-**Access:**
-
-- ✅ Developer Console
-- ✅ Code Editor
-- ✅ API Builder
-- ✅ Testing Framework
-- ✅ Git Integration
-- ✅ SDK Access
-- ❌ Admin features
-- ❌ User management
-
----
-
-### 🔵 Company Admin #2
-
-```
-Email:    casey@constructco.com
-Password: admin123
-Role:     company_admin
-Company:  ConstructCo (company-1)
-```
-
-**Access:**
-
-- ✅ Company dashboard
-- ✅ User management (company only)
-- ✅ Project management
-- ✅ Team collaboration
-- ✅ Reports & analytics
-
----
-
-### 🟡 Supervisor
-
-```
-Email:    mike@constructco.com
-Password: admin123
-Role:     supervisor
-Company:  ConstructCo (company-1)
-```
-
-**Access:**
-
-- ✅ Project dashboard
-- ✅ Task management
-- ✅ Team view
-- ✅ Reports
-- ❌ User management
-- ❌ Admin features
+⚠️ **Note**: This account was from the old SQLite database. May not exist in Supabase.
 
 ---
 
@@ -110,22 +72,61 @@ Company:  ConstructCo (company-1)
 ### 1. Start the Application
 
 ```bash
-# Start backend server
-npm run server
+# Start both frontend and backend
+npm run dev:all
 
-# Start frontend (in another terminal)
-npm run dev
+# Or start separately:
+npm run server    # Backend on port 3001
+npm run dev       # Frontend on port 3000
 ```
 
 ### 2. Access the Application
 
 ```
-URL: http://localhost:3000
+Frontend: http://localhost:3000
+Backend API: http://localhost:3001
 ```
 
 ### 3. Login
 
-Choose one of the accounts above based on what you want to test.
+Use the demo account:
+- Email: `demo@cortexbuild.ai`
+- Password: `demo1234`
+
+### 4. Test UK Tender Assistant
+
+1. After login, click "UK Tender Assistant" in the sidebar
+2. View 6 sample UK construction tenders (£74M total value)
+3. Search and filter by region, sector, value range
+4. Click "View Details" on any tender
+5. Click "Generate AI Bid" to create a bid
+
+## 🧪 API Testing
+
+### Test Login via API
+
+```bash
+curl -X POST http://localhost:3001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "demo@cortexbuild.ai",
+    "password": "demo1234"
+  }'
+```
+
+### Test UK Tender Endpoints
+
+```bash
+# Get all tenders
+curl http://localhost:3001/api/tenders
+
+# Get tender statistics
+curl http://localhost:3001/api/tenders/stats/overview
+
+# Generate AI bid for a tender
+curl -X POST http://localhost:3001/api/tenders/tender-001/generate-bid \
+  -H "x-company-id: company-1"
+```
 
 ---
 
