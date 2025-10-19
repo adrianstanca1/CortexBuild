@@ -467,8 +467,13 @@ const App: React.FC = () => {
   useEffect(() => {
     if (currentUser) {
       const loadProjects = async () => {
-        const projects = await api.fetchAllProjects(currentUser);
-        setAllProjects(projects);
+        try {
+          const projects = await api.fetchAllProjects(currentUser);
+          setAllProjects(projects || []);
+        } catch (error) {
+          console.error('Error loading projects:', error);
+          setAllProjects([]);
+        }
       };
       loadProjects();
 
