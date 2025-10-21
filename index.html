@@ -2536,6 +2536,19 @@
         initializeSupabase();
         handleLogoutUI(); // Ensure initial state is logged out
     </script>
-</body>
+    </head>
+
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/index.tsx"></script>
+        <script>
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                });
+            }
+        </script>
+    </body>
 
 </html>

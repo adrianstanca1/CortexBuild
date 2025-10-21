@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
     return {
       server: {
-        port: 3000,
+        port: 5173,
         host: '0.0.0.0',
         // Aggressive cache busting for development
         headers: {
@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
         },
         proxy: {
           '/api': {
-            target: apiUrl,
+            target: 'http://localhost:3000',
             changeOrigin: true,
           }
         },
