@@ -19,7 +19,7 @@
     "@google/genai": "^1.22.0",
     "@google/generative-ai": "0.24.1",
     "@monaco-editor/react": "4.7.0",
-    "@supabase/supabase-js": "2.74.0",
+    "@supabase/supabase-js": "2.44.4",
     "@types/bcryptjs": "2.4.6",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.3",

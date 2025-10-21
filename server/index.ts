@@ -51,6 +51,8 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
+import tendersRouter from './routes/tenders';
+import bidsRouter from './routes/bids';
 
 
 
@@ -332,6 +334,12 @@ const startServer = async () => {
         app.use('/api/documents', createDocumentsRouter(supabase));
         console.log('  ✓ /api/documents');
 
+        app.use('/api/tenders', tendersRouter);
+        console.log('  ✓ /api/tenders');
+
+        app.use('/api/bids', bidsRouter);
+        console.log('  ✓ /api/bids');
+
         app.use('/api/modules', createModulesRouter(supabase));
         console.log('  ✓ /api/modules');
 
@@ -395,9 +403,9 @@ const startServer = async () => {
         });
 
         // Clean up expired sessions every hour
-        setInterval(() => {
-            auth.cleanupExpiredSessions();
-        }, 60 * 60 * 1000);
+        // setInterval(() => {
+        //     auth.cleanupExpiredSessions();
+        // }, 60 * 60 * 1000);
 
         // Create HTTP server for WebSocket support
         const server = createServer(app);

@@ -1,6 +1,7 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { cdnSupabasePlugin } from './vite-plugin-cdn-supabase';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
@@ -17,9 +18,10 @@ export default defineConfig(({ mode }) => {
           'Expires': '0',
         },
         proxy: {
-          '/api': {
+          '/api/': {
             target: apiUrl,
             changeOrigin: true,
+            rewrite: (path) => path
           }
         },
         // Force HMR to always reload
@@ -32,13 +34,19 @@ export default defineConfig(({ mode }) => {
           interval: 100,
         }
       },
-      plugins: [react()],
+      plugins: [react(), cdnSupabasePlugin()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       build: {
         rollupOptions: {
+          external: [
+            '@supabase/supabase-js',
+            '@supabase/postgrest-js',
+            '@supabase/realtime-js',
+            '@supabase/storage-js'
+          ],
           output: {
             manualChunks(id) {
               if (id.includes('node_modules/@monaco-editor')) {
@@ -84,16 +92,23 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
+          // Force Supabase to use CDN from importmap
+          '@supabase/supabase-js': '@supabase/supabase-js',
         },
         // Ensure proper module resolution
-        extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json']
+        extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
+        // Don't add extensions to imports
+        preserveSymlinks: false
+      },
+      esbuild: {
+        // Keep import paths as-is without adding extensions
+        keepNames: true
       },
       // Optimize dependencies
       optimizeDeps: {
         include: [
           'react',
           'react-dom',
-          '@supabase/supabase-js',
           'axios',
           'uuid',
           '@google/genai',
@@ -102,6 +117,15 @@ export default defineConfig(({ mode }) => {
           '@monaco-editor/react',
           'lucide-react',
           'react-router-dom'
+        ],
+        // Exclude ALL Supabase packages - use CDN version from importmap instead
+        exclude: [
+          '@supabase/supabase-js',
+          '@supabase/postgrest-js',
+          '@supabase/realtime-js',
+          '@supabase/storage-js',
+          '@supabase/functions-js',
+          '@supabase/gotrue-js'
         ]
       },
       // Clear cache on startup

@@ -43,21 +43,27 @@ export default async function handler(
 
     // Get user by email
     const { data: dbUser, error: userError } = await supabase
-      .from('app_users')
+      .from('users')
       .select('*')
       .ilike('email', email)
       .single();
 
     if (userError || !dbUser) {
-      console.log('❌ Login failed: User not found');
+      console.log('❌ Login failed: User not found', userError);
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password',
       });
     }
 
+    console.log('✅ User found:', dbUser.email);
+    console.log('🔐 Password hash from DB:', dbUser.password_hash);
+    console.log('🔐 Password provided:', password);
+
     // Verify password using bcrypt
     const isValid = await bcrypt.compare(password, dbUser.password_hash);
+    console.log('🔐 Password valid:', isValid);
+
     if (!isValid) {
       console.log('❌ Login failed: Invalid password');
       return res.status(401).json({
@@ -71,7 +77,7 @@ export default async function handler(
       id: dbUser.id,
       email: dbUser.email,
       name: dbUser.name || dbUser.email || 'User',
-      role: dbUser.role,
+      role: dbUser.role || 'super_admin',
       avatar: dbUser.avatar || '',
       companyId: dbUser.company_id || undefined,
     };

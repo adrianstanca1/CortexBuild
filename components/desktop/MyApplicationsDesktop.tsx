@@ -203,8 +203,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                 </div>
                 {app.installation_type && (
                     <div className={`text-xs px-2 py-1 rounded-full ${app.installation_type === 'company'
-                            ? 'bg-purple-500/20 text-purple-400'
-                            : 'bg-blue-500/20 text-blue-400'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-blue-500/20 text-blue-400'
                         }`}>
                         {app.installation_type === 'company' ? (
                             <div className="flex items-center space-x-1">
@@ -236,8 +236,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                     <span className={`text-xs ${mutedClass}`}>v{app.version}</span>
                     {app.installation_type && (
                         <span className={`text-xs px-2 py-1 rounded-full ${app.installation_type === 'company'
-                                ? 'bg-purple-500/20 text-purple-400'
-                                : 'bg-blue-500/20 text-blue-400'
+                            ? 'bg-purple-500/20 text-purple-400'
+                            : 'bg-blue-500/20 text-blue-400'
                             }`}>
                             {app.installation_type === 'company' ? 'Company' : 'Personal'}
                         </span>
@@ -339,17 +339,21 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                 </div>
 
                 {/* Window Content */}
-                <div className="flex-1 overflow-auto p-6">
-                    <div className="text-center">
-                        <div className="text-6xl mb-4">{runningApp.app.icon}</div>
-                        <h2 className={`text-2xl font-bold ${textClass} mb-2`}>{runningApp.app.name}</h2>
-                        <p className={`${mutedClass} mb-4`}>{runningApp.app.description}</p>
-                        <div className={`${cardClass} border rounded-lg p-4 text-left`}>
-                            <p className={`${mutedClass} text-sm mb-2`}>App is running...</p>
-                            <p className={`${mutedClass} text-xs`}>Version: {runningApp.app.version}</p>
-                            <p className={`${mutedClass} text-xs`}>Category: {runningApp.app.category}</p>
+                <div className="flex-1 overflow-auto">
+                    {runningApp.app.component ? (
+                        <runningApp.app.component isDarkMode={isDarkMode} currentUser={currentUser} />
+                    ) : (
+                        <div className="p-6 text-center">
+                            <div className="text-6xl mb-4">{runningApp.app.icon}</div>
+                            <h2 className={`text-2xl font-bold ${textClass} mb-2`}>{runningApp.app.name}</h2>
+                            <p className={`${mutedClass} mb-4`}>{runningApp.app.description}</p>
+                            <div className={`${cardClass} border rounded-lg p-4 text-left`}>
+                                <p className={`${mutedClass} text-sm mb-2`}>App is running...</p>
+                                <p className={`${mutedClass} text-xs`}>Version: {runningApp.app.version}</p>
+                                <p className={`${mutedClass} text-xs`}>Category: {runningApp.app.category}</p>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         );
@@ -453,8 +457,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                                 bringToFront(ra.windowId);
                             }}
                             className={`px-3 py-2 rounded-lg transition-all ${ra.isMinimized
-                                    ? `${cardClass} opacity-50`
-                                    : 'bg-blue-600 text-white'
+                                ? `${cardClass} opacity-50`
+                                : 'bg-blue-600 text-white'
                                 } hover:scale-105`}
                         >
                             <div className="flex items-center space-x-2">

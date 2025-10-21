@@ -43,7 +43,7 @@ export default async function handler(
 
     // Check if user already exists
     const { data: existingUser } = await supabase
-      .from('app_users')
+      .from('users')
       .select('id')
       .ilike('email', email)
       .single();
@@ -61,7 +61,7 @@ export default async function handler(
 
     // Create user
     const { data: newUser, error } = await supabase
-      .from('app_users')
+      .from('users')
       .insert({
         email,
         password_hash: passwordHash,

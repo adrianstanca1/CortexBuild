@@ -2,9 +2,10 @@
  * Habit Tracker App - Track daily habits
  */
 
-import React, { useState } from 'react';
-import { Plus, Trash2, Check, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, Check, TrendingUp, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { habitService } from '../../../lib/services/marketplaceAppsService';
 
 interface Habit {
     id: string;
@@ -13,20 +14,47 @@ interface Habit {
     color: string;
     streak: number;
     completedToday: boolean;
-    totalCompleted: number;
 }
 
 interface HabitTrackerAppProps {
     isDarkMode?: boolean;
+    currentUser?: any;
 }
 
-const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) => {
-    const [habits, setHabits] = useState<Habit[]>([
-        { id: '1', name: 'Exercise', icon: '💪', color: 'from-blue-600 to-cyan-600', streak: 5, completedToday: false, totalCompleted: 25 },
-        { id: '2', name: 'Read', icon: '📚', color: 'from-purple-600 to-pink-600', streak: 3, completedToday: false, totalCompleted: 15 },
-        { id: '3', name: 'Meditate', icon: '🧘', color: 'from-green-600 to-emerald-600', streak: 7, completedToday: true, totalCompleted: 30 }
-    ]);
+const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true, currentUser }) => {
+    const [habits, setHabits] = useState<Habit[]>([]);
     const [newHabitName, setNewHabitName] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        loadHabits();
+    }, [currentUser]);
+
+    const loadHabits = async () => {
+        if (!currentUser?.id) {
+            setLoading(false);
+            return;
+        }
+        try {
+            setLoading(true);
+            const data = await habitService.getAll(currentUser.id);
+            const today = new Date().toISOString().split('T')[0];
+            setHabits(data.map(h => ({
+                id: h.id,
+                name: h.name,
+                icon: h.icon,
+                color: h.color,
+                streak: h.streak,
+                completedToday: h.last_completed === today
+            })));
+        } catch (error) {
+            console.error('Failed to load habits:', error);
+            toast.error('Failed to load habits');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const habitIcons = ['💪', '📚', '🧘', '💧', '🏃', '🎯', '✍️', '🎨', '🎵', '🌱'];
     const habitColors = [
@@ -37,46 +65,80 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
         'from-yellow-600 to-orange-600'
     ];
 
-    const addHabit = () => {
+    const addHabit = async () => {
         if (!newHabitName.trim()) {
             toast.error('Please enter a habit name');
             return;
         }
 
-        const newHabit: Habit = {
-            id: Date.now().toString(),
-            name: newHabitName,
-            icon: habitIcons[Math.floor(Math.random() * habitIcons.length)],
-            color: habitColors[Math.floor(Math.random() * habitColors.length)],
-            streak: 0,
-            completedToday: false,
-            totalCompleted: 0
-        };
+        if (!currentUser?.id) {
+            toast.error('Please log in to add habits');
+            return;
+        }
 
-        setHabits([...habits, newHabit]);
-        setNewHabitName('');
-        toast.success('Habit added!');
+        try {
+            setSaving(true);
+            const icon = habitIcons[Math.floor(Math.random() * habitIcons.length)];
+            const color = habitColors[Math.floor(Math.random() * habitColors.length)];
+            const newHabit = await habitService.create(currentUser.id, newHabitName, icon, color);
+            setHabits([...habits, {
+                id: newHabit.id,
+                name: newHabit.name,
+                icon: newHabit.icon,
+                color: newHabit.color,
+                streak: newHabit.streak,
+                completedToday: false
+            }]);
+            setNewHabitName('');
+            toast.success('Habit added!');
+        } catch (error) {
+            console.error('Failed to add habit:', error);
+            toast.error('Failed to add habit');
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const toggleHabit = (id: string) => {
-        setHabits(habits.map(habit => {
-            if (habit.id === id) {
-                const newCompleted = !habit.completedToday;
-                return {
-                    ...habit,
-                    completedToday: newCompleted,
-                    streak: newCompleted ? habit.streak + 1 : Math.max(0, habit.streak - 1),
-                    totalCompleted: newCompleted ? habit.totalCompleted + 1 : habit.totalCompleted
-                };
-            }
-            return habit;
-        }));
+    const toggleHabit = async (id: string) => {
+        try {
+            setSaving(true);
+            await habitService.toggleCompletion(id);
+            await loadHabits();
+            toast.success('Habit updated!');
+        } catch (error) {
+            console.error('Failed to toggle habit:', error);
+            toast.error('Failed to update habit');
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const deleteHabit = (id: string) => {
-        setHabits(habits.filter(h => h.id !== id));
-        toast.success('Habit deleted!');
+    const deleteHabit = async (id: string) => {
+        try {
+            setSaving(true);
+            await habitService.delete(id);
+            setHabits(habits.filter(h => h.id !== id));
+            toast.success('Habit deleted!');
+        } catch (error) {
+            console.error('Failed to delete habit:', error);
+            toast.error('Failed to delete habit');
+        } finally {
+            setSaving(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className={`min-h-full ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} p-8 flex items-center justify-center`}>
+                <div className="text-center">
+                    <Loader2 className={`h-12 w-12 animate-spin mx-auto mb-4 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
+                    <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Loading habits...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     const completedToday = habits.filter(h => h.completedToday).length;
     const totalHabits = habits.length;
@@ -117,9 +179,8 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
                 </div>
 
                 {/* Add Habit */}
-                <div className={`p-6 rounded-2xl border mb-8 ${
-                    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                }`}>
+                <div className={`p-6 rounded-2xl border mb-8 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                    }`}>
                     <div className="flex gap-2">
                         <input
                             type="text"
@@ -127,11 +188,10 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
                             onChange={(e) => setNewHabitName(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && addHabit()}
                             placeholder="Add a new habit..."
-                            className={`flex-1 px-4 py-3 rounded-xl border ${
-                                isDarkMode 
-                                    ? 'bg-gray-700 text-white border-gray-600' 
-                                    : 'bg-white text-gray-900 border-gray-300'
-                            } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                            className={`flex-1 px-4 py-3 rounded-xl border ${isDarkMode
+                                ? 'bg-gray-700 text-white border-gray-600'
+                                : 'bg-white text-gray-900 border-gray-300'
+                                } focus:outline-none focus:ring-2 focus:ring-purple-500`}
                         />
                         <button
                             type="button"
@@ -149,13 +209,12 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
                     {habits.map(habit => (
                         <div
                             key={habit.id}
-                            className={`p-6 rounded-2xl border transition-all ${
-                                habit.completedToday
-                                    ? `bg-gradient-to-br ${habit.color} text-white border-transparent`
-                                    : isDarkMode
-                                        ? 'bg-gray-800 border-gray-700 hover:border-purple-500'
-                                        : 'bg-white border-gray-200 hover:border-purple-500'
-                            }`}
+                            className={`p-6 rounded-2xl border transition-all ${habit.completedToday
+                                ? `bg-gradient-to-br ${habit.color} text-white border-transparent`
+                                : isDarkMode
+                                    ? 'bg-gray-800 border-gray-700 hover:border-purple-500'
+                                    : 'bg-white border-gray-200 hover:border-purple-500'
+                                }`}
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
@@ -163,14 +222,12 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
                                         {habit.icon}
                                     </div>
                                     <div>
-                                        <h3 className={`text-xl font-bold ${
-                                            habit.completedToday ? 'text-white' : isDarkMode ? 'text-white' : 'text-gray-900'
-                                        }`}>
+                                        <h3 className={`text-xl font-bold ${habit.completedToday ? 'text-white' : isDarkMode ? 'text-white' : 'text-gray-900'
+                                            }`}>
                                             {habit.name}
                                         </h3>
-                                        <div className={`flex items-center gap-2 mt-1 ${
-                                            habit.completedToday ? 'text-white/80' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                                        }`}>
+                                        <div className={`flex items-center gap-2 mt-1 ${habit.completedToday ? 'text-white/80' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                            }`}>
                                             <TrendingUp className="h-4 w-4" />
                                             <span className="text-sm">{habit.streak} day streak</span>
                                         </div>
@@ -179,13 +236,12 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
                                 <button
                                     type="button"
                                     onClick={() => deleteHabit(habit.id)}
-                                    className={`p-2 rounded-lg transition-colors ${
-                                        habit.completedToday
-                                            ? 'hover:bg-white/20 text-white/80'
-                                            : isDarkMode 
-                                                ? 'hover:bg-red-500/20 text-red-400' 
-                                                : 'hover:bg-red-50 text-red-500'
-                                    }`}
+                                    className={`p-2 rounded-lg transition-colors ${habit.completedToday
+                                        ? 'hover:bg-white/20 text-white/80'
+                                        : isDarkMode
+                                            ? 'hover:bg-red-500/20 text-red-400'
+                                            : 'hover:bg-red-50 text-red-500'
+                                        }`}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </button>
@@ -194,11 +250,10 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
                             <button
                                 type="button"
                                 onClick={() => toggleHabit(habit.id)}
-                                className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
-                                    habit.completedToday
-                                        ? 'bg-white/20 hover:bg-white/30 text-white'
-                                        : `bg-gradient-to-r ${habit.color} hover:opacity-90 text-white`
-                                }`}
+                                className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${habit.completedToday
+                                    ? 'bg-white/20 hover:bg-white/30 text-white'
+                                    : `bg-gradient-to-r ${habit.color} hover:opacity-90 text-white`
+                                    }`}
                             >
                                 {habit.completedToday ? (
                                     <>
@@ -213,9 +268,8 @@ const HabitTrackerApp: React.FC<HabitTrackerAppProps> = ({ isDarkMode = true }) 
                                 )}
                             </button>
 
-                            <div className={`mt-3 text-center text-sm ${
-                                habit.completedToday ? 'text-white/70' : isDarkMode ? 'text-gray-500' : 'text-gray-600'
-                            }`}>
+                            <div className={`mt-3 text-center text-sm ${habit.completedToday ? 'text-white/70' : isDarkMode ? 'text-gray-500' : 'text-gray-600'
+                                }`}>
                                 Completed {habit.totalCompleted} times
                             </div>
                         </div>
