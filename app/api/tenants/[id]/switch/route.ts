@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // For now, return success for any tenant switch
     // In a real application, this would:

@@ -125,7 +125,6 @@ const mapAgentCatalogRecord = (record: any): AgentCatalogItem => ({
     config: parseJsonIfNeeded(record.config, {} as Record<string, unknown>),
     metadata: parseJsonIfNeeded(record.metadata, {} as Record<string, unknown>),
     developerId: record.developerId ?? record.developer_id ?? undefined,
-    companyId: record.companyId ?? record.company_id ?? undefined,
     createdAt: record.createdAt ?? record.created_at ?? new Date().toISOString(),
     updatedAt: record.updatedAt ?? record.updated_at ?? new Date().toISOString()
 });
@@ -161,7 +160,7 @@ export const registerUser = async (details: { name: string, email: string, compa
 
         if (!nameValidation.isValid || !emailValidation.isValid || !companyValidation.isValid || !passwordValidation.isValid) {
             const allErrors = [...nameValidation.errors, ...emailValidation.errors, ...companyValidation.errors, ...passwordValidation.errors];
-            throw new APIError(allErrors.join('. '), 'VALIDATION_ERROR');
+            throw new APIError(allErrors.join('. '), 400);
         }
 
         if (supabase) {
@@ -185,14 +184,14 @@ export const registerUser = async (details: { name: string, email: string, compa
             if (signUpError) throw signUpError;
 
             if (data.user) {
-                  const { error: profileError } = await supabase.from('profiles').insert({
+                  const { error: profileError } = await (supabase.from('profiles').insert({
                       id: data.user.id,
                       name: details.name.trim(),
                       email: details.email.trim(),
                       role: 'Project Manager', // default role
                       company_id: companyId,
                       avatar: `https://i.pravatar.cc/150?u=${details.email.trim()}`,
-                  });
+                  }) as any);
                   if(profileError) throw profileError;
 
                 // Immediately log in the new user to create a session
@@ -204,7 +203,7 @@ export const registerUser = async (details: { name: string, email: string, compa
             // Mock implementation
             await delay(LATENCY * 3);
             if (db.findUserByEmail(details.email.trim())) {
-                throw new APIError("User with this email already exists.", 'DUPLICATE_USER');
+                throw new APIError("User with this email already exists.", 409);
             }
 
             let company = db.findCompanyByName(details.companyName.trim());
@@ -259,7 +258,7 @@ export const fetchAllProjects = async (currentUser: User): Promise<Project[]> =>
 
         // Data integrity check
         if (!currentUser.companyId) {
-            throw new APIError('User company ID is required', 'VALIDATION_ERROR');
+            throw new APIError('User company ID is required', 400);
         }
 
         if (supabase) {
@@ -630,13 +629,13 @@ export const createTask = async (taskData: Omit<Task, 'id' | 'comments' | 'histo
 
         // Data integrity checks
         if (!taskData.title || taskData.title.trim().length === 0) {
-            throw new APIError('Task title is required', 'VALIDATION_ERROR');
+            throw new APIError('Task title is required', 400);
         }
         if (taskData.title.length > 200) {
-            throw new APIError('Task title must be less than 200 characters', 'VALIDATION_ERROR');
+            throw new APIError('Task title must be less than 200 characters', 400);
         }
         if (!taskData.projectId) {
-            throw new APIError('Project ID is required', 'VALIDATION_ERROR');
+            throw new APIError('Project ID is required', 400);
         }
 
         // Verify project exists and user has access
@@ -645,7 +644,7 @@ export const createTask = async (taskData: Omit<Task, 'id' | 'comments' | 'histo
             throw new APIError('Project not found', 'NOT_FOUND');
         }
         if (project.companyId !== creator.companyId && creator.role !== 'super_admin') {
-            throw new APIError('Access denied to project', 'PERMISSION_DENIED');
+            throw new APIError('Access denied to project', 403);
         }
 
         // Validate due date
@@ -655,13 +654,13 @@ export const createTask = async (taskData: Omit<Task, 'id' | 'comments' | 'histo
                 throw new APIError('Invalid due date', 'VALIDATION_ERROR');
             }
             if (dueDate < new Date()) {
-                throw new APIError('Due date cannot be in the past', 'VALIDATION_ERROR');
+                throw new APIError('Due date cannot be in the past', 400);
             }
         }
 
         // Validate priority
         if (taskData.priority && !['Low', 'Medium', 'High', 'Critical'].includes(taskData.priority)) {
-            throw new APIError('Invalid priority level', 'VALIDATION_ERROR');
+            throw new APIError('Invalid priority level', 400);
         }
 
         const newTask: Task = {
