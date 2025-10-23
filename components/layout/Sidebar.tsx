@@ -169,21 +169,9 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
 
     const superAdminNavItems = [
         {
-            label: 'Super Admin Home',
-            screen: 'super-admin-dashboard',
-            icon: CheckBadgeIcon,
-            isModule: true
-        },
-        {
             label: 'Admin Control Panel',
             screen: 'unified-admin',
-            icon: DocumentIcon,
-            isModule: true
-        },
-        {
-            label: 'Platform Admin (Legacy)',
-            screen: 'platform-admin',
-            icon: DocumentIcon,
+            icon: ShieldCheckIcon,
             isModule: true
         }
     ];

@@ -89,10 +89,7 @@ const Base44Clone = lazy(() =>
     default: module.Base44Clone
   }))
 );
-const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
-const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
 const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
-const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
 const UnifiedAdminDashboard = lazy(() => import('./components/screens/admin/UnifiedAdminDashboard'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 
@@ -162,7 +159,6 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'automation-studio': ConstructionAutomationStudio,
   'developer-workspace': DeveloperWorkspaceScreen,
   'developer-console': MinimalDeveloperConsole,
-  'super-admin-dashboard': SuperAdminDashboardScreen,
   'sdk-developer': ProductionSDKDeveloperView,
   'my-apps-desktop': Base44Clone,
   // Global Marketplace
@@ -173,7 +169,6 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   // Zapier-Style Workflow Builder (now integrated in SDK Developer)
   // 'zapier-workflow': ZapierStyleWorkflowBuilder,
   // Admin
-  'platform-admin': PlatformAdminScreen,
   'unified-admin': UnifiedAdminDashboard,
   'admin-control-panel': AdminControlPanel,
   // ML & Advanced Analytics
@@ -653,32 +648,11 @@ const App: React.FC = () => {
       // Continue to normal screen rendering below
     }
     if (currentUser.role === 'super_admin') {
-      console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
+      console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Unified Admin Dashboard');
       return (
         <Suspense fallback={<ScreenLoader />}>
-          <SuperAdminDashboardV2
-            isDarkMode={true}
-            onNavigate={(section) => {
-              console.log('Navigating to section:', section);
-              // Map section IDs to actual screens
-              const sectionScreenMap: Record<string, string> = {
-                'user-management': 'platform-admin',
-                'company-management': 'platform-admin',
-                'billing-payments': 'platform-admin',
-                'marketplace': 'marketplace',
-                'analytics-reports': 'platform-admin',
-                'system-settings': 'platform-admin',
-                'security-audit': 'platform-admin',
-                'database-management': 'platform-admin',
-                'activity-monitoring': 'platform-admin',
-                'content-management': 'platform-admin',
-                'notifications': 'platform-admin',
-                'permissions': 'platform-admin',
-                'integrations': 'platform-admin'
-              };
-              const targetScreen = sectionScreenMap[section] || 'platform-admin';
-              navigateToModule(targetScreen as any, { section });
-            }}
+          <UnifiedAdminDashboard
+            currentUser={currentUser}
           />
         </Suspense>
       );

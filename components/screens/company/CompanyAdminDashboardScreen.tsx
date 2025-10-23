@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { User, Screen, PermissionAction, PermissionSubject } from '../../../types';
 import { EnhancedDashboard } from '../../dashboard/EnhancedDashboard';
-import CompanyAdminDashboard from '../dashboards/CompanyAdminDashboard';
 import CompanyAdminDashboardNew from '../dashboards/CompanyAdminDashboardNew';
 
 interface CompanyAdminDashboardScreenProps {
@@ -15,12 +14,11 @@ interface CompanyAdminDashboardScreenProps {
     goBack: () => void;
 }
 
-type DashboardView = 'executive' | 'operations' | 'legacy';
+type DashboardView = 'executive' | 'operations';
 
 const viewLabels: Record<DashboardView, string> = {
     executive: 'Executive Overview',
-    operations: 'Operational Control',
-    legacy: 'Legacy Widgets'
+    operations: 'Operational Control'
 };
 
 const CompanyAdminDashboardScreen: React.FC<CompanyAdminDashboardScreenProps> = (props) => {
@@ -31,8 +29,6 @@ const CompanyAdminDashboardScreen: React.FC<CompanyAdminDashboardScreenProps> = 
         switch (activeView) {
             case 'operations':
                 return <CompanyAdminDashboardNew {...props} />;
-            case 'legacy':
-                return <CompanyAdminDashboard {...props} />;
             case 'executive':
             default:
                 return <EnhancedDashboard />;
@@ -54,11 +50,10 @@ const CompanyAdminDashboardScreen: React.FC<CompanyAdminDashboardScreenProps> = 
                             key={view}
                             type="button"
                             onClick={() => setActiveView(view)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                                activeView === view
-                                    ? 'bg-blue-600 text-white shadow'
-                                    : 'text-slate-600 hover:bg-slate-100'
-                            }`}
+                            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeView === view
+                                ? 'bg-blue-600 text-white shadow'
+                                : 'text-slate-600 hover:bg-slate-100'
+                                }`}
                         >
                             {viewLabels[view]}
                         </button>
