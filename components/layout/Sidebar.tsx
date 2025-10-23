@@ -7,7 +7,7 @@ import {
     ChevronLeftIcon, BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
     CheckBadgeIcon, DocumentDuplicateIcon, CameraIcon, ClipboardDocumentListIcon,
     BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
-    WandSparklesIcon, ArrowPathIcon
+    WandSparklesIcon, ArrowPathIcon, ShieldCheckIcon
 } from '../Icons';
 
 interface SidebarProps {
