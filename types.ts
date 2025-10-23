@@ -139,6 +139,7 @@ export type Screen =
     | 'developer-submissions'
     // Admin screens
     | 'platform-admin'
+    | 'unified-admin'
     | 'admin-control-panel'
     // ML & Advanced Analytics
     | 'ml-analytics'

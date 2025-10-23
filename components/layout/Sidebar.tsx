@@ -175,7 +175,13 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
             isModule: true
         },
         {
-            label: 'Platform Admin',
+            label: 'Admin Control Panel',
+            screen: 'unified-admin',
+            icon: DocumentIcon,
+            isModule: true
+        },
+        {
+            label: 'Platform Admin (Legacy)',
             screen: 'platform-admin',
             icon: DocumentIcon,
             isModule: true

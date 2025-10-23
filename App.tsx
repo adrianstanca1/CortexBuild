@@ -93,6 +93,7 @@ const PlatformAdminScreen = lazy(() => import('./components/screens/admin/Platfo
 const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
 const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
+const UnifiedAdminDashboard = lazy(() => import('./components/screens/admin/UnifiedAdminDashboard'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 
 const ScreenLoader: React.FC = () => (
@@ -173,6 +174,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   // 'zapier-workflow': ZapierStyleWorkflowBuilder,
   // Admin
   'platform-admin': PlatformAdminScreen,
+  'unified-admin': UnifiedAdminDashboard,
   'admin-control-panel': AdminControlPanel,
   // ML & Advanced Analytics
   'ml-analytics': AdvancedMLDashboard,
@@ -569,7 +571,7 @@ const App: React.FC = () => {
       return;
     }
     if (currentUser?.role === 'super_admin') {
-      navigateToModule('super-admin-dashboard');
+      navigateToModule('unified-admin');
       return;
     }
     if (currentUser?.role === 'company_admin') {
