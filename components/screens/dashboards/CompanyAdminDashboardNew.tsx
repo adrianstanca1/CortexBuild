@@ -39,7 +39,7 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
                 // Process dashboard data with ML integration
                 const processedData = await processDashboardData(fetchedProjects, fetchedTasks, currentUser);
                 setDashboardData(processedData);
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error loading dashboard data:', error);
             } finally {
                 setIsLoading(false);
@@ -74,7 +74,7 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
 
     const activeProjects = projects.filter(p => p.status === 'in_progress').length;
     const totalRevenue = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
-    const completionRate = projects.length > 0 
+    const completionRate = projects.length > 0
         ? Math.round((projects.filter(p => p.status === 'completed').length / projects.length) * 100)
         : 0;
 

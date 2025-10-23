@@ -22,6 +22,19 @@ import { supabase } from './lib/supabase/client';
 // Lazily loaded screens and feature modules
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
 const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
+const ProjectsManagement = lazy(() => import('./components/construction/ProjectsManagement'));
+const TasksManagement = lazy(() => import('./components/construction/TasksManagement'));
+const DailyLogsManagement = lazy(() => import('./components/construction/DailyLogsManagement'));
+const RFIManagement = lazy(() => import('./components/construction/RFIManagement'));
+const DocumentsManagement = lazy(() => import('./components/construction/DocumentsManagement'));
+const BillingPaymentsManagement = lazy(() => import('./components/admin/BillingPaymentsManagement'));
+const AnalyticsReports = lazy(() => import('./components/admin/AnalyticsReports'));
+const MarketplaceManagement = lazy(() => import('./components/marketplace/MarketplaceManagement'));
+const DeveloperDashboard = lazy(() => import('./components/marketplace/DeveloperDashboard'));
+const AppDiscovery = lazy(() => import('./components/marketplace/AppDiscovery'));
+const TeamManagement = lazy(() => import('./components/company/TeamManagement'));
+const ProjectDashboard = lazy(() => import('./components/company/ProjectDashboard'));
+const NotificationsCenter = lazy(() => import('./components/realtime/NotificationsCenter'));
 const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
 const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
 const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
@@ -100,6 +113,19 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'company-admin-dashboard': CompanyAdminDashboard,
   'company-admin-legacy': CompanyAdminDashboardScreen,
   'projects': ProjectsListScreen,
+  'projects-management': ProjectsManagement,
+  'tasks-management': TasksManagement,
+  'daily-logs-management': DailyLogsManagement,
+  'rfi-management': RFIManagement,
+  'documents-management': DocumentsManagement,
+  'billing-payments-management': BillingPaymentsManagement,
+  'analytics-reports': AnalyticsReports,
+  'marketplace-management': MarketplaceManagement,
+  'developer-dashboard': DeveloperDashboard,
+  'app-discovery': AppDiscovery,
+  'team-management': TeamManagement,
+  'project-dashboard': ProjectDashboard,
+  'notifications-center': NotificationsCenter,
   'project-home': ProjectHomeScreen,
   'my-day': MyDayScreen,
   'tasks': TasksScreen,
@@ -520,6 +546,39 @@ const App: React.FC = () => {
     setIsAISuggestionModalOpen(false);
   };
 
+  // CRITICAL: Define ALL hooks here BEFORE any conditional returns
+  // This ensures hooks are called in the same order every render, regardless of user state
+  const currentNavItemOrDefault = currentNavItem || { screen: 'global-dashboard' as Screen, params: {}, project: undefined };
+  const { screen: navScreen, params: navParams, project: navProject } = currentNavItemOrDefault;
+
+  const getSidebarProject = useMemo(() => {
+    if (navProject) {
+      return navProject;
+    }
+    return {
+      ...MOCK_PROJECT,
+      id: '',
+      name: 'Global View',
+      location: `Welcome, ${currentUser?.name || 'User'}`,
+    };
+  }, [navProject, currentUser?.name]);
+
+  const sidebarGoHome = useCallback(() => {
+    if (currentUser?.role === 'developer') {
+      navigateToModule('developer-console');
+      return;
+    }
+    if (currentUser?.role === 'super_admin') {
+      navigateToModule('super-admin-dashboard');
+      return;
+    }
+    if (currentUser?.role === 'company_admin') {
+      navigateToModule('company-admin-dashboard');
+      return;
+    }
+    goHome();
+  }, [currentUser?.role, navigateToModule, goHome]);
+
   // ALWAYS render something - never return null
   // This ensures React is mounted and listening for events
 
@@ -559,6 +618,11 @@ const App: React.FC = () => {
   console.log('✅ Current user exists - showing app:', currentUser.name);
   console.log('📊 Navigation stack length:', navigationStack.length);
   console.log('📊 Current nav item:', currentNavItem);
+
+  // Use the hooks that were defined earlier (before any early returns)
+  const screen = navScreen;
+  const params = navParams;
+  const project = navProject;
 
   // If no navigation stack, show dashboard directly
   if (!currentNavItem || navigationStack.length === 0) {
@@ -627,15 +691,19 @@ const App: React.FC = () => {
               console.log('Company Admin navigating to:', screen, params);
               // Map section IDs to actual screens
               const sectionScreenMap: Record<string, string> = {
-                'projects': 'projects',
+                'projects': 'projects-management',
+                'tasks': 'tasks-management',
+                'daily-logs': 'daily-logs-management',
+                'rfis': 'rfi-management',
+                'documents': 'documents-management',
+                'billing': 'billing-payments-management',
+                'analytics': 'analytics-reports',
+                'marketplace': 'marketplace-management',
                 'teams': 'platform-admin',
-                'documents': 'documents',
-                'marketplace': 'marketplace',
                 'analytics': 'platform-admin',
                 'billing': 'platform-admin',
                 'clients': 'platform-admin',
                 'settings': 'platform-admin',
-                'daily-logs': 'daily-log',
                 'safety-reports': 'platform-admin',
                 'quality-control': 'platform-admin',
                 'time-tracking': 'platform-admin',
@@ -661,41 +729,11 @@ const App: React.FC = () => {
     );
   }
 
-  const { screen, params, project } = currentNavItem;
   console.log('📺 Rendering screen:', screen);
   console.log('📺 Current user role:', currentUser?.role);
   console.log('📺 Navigation stack:', navigationStack);
   const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
   console.log('📺 Screen component:', ScreenComponent.name);
-
-  // IMPORTANT: Call hooks BEFORE any early returns to avoid React hook violations
-  const getSidebarProject = useMemo(() => {
-    if (project) {
-      return project;
-    }
-    return {
-      ...MOCK_PROJECT,
-      id: '',
-      name: 'Global View',
-      location: `Welcome, ${currentUser?.name || 'User'}`,
-    };
-  }, [project, currentUser?.name]);
-
-  const sidebarGoHome = useCallback(() => {
-    if (currentUser.role === 'developer') {
-      navigateToModule('developer-console');
-      return;
-    }
-    if (currentUser.role === 'super_admin') {
-      navigateToModule('super-admin-dashboard');
-      return;
-    }
-    if (currentUser.role === 'company_admin') {
-      navigateToModule('company-admin-dashboard');
-      return;
-    }
-    goHome();
-  }, [currentUser.role, navigateToModule, goHome]);
 
   // Now do early returns AFTER hooks are called
   if (screen === 'my-apps-desktop') {

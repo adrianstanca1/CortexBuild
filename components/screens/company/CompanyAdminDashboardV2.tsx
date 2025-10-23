@@ -97,14 +97,15 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
 
     // Field Operations
     const fieldOperations = [
-        { id: 'daily-logs', title: 'Daily Site Logs', icon: ClipboardList, color: 'blue', count: 0, description: 'Daily reports' },
+        { id: 'tasks', title: 'Tasks & Assignments', icon: CheckSquare, color: 'blue', count: 0, description: 'Task tracking' },
+        { id: 'daily-logs', title: 'Daily Site Logs', icon: ClipboardList, color: 'green', count: 0, description: 'Daily reports' },
+        { id: 'rfis', title: 'RFIs & Issues', icon: AlertTriangle, color: 'yellow', count: 0, description: 'Issue tracking' },
         { id: 'safety', title: 'Safety Reports', icon: Shield, color: 'red', count: stats.safetyIncidents, description: 'Safety monitoring' },
         { id: 'quality', title: 'Quality Control', icon: CheckSquare, color: 'green', count: 0, description: 'Quality inspections' },
         { id: 'time-tracking', title: 'Time Tracking', icon: Clock, color: 'purple', count: stats.activeWorkers, description: 'Worker hours' },
         { id: 'photos', title: 'Photo Documentation', icon: Camera, color: 'pink', count: 0, description: 'Site photos' },
         { id: 'equipment', title: 'Equipment Tracking', icon: Hammer, color: 'orange', count: 0, description: 'Equipment management' },
-        { id: 'procurement', title: 'Material Procurement', icon: ShoppingCart, color: 'cyan', count: 0, description: 'Material orders' },
-        { id: 'rfis', title: 'RFIs & Issues', icon: AlertTriangle, color: 'yellow', count: 0, description: 'Issue tracking' }
+        { id: 'procurement', title: 'Material Procurement', icon: ShoppingCart, color: 'cyan', count: 0, description: 'Material orders' }
     ];
 
     const getColorClasses = (color: string) => {
@@ -240,8 +241,8 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-purple-600 text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                    ? 'bg-purple-600 text-white shadow-lg'
+                                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
                                     }`}
                             >
                                 <TabIcon className="w-5 h-5" />

@@ -1,118 +1,153 @@
 /**
- * Vercel Serverless Function: Register
+ * Registration API Endpoint
  * POST /api/auth/register
+ * Creates a new user account with hashed password
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cortexbuild-secret-2025';
-const TOKEN_EXPIRY = '24h';
+// Initialize Supabase client with service role key for admin operations
+// Note: VITE_ prefix is only for frontend, use plain env vars for serverless functions
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
-// Initialize Supabase client
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
-
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse,
-) {
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    const { email, password, firstName, lastName, role, companyId } = req.body;
-
-    if (!email || !password || !firstName || !lastName) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email, password, first name, and last name are required',
-      });
-    }
-
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .ilike('email', email)
-      .single();
-
-    if (existingUser) {
-      console.log('❌ Registration failed: Email already exists');
-      return res.status(400).json({
-        success: false,
-        error: 'Email already exists',
-      });
-    }
-
-    // Hash password using bcrypt
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Create user
-    const { data: newUser, error } = await supabase
-      .from('users')
-      .insert({
-        email,
-        password_hash: passwordHash,
-        name: `${firstName} ${lastName}`.trim(),
-        role: role || 'operative',
-        company_id: companyId || null,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('❌ Registration error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Registration failed',
-      });
-    }
-
-    // Map user data
-    const user = {
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name || newUser.email || 'User',
-      role: newUser.role,
-      avatar: newUser.avatar || '',
-      company_id: newUser.company_id || undefined,
-    };
-
-    // Generate JWT token
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-      },
-      JWT_SECRET,
-      { expiresIn: TOKEN_EXPIRY },
-    );
-
-    console.log(`✅ Registration successful: ${user.email}`);
-
-    return res.status(200).json({
-      success: true,
-      user,
-      token,
+if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('❌ Missing Supabase credentials:', {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceKey
     });
-  } catch (error: any) {
-    console.error('❌ Registration exception:', error);
-    return res.status(500).json({
-      success: false,
-      error: error.message || 'Registration failed',
-    });
-  }
+}
+
+const supabase = createClient(
+    supabaseUrl!,
+    supabaseServiceKey!,
+    {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    }
+);
+
+// Hash password using SHA-256
+function hashPassword(password: string): string {
+    return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+// Validate email format
+function isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Validate password strength
+function isValidPassword(password: string): { valid: boolean; message?: string } {
+    if (password.length < 8) {
+        return { valid: false, message: 'Password must be at least 8 characters long' };
+    }
+    if (!/[A-Z]/.test(password)) {
+        return { valid: false, message: 'Password must contain at least one uppercase letter' };
+    }
+    if (!/[a-z]/.test(password)) {
+        return { valid: false, message: 'Password must contain at least one lowercase letter' };
+    }
+    if (!/[0-9]/.test(password)) {
+        return { valid: false, message: 'Password must contain at least one number' };
+    }
+    return { valid: true };
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    try {
+        const { email, password, name, role, company_id } = req.body;
+
+        // Validate required fields
+        if (!email || !password || !name) {
+            return res.status(400).json({ 
+                error: 'Missing required fields',
+                details: 'Email, password, and name are required'
+            });
+        }
+
+        // Validate email format
+        if (!isValidEmail(email)) {
+            return res.status(400).json({ 
+                error: 'Invalid email format'
+            });
+        }
+
+        // Validate password strength
+        const passwordValidation = isValidPassword(password);
+        if (!passwordValidation.valid) {
+            return res.status(400).json({ 
+                error: 'Invalid password',
+                details: passwordValidation.message
+            });
+        }
+
+        // Check if user already exists
+        const { data: existingUser } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email.toLowerCase())
+            .single();
+
+        if (existingUser) {
+            return res.status(409).json({ 
+                error: 'User already exists',
+                details: 'An account with this email already exists'
+            });
+        }
+
+        // Hash the password
+        const hashedPassword = hashPassword(password);
+
+        // Create the user
+        const userId = crypto.randomUUID();
+        const { data: newUser, error: insertError } = await supabase
+            .from('users')
+            .insert({
+                id: userId,
+                email: email.toLowerCase(),
+                name: name,
+                password: hashedPassword,
+                role: role || 'user',
+                company_id: company_id || null,
+                status: 'active',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .select('id, email, name, role, company_id, status, created_at')
+            .single();
+
+        if (insertError) {
+            console.error('Error creating user:', insertError);
+            return res.status(500).json({ 
+                error: 'Failed to create user',
+                details: insertError.message
+            });
+        }
+
+        // Return success response (without password)
+        return res.status(201).json({
+            success: true,
+            message: 'User registered successfully',
+            user: newUser
+        });
+
+    } catch (error: any) {
+        console.error('Registration error:', error);
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            details: error.message
+        });
+    }
 }
 
