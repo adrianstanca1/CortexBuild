@@ -24,6 +24,9 @@ import {
 import { User, Screen } from '../../../types';
 import { supabase } from '../../../lib/supabase/client';
 import toast from 'react-hot-toast';
+import { SettingsTab } from './SettingsTab';
+import { AuditLogViewer } from './AuditLogViewer';
+import { exportMetricsToPDF } from '../../../utils/pdfExport';
 
 // Import sub-components
 import UserManagement from '../../admin/UserManagement';
@@ -301,11 +304,21 @@ const UnifiedAdminDashboard: React.FC<UnifiedAdminDashboardProps> = ({
         toast.success('Metrics exported to CSV');
     }, [metrics]);
 
-    // Export to PDF (simplified version - would need a PDF library for full implementation)
+    // Export to PDF with full implementation
     const exportToPDF = useCallback(() => {
-        toast.info('PDF export coming soon! Use CSV export for now.');
-        // TODO: Implement with jsPDF or similar library
-    }, []);
+        if (!metrics) {
+            toast.error('No data to export');
+            return;
+        }
+
+        try {
+            exportMetricsToPDF(metrics);
+            toast.success('Metrics exported to PDF');
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+            toast.error('Failed to export PDF');
+        }
+    }, [metrics]);
 
     // Apply custom date range
     const applyCustomDateRange = useCallback(() => {
@@ -436,9 +449,9 @@ const UnifiedAdminDashboard: React.FC<UnifiedAdminDashboardProps> = ({
 
     const renderSettings = () => {
         return (
-            <div className="bg-white rounded-xl p-6 shadow-md">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Platform Settings</h2>
-                <p className="text-gray-600">Settings panel coming soon...</p>
+            <div className="space-y-6">
+                <SettingsTab />
+                <AuditLogViewer />
             </div>
         );
     };
