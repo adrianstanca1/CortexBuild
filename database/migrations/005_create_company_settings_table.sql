@@ -1,7 +1,7 @@
 -- Create company_settings table
 CREATE TABLE IF NOT EXISTS public.company_settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL UNIQUE REFERENCES public.companies(id) ON DELETE CASCADE,
+    company_id TEXT NOT NULL UNIQUE REFERENCES public.companies(id) ON DELETE CASCADE,
     theme_color TEXT NOT NULL DEFAULT '#3B82F6',
     logo_url TEXT,
     email_template TEXT,

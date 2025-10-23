@@ -1,7 +1,7 @@
 -- Create custom_roles table
 CREATE TABLE IF NOT EXISTS public.custom_roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
+    company_id TEXT NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     description TEXT,
     permissions TEXT[] NOT NULL DEFAULT '{}',

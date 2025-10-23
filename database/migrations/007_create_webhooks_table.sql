@@ -1,7 +1,7 @@
 -- Create webhooks table
 CREATE TABLE IF NOT EXISTS public.webhooks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
+    company_id TEXT NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
     events TEXT[] NOT NULL DEFAULT '{}',
     active BOOLEAN NOT NULL DEFAULT true,

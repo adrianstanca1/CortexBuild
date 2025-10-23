@@ -1,7 +1,7 @@
 -- Create company_analytics table
 CREATE TABLE IF NOT EXISTS public.company_analytics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
+    company_id TEXT NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
     total_projects INTEGER NOT NULL DEFAULT 0 CHECK (total_projects >= 0),
     active_projects INTEGER NOT NULL DEFAULT 0 CHECK (active_projects >= 0),
     completed_projects INTEGER NOT NULL DEFAULT 0 CHECK (completed_projects >= 0),
