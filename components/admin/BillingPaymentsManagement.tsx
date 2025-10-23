@@ -168,24 +168,38 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
     };
 
     const loadPayments = async () => {
-        const { data, error } = await supabase
-            .from('payments')
-            .select(`
-                *,
-                companies(name),
-                invoices(invoice_number)
-            `)
-            .order('created_at', { ascending: false });
+        try {
+            const { data, error } = await supabase
+                .from('payments')
+                .select(`
+                    *,
+                    companies(name),
+                    invoices(invoice_number)
+                `)
+                .order('created_at', { ascending: false });
 
-        if (error) throw error;
+            if (error) {
+                // Handle table not found error gracefully
+                if (error.code === 'PGRST116' || error.message?.includes('not found')) {
+                    console.warn('Payments table not found in database');
+                    setPayments([]);
+                    return;
+                }
+                throw error;
+            }
 
-        const formatted = (data || []).map((pay: any) => ({
-            ...pay,
-            company_name: pay.companies?.name,
-            invoice_number: pay.invoices?.invoice_number
-        }));
+            const formatted = (data || []).map((pay: any) => ({
+                ...pay,
+                company_name: pay.companies?.name,
+                invoice_number: pay.invoices?.invoice_number
+            }));
 
-        setPayments(formatted);
+            setPayments(formatted);
+        } catch (error: any) {
+            console.error('Error loading payments:', error);
+            // Set empty array instead of throwing to prevent app crash
+            setPayments([]);
+        }
     };
 
     const generateInvoiceNumber = () => {
@@ -284,7 +298,14 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                 created_at: new Date().toISOString()
             });
 
-            if (error) throw error;
+            if (error) {
+                // Handle table not found error
+                if (error.code === 'PGRST116' || error.message?.includes('not found')) {
+                    toast.error('Payments table not configured. Please contact support.');
+                    return;
+                }
+                throw error;
+            }
 
             // Update invoice status if payment is linked to an invoice
             if (paymentForm.invoice_id) {
@@ -413,8 +434,8 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                         type="button"
                         onClick={() => setActiveTab('subscriptions')}
                         className={`px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'subscriptions'
-                                ? 'bg-white text-blue-600 shadow-md'
-                                : 'text-gray-600 hover:bg-white/50'
+                            ? 'bg-white text-blue-600 shadow-md'
+                            : 'text-gray-600 hover:bg-white/50'
                             }`}
                     >
                         <CreditCard className="w-5 h-5 inline mr-2" />
@@ -424,8 +445,8 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                         type="button"
                         onClick={() => setActiveTab('invoices')}
                         className={`px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'invoices'
-                                ? 'bg-white text-blue-600 shadow-md'
-                                : 'text-gray-600 hover:bg-white/50'
+                            ? 'bg-white text-blue-600 shadow-md'
+                            : 'text-gray-600 hover:bg-white/50'
                             }`}
                     >
                         <FileText className="w-5 h-5 inline mr-2" />
@@ -435,8 +456,8 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                         type="button"
                         onClick={() => setActiveTab('payments')}
                         className={`px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'payments'
-                                ? 'bg-white text-blue-600 shadow-md'
-                                : 'text-gray-600 hover:bg-white/50'
+                            ? 'bg-white text-blue-600 shadow-md'
+                            : 'text-gray-600 hover:bg-white/50'
                             }`}
                     >
                         <Wallet className="w-5 h-5 inline mr-2" />

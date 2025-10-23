@@ -200,10 +200,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
 
     // Filter users
     const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesRole = filterRole === 'all' || user.role === filterRole;
-        const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
+        const matchesSearch = (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (user.email || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = filterRole === 'all' || (user.role || 'user') === filterRole;
+        const matchesStatus = filterStatus === 'all' || (user.status || 'inactive') === filterStatus;
 
         return matchesSearch && matchesRole && matchesStatus;
     });
@@ -380,23 +380,23 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10">
                                                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                                                        {user.name.charAt(0).toUpperCase()}
+                                                        {(user.name || 'U').charAt(0).toUpperCase()}
                                                     </div>
                                                 </div>
                                                 <div className="ml-4">
-                                                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                                    <div className="text-sm text-gray-500">{user.email}</div>
+                                                    <div className="text-sm font-medium text-gray-900">{user.name || 'Unknown'}</div>
+                                                    <div className="text-sm text-gray-500">{user.email || 'N/A'}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getRoleBadgeColor(user.role)}`}>
-                                                {user.role.replace('_', ' ').toUpperCase()}
+                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getRoleBadgeColor(user.role || 'user')}`}>
+                                                {(user.role || 'user').replace('_', ' ').toUpperCase()}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusBadgeColor(user.status)}`}>
-                                                {user.status.toUpperCase()}
+                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusBadgeColor(user.status || 'inactive')}`}>
+                                                {(user.status || 'inactive').toUpperCase()}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
