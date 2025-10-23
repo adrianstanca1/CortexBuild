@@ -8,15 +8,14 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Get Supabase credentials from environment variables
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://zpbuvuxpfemldsknerew.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_LJlZdJB0JylgynMF8MCtQw_m0sKjIK3';
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ Missing Supabase credentials!');
+if (!supabaseUrl) {
+  console.error('❌ Missing Supabase URL!');
   console.error('Required environment variables:');
-  console.error('  - VITE_SUPABASE_URL');
-  console.error('  - SUPABASE_SERVICE_KEY');
-  throw new Error('Supabase credentials not configured');
+  console.error('  - REACT_APP_SUPABASE_URL or VITE_SUPABASE_URL');
+  throw new Error('Supabase URL not configured');
 }
 
 // Create Supabase client with service role key
