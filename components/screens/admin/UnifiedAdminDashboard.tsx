@@ -13,7 +13,7 @@
  * - Responsive design with mobile support
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     LayoutDashboard, Users, Building2, CreditCard, BarChart3,
     Settings, Shield, Activity, Bell, Search, Filter, Download,
@@ -72,6 +72,10 @@ const UnifiedAdminDashboard: React.FC<UnifiedAdminDashboardProps> = ({
     const [searchQuery, setSearchQuery] = useState('');
     const [dateRange, setDateRange] = useState('30'); // days
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [customStartDate, setCustomStartDate] = useState('');
+    const [customEndDate, setCustomEndDate] = useState('');
+    const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
 
     // Check super admin access
     if (currentUser.role !== 'super_admin') {
@@ -102,6 +106,63 @@ const UnifiedAdminDashboard: React.FC<UnifiedAdminDashboardProps> = ({
         loadPlatformMetrics();
         loadRecentActivity();
     }, [dateRange]);
+
+    // Auto-refresh every 30 seconds (only if enabled)
+    useEffect(() => {
+        if (!autoRefreshEnabled) return;
+
+        const interval = setInterval(() => {
+            loadPlatformMetrics();
+            loadRecentActivity();
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(interval);
+    }, [autoRefreshEnabled]);
+
+    // Real-time subscriptions for live data
+    useEffect(() => {
+        // Subscribe to users table changes
+        const usersSubscription = supabase
+            .channel('users-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'users' },
+                () => {
+                    loadPlatformMetrics();
+                    loadRecentActivity();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to companies table changes
+        const companiesSubscription = supabase
+            .channel('companies-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'companies' },
+                () => {
+                    loadPlatformMetrics();
+                    loadRecentActivity();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to payments table changes
+        const paymentsSubscription = supabase
+            .channel('payments-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'payments' },
+                () => {
+                    loadPlatformMetrics();
+                }
+            )
+            .subscribe();
+
+        // Cleanup subscriptions on unmount
+        return () => {
+            usersSubscription.unsubscribe();
+            companiesSubscription.unsubscribe();
+            paymentsSubscription.unsubscribe();
+        };
+    }, []);
 
     const loadPlatformMetrics = async () => {
         try {
@@ -202,6 +263,65 @@ const UnifiedAdminDashboard: React.FC<UnifiedAdminDashboardProps> = ({
         setRefreshing(false);
         toast.success('Dashboard refreshed');
     };
+
+    // Export to CSV
+    const exportToCSV = useCallback(() => {
+        if (!metrics) {
+            toast.error('No data to export');
+            return;
+        }
+
+        const csvData = [
+            ['Metric', 'Value'],
+            ['Total Users', metrics.totalUsers],
+            ['Active Users', metrics.activeUsers],
+            ['Total Companies', metrics.totalCompanies],
+            ['Active Companies', metrics.activeCompanies],
+            ['Total Revenue', `$${metrics.totalRevenue.toFixed(2)}`],
+            ['Monthly Revenue', `$${metrics.monthlyRevenue.toFixed(2)}`],
+            ['Total Projects', metrics.totalProjects],
+            ['Active Projects', metrics.activeProjects],
+            ['System Health', metrics.systemHealth],
+            ['Uptime', `${metrics.uptime}%`],
+            ['Export Date', new Date().toISOString()]
+        ];
+
+        const csvContent = csvData.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `platform-metrics-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast.success('Metrics exported to CSV');
+    }, [metrics]);
+
+    // Export to PDF (simplified version - would need a PDF library for full implementation)
+    const exportToPDF = useCallback(() => {
+        toast.info('PDF export coming soon! Use CSV export for now.');
+        // TODO: Implement with jsPDF or similar library
+    }, []);
+
+    // Apply custom date range
+    const applyCustomDateRange = useCallback(() => {
+        if (!customStartDate || !customEndDate) {
+            toast.error('Please select both start and end dates');
+            return;
+        }
+
+        const start = new Date(customStartDate);
+        const end = new Date(customEndDate);
+        const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+        setDateRange(diffDays.toString());
+        setShowDatePicker(false);
+        toast.success(`Date range applied: ${diffDays} days`);
+    }, [customStartDate, customEndDate]);
 
     const tabs = [
         { id: 'overview', name: 'Overview', icon: LayoutDashboard },
@@ -356,12 +476,105 @@ const UnifiedAdminDashboard: React.FC<UnifiedAdminDashboardProps> = ({
                                 />
                             </div>
 
+                            {/* Date Range Picker */}
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDatePicker(!showDatePicker)}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Custom date range"
+                                >
+                                    <Calendar className="w-5 h-5 text-gray-600" />
+                                </button>
+                                {showDatePicker && (
+                                    <div className="absolute right-0 top-12 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 w-80">
+                                        <h3 className="text-sm font-semibold text-gray-900 mb-3">Custom Date Range</h3>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-xs text-gray-600 mb-1">Start Date</label>
+                                                <input
+                                                    type="date"
+                                                    value={customStartDate}
+                                                    onChange={(e) => setCustomStartDate(e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs text-gray-600 mb-1">End Date</label>
+                                                <input
+                                                    type="date"
+                                                    value={customEndDate}
+                                                    onChange={(e) => setCustomEndDate(e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={applyCustomDateRange}
+                                                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                                                >
+                                                    Apply
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowDatePicker(false)}
+                                                    className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Export Menu */}
+                            <div className="relative group">
+                                <button
+                                    type="button"
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Export data"
+                                >
+                                    <Download className="w-5 h-5 text-gray-600" />
+                                </button>
+                                <div className="absolute right-0 top-12 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                                    <button
+                                        type="button"
+                                        onClick={exportToCSV}
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        Export to CSV
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={exportToPDF}
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        Export to PDF
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Auto-refresh Toggle */}
+                            <button
+                                type="button"
+                                onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
+                                className={`p-2 rounded-lg transition-colors ${autoRefreshEnabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}
+                                title={autoRefreshEnabled ? 'Auto-refresh enabled' : 'Auto-refresh disabled'}
+                            >
+                                <Activity className="w-5 h-5" />
+                            </button>
+
                             {/* Refresh */}
                             <button
                                 type="button"
                                 onClick={handleRefresh}
                                 disabled={refreshing}
                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Refresh now"
                             >
                                 <RefreshCw className={`w-5 h-5 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
                             </button>
@@ -371,6 +584,7 @@ const UnifiedAdminDashboard: React.FC<UnifiedAdminDashboardProps> = ({
                                 type="button"
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
+                                title="Notifications"
                             >
                                 <Bell className="w-5 h-5 text-gray-600" />
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
