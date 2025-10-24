@@ -9,6 +9,7 @@ import { AIInsightCard } from '../../cards/AIInsightCard';
 import { AlertCard } from '../../cards/AlertCard';
 import { Card } from '../../ui/Card';
 import { AnalyticsDashboard } from '../../analytics/AnalyticsDashboard';
+import { ReportingDashboard } from '../../reporting/ReportingDashboard';
 import { supabase } from '../../../lib/supabase/client';
 
 interface CompanyAdminDashboardNewProps {
@@ -27,7 +28,7 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
     const [isLoading, setIsLoading] = useState(true);
     const [teamMembersCount, setTeamMembersCount] = useState(0);
     const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null);
-    const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'reports'>('overview');
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -125,6 +126,15 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
                             }`}
                     >
                         Analytics
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('reports')}
+                        className={`px-4 py-2 font-medium transition-colors ${activeTab === 'reports'
+                            ? 'text-blue-600 border-b-2 border-blue-600'
+                            : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                    >
+                        Reports
                     </button>
                 </div>
 
@@ -363,6 +373,16 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
                     <div className="text-center py-12">
                         <p className="text-gray-600">No projects available. Create a project to view analytics.</p>
                     </div>
+                )}
+
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
+                    <ReportingDashboard
+                        userId={currentUser.id}
+                        projectId={selectedProjectId || undefined}
+                        companyId={currentUser.companyId}
+                        isDarkMode={false}
+                    />
                 )}
             </div>
         </DashboardLayout >
