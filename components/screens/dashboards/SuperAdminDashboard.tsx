@@ -67,10 +67,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
             {/* Modern Header */}
             <header className="mb-8">
                 <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-4xl font-black text-gray-900 mb-2">Super Admin Dashboard</h1>
-                        <p className="text-lg text-gray-600">Platform-wide overview and analytics</p>
-                    </div>
+                    <div></div>
                     <div className="flex items-center gap-4">
                         <div className="text-right">
                             <p className="text-sm font-semibold text-gray-900">{currentUser.name}</p>

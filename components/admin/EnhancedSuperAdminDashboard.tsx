@@ -245,14 +245,7 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
             <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                Super Admin Dashboard
-                            </h1>
-                            <p className={`mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Complete administrative control panel
-                            </p>
-                        </div>
+                        <div></div>
                         <div className="flex items-center space-x-3">
                             <button
                                 onClick={() => toast.success('Refreshing data...')}

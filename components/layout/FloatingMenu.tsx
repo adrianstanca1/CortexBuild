@@ -36,8 +36,8 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
     ];
 
     const superAdminMenuItems: MenuItem[] = [
-        { label: 'Super Admin Dashboard', screen: 'super-admin-dashboard' },
-        { label: 'Platform Admin', screen: 'platform-admin' }
+        { label: 'Admin Dashboard', screen: 'super-admin-dashboard' },
+        { label: 'System Settings', screen: 'platform-admin' }
     ];
 
     const companyAdminMenuItems: MenuItem[] = [

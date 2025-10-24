@@ -133,7 +133,7 @@ export const DashboardSidebar: React.FC = () => {
       ),
     },
     {
-      name: 'Platform Admin',
+      name: 'System Settings',
       path: '/platform-admin',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,11 +188,10 @@ export const DashboardSidebar: React.FC = () => {
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                  isActive(item.path)
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive(item.path)
                     ? 'bg-blue-50 text-blue-700 font-medium'
                     : 'text-gray-700 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {item.icon}
                 <span className="text-sm">{item.name}</span>
