@@ -18,6 +18,7 @@ import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { supabase } from './lib/supabase/client';
+import { serviceWorkerManager } from './lib/services/serviceWorkerManager';
 
 // Lazily loaded screens and feature modules
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
@@ -400,7 +401,24 @@ const App: React.FC = () => {
     };
 
     checkSession();
-  }, []);
+
+    // Register Service Worker for offline support and caching
+    if ('serviceWorker' in navigator) {
+      serviceWorkerManager.register().then((registration) => {
+        if (registration) {
+          console.log('✅ Service Worker registered for offline support');
+        }
+      }).catch((error) => {
+        console.warn('⚠️ Service Worker registration failed:', error);
+      });
+
+      // Listen for Service Worker updates
+      window.addEventListener('service-worker-update', () => {
+        console.log('📦 Service Worker update available');
+        showSuccess('Update Available', 'A new version of the app is available. Refresh to update.');
+      });
+    }
+  }, [showSuccess]);
 
   // Handle URL hash for OAuth redirects
   useEffect(() => {
