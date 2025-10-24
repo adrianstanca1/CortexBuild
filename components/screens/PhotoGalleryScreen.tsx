@@ -4,6 +4,7 @@ import { Project } from '../../types';
 // Fix: Added .tsx extension to import
 import { ChevronLeftIcon, PlusIcon } from '../Icons';
 import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
+import { LazyImage } from '../ui/LazyImage';
 
 
 interface PhotoGalleryScreenProps {
@@ -37,7 +38,7 @@ const PhotoGalleryScreen: React.FC<PhotoGalleryScreenProps> = ({ project, goBack
     }));
 
     return (
-         <div className="flex flex-col h-full max-w-6xl mx-auto">
+        <div className="flex flex-col h-full max-w-6xl mx-auto">
             <header className="bg-white p-4 flex justify-between items-center border-b mb-8">
                 <div className="flex items-center">
                     <button onClick={goBack} className="mr-4 p-2 rounded-full hover:bg-gray-100">
@@ -48,14 +49,23 @@ const PhotoGalleryScreen: React.FC<PhotoGalleryScreenProps> = ({ project, goBack
                         <p className="text-sm text-gray-500">{project.name}</p>
                     </div>
                 </div>
-                 <button className="bg-blue-600 text-white p-2.5 rounded-full shadow hover:bg-blue-700">
-                    <PlusIcon className="w-6 h-6"/>
+                <button className="bg-blue-600 text-white p-2.5 rounded-full shadow hover:bg-blue-700">
+                    <PlusIcon className="w-6 h-6" />
                 </button>
             </header>
-             <main className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <main className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {MOCK_PHOTOS.map((photo, index) => (
                     <div key={photo.id} onClick={() => openLightbox(index)} className="bg-white rounded-lg shadow overflow-hidden group cursor-pointer">
-                        <img src={photo.url.replace('/800/600', '/400/300')} alt={`Site photo ${photo.id}`} className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity" />
+                        <div className="w-full h-48 overflow-hidden">
+                            <LazyImage
+                                src={photo.url.replace('/800/600', '/400/300')}
+                                alt={`Site photo ${photo.id}`}
+                                placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23f3f4f6' width='400' height='300'/%3E%3C/svg%3E"
+                                blurUp={true}
+                                className="w-full h-48 object-cover group-hover:opacity-80 transition-opacity"
+                                containerClassName="w-full h-48"
+                            />
+                        </div>
                         <div className="p-2 text-xs">
                             <p className="font-semibold">{new Date(photo.date).toLocaleDateString()}</p>
                             <p className="text-gray-500">by {photo.author}</p>

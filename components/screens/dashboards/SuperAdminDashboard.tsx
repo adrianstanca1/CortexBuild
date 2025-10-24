@@ -3,6 +3,7 @@ import { User, Screen, Company, Project } from '../../../types';
 import * as api from '../../../api';
 import GlobalStatsWidget from '../../widgets/GlobalStatsWidget';
 import { BuildingOfficeIcon, UsersIcon } from '../../Icons';
+import { LazyImage } from '../../ui/LazyImage';
 import {
     TrendingUp,
     TrendingDown,
@@ -73,7 +74,16 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
                             <p className="text-sm font-semibold text-gray-900">{currentUser.name}</p>
                             <p className="text-xs text-gray-500 capitalize">{currentUser.role.replace('_', ' ')}</p>
                         </div>
-                        <img src={currentUser.avatar} alt="User Avatar" className="w-14 h-14 rounded-full ring-4 ring-purple-500/20" />
+                        <div className="w-14 h-14 rounded-full ring-4 ring-purple-500/20 overflow-hidden">
+                            <LazyImage
+                                src={currentUser.avatar}
+                                alt="User Avatar"
+                                placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'%3E%3Crect fill='%23e5e7eb' width='56' height='56'/%3E%3C/svg%3E"
+                                blurUp={true}
+                                className="w-14 h-14 rounded-full object-cover"
+                                containerClassName="w-14 h-14 rounded-full"
+                            />
+                        </div>
                     </div>
                 </div>
             </header>

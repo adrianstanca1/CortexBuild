@@ -14,6 +14,8 @@ import { RealtimeStats } from './RealtimeStats';
 import { RecentActivity } from './RecentActivity';
 import { NotificationCenter } from './NotificationCenter';
 import { DeveloperDashboard } from '../developer/DeveloperDashboard';
+import { PerformanceCharts } from './PerformanceCharts';
+import { LazyComponentWrapper } from '../layout/LazyComponentWrapper';
 
 interface DashboardStats {
   totalProjects: number;
@@ -327,7 +329,9 @@ export const EnhancedDashboard: React.FC = () => {
       <RealtimeStats />
 
       {/* Performance Charts */}
-      <PerformanceCharts />
+      <LazyComponentWrapper isDarkMode={false} showSkeleton={true} skeletonHeight="h-96">
+        <PerformanceCharts />
+      </LazyComponentWrapper>
 
       {/* Two Column Layout for Activity and Notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
