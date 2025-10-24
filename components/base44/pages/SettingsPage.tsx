@@ -2,10 +2,24 @@
  * Settings Page - Complete implementation from Base44
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { NotificationPreferences } from '../../settings/NotificationPreferences';
+import { supabase } from '../../../lib/supabase/client';
 
 export const SettingsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'profile' | 'company' | 'notifications' | 'security'>('profile');
+    const [currentUser, setCurrentUser] = useState<any>(null);
+
+    // Get current user on mount
+    useEffect(() => {
+        const getCurrentUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                setCurrentUser(user);
+            }
+        };
+        getCurrentUser();
+    }, []);
 
     return (
         <div className="p-8">
@@ -22,44 +36,40 @@ export const SettingsPage: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setActiveTab('profile')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === 'profile'
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile'
+                                ? 'border-blue-600 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             Profile
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('company')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === 'company'
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'company'
+                                ? 'border-blue-600 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             Company
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('notifications')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === 'notifications'
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'notifications'
+                                ? 'border-blue-600 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             Notifications
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('security')}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === 'security'
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'security'
+                                ? 'border-blue-600 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             Security
                         </button>
@@ -170,21 +180,8 @@ export const SettingsPage: React.FC = () => {
             )}
 
             {/* Notifications Tab */}
-            {activeTab === 'notifications' && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Notification Preferences</h2>
-                    <div className="space-y-4">
-                        {['Email notifications', 'Project updates', 'Invoice reminders', 'Team mentions', 'Weekly reports'].map((item) => (
-                            <div key={item} className="flex items-center justify-between py-3 border-b border-gray-200">
-                                <span className="text-gray-900">{item}</span>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" defaultChecked className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {activeTab === 'notifications' && currentUser && (
+                <NotificationPreferences userId={currentUser.id} isDarkMode={false} />
             )}
 
             {/* Security Tab */}
