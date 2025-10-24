@@ -40,6 +40,17 @@ export default defineConfig(({ mode }) => {
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       build: {
+        // Increase chunk size warning limit to reduce noise
+        chunkSizeWarningLimit: 600,
+        // Optimize minification
+        minify: 'terser',
+        terserOptions: {
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+          },
+          mangle: true,
+        },
         rollupOptions: {
           external: [
             '@supabase/supabase-js',
@@ -48,40 +59,81 @@ export default defineConfig(({ mode }) => {
             '@supabase/storage-js'
           ],
           output: {
+            // Optimize chunk naming for better caching
+            chunkFileNames: 'assets/[name]-[hash].js',
+            entryFileNames: 'assets/[name]-[hash].js',
+            assetFileNames: 'assets/[name]-[hash][extname]',
             manualChunks(id) {
-              if (id.includes('node_modules/@monaco-editor')) {
-                return 'monaco';
-              }
-              if (id.includes('components/sdk/') || id.includes('components/screens/developer/')) {
-                return 'developer-tools';
-              }
-              if (id.includes('components/marketplace/')) {
-                return 'marketplace';
-              }
-              if (id.includes('components/screens/modules/')) {
-                return 'module-screens';
-              }
-              if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable')) {
-                return 'pdf-tools';
-              }
+              // ===== VENDOR CHUNKS =====
+              // React core - critical path
               if (id.includes('node_modules/react-dom') || id.includes('node_modules/react') || id.includes('node_modules/scheduler')) {
                 return 'react-core';
               }
+
+              // ===== HEAVY LIBRARIES =====
+              // PDF tools - large, rarely used
+              if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable')) {
+                return 'pdf-tools';
+              }
+
+              // Monaco editor - large, lazy loaded
+              if (id.includes('node_modules/@monaco-editor')) {
+                return 'monaco';
+              }
+
+              // ===== FEATURE CHUNKS =====
+              // Developer tools - separate for lazy loading
+              if (id.includes('components/sdk/') || id.includes('components/screens/developer/')) {
+                return 'developer-tools';
+              }
+
+              // Marketplace - separate for lazy loading
+              if (id.includes('components/marketplace/')) {
+                return 'marketplace';
+              }
+
+              // Module screens - separate for lazy loading
+              if (id.includes('components/screens/modules/')) {
+                return 'module-screens';
+              }
+
+              // Admin components - separate for lazy loading
+              if (id.includes('components/admin/') && !id.includes('components/screens/admin/')) {
+                return 'admin-tools';
+              }
+
+              // Base44 - large legacy component
+              if (id.includes('components/base44/')) {
+                return 'base44';
+              }
+
+              // ===== UI & UTILITIES =====
+              // Icon pack - can be lazy loaded
               if (id.includes('node_modules/lucide-react')) {
                 return 'icon-pack';
               }
+
+              // Supabase - can be lazy loaded
               if (id.includes('node_modules/@supabase')) {
                 return 'supabase';
               }
+
+              // Workflow tools
               if (id.includes('node_modules/@xyflow')) {
                 return 'workflow';
               }
+
+              // HTTP client
               if (id.includes('node_modules/axios')) {
                 return 'axios';
               }
+
+              // Google AI
               if (id.includes('node_modules/@google')) {
                 return 'google-ai';
               }
+
+              // All other node_modules
               if (id.includes('node_modules')) {
                 return 'vendor';
               }
