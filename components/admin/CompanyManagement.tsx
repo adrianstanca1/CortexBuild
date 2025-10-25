@@ -5,9 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    Building2, Plus, Search, Edit2, Trash2, Users, Calendar,
-    DollarSign, Package, Settings, BarChart3, CheckCircle,
-    XCircle, AlertCircle, TrendingUp, Filter
+    Building2, Plus, Search, Edit2, Trash2, Users,
+    DollarSign, CheckCircle, AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase/client';
@@ -95,7 +94,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
         e.preventDefault();
 
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('companies')
                 .insert({
                     id: crypto.randomUUID(),
