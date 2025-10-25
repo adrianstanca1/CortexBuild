@@ -43,7 +43,7 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
 
   const handleToggle = (key: keyof NotificationPreferences) => {
     if (!preferences) return;
-    
+
     setPreferences({
       ...preferences,
       [key]: !preferences[key]
@@ -53,7 +53,7 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
 
   const handleTimeChange = (key: 'quiet_hours_start' | 'quiet_hours_end', value: string) => {
     if (!preferences) return;
-    
+
     setPreferences({
       ...preferences,
       [key]: value
@@ -137,11 +137,10 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
             {notificationTypes.map(({ key, label, icon, description }) => (
               <div
                 key={key}
-                className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                  isDarkMode
-                    ? 'border-gray-700 hover:bg-gray-700/50'
-                    : 'border-gray-200 hover:bg-gray-50'
-                }`}
+                className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${isDarkMode
+                  ? 'border-gray-700 hover:bg-gray-700/50'
+                  : 'border-gray-200 hover:bg-gray-50'
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{icon}</span>
@@ -160,6 +159,8 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
                     checked={preferences[key as keyof NotificationPreferences] as boolean}
                     onChange={() => handleToggle(key as keyof NotificationPreferences)}
                     className="w-5 h-5 rounded"
+                    aria-label={`Toggle ${key.replace(/_/g, ' ')}`}
+                    title={`Toggle ${key.replace(/_/g, ' ')}`}
                   />
                 </label>
               </div>
@@ -175,11 +176,10 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
           <div className="space-y-3">
             {/* Email Notifications */}
             <div
-              className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                isDarkMode
-                  ? 'border-gray-700 hover:bg-gray-700/50'
-                  : 'border-gray-200 hover:bg-gray-50'
-              }`}
+              className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${isDarkMode
+                ? 'border-gray-700 hover:bg-gray-700/50'
+                : 'border-gray-200 hover:bg-gray-50'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-blue-500" />
@@ -198,17 +198,18 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
                   checked={preferences.email_notifications_enabled}
                   onChange={() => handleToggle('email_notifications_enabled')}
                   className="w-5 h-5 rounded"
+                  aria-label="Toggle email notifications"
+                  title="Toggle email notifications"
                 />
               </label>
             </div>
 
             {/* Push Notifications */}
             <div
-              className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                isDarkMode
-                  ? 'border-gray-700 hover:bg-gray-700/50'
-                  : 'border-gray-200 hover:bg-gray-50'
-              }`}
+              className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${isDarkMode
+                ? 'border-gray-700 hover:bg-gray-700/50'
+                : 'border-gray-200 hover:bg-gray-50'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <Smartphone className="w-5 h-5 text-green-500" />
@@ -227,6 +228,8 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
                   checked={preferences.push_notifications_enabled}
                   onChange={() => handleToggle('push_notifications_enabled')}
                   className="w-5 h-5 rounded"
+                  aria-label="Toggle push notifications"
+                  title="Toggle push notifications"
                 />
               </label>
             </div>
@@ -251,11 +254,12 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
                 type="time"
                 value={preferences.quiet_hours_start || '22:00'}
                 onChange={(e) => handleTimeChange('quiet_hours_start', e.target.value)}
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  isDarkMode
-                    ? 'bg-gray-700 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
+                className={`w-full px-3 py-2 rounded-lg border ${isDarkMode
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                aria-label="Quiet hours start time"
+                title="Quiet hours start time"
               />
             </div>
             <div>
@@ -266,11 +270,12 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
                 type="time"
                 value={preferences.quiet_hours_end || '08:00'}
                 onChange={(e) => handleTimeChange('quiet_hours_end', e.target.value)}
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  isDarkMode
-                    ? 'bg-gray-700 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
+                className={`w-full px-3 py-2 rounded-lg border ${isDarkMode
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                aria-label="Quiet hours end time"
+                title="Quiet hours end time"
               />
             </div>
           </div>
@@ -280,27 +285,27 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
       {/* Footer */}
       <div className={`p-6 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-end gap-3`}>
         <button
+          type="button"
           onClick={() => {
             loadPreferences();
             setHasChanges(false);
           }}
           disabled={!hasChanges || saving}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            isDarkMode
-              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 disabled:opacity-50'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50'
-          }`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode
+            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 disabled:opacity-50'
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50'
+            }`}
         >
           Cancel
         </button>
         <button
+          type="button"
           onClick={handleSave}
           disabled={!hasChanges || saving}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-            hasChanges && !saving
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-          }`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${hasChanges && !saving
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+            }`}
         >
           <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save Changes'}
