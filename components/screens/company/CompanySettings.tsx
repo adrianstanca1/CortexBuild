@@ -148,12 +148,12 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ currentUser }) => {
                 {(['branding', 'email', 'security', 'api', 'webhooks'] as const).map(tab => (
                     <button
                         key={tab}
+                        type="button"
                         onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 font-medium transition-colors capitalize whitespace-nowrap ${
-                            activeTab === tab
-                                ? 'text-blue-600 border-b-2 border-blue-600'
-                                : 'text-gray-600 hover:text-gray-900'
-                        }`}
+                        className={`px-4 py-2 font-medium transition-colors capitalize whitespace-nowrap ${activeTab === tab
+                            ? 'text-blue-600 border-b-2 border-blue-600'
+                            : 'text-gray-600 hover:text-gray-900'
+                            }`}
                     >
                         {tab}
                     </button>
@@ -171,6 +171,8 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ currentUser }) => {
                             value={settings.theme_color || '#3B82F6'}
                             onChange={handleInputChange}
                             className="w-20 h-10 rounded cursor-pointer"
+                            aria-label="Theme color"
+                            title="Select theme color"
                         />
                     </div>
                     <div>
@@ -219,6 +221,8 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ currentUser }) => {
                             checked={settings.two_factor_required || false}
                             onChange={handleInputChange}
                             className="w-5 h-5 rounded"
+                            aria-label="Two-factor authentication"
+                            title="Require 2FA for all team members"
                         />
                     </div>
 
@@ -236,6 +240,8 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ currentUser }) => {
                             checked={settings.notifications_enabled || false}
                             onChange={handleInputChange}
                             className="w-5 h-5 rounded"
+                            aria-label="Email notifications"
+                            title="Enable email notifications"
                         />
                     </div>
 
@@ -265,6 +271,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ currentUser }) => {
                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                         <button
+                            type="button"
                             onClick={generateApiKey}
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
@@ -303,6 +310,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ currentUser }) => {
                             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                         <button
+                            type="button"
                             onClick={addWebhook}
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
@@ -336,6 +344,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ currentUser }) => {
             {/* Save Button */}
             <div className="mt-8 flex gap-3">
                 <button
+                    type="button"
                     onClick={handleSave}
                     disabled={isSaving}
                     className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"

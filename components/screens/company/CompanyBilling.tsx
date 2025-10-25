@@ -117,22 +117,22 @@ const CompanyBilling: React.FC<CompanyBillingProps> = ({ currentUser }) => {
             {/* Tabs */}
             <div className="flex gap-4 mb-6 border-b border-gray-200">
                 <button
+                    type="button"
                     onClick={() => setActiveTab('subscription')}
-                    className={`px-4 py-2 font-medium transition-colors ${
-                        activeTab === 'subscription'
-                            ? 'text-blue-600 border-b-2 border-blue-600'
-                            : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`px-4 py-2 font-medium transition-colors ${activeTab === 'subscription'
+                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                        }`}
                 >
                     Subscription
                 </button>
                 <button
+                    type="button"
                     onClick={() => setActiveTab('invoices')}
-                    className={`px-4 py-2 font-medium transition-colors ${
-                        activeTab === 'invoices'
-                            ? 'text-blue-600 border-b-2 border-blue-600'
-                            : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`px-4 py-2 font-medium transition-colors ${activeTab === 'invoices'
+                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        : 'text-gray-600 hover:text-gray-900'
+                        }`}
                 >
                     Invoices
                 </button>
@@ -178,7 +178,10 @@ const CompanyBilling: React.FC<CompanyBillingProps> = ({ currentUser }) => {
                                         {subscription.autoRenew ? 'Enabled' : 'Disabled'}
                                     </p>
                                 </div>
-                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <button
+                                    type="button"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
                                     Manage Subscription
                                 </button>
                             </div>

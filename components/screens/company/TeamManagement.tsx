@@ -150,6 +150,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                     </div>
                 </div>
                 <button
+                    type="button"
                     onClick={() => setShowAddForm(!showAddForm)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
@@ -174,6 +175,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                             value={newMemberRole}
                             onChange={(e) => setNewMemberRole(e.target.value as TeamMember['role'])}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            aria-label="Member role"
+                            title="Select member role"
                         >
                             <option value="operative">Operative</option>
                             <option value="supervisor">Supervisor</option>
@@ -181,6 +184,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                             <option value="company_admin">Company Admin</option>
                         </select>
                         <button
+                            type="button"
                             onClick={handleAddMember}
                             disabled={isAdding}
                             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
@@ -228,6 +232,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         value={member.role}
                                         onChange={(e) => handleUpdateRole(member.id, e.target.value as TeamMember['role'])}
                                         className={`px-3 py-1 rounded-full text-sm font-medium ${ROLE_COLORS[member.role]} border-0 cursor-pointer`}
+                                        aria-label="Member role"
+                                        title="Change member role"
                                     >
                                         <option value="operative">Operative</option>
                                         <option value="supervisor">Supervisor</option>
@@ -255,8 +261,10 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                 </td>
                                 <td className="py-3 px-4">
                                     <button
+                                        type="button"
                                         onClick={() => handleRemoveMember(member.id)}
                                         className="text-red-600 hover:text-red-700 transition-colors"
+                                        aria-label="Remove member"
                                         title="Remove member"
                                     >
                                         <Trash2 className="w-4 h-4" />
