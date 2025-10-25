@@ -241,6 +241,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                         </p>
                     </div>
                     <button
+                        type="button"
                         onClick={() => setShowCreateModal(true)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-lg"
                     >
@@ -316,6 +317,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                             value={filterRole}
                             onChange={(e) => setFilterRole(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Filter by role"
+                            title="Filter users by role"
                         >
                             <option value="all">All Roles</option>
                             <option value="super_admin">Super Admin</option>
@@ -329,6 +332,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Filter by status"
+                            title="Filter users by status"
                         >
                             <option value="all">All Status</option>
                             <option value="active">Active</option>
@@ -405,22 +410,28 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
+                                                    type="button"
                                                     onClick={() => openEditModal(user)}
                                                     className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    aria-label="Edit user"
                                                     title="Edit user"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
                                                 <button
+                                                    type="button"
                                                     onClick={() => handleSuspendUser(user.id, user.status)}
                                                     className="text-yellow-600 hover:text-yellow-900 p-2 hover:bg-yellow-50 rounded-lg transition-colors"
+                                                    aria-label={user.status === 'suspended' ? 'Activate user' : 'Suspend user'}
                                                     title={user.status === 'suspended' ? 'Activate user' : 'Suspend user'}
                                                 >
                                                     <Lock className="w-4 h-4" />
                                                 </button>
                                                 <button
+                                                    type="button"
                                                     onClick={() => handleDeleteUser(user.id)}
                                                     className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                                    aria-label="Delete user"
                                                     title="Delete user"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -452,6 +463,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Email"
+                                        title="Enter user email address"
                                     />
                                 </div>
                                 <div>
@@ -464,6 +477,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Name"
+                                        title="Enter user full name"
                                     />
                                 </div>
                                 <div>
@@ -476,6 +491,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Password"
+                                        title="Enter user password"
                                     />
                                 </div>
                                 <div>
@@ -486,6 +503,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         value={formData.role}
                                         onChange={(e) => setFormData({ ...formData, role: e.target.value as User['role'] })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Role"
+                                        title="Select user role"
                                     >
                                         <option value="user">User</option>
                                         <option value="developer">Developer</option>
@@ -533,6 +552,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         disabled
                                         value={formData.email}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                                        aria-label="Email"
+                                        title="Email address (cannot be changed)"
                                     />
                                 </div>
                                 <div>
@@ -545,6 +566,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Name"
+                                        title="Enter user full name"
                                     />
                                 </div>
                                 <div>
@@ -555,6 +578,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                                         value={formData.role}
                                         onChange={(e) => setFormData({ ...formData, role: e.target.value as User['role'] })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Role"
+                                        title="Select user role"
                                     >
                                         <option value="user">User</option>
                                         <option value="developer">Developer</option>

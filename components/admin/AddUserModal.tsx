@@ -88,8 +88,11 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
             Add New User
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close"
+            title="Close"
           >
             <X className="w-6 h-6" />
           </button>
@@ -170,6 +173,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                aria-label="Role"
+                title="Select user role"
               >
                 <option value="user">User</option>
                 <option value="company_admin">Company Admin</option>
@@ -191,6 +196,8 @@ export const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onS
                 onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                 required
+                aria-label="Company"
+                title="Select company"
               >
                 <option value="">Select a company</option>
                 {companies.map((company) => (

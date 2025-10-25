@@ -248,8 +248,10 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                         <div></div>
                         <div className="flex items-center space-x-3">
                             <button
+                                type="button"
                                 onClick={() => toast.success('Refreshing data...')}
                                 aria-label="Refresh data"
+                                title="Refresh data"
                                 className={`px-4 py-2 rounded-lg ${isDarkMode
                                     ? 'bg-gray-700 hover:bg-gray-600 text-white'
                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
@@ -259,6 +261,7 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                                 <Activity className="w-4 h-4" aria-hidden="true" />
                             </button>
                             <button
+                                type="button"
                                 onClick={() => toast('Downloading report...', { icon: 'ℹ️' })}
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
                             >
@@ -272,6 +275,7 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                     <div className="mt-6 flex space-x-4 border-b border-gray-200">
                         {navigationTabs.map((tab) => (
                             <button
+                                type="button"
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex items-center space-x-2 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === tab.id
