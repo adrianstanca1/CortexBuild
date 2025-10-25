@@ -16,9 +16,9 @@ jest.mock('../developer/DeveloperWorkspaceScreen', () => {
   };
 });
 
-jest.mock('../company/CompanyAdminDashboardScreen', () => {
-  return function MockCompanyAdminDashboardScreen() {
-    return <div data-testid="company-admin-dashboard-screen">Company Admin Dashboard Screen</div>;
+jest.mock('../company/CompanyAdminDashboardV2', () => {
+  return function MockCompanyAdminDashboardV2() {
+    return <div data-testid="company-admin-dashboard-v2">Company Admin Dashboard V2</div>;
   };
 });
 
@@ -83,7 +83,7 @@ describe('UnifiedDashboardScreen', () => {
     expect(screen.getByTestId('developer-workspace')).toBeInTheDocument();
   });
 
-  it('renders CompanyAdminDashboardScreen for company_admin role', () => {
+  it('renders CompanyAdminDashboardV2 for company_admin role', () => {
     const companyAdminUser = {
       id: 'user-3',
       name: 'Company Admin',
@@ -98,7 +98,7 @@ describe('UnifiedDashboardScreen', () => {
       />
     );
 
-    expect(screen.getByTestId('company-admin-dashboard-screen')).toBeInTheDocument();
+    expect(screen.getByTestId('company-admin-dashboard-v2')).toBeInTheDocument();
   });
 
   it('renders EnhancedDashboard for Project Manager role', () => {

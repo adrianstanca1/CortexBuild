@@ -62,12 +62,17 @@ export const EnhancedDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       // Load current user
-      const user = await authService.getCurrentUser();
+      const user = authService.getCurrentUser();
       setCurrentUser(user);
 
-      // Load health status
-      const health = await authService.getHealthStatus();
-      setHealthStatus(health);
+      // Mock health status for now
+      setHealthStatus({
+        api: 'healthy',
+        database: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: 99.9,
+        version: '1.0.0'
+      });
 
       setLoading(false);
     } catch (error) {
