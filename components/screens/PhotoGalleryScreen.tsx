@@ -41,7 +41,13 @@ const PhotoGalleryScreen: React.FC<PhotoGalleryScreenProps> = ({ project, goBack
         <div className="flex flex-col h-full max-w-6xl mx-auto">
             <header className="bg-white p-4 flex justify-between items-center border-b mb-8">
                 <div className="flex items-center">
-                    <button onClick={goBack} className="mr-4 p-2 rounded-full hover:bg-gray-100">
+                    <button
+                        type="button"
+                        onClick={goBack}
+                        className="mr-4 p-2 rounded-full hover:bg-gray-100"
+                        aria-label="Go back"
+                        title="Go back"
+                    >
                         <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
                     </button>
                     <div>
@@ -49,7 +55,12 @@ const PhotoGalleryScreen: React.FC<PhotoGalleryScreenProps> = ({ project, goBack
                         <p className="text-sm text-gray-500">{project.name}</p>
                     </div>
                 </div>
-                <button className="bg-blue-600 text-white p-2.5 rounded-full shadow hover:bg-blue-700">
+                <button
+                    type="button"
+                    className="bg-blue-600 text-white p-2.5 rounded-full shadow hover:bg-blue-700"
+                    aria-label="Add photo"
+                    title="Add photo"
+                >
                     <PlusIcon className="w-6 h-6" />
                 </button>
             </header>
