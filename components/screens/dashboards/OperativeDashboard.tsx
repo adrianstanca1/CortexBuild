@@ -84,7 +84,11 @@ const OperativeDashboard: React.FC<OperativeDashboardProps> = ({ currentUser, na
                                 <h2 className="text-lg font-bold text-gray-800 mb-3">First Task Up</h2>
                                 <div className="p-4 bg-green-50 text-green-800 text-center rounded-lg">
                                     <p>No open tasks. Great job!</p>
-                                    <button onClick={() => navigateTo('my-tasks')} className="mt-4 px-4 py-2 bg-green-600 text-white font-bold rounded-md hover:bg-green-700">
+                                    <button
+                                        type="button"
+                                        onClick={() => navigateTo('my-tasks')}
+                                        className="mt-4 px-4 py-2 bg-green-600 text-white font-bold rounded-md hover:bg-green-700"
+                                    >
                                         View All Tasks
                                     </button>
                                 </div>
@@ -95,7 +99,11 @@ const OperativeDashboard: React.FC<OperativeDashboardProps> = ({ currentUser, na
                             <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                                 <ListBulletIcon className="w-6 h-6 text-gray-500" /> All My Tasks
                             </h2>
-                            <button onClick={() => navigateTo('my-tasks')} className="w-full px-4 py-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700">
+                            <button
+                                type="button"
+                                onClick={() => navigateTo('my-tasks')}
+                                className="w-full px-4 py-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700"
+                            >
                                 View All My Tasks
                             </button>
                         </div>
@@ -106,6 +114,7 @@ const OperativeDashboard: React.FC<OperativeDashboardProps> = ({ currentUser, na
                                 <ClipboardDocumentListIcon className="w-6 h-6 text-gray-500" /> Daily Log
                             </h2>
                             <button
+                                type="button"
                                 onClick={handleDailyLogClick}
                                 disabled={!firstTask}
                                 title={!firstTask ? 'You must have an active task on a project to create a daily log' : (dailyLog ? "View or edit today's log" : "Start a new daily log")}
