@@ -88,6 +88,8 @@ export const SettingsPage: React.FC = () => {
                                 <input
                                     type="text"
                                     defaultValue="Adrian"
+                                    placeholder="Enter your first name"
+                                    title="First name"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
@@ -96,6 +98,8 @@ export const SettingsPage: React.FC = () => {
                                 <input
                                     type="text"
                                     defaultValue="Stanca"
+                                    placeholder="Enter your last name"
+                                    title="Last name"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
@@ -142,6 +146,8 @@ export const SettingsPage: React.FC = () => {
                             <input
                                 type="text"
                                 defaultValue="ConstructAI"
+                                placeholder="Enter your company name"
+                                title="Company name"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
@@ -161,6 +167,8 @@ export const SettingsPage: React.FC = () => {
                                 <input
                                     type="text"
                                     defaultValue="GB123456789"
+                                    placeholder="Enter your tax ID"
+                                    title="Tax ID"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
@@ -169,6 +177,8 @@ export const SettingsPage: React.FC = () => {
                                 <input
                                     type="text"
                                     defaultValue="12345678"
+                                    placeholder="Enter your registration number"
+                                    title="Registration number"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
