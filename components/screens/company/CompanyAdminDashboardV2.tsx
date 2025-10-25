@@ -202,6 +202,8 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                                 type="button"
                                 onClick={() => toast.success('Refreshing data...')}
                                 className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all backdrop-blur-sm"
+                                aria-label="Refresh dashboard data"
+                                title="Refresh dashboard data"
                             >
                                 <Activity className="w-5 h-5" />
                             </button>
@@ -321,6 +323,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                                 value={selectedProjectId || ''}
                                 onChange={(e) => setSelectedProjectId(e.target.value || null)}
                                 className={`w-full px-4 py-3 rounded-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                                aria-label="Select project for analytics"
                             >
                                 <option value="">-- Choose a project --</option>
                                 {projects.map(p => (

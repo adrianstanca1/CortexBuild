@@ -686,8 +686,6 @@ const App: React.FC = () => {
                 'analytics': 'analytics-reports',
                 'marketplace': 'marketplace-management',
                 'teams': 'platform-admin',
-                'analytics': 'platform-admin',
-                'billing': 'platform-admin',
                 'clients': 'platform-admin',
                 'settings': 'platform-admin',
                 'safety-reports': 'platform-admin',
