@@ -34,7 +34,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     const unsubscribe = notificationService.subscribeToNotifications(userId, (newNotification) => {
       setNotifications(prev => [newNotification, ...prev]);
       setUnreadCount(prev => prev + 1);
-      
+
       // Show toast notification
       toast.success(newNotification.title, {
         icon: '🔔',
@@ -62,7 +62,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
       setLoading(true);
       const data = await notificationService.getNotifications(userId, 10);
       setNotifications(data);
-      
+
       // Count unread
       const unread = data.filter(n => !n.read).length;
       setUnreadCount(unread);
@@ -166,16 +166,17 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     <div className="relative" ref={dropdownRef}>
       {/* Bell Button */}
       <button
+        type="button"
         onClick={() => setShowDropdown(!showDropdown)}
-        className={`relative p-2 rounded-lg transition-colors ${
-          isDarkMode
-            ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-        }`}
+        className={`relative p-2 rounded-lg transition-colors ${isDarkMode
+          ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
         aria-label="Notifications"
+        title="Notifications"
       >
         <Bell className="w-6 h-6" />
-        
+
         {/* Unread Badge */}
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -187,28 +188,25 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
       {/* Dropdown Menu */}
       {showDropdown && (
         <div
-          className={`absolute right-0 mt-2 w-96 rounded-lg shadow-xl border z-50 ${
-            isDarkMode
-              ? 'bg-gray-800 border-gray-700'
-              : 'bg-white border-gray-200'
-          }`}
+          className={`absolute right-0 mt-2 w-96 rounded-lg shadow-xl border z-50 ${isDarkMode
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-200'
+            }`}
         >
           {/* Header */}
           <div
-            className={`p-4 border-b ${
-              isDarkMode ? 'border-gray-700' : 'border-gray-200'
-            }`}
+            className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+              }`}
           >
             <div className="flex items-center justify-between">
               <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 Notifications
               </h3>
               {unreadCount > 0 && (
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                  isDarkMode
-                    ? 'bg-red-500/20 text-red-400'
-                    : 'bg-red-100 text-red-700'
-                }`}>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${isDarkMode
+                  ? 'bg-red-500/20 text-red-400'
+                  : 'bg-red-100 text-red-700'
+                  }`}>
                   {unreadCount} unread
                 </span>
               )}
@@ -231,9 +229,8 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 border-b transition-colors cursor-pointer hover:bg-opacity-50 ${
-                    getPriorityColor(notification.priority)
-                  } ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-100 hover:bg-gray-50'}`}
+                  className={`p-4 border-b transition-colors cursor-pointer hover:bg-opacity-50 ${getPriorityColor(notification.priority)
+                    } ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-100 hover:bg-gray-50'}`}
                   onClick={() => !notification.read && handleMarkAsRead(notification, {} as any)}
                 >
                   <div className="flex items-start gap-3">
@@ -270,35 +267,35 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                       <div className="flex items-center gap-2 mt-3">
                         {!notification.read && (
                           <button
+                            type="button"
                             onClick={(e) => handleMarkAsRead(notification, e)}
-                            className={`text-xs font-medium px-2 py-1 rounded transition-colors flex items-center gap-1 ${
-                              isDarkMode
-                                ? 'text-blue-400 hover:bg-blue-500/20'
-                                : 'text-blue-600 hover:bg-blue-50'
-                            }`}
+                            className={`text-xs font-medium px-2 py-1 rounded transition-colors flex items-center gap-1 ${isDarkMode
+                              ? 'text-blue-400 hover:bg-blue-500/20'
+                              : 'text-blue-600 hover:bg-blue-50'
+                              }`}
                           >
                             <Check className="w-3 h-3" />
                             Mark read
                           </button>
                         )}
                         <button
+                          type="button"
                           onClick={(e) => handleArchive(notification.id, e)}
-                          className={`text-xs font-medium px-2 py-1 rounded transition-colors flex items-center gap-1 ${
-                            isDarkMode
-                              ? 'text-gray-400 hover:bg-gray-700'
-                              : 'text-gray-600 hover:bg-gray-100'
-                          }`}
+                          className={`text-xs font-medium px-2 py-1 rounded transition-colors flex items-center gap-1 ${isDarkMode
+                            ? 'text-gray-400 hover:bg-gray-700'
+                            : 'text-gray-600 hover:bg-gray-100'
+                            }`}
                         >
                           <Archive className="w-3 h-3" />
                           Archive
                         </button>
                         <button
+                          type="button"
                           onClick={(e) => handleDelete(notification.id, e)}
-                          className={`text-xs font-medium px-2 py-1 rounded transition-colors flex items-center gap-1 ${
-                            isDarkMode
-                              ? 'text-red-400 hover:bg-red-500/20'
-                              : 'text-red-600 hover:bg-red-50'
-                          }`}
+                          className={`text-xs font-medium px-2 py-1 rounded transition-colors flex items-center gap-1 ${isDarkMode
+                            ? 'text-red-400 hover:bg-red-500/20'
+                            : 'text-red-600 hover:bg-red-50'
+                            }`}
                         >
                           <Trash2 className="w-3 h-3" />
                           Delete
@@ -314,17 +311,16 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
           {/* Footer */}
           {notifications.length > 0 && (
             <div
-              className={`p-3 border-t text-center ${
-                isDarkMode ? 'border-gray-700' : 'border-gray-200'
-              }`}
+              className={`p-3 border-t text-center ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+                }`}
             >
               <button
+                type="button"
                 onClick={() => setShowDropdown(false)}
-                className={`text-sm font-medium ${
-                  isDarkMode
-                    ? 'text-blue-400 hover:text-blue-300'
-                    : 'text-blue-600 hover:text-blue-700'
-                }`}
+                className={`text-sm font-medium ${isDarkMode
+                  ? 'text-blue-400 hover:text-blue-300'
+                  : 'text-blue-600 hover:text-blue-700'
+                  }`}
               >
                 View all notifications
               </button>

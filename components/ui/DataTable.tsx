@@ -142,6 +142,7 @@ const DataTable = React.forwardRef<HTMLDivElement, DataTableProps<any>>(
                             />
                         </div>
                         <button
+                            type="button"
                             onClick={handleExport}
                             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
@@ -162,6 +163,8 @@ const DataTable = React.forwardRef<HTMLDivElement, DataTableProps<any>>(
                                         checked={selectedRows.size === paginatedData.length && paginatedData.length > 0}
                                         onChange={handleSelectAll}
                                         className="w-4 h-4 rounded"
+                                        aria-label="Select all rows"
+                                        title="Select all rows"
                                     />
                                 </th>
                                 {columns.map(col => (
@@ -189,6 +192,8 @@ const DataTable = React.forwardRef<HTMLDivElement, DataTableProps<any>>(
                                             checked={selectedRows.has(row.id)}
                                             onChange={() => handleSelectRow(row.id)}
                                             className="w-4 h-4 rounded"
+                                            aria-label={`Select row ${row.id}`}
+                                            title={`Select row ${row.id}`}
                                         />
                                     </td>
                                     {columns.map(col => (
@@ -217,6 +222,7 @@ const DataTable = React.forwardRef<HTMLDivElement, DataTableProps<any>>(
                         </span>
                         <div className="flex gap-2">
                             <button
+                                type="button"
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
                                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
@@ -224,6 +230,7 @@ const DataTable = React.forwardRef<HTMLDivElement, DataTableProps<any>>(
                                 Previous
                             </button>
                             <button
+                                type="button"
                                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                 disabled={currentPage === totalPages}
                                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
