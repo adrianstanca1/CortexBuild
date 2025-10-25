@@ -1261,6 +1261,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   event.target.value = '';
                 }}
                 defaultValue=""
+                aria-label="Start from template"
+                title="Select a template to start from"
               >
                 <option value="" disabled>
                   Start from template...
