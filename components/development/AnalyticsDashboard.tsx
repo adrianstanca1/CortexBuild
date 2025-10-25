@@ -66,6 +66,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isDarkMode = tr
                                 onChange={(e) => setTimeRange(e.target.value as any)}
                                 className={`px-4 py-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-300'
                                     }`}
+                                aria-label="Time range filter"
+                                title="Time range filter"
                             >
                                 <option value="7d">Last 7 days</option>
                                 <option value="30d">Last 30 days</option>
