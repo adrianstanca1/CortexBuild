@@ -113,6 +113,7 @@ export const CompanyManagement: React.FC = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Company Management</h2>
         <button
+          type="button"
           onClick={() => setShowCreateModal(true)}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
@@ -148,12 +149,11 @@ export const CompanyManagement: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{company.name}</h3>
-                    <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      company.subscription_plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                    <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full mt-1 ${company.subscription_plan === 'enterprise' ? 'bg-purple-100 text-purple-800' :
                       company.subscription_plan === 'pro' ? 'bg-blue-100 text-blue-800' :
-                      company.subscription_plan === 'starter' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                        company.subscription_plan === 'starter' ? 'bg-green-100 text-green-800' :
+                          'bg-gray-100 text-gray-800'
+                      }`}>
                       {company.subscription_plan || 'free'}
                     </span>
                   </div>
@@ -184,9 +184,8 @@ export const CompanyManagement: React.FC = () => {
 
               {/* Status */}
               <div className="mb-4">
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  company.is_active === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${company.is_active === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {company.is_active === 1 ? 'Active' : 'Inactive'}
                 </span>
               </div>
@@ -194,6 +193,7 @@ export const CompanyManagement: React.FC = () => {
               {/* Actions */}
               <div className="flex space-x-2 pt-4 border-t">
                 <button
+                  type="button"
                   onClick={() => { setSelectedCompany(company); setShowEditModal(true); }}
                   className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
                 >
@@ -261,7 +261,13 @@ const CompanyFormModal: React.FC<any> = ({ title, company, onSubmit, onClose }) 
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-6 border-b">
           <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label="Close modal"
+            title="Close modal"
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -275,9 +281,10 @@ const CompanyFormModal: React.FC<any> = ({ title, company, onSubmit, onClose }) 
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                }`}
+              aria-label="Company name"
+              title="Company name"
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
@@ -288,6 +295,8 @@ const CompanyFormModal: React.FC<any> = ({ title, company, onSubmit, onClose }) 
               value={formData.subscription_plan}
               onChange={(e) => setFormData({ ...formData, subscription_plan: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              aria-label="Subscription plan"
+              title="Subscription plan"
             >
               <option value="free">Free</option>
               <option value="starter">Starter</option>
@@ -305,6 +314,8 @@ const CompanyFormModal: React.FC<any> = ({ title, company, onSubmit, onClose }) 
                 onChange={(e) => setFormData({ ...formData, max_users: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 min="1"
+                aria-label="Maximum users"
+                title="Maximum users"
               />
             </div>
             <div>
@@ -315,6 +326,8 @@ const CompanyFormModal: React.FC<any> = ({ title, company, onSubmit, onClose }) 
                 onChange={(e) => setFormData({ ...formData, max_projects: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 min="1"
+                aria-label="Maximum projects"
+                title="Maximum projects"
               />
             </div>
           </div>
