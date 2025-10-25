@@ -438,6 +438,8 @@ const DocumentsManagement: React.FC<DocumentsManagementProps> = ({ currentUser, 
                                     type="button"
                                     onClick={() => handleDelete(doc.id)}
                                     className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    aria-label="Delete document"
+                                    title="Delete document"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>
@@ -457,6 +459,8 @@ const DocumentsManagement: React.FC<DocumentsManagementProps> = ({ currentUser, 
                                 type="button"
                                 onClick={() => setShowUploadModal(false)}
                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                aria-label="Close modal"
+                                title="Close modal"
                             >
                                 <X className="w-6 h-6" />
                             </button>
