@@ -25,7 +25,11 @@ const NavItem: React.FC<{
     onClick: () => void;
 }> = ({ label, icon: Icon, onClick }) => (
     <li>
-        <button onClick={onClick} className="w-full flex items-center p-3 text-sm text-slate-300 rounded-lg hover:bg-slate-700 transition-colors">
+        <button
+            type="button"
+            onClick={onClick}
+            className="w-full flex items-center p-3 text-sm text-slate-300 rounded-lg hover:bg-slate-700 transition-colors"
+        >
             <Icon className="w-6 h-6 mr-3 text-slate-400" />
             <span>{label}</span>
         </button>
@@ -195,7 +199,11 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
     return (
         <div className="flex flex-col h-full p-4">
             <div className="mb-6">
-                <button onClick={goHome} className="block text-left">
+                <button
+                    type="button"
+                    onClick={goHome}
+                    className="block text-left"
+                >
                     <h1 className="text-xl font-bold text-white">
                         {isDeveloper ? 'Developer Tenant' : isSuperAdmin ? 'Super Admin' : isCompanyAdmin ? 'Company Admin' : project.name}
                     </h1>
@@ -226,7 +234,11 @@ const Sidebar: React.FC<SidebarProps> = ({ project, navigateTo, navigateToModule
                     <p className="font-semibold">{currentUser.name}</p>
                     <p className="text-xs text-slate-400 capitalize">{currentUser.role.replace('_', ' ')}</p>
                 </div>
-                <button onClick={onLogout} className="w-full flex items-center justify-center p-3 text-sm text-slate-300 rounded-lg hover:bg-slate-700 transition-colors">
+                <button
+                    type="button"
+                    onClick={onLogout}
+                    className="w-full flex items-center justify-center p-3 text-sm text-slate-300 rounded-lg hover:bg-slate-700 transition-colors"
+                >
                     <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-2" />
                     <span>Logout</span>
                 </button>

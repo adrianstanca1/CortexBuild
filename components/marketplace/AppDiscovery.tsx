@@ -210,7 +210,7 @@ const AppDiscovery: React.FC<AppDiscoveryProps> = ({ currentUser, onInstall, onV
                     Featured
                 </div>
             )}
-            
+
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <div className="p-3 bg-blue-50 rounded-lg">
@@ -390,6 +390,8 @@ const AppDiscovery: React.FC<AppDiscoveryProps> = ({ currentUser, onInstall, onV
                                         value={minRating}
                                         onChange={(e) => setMinRating(parseFloat(e.target.value))}
                                         className="w-full"
+                                        aria-label="Minimum rating filter"
+                                        title="Minimum rating filter"
                                     />
                                     <div className="flex items-center justify-between text-sm text-gray-600 mt-1">
                                         <span>0</span>
