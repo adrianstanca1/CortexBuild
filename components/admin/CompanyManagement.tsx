@@ -263,6 +263,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                         </p>
                     </div>
                     <button
+                        type="button"
                         onClick={() => setShowCreateModal(true)}
                         className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-lg"
                     >
@@ -335,6 +336,8 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                             value={filterPlan}
                             onChange={(e) => setFilterPlan(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            aria-label="Filter by subscription plan"
+                            title="Filter by subscription plan"
                         >
                             <option value="all">All Plans</option>
                             <option value="free">Free</option>
@@ -348,6 +351,8 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            aria-label="Filter by company status"
+                            title="Filter by company status"
                         >
                             <option value="all">All Status</option>
                             <option value="active">Active</option>
@@ -476,27 +481,31 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                         <form onSubmit={handleCreateCompany}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="create-company-name" className="block text-sm font-medium text-gray-700 mb-1">
                                         Company Name *
                                     </label>
                                     <input
+                                        id="create-company-name"
                                         type="text"
                                         required
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Company name"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="create-company-email" className="block text-sm font-medium text-gray-700 mb-1">
                                         Email *
                                     </label>
                                     <input
+                                        id="create-company-email"
                                         type="email"
                                         required
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Company email"
                                     />
                                 </div>
                                 <div>
@@ -512,13 +521,15 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="create-subscription-plan" className="block text-sm font-medium text-gray-700 mb-1">
                                         Subscription Plan
                                     </label>
                                     <select
+                                        id="create-subscription-plan"
                                         value={formData.subscription_plan}
                                         onChange={(e) => setFormData({ ...formData, subscription_plan: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Subscription plan"
                                     >
                                         <option value="free">Free</option>
                                         <option value="starter">Starter</option>
@@ -527,27 +538,31 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="create-max-users" className="block text-sm font-medium text-gray-700 mb-1">
                                         Max Users
                                     </label>
                                     <input
+                                        id="create-max-users"
                                         type="number"
                                         min="1"
                                         value={formData.max_users}
                                         onChange={(e) => setFormData({ ...formData, max_users: parseInt(e.target.value) })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Maximum number of users"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="create-max-projects" className="block text-sm font-medium text-gray-700 mb-1">
                                         Max Projects
                                     </label>
                                     <input
+                                        id="create-max-projects"
                                         type="number"
                                         min="1"
                                         value={formData.max_projects}
                                         onChange={(e) => setFormData({ ...formData, max_projects: parseInt(e.target.value) })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Maximum number of projects"
                                     />
                                 </div>
                             </div>
@@ -582,27 +597,31 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                         <form onSubmit={handleUpdateCompany}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="edit-company-name" className="block text-sm font-medium text-gray-700 mb-1">
                                         Company Name *
                                     </label>
                                     <input
+                                        id="edit-company-name"
                                         type="text"
                                         required
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Company name"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="edit-company-email" className="block text-sm font-medium text-gray-700 mb-1">
                                         Email *
                                     </label>
                                     <input
+                                        id="edit-company-email"
                                         type="email"
                                         required
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Company email"
                                     />
                                 </div>
                                 <div>
@@ -618,13 +637,15 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="edit-subscription-plan" className="block text-sm font-medium text-gray-700 mb-1">
                                         Subscription Plan
                                     </label>
                                     <select
+                                        id="edit-subscription-plan"
                                         value={formData.subscription_plan}
                                         onChange={(e) => setFormData({ ...formData, subscription_plan: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Subscription plan"
                                     >
                                         <option value="free">Free</option>
                                         <option value="starter">Starter</option>
@@ -633,27 +654,31 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="edit-max-users" className="block text-sm font-medium text-gray-700 mb-1">
                                         Max Users
                                     </label>
                                     <input
+                                        id="edit-max-users"
                                         type="number"
                                         min="1"
                                         value={formData.max_users}
                                         onChange={(e) => setFormData({ ...formData, max_users: parseInt(e.target.value) })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Maximum number of users"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label htmlFor="edit-max-projects" className="block text-sm font-medium text-gray-700 mb-1">
                                         Max Projects
                                     </label>
                                     <input
+                                        id="edit-max-projects"
                                         type="number"
                                         min="1"
                                         value={formData.max_projects}
                                         onChange={(e) => setFormData({ ...formData, max_projects: parseInt(e.target.value) })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        aria-label="Maximum number of projects"
                                     />
                                 </div>
                             </div>
