@@ -123,6 +123,7 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                 </div>
                 {!isEditing && (
                     <button
+                        type="button"
                         onClick={() => setIsEditing(true)}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
@@ -142,6 +143,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.name || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Company name"
+                            title="Company name"
                         />
                     ) : (
                         <p className="text-gray-900 font-semibold">{company.name}</p>
@@ -158,6 +161,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.industry || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Industry"
+                            title="Industry"
                         />
                     ) : (
                         <p className="text-gray-900">{company.industry || 'N/A'}</p>
@@ -176,6 +181,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.email || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Email"
+                            title="Email"
                         />
                     ) : (
                         <p className="text-gray-900">{company.email}</p>
@@ -194,6 +201,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.phone || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Phone"
+                            title="Phone"
                         />
                     ) : (
                         <p className="text-gray-900">{company.phone || 'N/A'}</p>
@@ -212,6 +221,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.address || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Address"
+                            title="Address"
                         />
                     ) : (
                         <p className="text-gray-900">{company.address || 'N/A'}</p>
@@ -228,6 +239,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.city || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="City"
+                            title="City"
                         />
                     ) : (
                         <p className="text-gray-900">{company.city || 'N/A'}</p>
@@ -243,6 +256,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.state || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="State"
+                            title="State"
                         />
                     ) : (
                         <p className="text-gray-900">{company.state || 'N/A'}</p>
@@ -261,6 +276,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.website || ''}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Website"
+                            title="Website"
                         />
                     ) : (
                         <p className="text-gray-900">{company.website || 'N/A'}</p>
@@ -277,6 +294,8 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                             value={formData.employeeCount || 0}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Employee count"
+                            title="Employee count"
                         />
                     ) : (
                         <p className="text-gray-900">{company.employeeCount || 0}</p>
@@ -288,6 +307,7 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
             {isEditing && (
                 <div className="flex gap-3 mt-8">
                     <button
+                        type="button"
                         onClick={handleSave}
                         disabled={isSaving}
                         className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
@@ -296,6 +316,7 @@ const CompanyProfile: React.FC<CompanyProfileProps> = ({ currentUser, onClose })
                         {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                     <button
+                        type="button"
                         onClick={handleCancel}
                         className="flex items-center gap-2 px-6 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400 transition-colors"
                     >

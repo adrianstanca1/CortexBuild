@@ -175,6 +175,7 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = ({ currentUser
                     </div>
                 </div>
                 <button
+                    type="button"
                     onClick={() => setShowAddForm(!showAddForm)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
@@ -201,6 +202,8 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = ({ currentUser
                             value={formData.manager_id}
                             onChange={handleInputChange}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            aria-label="Department manager"
+                            title="Select department manager"
                         >
                             <option value="">Select Manager</option>
                             {teamMembers.map(member => (
@@ -226,12 +229,14 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = ({ currentUser
                     </div>
                     <div className="flex gap-3 mt-4">
                         <button
+                            type="button"
                             onClick={handleSave}
                             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                         >
                             {editingId ? 'Update' : 'Create'}
                         </button>
                         <button
+                            type="button"
                             onClick={resetForm}
                             className="px-6 py-2 bg-gray-300 text-gray-900 rounded-lg hover:bg-gray-400 transition-colors"
                         >
@@ -252,14 +257,20 @@ const DepartmentManagement: React.FC<DepartmentManagementProps> = ({ currentUser
                             </div>
                             <div className="flex gap-2">
                                 <button
+                                    type="button"
                                     onClick={() => handleEdit(dept)}
                                     className="text-blue-600 hover:text-blue-700"
+                                    aria-label="Edit department"
+                                    title="Edit department"
                                 >
                                     <Edit2 className="w-4 h-4" />
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => handleDelete(dept.id)}
                                     className="text-red-600 hover:text-red-700"
+                                    aria-label="Delete department"
+                                    title="Delete department"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>

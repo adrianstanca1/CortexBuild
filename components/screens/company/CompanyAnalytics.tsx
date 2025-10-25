@@ -163,6 +163,7 @@ const CompanyAnalytics: React.FC<CompanyAnalyticsProps> = ({ currentUser }) => {
                 </div>
                 <div className="flex gap-2">
                     <button
+                        type="button"
                         onClick={exportToPDF}
                         className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                     >
@@ -170,6 +171,7 @@ const CompanyAnalytics: React.FC<CompanyAnalyticsProps> = ({ currentUser }) => {
                         PDF
                     </button>
                     <button
+                        type="button"
                         onClick={exportToCSV}
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                     >
