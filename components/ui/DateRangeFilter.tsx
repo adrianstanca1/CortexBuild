@@ -113,6 +113,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     return (
         <div ref={containerRef} className="relative w-full">
             <button
+                type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left flex items-center justify-between hover:border-gray-400 focus:ring-2 focus:ring-blue-500"
             >
@@ -142,6 +143,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                             {PRESET_RANGES.map(preset => (
                                 <button
                                     key={preset.label}
+                                    type="button"
                                     onClick={() => handlePresetClick(preset)}
                                     className="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors text-gray-700"
                                 >
@@ -161,6 +163,8 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Start date"
+                                    title="Start date"
                                 />
                             </div>
                             <div>
@@ -170,6 +174,8 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                    aria-label="End date"
+                                    title="End date"
                                 />
                             </div>
                         </div>
@@ -178,12 +184,14 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                     {/* Actions */}
                     <div className="mt-4 flex gap-2">
                         <button
+                            type="button"
                             onClick={handleClear}
                             className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 text-gray-700"
                         >
                             Clear
                         </button>
                         <button
+                            type="button"
                             onClick={handleApply}
                             disabled={!startDate || !endDate}
                             className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"

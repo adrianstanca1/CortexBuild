@@ -155,6 +155,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     if (formats.length === 1) {
         return (
             <button
+                type="button"
                 onClick={() => handleExport(formats[0])}
                 disabled={isExporting || data.length === 0}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -168,6 +169,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     return (
         <div ref={containerRef} className="relative">
             <button
+                type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 disabled={isExporting || data.length === 0}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -181,6 +183,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
                 <div className="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-48">
                     {formats.includes('csv') && (
                         <button
+                            type="button"
                             onClick={() => handleExport('csv')}
                             disabled={isExporting}
                             className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors disabled:opacity-50 border-b border-gray-200"
@@ -195,6 +198,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 
                     {formats.includes('pdf') && (
                         <button
+                            type="button"
                             onClick={() => handleExport('pdf')}
                             disabled={isExporting}
                             className="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors disabled:opacity-50"

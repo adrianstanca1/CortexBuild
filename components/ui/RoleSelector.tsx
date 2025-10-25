@@ -96,6 +96,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({
     return (
         <div ref={containerRef} className="relative w-full">
             <button
+                type="button"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left flex items-center justify-between hover:border-gray-400 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -138,10 +139,10 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({
                                     className="relative"
                                 >
                                     <button
+                                        type="button"
                                         onClick={() => handleSelect(role.id)}
-                                        className={`w-full px-4 py-3 text-left flex items-center justify-between hover:bg-blue-50 transition-colors ${
-                                            selectedRoles.includes(role.id) ? 'bg-blue-50' : ''
-                                        }`}
+                                        className={`w-full px-4 py-3 text-left flex items-center justify-between hover:bg-blue-50 transition-colors ${selectedRoles.includes(role.id) ? 'bg-blue-50' : ''
+                                            }`}
                                     >
                                         <div className="flex-1">
                                             <div className="font-medium text-gray-900">{role.name}</div>
@@ -175,12 +176,14 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({
                     {multi && selectedRoles.length > 0 && (
                         <div className="p-3 border-t border-gray-200 flex justify-between">
                             <button
+                                type="button"
                                 onClick={() => onChange?.([])}
                                 className="text-sm text-gray-600 hover:text-gray-900"
                             >
                                 Clear all
                             </button>
                             <button
+                                type="button"
                                 onClick={() => setIsOpen(false)}
                                 className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                             >
