@@ -62,34 +62,34 @@ export const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-6 border-b border-gray-300 dark:border-gray-700">
         <button
+          type="button"
           onClick={() => setActiveTab('reports')}
-          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${
-            activeTab === 'reports'
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${activeTab === 'reports'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
+            }`}
         >
           <FileText className="w-5 h-5" />
           My Reports
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('templates')}
-          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${
-            activeTab === 'templates'
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${activeTab === 'templates'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
+            }`}
         >
           <Layout className="w-5 h-5" />
           Templates
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('create')}
-          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${
-            activeTab === 'create'
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${activeTab === 'create'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
+            }`}
         >
           <Plus className="w-5 h-5" />
           Create Report
