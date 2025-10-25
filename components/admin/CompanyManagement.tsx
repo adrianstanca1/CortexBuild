@@ -3,7 +3,7 @@
  * Features: Create, Read, Update, Delete companies with subscription management
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Building2, Plus, Search, Edit2, Trash2, Users,
     DollarSign, CheckCircle, AlertCircle
@@ -220,7 +220,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
     };
 
     // Filter companies
-    const filteredCompanies = companies.filter(company => {
+    const filteredCompanies = companies.filter((company: Company) => {
         const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             company.email.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesPlan = filterPlan === 'all' || company.subscription_plan === filterPlan;
@@ -287,7 +287,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                             <div>
                                 <p className="text-sm text-gray-600">Active Companies</p>
                                 <p className="text-2xl font-bold text-green-600">
-                                    {companies.filter(c => c.status === 'active').length}
+                                    {companies.filter((c: Company) => c.status === 'active').length}
                                 </p>
                             </div>
                             <CheckCircle className="w-8 h-8 text-green-600" />
@@ -298,7 +298,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                             <div>
                                 <p className="text-sm text-gray-600">Total Users</p>
                                 <p className="text-2xl font-bold text-blue-600">
-                                    {companies.reduce((sum, c) => sum + (c.user_count || 0), 0)}
+                                    {companies.reduce((sum: number, c: Company) => sum + (c.user_count || 0), 0)}
                                 </p>
                             </div>
                             <Users className="w-8 h-8 text-blue-600" />
@@ -400,7 +400,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ currentUser }) =>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {filteredCompanies.map((company) => (
+                                {filteredCompanies.map((company: Company) => (
                                     <tr key={company.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
