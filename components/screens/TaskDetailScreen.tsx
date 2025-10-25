@@ -154,7 +154,13 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
     return (
         <div className="flex flex-col h-full max-w-4xl mx-auto">
             <header className="bg-white p-4 flex items-center border-b mb-8">
-                <button onClick={goBack} className="mr-4 p-2 rounded-full hover:bg-gray-100">
+                <button
+                    type="button"
+                    onClick={goBack}
+                    className="mr-4 p-2 rounded-full hover:bg-gray-100"
+                    aria-label="Go back"
+                    title="Go back"
+                >
                     <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
                 </button>
                 <div>
@@ -177,6 +183,8 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                                 onChange={handleStatusChange}
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md disabled:opacity-70 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 disabled={!canEditStatus}
+                                aria-label="Task status"
+                                title="Task status"
                             >
                                 <option value="To Do" disabled={currentUser.role === 'Foreman' || currentUser.role === 'operative'}>To Do</option>
                                 <option value="In Progress">In Progress</option>
@@ -207,7 +215,14 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                         <h3 className="font-bold text-lg text-gray-800 mb-2 flex items-center gap-2"><PaperClipIcon className="w-5 h-5" />Attachments</h3>
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                             {imageAttachments.map((att, index) => (
-                                <button key={index} onClick={() => openLightbox(index)} className="block group relative focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md" type="button">
+                                <button
+                                    key={index}
+                                    onClick={() => openLightbox(index)}
+                                    className="block group relative focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                                    type="button"
+                                    aria-label={`View ${att.name}`}
+                                    title={`View ${att.name}`}
+                                >
                                     <div className="w-full h-24 overflow-hidden rounded-md">
                                         <LazyImage
                                             src={att.url}
@@ -287,14 +302,26 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                                     {commentFiles.map((file, index) => (
                                         <div key={index} className="flex items-center justify-between p-2 bg-gray-100 rounded-md text-sm">
                                             <span className="font-medium text-gray-700 truncate">{file.name}</span>
-                                            <button onClick={() => handleRemoveFile(index)} className="p-1 text-gray-400 hover:text-red-500"><TrashIcon className="w-4 h-4" /></button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveFile(index)}
+                                                className="p-1 text-gray-400 hover:text-red-500"
+                                                aria-label={`Remove ${file.name}`}
+                                                title={`Remove ${file.name}`}
+                                            >
+                                                <TrashIcon className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
                         <div className="text-right mt-2">
-                            <button onClick={handleAddComment} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700">
+                            <button
+                                type="button"
+                                onClick={handleAddComment}
+                                className="px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700"
+                            >
                                 Post Comment
                             </button>
                         </div>
