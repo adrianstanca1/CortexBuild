@@ -1334,6 +1334,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   onChange={(event) => setBuilderEditor((prev) => ({ ...prev, description: event.target.value }))}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   rows={2}
+                  aria-label="Description"
+                  title="Builder description"
                 />
               </div>
               <div className="grid gap-4 md:grid-cols-3">
@@ -1344,6 +1346,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                     value={builderEditor.version}
                     onChange={(event) => setBuilderEditor((prev) => ({ ...prev, version: event.target.value }))}
                     className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Version"
+                    title="Builder version"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -1352,6 +1356,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                     value={builderEditor.status}
                     onChange={(event) => setBuilderEditor((prev) => ({ ...prev, status: event.target.value }))}
                     className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Status"
+                    title="Builder status"
                   >
                     <option value="draft">Draft</option>
                     <option value="ready">Ready</option>
@@ -1397,6 +1403,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                           value={node.type}
                           onChange={(event) => handleNodeChange(index, 'type', event.target.value)}
                           className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          aria-label="Node type"
+                          title="Select node type"
                         >
                           <option value="trigger">Trigger</option>
                           <option value="action">Action</option>
@@ -1422,6 +1430,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   onChange={(event) => setBuilderEditor((prev) => ({ ...prev, testPayload: event.target.value }))}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   rows={3}
+                  aria-label="Test payload"
+                  title="Test payload JSON"
                 />
               </div>
 
