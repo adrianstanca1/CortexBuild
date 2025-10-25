@@ -131,8 +131,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           </p>
         </div>
         <button
+          type="button"
           onClick={loadReports}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          aria-label="Refresh reports"
+          title="Refresh reports"
         >
           <RefreshCw className="w-5 h-5" />
         </button>
@@ -181,29 +184,37 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               {/* Actions */}
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => handleGenerate(report)}
                   className="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                  aria-label="Generate Report"
                   title="Generate Report"
                 >
                   <Play className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => loadHistory(report.id)}
                   className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                  aria-label="View History"
                   title="View History"
                 >
                   <Download className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => onEdit && onEdit(report)}
                   className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 rounded-lg transition-colors"
+                  aria-label="Edit Report"
                   title="Edit Report"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDelete(report.id)}
                   className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                  aria-label="Delete Report"
                   title="Delete Report"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -233,7 +244,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                         )}
                       </div>
                       {item.file_path && item.status === 'completed' && (
-                        <button className="text-blue-600 hover:underline text-xs">
+                        <button type="button" className="text-blue-600 hover:underline text-xs">
                           Download
                         </button>
                       )}

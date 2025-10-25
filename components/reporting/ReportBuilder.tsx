@@ -119,8 +119,11 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
         </div>
         {onCancel && (
           <button
+            type="button"
             onClick={onCancel}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label="Close"
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -173,6 +176,8 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
             value={selectedTemplate}
             onChange={(e) => handleTemplateChange(e.target.value)}
             className={`w-full px-4 py-2 border ${borderClass} ${inputBgClass} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            aria-label="Report Template"
+            title="Select a report template"
           >
             <option value="">-- Select a template --</option>
             {templates.map(template => (
@@ -193,6 +198,8 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
             value={schedule}
             onChange={(e) => setSchedule(e.target.value as Report['schedule'])}
             className={`w-full px-4 py-2 border ${borderClass} ${inputBgClass} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            aria-label="Schedule"
+            title="Select report schedule"
           >
             <option value="never">Never (Manual only)</option>
             <option value="once">Once</option>
@@ -230,6 +237,8 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
               value={filters.date_range || 'month'}
               onChange={(e) => setFilters({ ...filters, date_range: e.target.value })}
               className={`w-full px-4 py-2 border ${borderClass} ${inputBgClass} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              aria-label="Date Range"
+              title="Select date range for report"
             >
               <option value="week">Last Week</option>
               <option value="month">Last Month</option>
@@ -244,6 +253,7 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
       {/* Actions */}
       <div className="flex gap-3 mt-8">
         <button
+          type="button"
           onClick={handleSave}
           disabled={loading}
           className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -253,6 +263,7 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
         </button>
         {onCancel && (
           <button
+            type="button"
             onClick={onCancel}
             disabled={loading}
             className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

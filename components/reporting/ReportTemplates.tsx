@@ -100,12 +100,12 @@ export const ReportTemplates: React.FC<ReportTemplatesProps> = ({
         {categories.map(category => (
           <button
             key={category}
+            type="button"
             onClick={() => setSelectedCategory(category)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              selectedCategory === category
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === category
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
           >
             {category.charAt(0).toUpperCase() + category.slice(1)}
           </button>
@@ -176,6 +176,7 @@ export const ReportTemplates: React.FC<ReportTemplatesProps> = ({
 
             {/* Use Template Button */}
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectTemplate && onSelectTemplate(template);
