@@ -204,8 +204,8 @@ export const SettingsTab: React.FC = () => {
                         type="button"
                         onClick={() => setActiveSection('platform')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${activeSection === 'platform'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
                             }`}
                     >
                         <Globe className="w-4 h-4 inline mr-2" />
@@ -215,8 +215,8 @@ export const SettingsTab: React.FC = () => {
                         type="button"
                         onClick={() => setActiveSection('email')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${activeSection === 'email'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
                             }`}
                     >
                         <Mail className="w-4 h-4 inline mr-2" />
@@ -226,8 +226,8 @@ export const SettingsTab: React.FC = () => {
                         type="button"
                         onClick={() => setActiveSection('security')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${activeSection === 'security'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
                             }`}
                     >
                         <Shield className="w-4 h-4 inline mr-2" />
@@ -237,8 +237,8 @@ export const SettingsTab: React.FC = () => {
                         type="button"
                         onClick={() => setActiveSection('api')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${activeSection === 'api'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
                             }`}
                     >
                         <Key className="w-4 h-4 inline mr-2" />
@@ -248,8 +248,8 @@ export const SettingsTab: React.FC = () => {
                         type="button"
                         onClick={() => setActiveSection('notifications')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${activeSection === 'notifications'
-                                ? 'bg-blue-600 text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
                             }`}
                     >
                         <Bell className="w-4 h-4 inline mr-2" />
@@ -274,6 +274,8 @@ export const SettingsTab: React.FC = () => {
                                     value={platformConfig.siteName}
                                     onChange={(e) => setPlatformConfig({ ...platformConfig, siteName: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Site name"
+                                    title="Site name"
                                 />
                             </div>
 
@@ -286,6 +288,8 @@ export const SettingsTab: React.FC = () => {
                                     value={platformConfig.siteUrl}
                                     onChange={(e) => setPlatformConfig({ ...platformConfig, siteUrl: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Site URL"
+                                    title="Site URL"
                                 />
                             </div>
 
@@ -298,6 +302,8 @@ export const SettingsTab: React.FC = () => {
                                     value={platformConfig.supportEmail}
                                     onChange={(e) => setPlatformConfig({ ...platformConfig, supportEmail: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Support email"
+                                    title="Support email"
                                 />
                             </div>
 
@@ -310,6 +316,8 @@ export const SettingsTab: React.FC = () => {
                                     value={platformConfig.maxUsersPerCompany}
                                     onChange={(e) => setPlatformConfig({ ...platformConfig, maxUsersPerCompany: parseInt(e.target.value) })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Max users per company"
+                                    title="Max users per company"
                                 />
                             </div>
 
@@ -322,6 +330,8 @@ export const SettingsTab: React.FC = () => {
                                     value={platformConfig.sessionTimeout}
                                     onChange={(e) => setPlatformConfig({ ...platformConfig, sessionTimeout: parseInt(e.target.value) })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Session timeout"
+                                    title="Session timeout in minutes"
                                 />
                             </div>
                         </div>
@@ -416,6 +426,8 @@ export const SettingsTab: React.FC = () => {
                                     <button
                                         type="button"
                                         className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50"
+                                        aria-label="Edit template"
+                                        title="Edit template"
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </button>
@@ -478,6 +490,8 @@ export const SettingsTab: React.FC = () => {
                                                     type="button"
                                                     onClick={() => copyToClipboard(apiKey.key)}
                                                     className="p-1 text-gray-400 hover:text-blue-600"
+                                                    aria-label="Copy API key"
+                                                    title="Copy API key"
                                                 >
                                                     <Copy className="w-4 h-4" />
                                                 </button>
@@ -491,6 +505,8 @@ export const SettingsTab: React.FC = () => {
                                             type="button"
                                             onClick={() => deleteApiKey(apiKey.id)}
                                             className="p-2 text-red-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                                            aria-label="Delete API key"
+                                            title="Delete API key"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -549,6 +565,8 @@ export const SettingsTab: React.FC = () => {
                                             checked={rule.enabled}
                                             onChange={() => toggleNotificationRule(rule.id)}
                                             className="sr-only peer"
+                                            aria-label="Toggle notification rule"
+                                            title="Toggle notification rule"
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                     </label>

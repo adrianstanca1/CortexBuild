@@ -296,6 +296,8 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ compactMode = fa
                                 value={filterAction}
                                 onChange={(e) => setFilterAction(e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                aria-label="Action filter"
+                                title="Filter by action type"
                             >
                                 <option value="">All actions</option>
                                 <option value="user.created">User Created</option>
@@ -315,6 +317,8 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ compactMode = fa
                                 value={filterDateFrom}
                                 onChange={(e) => setFilterDateFrom(e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                aria-label="From date"
+                                title="Filter from date"
                             />
                         </div>
                         <div>
@@ -324,6 +328,8 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ compactMode = fa
                                 value={filterDateTo}
                                 onChange={(e) => setFilterDateTo(e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                aria-label="To date"
+                                title="Filter to date"
                             />
                         </div>
                     </div>
