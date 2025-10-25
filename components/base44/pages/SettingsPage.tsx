@@ -106,6 +106,8 @@ export const SettingsPage: React.FC = () => {
                                 type="email"
                                 defaultValue="adrian.stanca1@gmail.com"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                aria-label="Email address"
+                                title="Email address"
                             />
                         </div>
                         <div>
@@ -114,6 +116,8 @@ export const SettingsPage: React.FC = () => {
                                 type="tel"
                                 defaultValue="+44 123 456 7890"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                aria-label="Phone number"
+                                title="Phone number"
                             />
                         </div>
                         <div className="flex justify-end">
@@ -147,6 +151,8 @@ export const SettingsPage: React.FC = () => {
                                 rows={3}
                                 defaultValue="123 Construction Ave, London, UK"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                aria-label="Address"
+                                title="Address"
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-6">
@@ -194,6 +200,8 @@ export const SettingsPage: React.FC = () => {
                             <input
                                 type="password"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                aria-label="Current password"
+                                title="Current password"
                             />
                         </div>
                         <div>
@@ -201,6 +209,8 @@ export const SettingsPage: React.FC = () => {
                             <input
                                 type="password"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                aria-label="New password"
+                                title="New password"
                             />
                         </div>
                         <div>
@@ -208,6 +218,8 @@ export const SettingsPage: React.FC = () => {
                             <input
                                 type="password"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                aria-label="Confirm new password"
+                                title="Confirm new password"
                             />
                         </div>
                         <div className="flex justify-end">

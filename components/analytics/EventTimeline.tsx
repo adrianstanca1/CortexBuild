@@ -28,7 +28,7 @@ const getEventIcon = (eventType: string) => {
 
 const getEventColor = (eventType: string, isDarkMode: boolean) => {
   const baseClass = isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
-  
+
   switch (eventType) {
     case 'task_completed':
       return `${baseClass} border-l-4 border-l-green-500`;
@@ -163,6 +163,7 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
       {/* Load more button */}
       {events.length >= limit && (
         <button
+          type="button"
           onClick={loadEvents}
           className={`
             mt-6 w-full py-2 px-4 rounded-lg

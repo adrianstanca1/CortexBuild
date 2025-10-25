@@ -74,6 +74,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </h2>
         </div>
         <button
+          type="button"
           onClick={loadSummary}
           className={`
             px-4 py-2 rounded-lg
@@ -89,6 +90,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200">
         <button
+          type="button"
           onClick={() => setActiveTab('overview')}
           className={`
             px-4 py-2 font-medium transition-colors duration-200
@@ -101,6 +103,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           Overview
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('events')}
           className={`
             px-4 py-2 font-medium transition-colors duration-200

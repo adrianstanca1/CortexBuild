@@ -343,6 +343,7 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveSection(tab.id as Section)}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${activeSection === tab.id ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
                   }`}
