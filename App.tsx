@@ -619,7 +619,7 @@ const App: React.FC = () => {
 
     // Otherwise, render empty div (NOT null) - let marketing site show
     console.log('📊 [App.tsx] Marketing site visible - rendering empty div');
-    return <div id="react-placeholder" style={{ display: 'none' }} />;
+    return <div id="react-placeholder" className="hidden" />;
   }
 
   console.log('✅ Current user exists - showing app:', currentUser.name);

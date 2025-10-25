@@ -57,7 +57,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
                             onMouseEnter={() => setHoveredIndex(idx)}
                             onMouseLeave={() => setHoveredIndex(null)}
                         >
-                            <div className="relative w-full flex items-end justify-center" style={{ height: '200px' }}>
+                            <div className="relative w-full flex items-end justify-center h-[200px]">
                                 <div
                                     className="w-full rounded-t transition-all duration-200 hover:opacity-80 cursor-pointer"
                                     style={{
