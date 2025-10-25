@@ -13,7 +13,7 @@ import * as authService from '../../auth/authService';
 import { RealtimeStats } from './RealtimeStats';
 import { RecentActivity } from './RecentActivity';
 import { NotificationCenter } from './NotificationCenter';
-import { DeveloperDashboard } from '../developer/DeveloperDashboard';
+import { DeveloperDashboard } from '../admin/DeveloperDashboard';
 import { PerformanceCharts } from './PerformanceCharts';
 import { LazyComponentWrapper } from '../layout/LazyComponentWrapper';
 

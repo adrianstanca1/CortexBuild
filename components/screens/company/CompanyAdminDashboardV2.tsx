@@ -1,6 +1,7 @@
 /**
  * Company Admin Dashboard V2.0 - Revolutionary Design
  * Modern dual-scope dashboard: Office Operations + Field Operations
+ * Includes Analytics and Reporting features from Priority 4
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,8 +13,12 @@ import {
     ArrowDownRight, Sparkles, Target, Award, ChevronRight,
     Zap, Activity
 } from 'lucide-react';
-import { User } from '../../../types';
+import { User, Project } from '../../../types';
 import toast from 'react-hot-toast';
+import { AnalyticsDashboard } from '../../analytics/AnalyticsDashboard';
+import { ReportingDashboard } from '../../reporting/ReportingDashboard';
+import * as api from '../../../api';
+import { supabase } from '../../../lib/supabase/client';
 
 interface CompanyAdminDashboardV2Props {
     currentUser: User;
@@ -35,13 +40,27 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
         qualityScore: 94.5
     });
 
-    const [activeTab, setActiveTab] = useState<'overview' | 'office' | 'field'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'office' | 'field' | 'analytics' | 'reports'>('overview');
     const [isAnimating, setIsAnimating] = useState(true);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => setIsAnimating(false), 1000);
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        const loadProjects = async () => {
+            try {
+                const fetchedProjects = await api.fetchAllProjects(currentUser);
+                setProjects(fetchedProjects);
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        };
+        loadProjects();
+    }, [currentUser]);
 
     // Quick Stats
     const quickStats = [
@@ -228,11 +247,13 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="flex space-x-2 mb-8 p-1 bg-gray-800 rounded-xl">
+                <div className="flex space-x-2 mb-8 p-1 bg-gray-800 rounded-xl overflow-x-auto">
                     {[
                         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                         { id: 'office', label: 'Office Operations', icon: Briefcase },
-                        { id: 'field', label: 'Field Operations', icon: Hammer }
+                        { id: 'field', label: 'Field Operations', icon: Hammer },
+                        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+                        { id: 'reports', label: 'Reports', icon: FileText }
                     ].map((tab) => {
                         const TabIcon = tab.icon;
                         return (
@@ -240,7 +261,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
+                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${activeTab === tab.id
                                     ? 'bg-purple-600 text-white shadow-lg'
                                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                                     }`}
@@ -283,6 +304,50 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                 {activeTab === 'field' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {fieldOperations.map((op, idx) => renderOperationCard(op, idx))}
+                    </div>
+                )}
+
+                {/* Analytics Tab */}
+                {activeTab === 'analytics' && (
+                    <div className="space-y-6">
+                        <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-xl p-6`}>
+                            <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                Analytics Dashboard
+                            </h2>
+                            <p className={`mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                Select a project to view detailed analytics and metrics
+                            </p>
+                            <select
+                                value={selectedProjectId || ''}
+                                onChange={(e) => setSelectedProjectId(e.target.value || null)}
+                                className={`w-full px-4 py-3 rounded-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                            >
+                                <option value="">-- Choose a project --</option>
+                                {projects.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        {selectedProjectId && (
+                            <AnalyticsDashboard projectId={selectedProjectId} isDarkMode={isDarkMode} />
+                        )}
+                        {!selectedProjectId && projects.length === 0 && (
+                            <div className={`text-center py-12 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <p>No projects available. Create a project to view analytics.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
+                    <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-xl p-6`}>
+                        <ReportingDashboard
+                            userId={currentUser.id}
+                            projectId={selectedProjectId || undefined}
+                            companyId={currentUser.companyId}
+                            isDarkMode={isDarkMode}
+                        />
                     </div>
                 )}
             </div>

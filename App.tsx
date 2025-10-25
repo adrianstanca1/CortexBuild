@@ -31,7 +31,6 @@ const DocumentsManagement = lazy(() => import('./components/construction/Documen
 const BillingPaymentsManagement = lazy(() => import('./components/admin/BillingPaymentsManagement'));
 const AnalyticsReports = lazy(() => import('./components/admin/AnalyticsReports'));
 const MarketplaceManagement = lazy(() => import('./components/marketplace/MarketplaceManagement'));
-const DeveloperDashboard = lazy(() => import('./components/marketplace/DeveloperDashboard'));
 const AppDiscovery = lazy(() => import('./components/marketplace/AppDiscovery'));
 const TeamManagement = lazy(() => import('./components/company/TeamManagement'));
 const ProjectDashboard = lazy(() => import('./components/company/ProjectDashboard'));
@@ -54,11 +53,7 @@ const ProductionSDKDeveloperView = lazy(() =>
 const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
 // Import minimal developer console to avoid React hook issues
 import MinimalDeveloperConsole from './components/screens/developer/MinimalDeveloperConsole';
-const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
-const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
-const CompanyAdminDashboardScreen = lazy(() => import('./components/screens/company/CompanyAdminDashboardScreen'));
-const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
 const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
 const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
 const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
@@ -109,8 +104,6 @@ type NavigationItem = {
 
 const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'global-dashboard': UnifiedDashboardScreen,
-  'company-admin-dashboard': CompanyAdminDashboard,
-  'company-admin-legacy': CompanyAdminDashboardScreen,
   'projects': ProjectsListScreen,
   'projects-management': ProjectsManagement,
   'tasks-management': TasksManagement,
@@ -120,7 +113,6 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'billing-payments-management': BillingPaymentsManagement,
   'analytics-reports': AnalyticsReports,
   'marketplace-management': MarketplaceManagement,
-  'developer-dashboard': DeveloperDashboard,
   'app-discovery': AppDiscovery,
   'team-management': TeamManagement,
   'project-dashboard': ProjectDashboard,
@@ -156,7 +148,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'financial-management': FinancialManagementScreen,
   'business-development': BusinessDevelopmentScreen,
   'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-  'developer-dashboard': ModernDeveloperDashboard,
+  'developer-dashboard': DeveloperWorkspaceScreen,
   'automation-studio': ConstructionAutomationStudio,
   'developer-workspace': DeveloperWorkspaceScreen,
   'developer-console': MinimalDeveloperConsole,

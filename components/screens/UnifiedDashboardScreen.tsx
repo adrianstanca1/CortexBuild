@@ -1,11 +1,10 @@
 import React from 'react';
 import { User, Screen, PermissionAction, PermissionSubject } from '../../types';
-import CompanyAdminDashboardNew from './dashboards/CompanyAdminDashboardNew';
 import SupervisorDashboard from './dashboards/SupervisorDashboard';
 import OperativeDashboard from './dashboards/OperativeDashboard';
 import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard';
 import DeveloperWorkspaceScreen from './developer/DeveloperWorkspaceScreen';
-import CompanyAdminDashboardScreen from './company/CompanyAdminDashboardScreen';
+import CompanyAdminDashboardV2 from './company/CompanyAdminDashboardV2';
 import UnifiedAdminDashboard from './admin/UnifiedAdminDashboard';
 
 
@@ -33,7 +32,7 @@ const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) =>
             return <DeveloperWorkspaceScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
 
         case 'company_admin':
-            return <CompanyAdminDashboardScreen {...props} />;
+            return <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={props.navigateTo} />;
         case 'Project Manager':
         case 'Accounting Clerk':
             return <EnhancedDashboard />;
