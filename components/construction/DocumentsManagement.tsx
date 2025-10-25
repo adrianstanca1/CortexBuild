@@ -472,6 +472,8 @@ const DocumentsManagement: React.FC<DocumentsManagementProps> = ({ currentUser, 
                                     onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     required
+                                    aria-label="Document file"
+                                    title="Document file"
                                 />
                             </div>
 
@@ -484,6 +486,8 @@ const DocumentsManagement: React.FC<DocumentsManagementProps> = ({ currentUser, 
                                     onChange={(e) => setUploadData({ ...uploadData, category: e.target.value as Document['category'] })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     required
+                                    aria-label="Document category"
+                                    title="Document category"
                                 >
                                     <option value="contract">Contract</option>
                                     <option value="drawing">Drawing</option>
@@ -503,6 +507,8 @@ const DocumentsManagement: React.FC<DocumentsManagementProps> = ({ currentUser, 
                                     value={uploadData.project_id}
                                     onChange={(e) => setUploadData({ ...uploadData, project_id: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    aria-label="Associated project"
+                                    title="Associated project"
                                 >
                                     <option value="">No Project</option>
                                     {projects.map(project => (

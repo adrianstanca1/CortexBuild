@@ -271,6 +271,7 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                         </p>
                     </div>
                     <button
+                        type="button"
                         onClick={() => setShowCreateModal(true)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-lg"
                     >
@@ -366,6 +367,7 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                     <FolderKanban className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">No projects found</p>
                     <button
+                        type="button"
                         onClick={() => setShowCreateModal(true)}
                         className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
                     >
@@ -526,6 +528,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.status}
                                         onChange={(e) => setFormData({ ...formData, status: e.target.value as Project['status'] })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project status"
+                                        title="Project status"
                                     >
                                         <option value="planning">Planning</option>
                                         <option value="active">Active</option>
@@ -544,6 +548,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.start_date}
                                         onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project start date"
+                                        title="Project start date"
                                     />
                                 </div>
                                 <div>
@@ -555,6 +561,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.end_date}
                                         onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project end date"
+                                        title="Project end date"
                                     />
                                 </div>
                                 <div>
@@ -623,6 +631,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project name"
+                                        title="Project name"
                                     />
                                 </div>
                                 <div className="md:col-span-2">
@@ -634,6 +644,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         rows={3}
+                                        aria-label="Project description"
+                                        title="Project description"
                                     />
                                 </div>
                                 <div>
@@ -646,6 +658,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.location}
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project location"
+                                        title="Project location"
                                     />
                                 </div>
                                 <div>
@@ -656,6 +670,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.status}
                                         onChange={(e) => setFormData({ ...formData, status: e.target.value as Project['status'] })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project status"
+                                        title="Project status"
                                     >
                                         <option value="planning">Planning</option>
                                         <option value="active">Active</option>
@@ -674,6 +690,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.start_date}
                                         onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project start date"
+                                        title="Project start date"
                                     />
                                 </div>
                                 <div>
@@ -685,6 +703,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.end_date}
                                         onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project end date"
+                                        title="Project end date"
                                     />
                                 </div>
                                 <div>
@@ -697,6 +717,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.budget}
                                         onChange={(e) => setFormData({ ...formData, budget: parseFloat(e.target.value) })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project budget"
+                                        title="Project budget"
                                     />
                                 </div>
                                 <div>
@@ -708,6 +730,8 @@ const ProjectsManagement: React.FC<ProjectsManagementProps> = ({ currentUser }) 
                                         value={formData.project_manager}
                                         onChange={(e) => setFormData({ ...formData, project_manager: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Project manager"
+                                        title="Project manager"
                                     />
                                 </div>
                             </div>

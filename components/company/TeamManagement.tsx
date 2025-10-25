@@ -486,6 +486,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member name"
+                                        title="Team member name"
                                     />
                                 </div>
 
@@ -499,6 +501,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, email: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member email"
+                                        title="Team member email"
                                     />
                                 </div>
 
@@ -511,6 +515,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, role: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member role"
+                                        title="Team member role"
                                     >
                                         <option value="developer">Developer</option>
                                         <option value="designer">Designer</option>
@@ -528,6 +534,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         value={memberForm.department}
                                         onChange={(e) => setMemberForm({ ...memberForm, department: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Team member department"
+                                        title="Team member department"
                                     >
                                         <option value="">Select Department</option>
                                         <option value="engineering">Engineering</option>
@@ -547,6 +555,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         value={memberForm.phone}
                                         onChange={(e) => setMemberForm({ ...memberForm, phone: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Team member phone"
+                                        title="Team member phone"
                                     />
                                 </div>
 
@@ -559,6 +569,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, status: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member status"
+                                        title="Team member status"
                                     >
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
@@ -614,6 +626,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member name"
+                                        title="Team member name"
                                     />
                                 </div>
 
@@ -627,6 +641,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, email: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member email"
+                                        title="Team member email"
                                     />
                                 </div>
 
@@ -639,6 +655,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, role: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member role"
+                                        title="Team member role"
                                     >
                                         <option value="developer">Developer</option>
                                         <option value="designer">Designer</option>
@@ -656,6 +674,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         value={memberForm.department}
                                         onChange={(e) => setMemberForm({ ...memberForm, department: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Team member department"
+                                        title="Team member department"
                                     >
                                         <option value="">Select Department</option>
                                         <option value="engineering">Engineering</option>
@@ -675,6 +695,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         value={memberForm.phone}
                                         onChange={(e) => setMemberForm({ ...memberForm, phone: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        aria-label="Team member phone"
+                                        title="Team member phone"
                                     />
                                 </div>
 
@@ -687,6 +709,8 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ currentUser }) => {
                                         onChange={(e) => setMemberForm({ ...memberForm, status: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required
+                                        aria-label="Team member status"
+                                        title="Team member status"
                                     >
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>

@@ -325,6 +325,7 @@ const TasksManagement: React.FC<TasksManagementProps> = ({ currentUser, projectI
                         <p className="text-gray-600 mt-2">Track and manage project tasks</p>
                     </div>
                     <button
+                        type="button"
                         onClick={() => setShowCreateModal(true)}
                         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
                     >
@@ -405,6 +406,8 @@ const TasksManagement: React.FC<TasksManagementProps> = ({ currentUser, projectI
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        aria-label="Filter by status"
+                        title="Filter by status"
                     >
                         <option value="all">All Status</option>
                         <option value="todo">To Do</option>
@@ -418,6 +421,8 @@ const TasksManagement: React.FC<TasksManagementProps> = ({ currentUser, projectI
                         value={filterPriority}
                         onChange={(e) => setFilterPriority(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        aria-label="Filter by priority"
+                        title="Filter by priority"
                     >
                         <option value="all">All Priority</option>
                         <option value="low">Low</option>
@@ -439,6 +444,7 @@ const TasksManagement: React.FC<TasksManagementProps> = ({ currentUser, projectI
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">No tasks found</h3>
                     <p className="text-gray-600 mb-6">Get started by creating your first task</p>
                     <button
+                        type="button"
                         onClick={() => setShowCreateModal(true)}
                         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
                     >
@@ -490,6 +496,7 @@ const TasksManagement: React.FC<TasksManagementProps> = ({ currentUser, projectI
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
+                                        type="button"
                                         onClick={() => openEditModal(task)}
                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                         title="Edit task"
@@ -497,6 +504,7 @@ const TasksManagement: React.FC<TasksManagementProps> = ({ currentUser, projectI
                                         <Edit2 className="w-5 h-5" />
                                     </button>
                                     <button
+                                        type="button"
                                         onClick={() => handleDeleteTask(task.id)}
                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         title="Delete task"
@@ -509,24 +517,28 @@ const TasksManagement: React.FC<TasksManagementProps> = ({ currentUser, projectI
                             {/* Quick Status Change */}
                             <div className="flex gap-2 pt-4 border-t border-gray-100">
                                 <button
+                                    type="button"
                                     onClick={() => handleStatusChange(task.id, 'todo')}
                                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${task.status === 'todo' ? 'bg-gray-200 text-gray-800' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                                 >
                                     To Do
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => handleStatusChange(task.id, 'in_progress')}
                                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${task.status === 'in_progress' ? 'bg-blue-200 text-blue-800' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}
                                 >
                                     In Progress
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => handleStatusChange(task.id, 'review')}
                                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${task.status === 'review' ? 'bg-yellow-200 text-yellow-800' : 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100'}`}
                                 >
                                     Review
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => handleStatusChange(task.id, 'completed')}
                                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${task.status === 'completed' ? 'bg-green-200 text-green-800' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
                                 >
