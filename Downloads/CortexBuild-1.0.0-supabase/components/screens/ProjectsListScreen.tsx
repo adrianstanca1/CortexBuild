@@ -7,6 +7,7 @@ import { Project, User } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
 import * as api from '../../api';
 import { MapPinIcon } from '../Icons';
+import { FileUpload } from '../FileUpload';
 
 interface ProjectsListScreenProps {
     selectProject: (projectId: string) => void;
@@ -16,6 +17,7 @@ interface ProjectsListScreenProps {
 const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, currentUser }) => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [showFileUpload, setShowFileUpload] = useState(false);
 
     useEffect(() => {
         const loadProjects = async () => {
@@ -27,11 +29,39 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, 
         loadProjects();
     }, [currentUser]);
 
+    const handleFileUpload = async (files: any[]) => {
+        console.log('Files uploaded:', files);
+        // Here you would typically save file references to the database
+        // For now, we'll just log them
+    };
+
     return (
         <div className="w-full">
             <header className="bg-white p-4 border-b mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-                <p className="text-sm text-gray-500">Select a project to view its workspace.</p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
+                        <p className="text-sm text-gray-500">Select a project to view its workspace.</p>
+                    </div>
+                    <button
+                        onClick={() => setShowFileUpload(!showFileUpload)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        {showFileUpload ? 'Hide Upload' : 'Upload Files'}
+                    </button>
+                </div>
+                
+                {showFileUpload && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                        <h3 className="text-lg font-semibold mb-2">Upload Project Files</h3>
+                        <FileUpload
+                            onUploadComplete={handleFileUpload}
+                            folder={`company-${currentUser.company_id || 'default'}/project-files`}
+                            multiple={true}
+                            accept="*/*"
+                        />
+                    </div>
+                )}
             </header>
 
             {isLoading ? (
@@ -42,6 +72,13 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, 
                         <div 
                             key={project.id} 
                             onClick={() => selectProject(project.id)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    selectProject(project.id);
+                                }
+                            }}
+                            role="button"
+                            tabIndex={0}
                             className="bg-white rounded-lg shadow-lg overflow-hidden group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col"
                         >
                             <div className="h-48 overflow-hidden flex-shrink-0">
