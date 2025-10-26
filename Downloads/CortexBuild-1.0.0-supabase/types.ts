@@ -130,6 +130,10 @@ export type Screen =
     | 'bulk-operations'
     | 'collaboration-hub'
     | 'advanced-analytics'
+    // AI Features
+    | 'ai-recommendations'
+    | 'ai-workflow'
+    | 'smart-task-assignment'
     // Tool screens
     | 'placeholder-tool';
 

@@ -85,6 +85,9 @@ const AdvancedSearchScreen = lazy(() => import('./components/screens/AdvancedSea
 const BulkOperationsScreen = lazy(() => import('./components/screens/BulkOperationsScreen'));
 const CollaborationHubScreen = lazy(() => import('./components/screens/CollaborationHubScreen'));
 const AdvancedAnalyticsScreen = lazy(() => import('./components/screens/AdvancedAnalyticsScreen'));
+const AIRecommendationsScreen = lazy(() => import('./components/screens/AIRecommendationsScreen'));
+const AIWorkflowScreen = lazy(() => import('./components/screens/AIWorkflowScreen'));
+const SmartTaskAssignmentScreen = lazy(() => import('./components/screens/SmartTaskAssignmentScreen'));
 
 const ScreenLoader: React.FC = () => (
     <div className="py-16 text-center text-slate-500">
@@ -160,6 +163,10 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'bulk-operations': BulkOperationsScreen,
     'collaboration-hub': CollaborationHubScreen,
     'advanced-analytics': AdvancedAnalyticsScreen,
+    // AI Features
+    'ai-recommendations': AIRecommendationsScreen,
+    'ai-workflow': AIWorkflowScreen,
+    'smart-task-assignment': SmartTaskAssignmentScreen,
     // Tools
     'placeholder-tool': PlaceholderToolScreen,
 };
@@ -250,7 +257,7 @@ const App: React.FC = () => {
 
     const handleUserSignIn = async (user: any) => {
         try {
-        logger.info('Processing OAuth callback', { hashLength: hash.length });
+            logger.info('Processing OAuth callback', { hashLength: hash.length });
 
             // Try to fetch from users table first (our main table)
             let profile = null;

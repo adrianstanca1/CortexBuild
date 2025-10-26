@@ -23,6 +23,14 @@ export const MENU_ITEMS: MenuItem[] = [
         permission: { subject: 'accounting', action: 'read' },
     },
     {
+        label: 'AI Features',
+        children: [
+            { label: 'AI Recommendations', screen: 'ai-recommendations', permission: { subject: 'user', action: 'read' } },
+            { label: 'AI Workflow Automation', screen: 'ai-workflow', permission: { subject: 'user', action: 'read' } },
+            { label: 'Smart Task Assignment', screen: 'smart-task-assignment', permission: { subject: 'task', action: 'update' } },
+        ]
+    },
+    {
         label: 'Advanced Features',
         children: [
             { label: 'Advanced Search', screen: 'advanced-search', permission: { subject: 'user', action: 'read' } },
