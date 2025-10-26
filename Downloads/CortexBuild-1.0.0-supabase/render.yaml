@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cortexbuild-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://cortex-build-9d882ymnj-adrian-b7e84541.vercel.app
+
