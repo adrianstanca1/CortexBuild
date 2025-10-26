@@ -1,118 +1,143 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { verifyAuth } from './utils/auth';
+// api/notifications.ts
+import { supabase } from '../lib/supabaseClient';
 
-interface Notification {
-    id: string;
-    user_id: string;
-    title: string;
-    message: string;
-    type: 'info' | 'success' | 'warning' | 'error';
-    read: boolean;
-    link?: string;
-    created_at: string;
-}
+export default async function handler(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  const token = authHeader.split(' ')[1];
+  
+  // Verify token and get user
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: 'Invalid token' }), { 
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+  const url = new URL(req.url);
+  
+  if (req.method === 'GET') {
+    // Get notifications
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const offset = parseInt(url.searchParams.get('offset') || '0');
+    
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    try {
-        const user = verifyAuth(req);
-        
-        if (req.method === 'GET') {
-            // Get notifications for current user
-            const unreadOnly = req.query.unreadOnly === 'true';
-            
-            // Mock notifications - in production, fetch from database
-            const notifications: Notification[] = [
-                {
-                    id: '1',
-                    user_id: user.id,
-                    title: 'Task nou adăugat',
-                    message: 'Ai primit un nou task pentru proiectul "Renovare Vila"',
-                    type: 'info',
-                    read: false,
-                    link: '/tasks/123',
-                    created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 min ago
-                },
-                {
-                    id: '2',
-                    user_id: user.id,
-                    title: 'Deadline apropiat',
-                    message: 'Task "Instalare electrică" se apropie de deadline',
-                    type: 'warning',
-                    read: false,
-                    link: '/tasks/456',
-                    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2h ago
-                },
-                {
-                    id: '3',
-                    user_id: user.id,
-                    title: 'Proiect finalizat',
-                    message: 'Proiectul "Construire Magazin" a fost finalizat cu succes!',
-                    type: 'success',
-                    read: true,
-                    link: '/projects/789',
-                    created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1d ago
-                },
-            ];
+    return new Response(JSON.stringify({ success: true, data }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
-            const filteredNotifications = unreadOnly
-                ? notifications.filter(n => !n.read)
-                : notifications;
+  if (req.method === 'POST') {
+    // Create notification
+    const body = await req.json();
+    
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert([{
+        user_id: user.id,
+        company_id: body.company_id || user.user_metadata?.company_id,
+        title: body.title,
+        message: body.message,
+        type: body.type || 'info',
+        category: body.category || 'system',
+        action_url: body.action_url,
+        metadata: body.metadata || {}
+      }])
+      .select()
+      .single();
 
-            return res.status(200).json({
-                success: true,
-                notifications: filteredNotifications,
-            });
-        }
-
-        if (req.method === 'POST') {
-            // Mark notification as read
-            const { notificationId } = req.query;
-            const { readAll, userId } = req.body;
-
-            if (readAll) {
-                // Mark all as read
-                return res.status(200).json({
-                    success: true,
-                    message: 'All notifications marked as read',
-                });
-            }
-
-            if (notificationId) {
-                // Mark single notification as read
-                return res.status(200).json({
-                    success: true,
-                    message: 'Notification marked as read',
-                });
-            }
-        }
-
-        if (req.method === 'DELETE') {
-            // Delete notification
-            return res.status(200).json({
-                success: true,
-                message: 'Notification deleted',
-            });
-        }
-
-        return res.status(405).json({ success: false, error: 'Method not allowed' });
-    } catch (error: any) {
-        console.error('Notifications API error:', error);
-        
-        if (error.message === 'No token provided') {
-            return res.status(401).json({ success: false, error: 'Authentication required' });
-        }
-        
-        return res.status(500).json({ success: false, error: 'Internal server error' });
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
+
+    return new Response(JSON.stringify({ success: true, data }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (req.method === 'PUT') {
+    // Mark notification as read
+    const notificationId = url.searchParams.get('id');
+    if (!notificationId) {
+      return new Response(JSON.stringify({ error: 'Notification ID required' }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { data, error } = await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', notificationId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true, data }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (req.method === 'DELETE') {
+    // Delete notification
+    const notificationId = url.searchParams.get('id');
+    if (!notificationId) {
+      return new Response(JSON.stringify({ error: 'Notification ID required' }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('id', notificationId)
+      .eq('user_id', user.id);
+
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
+    status: 405,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
