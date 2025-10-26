@@ -69,9 +69,9 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     const handleMarkAsRead = async (notificationId: string) => {
         try {
             await markNotificationAsRead(notificationId);
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
-      );
+            setNotifications(prev =>
+                prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+            );
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (error) {
             console.error('Error marking notification as read:', error);
@@ -81,9 +81,9 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     const handleMarkAllAsRead = async () => {
         try {
             await markAllNotificationsAsRead(userId);
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true }))
-      );
+            setNotifications(prev =>
+                prev.map(n => ({ ...n, is_read: true }))
+            );
             setUnreadCount(0);
         } catch (error) {
             console.error('Error marking all notifications as read:', error);
@@ -96,10 +96,10 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
             setNotifications(prev =>
                 prev.filter(n => n.id !== notificationId)
             );
-      const deletedNotification = notifications.find(n => n.id === notificationId);
-      if (deletedNotification && !deletedNotification.is_read) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
+            const deletedNotification = notifications.find(n => n.id === notificationId);
+            if (deletedNotification && !deletedNotification.is_read) {
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }
         } catch (error) {
             console.error('Error deleting notification:', error);
         }
@@ -203,9 +203,9 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                                                             {notification.title}
                                                         </h4>
                                                         <div className="flex items-center gap-1">
-                              {!notification.is_read && (
-                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                              )}
+                                                            {!notification.is_read && (
+                                                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                                                            )}
                                                             <button
                                                                 onClick={() => handleDeleteNotification(notification.id)}
                                                                 className="p-1 hover:bg-gray-200 rounded text-gray-400 hover:text-gray-600"
@@ -227,14 +227,14 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                                                             <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(notification.type)}`}>
                                                                 {notification.category}
                                                             </span>
-                              {!notification.is_read && (
-                                <button
-                                  onClick={() => handleMarkAsRead(notification.id)}
-                                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                                >
-                                  Mark read
-                                </button>
-                              )}
+                                                            {!notification.is_read && (
+                                                                <button
+                                                                    onClick={() => handleMarkAsRead(notification.id)}
+                                                                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                                                >
+                                                                    Mark read
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>

@@ -50,7 +50,7 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, 
                         {showFileUpload ? 'Hide Upload' : 'Upload Files'}
                     </button>
                 </div>
-                
+
                 {showFileUpload && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                         <h3 className="text-lg font-semibold mb-2">Upload Project Files</h3>
@@ -69,8 +69,8 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, 
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {projects.map(project => (
-                        <div 
-                            key={project.id} 
+                        <div
+                            key={project.id}
                             onClick={() => selectProject(project.id)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -82,10 +82,10 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, 
                             className="bg-white rounded-lg shadow-lg overflow-hidden group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col"
                         >
                             <div className="h-48 overflow-hidden flex-shrink-0">
-                                <img 
-                                    src={project.image} 
-                                    alt={project.name} 
-                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                                <img
+                                    src={project.image}
+                                    alt={project.name}
+                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                             </div>
                             <div className="p-6 flex flex-col flex-grow">

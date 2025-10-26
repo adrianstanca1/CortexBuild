@@ -125,6 +125,11 @@ export type Screen =
     | 'analytics-dashboard'
     // Notifications
     | 'notifications'
+    // Advanced Features
+    | 'advanced-search'
+    | 'bulk-operations'
+    | 'collaboration-hub'
+    | 'advanced-analytics'
     // Tool screens
     | 'placeholder-tool';
 

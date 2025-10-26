@@ -81,6 +81,10 @@ const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPane
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 const AnalyticsDashboardScreen = lazy(() => import('./components/screens/AnalyticsDashboardScreen'));
+const AdvancedSearchScreen = lazy(() => import('./components/screens/AdvancedSearchScreen'));
+const BulkOperationsScreen = lazy(() => import('./components/screens/BulkOperationsScreen'));
+const CollaborationHubScreen = lazy(() => import('./components/screens/CollaborationHubScreen'));
+const AdvancedAnalyticsScreen = lazy(() => import('./components/screens/AdvancedAnalyticsScreen'));
 
 const ScreenLoader: React.FC = () => (
     <div className="py-16 text-center text-slate-500">
@@ -151,6 +155,11 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     // ML & Advanced Analytics
     'ml-analytics': AdvancedMLDashboard,
     'analytics-dashboard': AnalyticsDashboardScreen,
+    // Advanced Features
+    'advanced-search': AdvancedSearchScreen,
+    'bulk-operations': BulkOperationsScreen,
+    'collaboration-hub': CollaborationHubScreen,
+    'advanced-analytics': AdvancedAnalyticsScreen,
     // Tools
     'placeholder-tool': PlaceholderToolScreen,
 };
@@ -241,7 +250,7 @@ const App: React.FC = () => {
 
     const handleUserSignIn = async (user: any) => {
         try {
-            console.log('🔐 Handling user sign in for:', user.email);
+        logger.info('Processing OAuth callback', { hashLength: hash.length });
 
             // Try to fetch from users table first (our main table)
             let profile = null;

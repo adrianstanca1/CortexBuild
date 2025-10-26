@@ -548,15 +548,31 @@
                     </nav>
                     <div class="flex items-center space-x-3">
                         <button id="auth-button"
-                            class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center"></button>
+                            class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center"
+                            title="Sign in or Register">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-4 h-4 mr-2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 15l3-3m0 0l-3-3m3 3H9" />
+                            </svg>
+                            Sign In
+                        </button>
                         <button id="logout-button"
-                            class="hidden bg-red-600 text-white font-bold py-2 px-4 rounded-md hover:bg-red-700 transition-colors text-sm flex items-center">
+                            class="hidden bg-red-600 text-white font-bold py-2 px-4 rounded-md hover:bg-red-700 transition-colors text-sm flex items-center"
+                            title="Logout">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-4 h-4 mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                             </svg>
                             Logout
+                        </button>
+                        stroke="currentColor" class="w-4 h-4 mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                        </svg>
+                        Logout
                         </button>
                         <div class="md:hidden ml-4">
                             <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800">

@@ -23,6 +23,15 @@ export const MENU_ITEMS: MenuItem[] = [
         permission: { subject: 'accounting', action: 'read' },
     },
     {
+        label: 'Advanced Features',
+        children: [
+            { label: 'Advanced Search', screen: 'advanced-search', permission: { subject: 'user', action: 'read' } },
+            { label: 'Bulk Operations', screen: 'bulk-operations', permission: { subject: 'task', action: 'update' } },
+            { label: 'Collaboration Hub', screen: 'collaboration-hub', permission: { subject: 'user', action: 'read' } },
+            { label: 'Advanced Analytics', screen: 'advanced-analytics', permission: { subject: 'user', action: 'read' } },
+        ]
+    },
+    {
         label: 'AI Tools',
         children: [
             { label: 'AI Agents Marketplace', screen: 'ai-agents-marketplace', permission: { subject: 'user', action: 'read' } },

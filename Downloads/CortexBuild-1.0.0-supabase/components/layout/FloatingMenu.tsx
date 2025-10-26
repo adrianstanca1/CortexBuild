@@ -122,7 +122,7 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
                             </div>
                         ))}
                     </div>
-                    
+
                     {/* Notification Bell */}
                     <div className="flex items-center gap-4">
                         <NotificationBell userId={currentUser.id} />
