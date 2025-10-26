@@ -18,6 +18,7 @@ Before deploying CortexBuild to production, ensure you have:
 #### **1.1 Supabase Configuration**
 
 1. **Create Supabase Project**:
+
    ```bash
    # Visit https://supabase.com
    # Create new project
@@ -25,6 +26,7 @@ Before deploying CortexBuild to production, ensure you have:
    ```
 
 2. **Deploy Database Schema**:
+
    ```sql
    -- Run the following SQL in Supabase SQL Editor
    -- This creates all necessary tables and RLS policies
@@ -129,6 +131,7 @@ Before deploying CortexBuild to production, ensure you have:
    ```
 
 3. **Configure Storage Buckets**:
+
    ```sql
    -- Create storage buckets
    INSERT INTO storage.buckets (id, name, public) VALUES 

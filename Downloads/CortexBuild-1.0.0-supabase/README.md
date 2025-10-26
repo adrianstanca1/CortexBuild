@@ -13,18 +13,21 @@ CortexBuild is a comprehensive AI-powered construction project management platfo
 ## ✨ Key Features
 
 ### 🤖 AI-Powered Intelligence
+
 - **Smart Recommendations**: AI analyzes project data to suggest optimizations
 - **Workflow Automation**: Automated processes triggered by events and conditions
 - **Smart Task Assignment**: AI matches tasks to team members based on skills and workload
 - **Predictive Analytics**: Forecast project outcomes and identify risks
 
 ### 📱 Mobile-First Experience
+
 - **Progressive Web App**: Installable on any device with offline capabilities
 - **Photo Capture**: GPS-tagged photos with metadata for site documentation
 - **Location Tracking**: Real-time team location monitoring
 - **Push Notifications**: Instant project updates and alerts
 
 ### 🔗 Comprehensive Integrations
+
 - **Accounting**: QuickBooks, Xero integration for financial management
 - **Payments**: Stripe payment processing and subscription management
 - **Communication**: Slack, Microsoft Teams for team collaboration
@@ -32,12 +35,14 @@ CortexBuild is a comprehensive AI-powered construction project management platfo
 - **Productivity**: Google Calendar, Office 365 for scheduling
 
 ### 📊 Advanced Analytics
+
 - **Real-time Dashboards**: Live project metrics and performance indicators
 - **Custom Reports**: Comprehensive reporting with data visualization
 - **Performance Tracking**: Team productivity and project health monitoring
 - **Predictive Insights**: AI-driven forecasting and risk assessment
 
 ### 👥 Collaboration Tools
+
 - **Real-time Chat**: Live communication with team members
 - **File Sharing**: Secure document collaboration and version control
 - **Comment System**: Contextual discussions on projects and tasks
@@ -86,6 +91,7 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ## 🏗️ Architecture
 
 ### Frontend Stack
+
 - **React 18**: Modern React with hooks and functional components
 - **TypeScript**: Full type safety across the entire application
 - **Vite**: Fast build tool with hot module replacement
@@ -93,6 +99,7 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 - **Lucide React**: Comprehensive icon library
 
 ### Backend Integration
+
 - **Supabase**: Backend-as-a-Service with PostgreSQL database
 - **Real-time**: WebSocket connections for live updates
 - **Authentication**: JWT-based auth with role-based access control
@@ -100,6 +107,7 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 - **API**: RESTful API with serverless functions
 
 ### Mobile & PWA
+
 - **Service Worker**: Advanced caching and offline capabilities
 - **Manifest**: Complete PWA configuration
 - **Responsive Design**: Mobile-first approach with breakpoints
@@ -109,12 +117,14 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ## 📱 Mobile Features
 
 ### Progressive Web App
+
 - Installable on any device (iOS, Android, Desktop)
 - Offline functionality with automatic sync
 - Push notifications for real-time updates
 - App shortcuts for quick access
 
 ### Mobile Tools
+
 - **Photo Capture**: Camera integration with GPS tagging
 - **Location Services**: Real-time team location tracking
 - **Calendar Sync**: Project deadline synchronization
@@ -123,16 +133,19 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ## 🔗 Integrations
 
 ### Accounting & Finance
+
 - **QuickBooks Online**: Invoice sync, expense tracking, financial reports
 - **Xero**: Alternative accounting platform integration
 - **Stripe**: Payment processing, subscription management, billing
 
 ### Communication & Collaboration
+
 - **Slack**: Project notifications, team updates, file sharing
 - **Microsoft Teams**: Team chat, video meetings, collaboration
 - **Google Calendar**: Event sync, deadline tracking, team scheduling
 
 ### Storage & Productivity
+
 - **Dropbox**: File sync, document sharing, version control
 - **Google Drive**: Document storage, collaborative editing
 - **Office 365**: Integration with Microsoft productivity suite
@@ -140,18 +153,21 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ## 🎯 Use Cases
 
 ### Construction Companies
+
 - **Project Management**: Complete project lifecycle management
 - **Team Coordination**: Real-time collaboration and communication
 - **Resource Planning**: Intelligent resource allocation and scheduling
 - **Quality Control**: Photo documentation and progress tracking
 
 ### Project Managers
+
 - **Task Management**: Hierarchical task organization with dependencies
 - **Progress Monitoring**: Visual progress indicators and analytics
 - **Risk Management**: AI-powered risk identification and mitigation
 - **Reporting**: Comprehensive project reports and insights
 
 ### Field Teams
+
 - **Mobile Access**: Full functionality on mobile devices
 - **Photo Documentation**: GPS-tagged photos with metadata
 - **Offline Work**: Complete offline capabilities with sync
@@ -204,12 +220,14 @@ cortexbuild/
 ## 📊 Performance
 
 ### Build Metrics
+
 - **Build Time**: ~4.5 seconds
 - **Bundle Size**: ~1.5MB (gzip: ~300KB)
 - **Modules**: 2101 modules transformed
 - **TypeScript Coverage**: 100%
 
 ### Performance Scores
+
 - **Lighthouse Performance**: 95+
 - **Core Web Vitals**: All green
 - **Mobile Performance**: Optimized
@@ -218,18 +236,21 @@ cortexbuild/
 ## 🔐 Security
 
 ### Authentication & Authorization
+
 - JWT-based authentication with secure token handling
 - Role-based access control with granular permissions
 - Multi-factor authentication support
 - Secure session management
 
 ### Data Protection
+
 - End-to-end encryption for sensitive data
 - Row-level security (RLS) in database
 - Comprehensive input validation and sanitization
 - CORS protection and rate limiting
 
 ### Privacy Compliance
+
 - GDPR compliant data handling
 - User consent mechanisms
 - Data portability and deletion rights
@@ -289,6 +310,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎯 Roadmap
 
 ### Upcoming Features
+
 - [ ] Augmented Reality (AR) for site visualization
 - [ ] Voice commands and dictation
 - [ ] Advanced IoT device integration
@@ -296,6 +318,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Enterprise SSO integration
 
 ### Long-term Vision
+
 - [ ] Global construction marketplace
 - [ ] AI-powered project bidding
 - [ ] Blockchain-based contracts
