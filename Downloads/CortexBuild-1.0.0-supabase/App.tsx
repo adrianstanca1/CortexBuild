@@ -88,6 +88,8 @@ const AdvancedAnalyticsScreen = lazy(() => import('./components/screens/Advanced
 const AIRecommendationsScreen = lazy(() => import('./components/screens/AIRecommendationsScreen'));
 const AIWorkflowScreen = lazy(() => import('./components/screens/AIWorkflowScreen'));
 const SmartTaskAssignmentScreen = lazy(() => import('./components/screens/SmartTaskAssignmentScreen'));
+const MobileToolsScreen = lazy(() => import('./components/screens/MobileToolsScreen'));
+const IntegrationsScreen = lazy(() => import('./components/screens/IntegrationsScreen'));
 
 const ScreenLoader: React.FC = () => (
     <div className="py-16 text-center text-slate-500">
@@ -167,6 +169,9 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'ai-recommendations': AIRecommendationsScreen,
     'ai-workflow': AIWorkflowScreen,
     'smart-task-assignment': SmartTaskAssignmentScreen,
+    // Mobile & Integration Features
+    'mobile-tools': MobileToolsScreen,
+    'integrations': IntegrationsScreen,
     // Tools
     'placeholder-tool': PlaceholderToolScreen,
 };

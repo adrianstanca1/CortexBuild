@@ -134,6 +134,12 @@ export type Screen =
     | 'ai-recommendations'
     | 'ai-workflow'
     | 'smart-task-assignment'
+    // Mobile & Integration Features
+    | 'mobile-tools'
+    | 'integrations'
+    | 'photo-capture'
+    | 'location-tracking'
+    | 'calendar-sync'
     // Tool screens
     | 'placeholder-tool';
 

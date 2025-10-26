@@ -31,6 +31,13 @@ export const MENU_ITEMS: MenuItem[] = [
         ]
     },
     {
+        label: 'Mobile & Integration',
+        children: [
+            { label: 'Mobile Tools', screen: 'mobile-tools', permission: { subject: 'user', action: 'read' } },
+            { label: 'Third-Party Integrations', screen: 'integrations', permission: { subject: 'user', action: 'read' } },
+        ]
+    },
+    {
         label: 'Advanced Features',
         children: [
             { label: 'Advanced Search', screen: 'advanced-search', permission: { subject: 'user', action: 'read' } },
