@@ -90,6 +90,12 @@ const AIWorkflowScreen = lazy(() => import('./components/screens/AIWorkflowScree
 const SmartTaskAssignmentScreen = lazy(() => import('./components/screens/SmartTaskAssignmentScreen'));
 const MobileToolsScreen = lazy(() => import('./components/screens/MobileToolsScreen'));
 const IntegrationsScreen = lazy(() => import('./components/screens/IntegrationsScreen'));
+// Buildr-Inspired Enhanced Features
+const BuildrInspiredDashboard = lazy(() => import('./components/screens/BuildrInspiredDashboard'));
+const EnhancedProjectManagement = lazy(() => import('./components/screens/EnhancedProjectManagement'));
+const EnhancedTeamCollaboration = lazy(() => import('./components/screens/EnhancedTeamCollaboration'));
+const EnhancedFinancialTracking = lazy(() => import('./components/screens/EnhancedFinancialTracking'));
+const EnhancedMobileExperience = lazy(() => import('./components/screens/EnhancedMobileExperience'));
 
 const ScreenLoader: React.FC = () => (
     <div className="py-16 text-center text-slate-500">
@@ -172,6 +178,12 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     // Mobile & Integration Features
     'mobile-tools': MobileToolsScreen,
     'integrations': IntegrationsScreen,
+    // Buildr-Inspired Enhanced Features
+    'buildr-dashboard': BuildrInspiredDashboard,
+    'enhanced-project-management': EnhancedProjectManagement,
+    'enhanced-team-collaboration': EnhancedTeamCollaboration,
+    'enhanced-financial-tracking': EnhancedFinancialTracking,
+    'enhanced-mobile-experience': EnhancedMobileExperience,
     // Tools
     'placeholder-tool': PlaceholderToolScreen,
 };

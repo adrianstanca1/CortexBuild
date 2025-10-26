@@ -47,6 +47,16 @@ export const MENU_ITEMS: MenuItem[] = [
         ]
     },
     {
+        label: 'Buildr-Inspired Features',
+        children: [
+            { label: 'Enhanced Dashboard', screen: 'buildr-dashboard', permission: { subject: 'user', action: 'read' } },
+            { label: 'Enhanced Project Management', screen: 'enhanced-project-management', permission: { subject: 'task', action: 'read' } },
+            { label: 'Enhanced Team Collaboration', screen: 'enhanced-team-collaboration', permission: { subject: 'user', action: 'read' } },
+            { label: 'Enhanced Financial Tracking', screen: 'enhanced-financial-tracking', permission: { subject: 'accounting', action: 'read' } },
+            { label: 'Enhanced Mobile Experience', screen: 'enhanced-mobile-experience', permission: { subject: 'user', action: 'read' } },
+        ]
+    },
+    {
         label: 'AI Tools',
         children: [
             { label: 'AI Agents Marketplace', screen: 'ai-agents-marketplace', permission: { subject: 'user', action: 'read' } },

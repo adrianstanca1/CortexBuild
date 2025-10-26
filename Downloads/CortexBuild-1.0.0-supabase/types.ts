@@ -140,6 +140,12 @@ export type Screen =
     | 'photo-capture'
     | 'location-tracking'
     | 'calendar-sync'
+    // Buildr-Inspired Enhanced Features
+    | 'buildr-dashboard'
+    | 'enhanced-project-management'
+    | 'enhanced-team-collaboration'
+    | 'enhanced-financial-tracking'
+    | 'enhanced-mobile-experience'
     // Tool screens
     | 'placeholder-tool';
 
