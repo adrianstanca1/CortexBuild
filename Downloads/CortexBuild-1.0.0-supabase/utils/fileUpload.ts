@@ -42,7 +42,7 @@ export const uploadFile = async (
   }
 
   const { data, error } = await supabase.storage
-    .from('project-files')
+    .from('documents')
     .upload(filePath, file, {
       cacheControl: '3600',
       upsert: false
@@ -51,7 +51,7 @@ export const uploadFile = async (
   if (error) throw error;
 
   const { data: urlData } = supabase.storage
-    .from('project-files')
+    .from('documents')
     .getPublicUrl(data.path);
 
   return {
@@ -64,7 +64,7 @@ export const uploadFile = async (
 
 export const deleteFile = async (path: string): Promise<void> => {
   const { error } = await supabase.storage
-    .from('project-files')
+    .from('documents')
     .remove([path]);
 
   if (error) throw error;
@@ -72,7 +72,7 @@ export const deleteFile = async (path: string): Promise<void> => {
 
 export const getFileUrl = (path: string): string => {
   const { data } = supabase.storage
-    .from('project-files')
+    .from('documents')
     .getPublicUrl(path);
 
   return data.publicUrl;
@@ -80,7 +80,7 @@ export const getFileUrl = (path: string): string => {
 
 export const downloadFile = async (path: string): Promise<Blob> => {
   const { data, error } = await supabase.storage
-    .from('project-files')
+    .from('documents')
     .download(path);
 
   if (error) throw error;
@@ -89,7 +89,7 @@ export const downloadFile = async (path: string): Promise<Blob> => {
 
 export const listFiles = async (folder: string, limit: number = 100) => {
   const { data, error } = await supabase.storage
-    .from('project-files')
+    .from('documents')
     .list(folder, {
       limit,
       offset: 0,
@@ -102,7 +102,7 @@ export const listFiles = async (folder: string, limit: number = 100) => {
 
 export const getFileInfo = async (path: string) => {
   const { data, error } = await supabase.storage
-    .from('project-files')
+    .from('documents')
     .getPublicUrl(path);
 
   if (error) throw error;

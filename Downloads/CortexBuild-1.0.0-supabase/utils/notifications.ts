@@ -5,16 +5,16 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 export interface Notification {
   id: string;
   user_id: string;
-  company_id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error' | 'system';
-  category: 'project' | 'task' | 'invoice' | 'system' | 'chat' | 'comment';
-  read: boolean;
+  type: 'info' | 'success' | 'warning' | 'error';
+  category: 'system' | 'project' | 'task' | 'safety' | 'time' | 'expense';
+  is_read: boolean;
   action_url?: string;
+  action_text?: string;
   metadata: Record<string, any>;
   created_at: string;
-  updated_at: string;
+  read_at?: string;
 }
 
 let notificationChannel: RealtimeChannel | null = null;
@@ -70,7 +70,7 @@ export const fetchNotifications = async (
 export const markNotificationAsRead = async (notificationId: string) => {
   const { error } = await supabase
     .from('notifications')
-    .update({ read: true })
+    .update({ is_read: true, read_at: new Date().toISOString() })
     .eq('id', notificationId);
 
   if (error) throw error;
@@ -79,9 +79,9 @@ export const markNotificationAsRead = async (notificationId: string) => {
 export const markAllNotificationsAsRead = async (userId: string) => {
   const { error } = await supabase
     .from('notifications')
-    .update({ read: true })
+    .update({ is_read: true, read_at: new Date().toISOString() })
     .eq('user_id', userId)
-    .eq('read', false);
+    .eq('is_read', false);
 
   if (error) throw error;
 };
@@ -100,7 +100,7 @@ export const getUnreadCount = async (userId: string): Promise<number> => {
     .from('notifications')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .eq('read', false);
+    .eq('is_read', false);
 
   if (error) throw error;
   return count || 0;
@@ -108,24 +108,24 @@ export const getUnreadCount = async (userId: string): Promise<number> => {
 
 export const createNotification = async (
   userId: string,
-  companyId: string,
   title: string,
   message: string,
   type: Notification['type'] = 'info',
   category: Notification['category'] = 'system',
   actionUrl?: string,
+  actionText?: string,
   metadata: Record<string, any> = {}
 ) => {
   const { data, error } = await supabase
     .from('notifications')
     .insert([{
       user_id: userId,
-      company_id: companyId,
       title,
       message,
       type,
       category,
       action_url: actionUrl,
+      action_text: actionText,
       metadata
     }])
     .select()
