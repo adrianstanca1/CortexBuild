@@ -80,6 +80,7 @@ const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/
 const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
+const AnalyticsDashboardScreen = lazy(() => import('./components/screens/AnalyticsDashboardScreen'));
 
 const ScreenLoader: React.FC = () => (
     <div className="py-16 text-center text-slate-500">
@@ -149,6 +150,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'admin-control-panel': AdminControlPanel,
     // ML & Advanced Analytics
     'ml-analytics': AdvancedMLDashboard,
+    'analytics-dashboard': AnalyticsDashboardScreen,
     // Tools
     'placeholder-tool': PlaceholderToolScreen,
 };

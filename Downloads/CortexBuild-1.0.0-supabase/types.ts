@@ -122,6 +122,9 @@ export type Screen =
     | 'admin-control-panel'
     // ML & Advanced Analytics
     | 'ml-analytics'
+    | 'analytics-dashboard'
+    // Notifications
+    | 'notifications'
     // Tool screens
     | 'placeholder-tool';
 

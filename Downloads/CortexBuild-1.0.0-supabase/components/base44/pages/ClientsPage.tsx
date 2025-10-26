@@ -56,7 +56,17 @@ export const ClientsPage: React.FC = () => {
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
 
-            const response = await fetch(`/api/clients?${params}`);
+            // Get auth token
+            const token = localStorage.getItem('token') || localStorage.getItem('constructai_token');
+
+            const response = await fetch(`/api/clients?${params}`, {
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                } : {
+                    'Content-Type': 'application/json'
+                }
+            });
             const data = await response.json();
 
             if (data.success) {
@@ -79,8 +89,16 @@ export const ClientsPage: React.FC = () => {
 
         setDeleteLoading(true);
         try {
+            const token = localStorage.getItem('token') || localStorage.getItem('constructai_token');
+
             const response = await fetch(`/api/clients/${selectedClient.id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                } : {
+                    'Content-Type': 'application/json'
+                }
             });
 
             const data = await response.json();
@@ -239,6 +257,7 @@ export const ClientsPage: React.FC = () => {
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Filter by status"
                         >
                             <option value="all">All Status</option>
                             <option value="active">Active</option>
@@ -251,6 +270,7 @@ export const ClientsPage: React.FC = () => {
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Filter by type"
                         >
                             <option value="all">All Types</option>
                             <option value="residential">Residential</option>

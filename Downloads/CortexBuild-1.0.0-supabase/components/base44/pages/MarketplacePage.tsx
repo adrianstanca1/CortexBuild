@@ -45,7 +45,7 @@ export const MarketplacePage: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/marketplace/categories', {
+      const response = await fetch('/api/marketplace/categories', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -64,7 +64,7 @@ export const MarketplacePage: React.FC = () => {
       if (selectedCategory) params.append('category', selectedCategory);
       if (sortBy) params.append('sort', sortBy);
 
-      const response = await fetch(`http://localhost:3001/api/marketplace/modules?${params}`, {
+      const response = await fetch(`/api/marketplace/modules?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -97,7 +97,7 @@ export const MarketplacePage: React.FC = () => {
   const handleInstall = async (moduleId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/marketplace/install', {
+      const response = await fetch('/api/marketplace/install', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -195,9 +195,8 @@ export const MarketplacePage: React.FC = () => {
               <div className="space-y-2">
                 <button
                   onClick={() => setSelectedCategory('')}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                    selectedCategory === '' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-                  }`}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === '' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <span>All Modules</span>
@@ -208,9 +207,8 @@ export const MarketplacePage: React.FC = () => {
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.slug)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      selectedCategory === category.slug ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-                    }`}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === category.slug ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <span>{category.name}</span>

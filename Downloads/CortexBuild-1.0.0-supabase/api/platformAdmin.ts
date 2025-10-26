@@ -79,16 +79,20 @@ const buildPlatformDashboardData = (payload: any): PlatformDashboardData => {
     });
 
     const agents: PlatformDashboardData['agents'] = (sdkStats.topProviders ?? []).map(
-        (provider: any, index: number) => ({
-            id: String(provider.provider ?? `provider-${index}`),
-            name: provider.provider ?? `Provider ${index + 1}`,
-            description: provider.provider ?? 'AI Provider',
-            category: 'integration',
-            status: 'active',
-            icon: '🤖',
-            subscription_count: Number(provider.requests ?? 0),
-            monthly_revenue: Number(provider.cost ?? 0),
-        })
+        (provider: any, index: number) => {
+            const agentId = String(provider.provider ?? `provider-${index}`);
+            const agentName = provider.provider ?? `Provider ${index + 1}`;
+            return {
+                id: agentId,
+                name: agentName,
+                description: provider.provider ?? 'AI Provider',
+                category: 'integration',
+                status: 'active',
+                icon: '🤖',
+                subscription_count: Number(provider.requests ?? 0),
+                monthly_revenue: Number(provider.cost ?? 0),
+            };
+        }
     );
 
     const revenueBreakdown: PlatformDashboardData['revenueBreakdown'] = {
@@ -98,7 +102,7 @@ const buildPlatformDashboardData = (payload: any): PlatformDashboardData => {
             enterprise: Number((monthlyCost * 0.45).toFixed(2)),
         },
         agent_revenue: agents.reduce<Record<string, number>>((acc, agent) => {
-            acc[agent.id] = agent.monthly_revenue;
+            acc[String((agent as any).id)] = agent.monthly_revenue;
             return acc;
         }, {}),
         total_revenue: monthlyCost,
@@ -162,14 +166,14 @@ const buildPlatformDashboardData = (payload: any): PlatformDashboardData => {
                     'rgba(156, 163, 175, 0.5)',
                     'rgba(59, 130, 246, 0.5)',
                     'rgba(139, 92, 246, 0.5)',
-                ],
-                borderColor: ['rgb(156, 163, 175)', 'rgb(59, 130, 246)', 'rgb(139, 92, 246)'],
+                ] as any,
+                borderColor: 'rgb(59, 130, 246)',
             },
         ],
     };
 
     const agentPopularityChart: PlatformDashboardData['agentPopularityChart'] = {
-        labels: agents.map((agent) => agent.name),
+        labels: agents.map((agent) => (agent as any).name),
         datasets: [
             {
                 label: 'Subscriptions',
