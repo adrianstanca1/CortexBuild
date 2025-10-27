@@ -11,6 +11,7 @@ import type {
   NotificationPriority,
   NotificationType,
   NotificationCategory
+} from '../../types/notifications';
 import { sendNotificationEmail } from './email';
 import { sendNotificationSMS } from './sms';
 import { showNotificationFromSystem } from '../../lib/services/pushNotifications';
