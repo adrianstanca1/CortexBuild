@@ -3,8 +3,8 @@
  * Version: 1.1.0 GOLDEN
  */
 
-import React, { useState, useEffect } from 'react';
-import { ProjectDetailPage } from './ProjectDetailPage';
+import { NotificationBell } from '../../notifications/NotificationBell';
+import { NotificationCenter } from '../../notifications/NotificationCenter';
 import { CreateProjectModal } from '../modals/CreateProjectModal';
 
 interface Project {
@@ -22,6 +22,8 @@ interface Project {
 }
 
 export const ProjectsPage: React.FC = () => {
+    const [showNotificationCenter, setShowNotificationCenter] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string>('user-2'); // Mock user ID
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
@@ -203,7 +205,14 @@ export const ProjectsPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Projects</h1>
-                        <p className="text-gray-600">Manage all your construction projects</p>
+                        {/* Notification Bell */}
+                        <NotificationBell
+                            userId={currentUserId}
+                            onOpenNotifications={() => setShowNotificationCenter(true)}
+                            showUnreadCount={true}
+                            maxCount={99}
+                        />
+
                     </div>
                     <div className="flex items-center space-x-4">
                         {/* Search */}
@@ -333,7 +342,13 @@ export const ProjectsPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* Create Project Modal */}
+            {/* Notification Center Modal */}
+            <NotificationCenter
+                userId={currentUserId}
+                isOpen={showNotificationCenter}
+                onClose={() => setShowNotificationCenter(false)}
+            />
+
             <CreateProjectModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}

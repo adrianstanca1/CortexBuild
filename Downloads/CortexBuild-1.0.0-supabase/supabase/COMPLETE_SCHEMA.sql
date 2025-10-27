@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'operative',
     company_id TEXT REFERENCES companies(id) ON DELETE CASCADE,
-    avatar TEXT,
+    phone TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -190,11 +190,11 @@ ON CONFLICT (id) DO NOTHING;
 -- Company Admin: lolozania1
 -- Developer: password123
 
-INSERT INTO users (id, email, password_hash, name, role, company_id)
-VALUES 
-    ('user-1', 'adrian.stanca1@gmail.com', '$2a$10$YourHashedPasswordHere1', 'Adrian Stanca', 'super_admin', 'company-1'),
-    ('user-2', 'adrian@ascladdingltd.co.uk', '$2a$10$YourHashedPasswordHere2', 'Adrian ASC', 'company_admin', 'company-2'),
-    ('user-3', 'adrian.stanca1@icloud.com', '$2a$10$YourHashedPasswordHere3', 'Adrian Dev', 'developer', 'company-1')
+    phone TEXT,
+INSERT INTO users (id, email, password_hash, name, role, company_id, phone) VALUES
+    ('user-1', 'adrian.stanca1@gmail.com', '$2a$10$YourHashedPasswordHere1', 'Adrian Stanca', 'super_admin', 'company-1', NULL),
+    ('user-2', 'adrian@ascladdingltd.co.uk', '$2a$10$YourHashedPasswordHere2', 'Adrian ASC', 'company_admin', 'company-2', '+447700000001'),
+    ('user-3', 'adrian.stanca1@icloud.com', '$2a$10$YourHashedPasswordHere3', 'Adrian Dev', 'developer', 'company-1', NULL)
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================================

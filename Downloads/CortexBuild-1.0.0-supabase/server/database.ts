@@ -13,7 +13,7 @@ db.pragma('foreign_keys = ON');
 /**
  * Initialize database tables
  */
-export const initDatabase = () => {
+export const initDatabase = async () => {
     console.log('📊 Initializing database...');
 
     // Users table
@@ -811,6 +811,21 @@ export const initDatabase = () => {
     db.exec('CREATE INDEX IF NOT EXISTS idx_user_installations_user ON user_app_installations(user_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_company_installations_company ON company_app_installations(company_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_app_analytics_app ON app_analytics(app_id)');
+
+    // Run enhanced tables migration
+    try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const migrationPath = path.join(__dirname, 'migrations', 'add_enhanced_tables.sql');
+
+        if (fs.existsSync(migrationPath)) {
+            const migrationSQL = fs.readFileSync(migrationPath, 'utf-8');
+            db.exec(migrationSQL);
+            console.log('✅ Enhanced tables migration applied');
+        }
+    } catch (error) {
+        console.log('ℹ️ Enhanced tables migration not found or already applied');
+    }
 
     console.log('✅ Database initialized');
 

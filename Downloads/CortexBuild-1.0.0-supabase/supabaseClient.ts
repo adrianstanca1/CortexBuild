@@ -2,29 +2,45 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { User } from './types';
 
 // Use environment variables directly - no global variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+// Helper function to check if URL is valid
+const isValidUrl = (url: string): boolean => {
+    if (!url) return false;
+    try {
+        const parsedUrl = new URL(url);
+        return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+    } catch {
+        return false;
+    }
+};
 
 // Configuration check
-if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseAnonKey === 'YOUR_SUPABASE_ANON_KEY') {
-    console.warn('Supabase not configured properly');
+const isUrlValid = isValidUrl(supabaseUrl);
+const isKeyValid = supabaseAnonKey && supabaseAnonKey.length > 0 && !supabaseAnonKey.includes('YOUR_') && !supabaseAnonKey.includes('example');
+
+if (!isUrlValid || !isKeyValid) {
+    console.warn('⚠️ Supabase not configured properly');
+    console.warn('URL Valid:', isUrlValid);
+    console.warn('Key Valid:', isKeyValid);
 }
 
 let supabaseInstance: SupabaseClient | null = null;
 
-if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'YOUR_SUPABASE_URL' && supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY') {
+if (isUrlValid && isKeyValid) {
     try {
         supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
         // Store globally to avoid multiple client instances
-        (window as any).supabaseClient = supabaseInstance;
+        if (typeof window !== 'undefined') {
+            (window as any).supabaseClient = supabaseInstance;
+        }
         console.log('✅ Supabase client initialized successfully!');
     } catch (e) {
         console.error("❌ Failed to initialize Supabase client:", e);
     }
 } else {
     console.warn('⚠️ Supabase is not configured. Falling back to mock auth.');
-    console.warn('Reason - URL valid:', supabaseUrl !== 'YOUR_SUPABASE_URL');
-    console.warn('Reason - Key valid:', supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY');
 }
 
 export const supabase = supabaseInstance;

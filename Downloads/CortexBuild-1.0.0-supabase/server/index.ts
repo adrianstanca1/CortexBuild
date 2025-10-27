@@ -39,6 +39,8 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
+import { createEnhancedFeaturesRoutes } from './routes/enhanced-features';
+import { createReportingBIMRoutes } from './routes/reporting-bim';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -167,7 +169,7 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
 const startServer = async () => {
     try {
         // Initialize database
-        initDatabase();
+        await initDatabase();
         auth.setDatabase(db);
 
         // Initialize MCP tables
@@ -362,7 +364,13 @@ const startServer = async () => {
         app.use('/api/automations', createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
-        console.log('✅ All 24 API routes registered successfully');
+        app.use('/api/enhanced', createEnhancedFeaturesRoutes(db));
+        console.log('  ✓ /api/enhanced (chat history, notifications, construction features)');
+
+        app.use('/api/reporting', createReportingBIMRoutes(db));
+        console.log('  ✓ /api/reporting (daily logs, weekly reports, BIM, clash detection, IoT)');
+
+        console.log('✅ All 26 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {

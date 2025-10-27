@@ -3,7 +3,7 @@ import { Screen, User } from '../../types';
 import { MENU_ITEMS, MenuItem } from '../../navigation';
 import { usePermissions } from '../../hooks/usePermissions';
 import { ChevronDownIcon } from '../Icons';
-import { NotificationBell } from '../NotificationBell';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 interface FloatingMenuProps {
     currentUser: User;
@@ -125,7 +125,7 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
 
                     {/* Notification Bell */}
                     <div className="flex items-center gap-4">
-                        <NotificationBell userId={currentUser.id} />
+                        <NotificationBell userId={currentUser.id} onOpenNotifications={() => {}} />
                     </div>
                 </div>
             </div>

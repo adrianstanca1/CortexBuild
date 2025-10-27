@@ -202,7 +202,7 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'explore') {
     event.waitUntil(
-      clients.openWindow('/notifications')
+      clients.openWindow('/')
     );
   } else if (event.action === 'close') {
     // Just close the notification
