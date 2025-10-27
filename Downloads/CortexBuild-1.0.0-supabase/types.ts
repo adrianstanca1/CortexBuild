@@ -134,6 +134,11 @@ export type Screen =
     | 'ai-recommendations'
     | 'ai-workflow'
     | 'smart-task-assignment'
+    // AI Marketplace Apps
+    | 'quality-control-vision'
+    | 'document-intelligence'
+    | 'risk-assessment-ai'
+    | 'cost-optimization'
     // Mobile & Integration Features
     | 'mobile-tools'
     | 'integrations'

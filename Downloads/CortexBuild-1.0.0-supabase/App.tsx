@@ -18,6 +18,7 @@ import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { supabase } from './supabaseClient';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 // Lazily loaded screens and feature modules
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
@@ -58,6 +59,11 @@ const DeliveryScreen = lazy(() => import('./components/screens/DeliveryScreen'))
 const DrawingComparisonScreen = lazy(() => import('./components/screens/DrawingComparisonScreen'));
 const AccountingScreen = lazy(() => import('./components/screens/modules/AccountingScreen'));
 const AIToolsScreen = lazy(() => import('./components/screens/modules/AIToolsScreen'));
+// AI Marketplace Apps
+const QualityControlVisionApp = lazy(() => import('./components/apps/QualityControlVisionApp'));
+const DocumentIntelligenceApp = lazy(() => import('./components/apps/DocumentIntelligenceApp'));
+const RiskAssessmentAIApp = lazy(() => import('./components/apps/RiskAssessmentAIApp'));
+const CostOptimizationApp = lazy(() => import('./components/apps/CostOptimizationApp'));
 const DocumentManagementScreen = lazy(() => import('./components/screens/modules/DocumentManagementScreen'));
 const TimeTrackingScreen = lazy(() => import('./components/screens/modules/TimeTrackingScreen'));
 const ProjectOperationsScreen = lazy(() => import('./components/screens/modules/ProjectOperationsScreen'));
@@ -186,6 +192,11 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
     'enhanced-mobile-experience': EnhancedMobileExperience,
     // Tools
     'placeholder-tool': PlaceholderToolScreen,
+    // AI Marketplace Apps
+    'quality-control-vision': QualityControlVisionApp,
+    'document-intelligence': DocumentIntelligenceApp,
+    'risk-assessment-ai': RiskAssessmentAIApp,
+    'cost-optimization': CostOptimizationApp,
 };
 
 const App: React.FC = () => {
@@ -571,6 +582,8 @@ const App: React.FC = () => {
         );
     }
 
+    return (
+        <NotificationProvider userId={currentUser.id} companyId={currentUser.companyId}>
     console.log('✅ Current user exists - showing app:', currentUser.name);
     console.log('📊 Navigation stack length:', navigationStack.length);
     console.log('📊 Current nav item:', currentNavItem);
@@ -738,6 +751,7 @@ const App: React.FC = () => {
             {/* Global AI Chatbot - Available on all pages */}
             {currentUser && <ChatbotWidget />}
         </div>
+        </NotificationProvider>
     );
 }
 

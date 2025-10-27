@@ -37,10 +37,10 @@ export const ACCOUNTING_TOOLS: ToolDefinition[] = [
 ];
 
 export const AI_TOOLS: ToolDefinition[] = [
-    { title: 'Risk Assessment AI', description: 'Analyze project data to identify potential risks.', icon: ShieldCheckIcon, screen: 'placeholder-tool', permission: { subject: 'task', action: 'read' } },
-    { title: 'Procurement AI Agent', description: 'Automated material and subcontractor sourcing.', icon: BriefcaseIcon, screen: 'placeholder-tool', permission: { subject: 'document', action: 'read' } },
-    { title: 'Compliance Bot', description: 'Monitor documents for regulatory compliance.', icon: DocumentMagnifyingGlassIcon, screen: 'placeholder-tool', permission: { subject: 'document', action: 'read' } },
-    { title: 'HR AI Agent', description: 'Manage training, qualifications, and certifications.', icon: IdentificationIcon, screen: 'placeholder-tool', permission: { subject: 'user', action: 'read' } },
+    { title: 'Quality Control Vision', description: 'AI-powered image analysis for construction quality assessment', icon: CameraIcon, screen: 'quality-control-vision', permission: { subject: 'document', action: 'read' } },
+    { title: 'Document Intelligence', description: 'Extract insights from construction documents and blueprints', icon: DocumentIcon, screen: 'document-intelligence', permission: { subject: 'document', action: 'read' } },
+    { title: 'Risk Assessment AI', description: 'Predictive analytics for project risk management', icon: ShieldCheckIcon, screen: 'risk-assessment-ai', permission: { subject: 'task', action: 'read' } },
+    { title: 'Cost Optimization', description: 'AI-driven cost analysis and budget optimization', icon: CurrencyPoundIcon, screen: 'cost-optimization', permission: { subject: 'accounting', action: 'read' } },
 ];
 
 export const DOCUMENT_MANAGEMENT_TOOLS: ToolDefinition[] = [
