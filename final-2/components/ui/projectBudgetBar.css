@@ -1,6 +1,0 @@
-.project-budget-bar {
-  height: 0.5rem;
-  border-radius: 9999px;
-  background-color: var(--bar-color, #0ea5e9);
-  width: var(--bar-width, 0%);
-}
