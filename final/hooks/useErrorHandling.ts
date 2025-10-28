@@ -283,7 +283,7 @@ export function useAsyncOperation<T>(
     
     setLoading(false);
     return result;
-  }, [operation, errorHandling, retryConfig]);
+  }, [operation, retryConfig]);
 
   const retry = useCallback(() => {
     return execute('retry_operation');
@@ -294,7 +294,7 @@ export function useAsyncOperation<T>(
     if (immediate) {
       execute('initial_load');
     }
-  }, [immediate, ...dependencies]);
+  }, [immediate, execute, ...dependencies]);
 
   return {
     loading,

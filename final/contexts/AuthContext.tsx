@@ -64,8 +64,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     /**
      * Proactively schedules a token refresh before the current access token expires.
      * This improves UX by preventing the user from being logged out during an active session.
+     * Note: Not wrapped in useCallback to avoid circular dependencies.
      */
-    const scheduleTokenRefresh = useCallback((token: string) => {
+    const scheduleTokenRefresh = (token: string) => {
         if (tokenRefreshTimeout) {
             clearTimeout(tokenRefreshTimeout);
         }
@@ -122,7 +123,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 });
             }
         }
-    }, []); // Remove logout dependency to break the cycle
+    };
 
     const finalizeLogin = useCallback((data: { token: string, refreshToken: string, user: User, company: Company }) => {
         storage.setItem('token', data.token);
@@ -137,14 +138,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             error: null,
         });
         scheduleTokenRefresh(data.token);
-    }, []); // Remove scheduleTokenRefresh dependency to break the cycle
+    }, []);
 
     /**
      * Initializes authentication state on app load.
      * It checks for stored tokens and attempts to validate the session.
      * If the access token is expired, it reactively tries to use the refresh token.
      */
-    const initAuth = useCallback(async () => {
+    const initAuth = async () => {
         const token = storage.getItem('token');
         const refreshToken = storage.getItem('refreshToken');
         if (token && refreshToken) {
@@ -167,14 +168,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } else {
             setAuthState(prev => ({ ...prev, loading: false }));
         }
-    }, [finalizeLogin, logout]);
+    };
 
     useEffect(() => {
         initAuth();
         return () => {
             if (tokenRefreshTimeout) clearTimeout(tokenRefreshTimeout);
         }
-    }, [initAuth]);
+    }, []);
 
     const login = async (credentials: LoginCredentials): Promise<{ mfaRequired: boolean; userId?: string }> => {
         setAuthState(prev => ({ ...prev, loading: true, error: null }));
