@@ -1,0 +1,4 @@
+.subtask-progress-bar {
+  width: var(--subtask-progress, 0%);
+  transition: width 0.3s;
+}

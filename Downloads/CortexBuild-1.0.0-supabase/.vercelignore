@@ -1,0 +1,30 @@
+# Ignore API directory - these are Express routes, not Vercel serverless functions
+api/
+
+# Ignore server directory
+server/
+
+# Ignore build artifacts
+node_modules/
+dist/
+.vite-temp/
+
+# Ignore test files
+__tests__/
+test-results/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Ignore development files
+*.log
+.env
+.env.local
+.env.*.local
+
+# Ignore database files
+*.db
+*.db-shm
+*.db-wal
+cortexbuild.db*

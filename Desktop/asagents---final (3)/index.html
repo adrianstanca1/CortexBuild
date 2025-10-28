@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AS Agents - Construction Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""/>
+    <style>
+      :root {
+        --background: 220 20% 98%; /* Light Grey */
+        --foreground: 220 15% 25%; /* Dark Grey Text */
+        
+        --card: 0 0% 100%; /* White */
+        --card-foreground: 220 15% 25%;
+        
+        --muted: 220 20% 95%; /* Slightly darker grey for muted bg */
+        --muted-foreground: 220 10% 45%; /* Mid-grey text */
+        
+        --border: 220 20% 90%;
+        --input: 220 20% 95%;
+
+        --primary: 217 91% 60%; /* Vibrant Blue */
+        --primary-foreground: 0 0% 100%;
+
+        --secondary: 260 85% 65%; /* Vibrant Purple */
+        --secondary-foreground: 0 0% 100%;
+
+        --accent: 38 92% 50%;
+        --accent-foreground: 222 83% 4%;
+
+        --ring: 217 91% 60%;
+      }
+      
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        overflow: hidden;
+      }
+      
+      .animated-bg {
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        background: linear-gradient(
+          -45deg,
+          hsl(var(--background)),
+          hsl(220, 20%, 99%),
+          hsl(220, 30%, 97%),
+          hsl(var(--background))
+        );
+        background-size: 400% 400%;
+        animation: gradientBG 25s ease infinite;
+      }
+      
+      @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      /* Base styles */
+      .bg-background { background-color: hsl(var(--background)); }
+      .bg-card { background-color: hsl(var(--card)); }
+      .text-card-foreground { color: hsl(var(--card-foreground)); }
+      .bg-muted { background-color: hsl(var(--muted)); }
+      .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+      .border-card { border-color: hsl(var(--border)); }
+      
+      /* Replaced Glassmorphism with subtle shadows */
+      .glass-pane {
+        background-color: hsl(var(--card));
+        border: 1px solid hsl(var(--border));
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      }
+      .sidebar-pane {
+        background-color: hsl(var(--muted));
+        border-right: 1px solid hsl(var(--border));
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+      /* Inputs */
+      input, select, textarea {
+          background-color: hsl(var(--input));
+          border: 1px solid hsl(var(--border));
+          color: hsl(var(--foreground));
+          border-radius: 0.5rem;
+          padding: 0.75rem 1rem;
+          transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      input:focus, select:focus, textarea:focus {
+          outline: none;
+          border-color: hsl(var(--primary));
+          box-shadow: 0 0 0 2px hsla(var(--primary), 0.2);
+      }
+      select {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+          background-position: right 0.5rem center;
+          background-repeat: no-repeat;
+          background-size: 1.5em 1.5em;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+      }
+      input::placeholder, textarea::placeholder {
+          color: hsl(var(--muted-foreground));
+      }
+
+      /* Maps */
+      .leaflet-tile {
+        filter: grayscale(0.8) brightness(1.05);
+      }
+      .leaflet-container {
+        background-color: hsl(var(--muted));
+      }
+
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+      
+      /* Styles for cluster markers */
+      .cluster-marker-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: hsl(var(--primary-foreground));
+        font-weight: bold;
+        font-size: 1rem;
+        border-radius: 50%;
+        background: hsla(var(--primary), 0.9);
+        border: 2px solid hsl(var(--card));
+        box-shadow: 0 0 0 3px hsla(var(--primary), 0.4);
+        padding: 4px;
+        gap: 2px;
+        min-width: 44px;
+        min-height: 44px;
+      }
+      .cluster-count {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.8rem;
+        line-height: 1;
+      }
+      .cluster-count svg {
+        width: 1em;
+        height: 1em;
+        fill: white;
+      }
+      
+      /* Custom Marker Styles */
+      .custom-marker-icon {
+        background: none;
+        border: none;
+      }
+      .custom-marker-icon svg {
+        width: 32px;
+        height: 32px;
+        filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+      }
+      .marker-active { fill: hsl(145 73% 45%); }
+      .marker-on-hold { fill: hsl(38 92% 55%); }
+      .marker-completed { fill: hsl(260 85% 65%); }
+
+      /* Animation for overdue task indicator */
+      @keyframes pulse-red {
+        0%, 100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.4);
+          opacity: 0.8;
+        }
+      }
+      .overdue-indicator {
+        transform-origin: 20px 4px; /* Set origin to the center of the circle */
+        animation: pulse-red 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      /* Animation for cards */
+      @keyframes card-enter {
+        from {
+          opacity: 0;
+          transform: translateY(10px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .animate-card-enter {
+        animation: card-enter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      }
+
+      /* Accessibility utility */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react": "https://esm.sh/react@18.2.0",
+    "leaflet": "https://esm.sh/leaflet@1.9.4",
+    "react-leaflet": "https://esm.sh/react-leaflet@4.2.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.17.0",
+    "use-supercluster": "https://esm.sh/use-supercluster@0.4.0",
+    "socket.io-client": "https://esm.sh/socket.io-client@4.7.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div class="animated-bg"></div>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

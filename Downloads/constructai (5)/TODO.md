@@ -1,0 +1,4 @@
+- [x] Fix uptime progress bar width to use inline style
+- [x] Fix CPU progress bar width to use inline style
+- [x] Fix memory progress bar width to use inline style
+- [x] Fix storage progress bar width to use inline style

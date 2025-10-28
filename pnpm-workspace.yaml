@@ -1,0 +1,12 @@
+packages:
+  - construction-ai-platform/apps/*
+  - construction-ai-platform/services/*
+  - construction-ai-platform/packages/*
+ignoredBuiltDependencies:
+  - core-js
+  - cwebp-bin
+  - mozjpeg
+  - pngquant-bin
+
+onlyBuiltDependencies:
+  - '@pnpm/exe'
