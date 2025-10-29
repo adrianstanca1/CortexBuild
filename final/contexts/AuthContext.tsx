@@ -161,8 +161,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     const { user, company } = await authClient.me(newToken);
                     finalizeLogin({ token: newToken, refreshToken, user, company });
                 } catch (refreshError) {
-                    console.error("Auth init with refresh token failed, logging out.", refreshError);
-                    logout();
+                    console.error("Auth init with refresh token failed, clearing auth state.", refreshError);
+                    // Clear invalid tokens and reset to fresh state
+                    storage.removeItem('token');
+                    storage.removeItem('refreshToken');
+                    setAuthState({
+                        isAuthenticated: false,
+                        token: null,
+                        refreshToken: null,
+                        user: null,
+                        company: null,
+                        loading: false,
+                        error: null,
+                    });
                 }
             }
         } else {
