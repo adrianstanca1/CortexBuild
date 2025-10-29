@@ -27,3 +27,4 @@ export const isSupabaseConfigured = () => {
     supabaseAnonKey !== 'placeholder-key');
 };
 
+

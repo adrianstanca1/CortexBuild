@@ -52,6 +52,7 @@ export const initialData = {
         { id: '3', name: 'As Cladding and Roofing Ltd' },
     ] as Partial<Company>[],
     users: [
+        { id: 'demo', firstName: 'Demo', lastName: 'User', email: 'demo@example.com', role: Role.ADMIN, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=demo', password: 'password', mfaEnabled: false },
         { id: '0', firstName: 'Adrian', lastName: 'Admin', email: 'adrian@ascladdingltd.co.uk', role: Role.PRINCIPAL_ADMIN, companyId: '0', avatar: 'https://i.pravatar.cc/150?u=0', password: 'Cumparavinde1', mfaEnabled: false },
         { id: '1', firstName: 'Samantha', lastName: 'Lee', email: 'sam@constructco.com', role: Role.ADMIN, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=1', phone: '07123456781', password: 'password123', mfaEnabled: false },
         { id: '2', firstName: 'David', lastName: 'Chen', email: 'david@constructco.com', role: Role.PROJECT_MANAGER, companyId: '1', avatar: 'https://i.pravatar.cc/150?u=2', phone: '07123456782', password: 'password123', mfaEnabled: true },

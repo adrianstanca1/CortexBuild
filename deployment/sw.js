@@ -6,9 +6,7 @@ const CACHE_NAME = 'construction-app-v1';
 const STATIC_CACHE_URLS = [
   '/',
   '/index.html',
-  '/index.tsx',
   '/manifest.json',
-  '/favicon.ico',
 ];
 
 // Install event - cache static assets

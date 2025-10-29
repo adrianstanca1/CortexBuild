@@ -403,3 +403,4 @@ export const supabaseService = new SupabaseService();
 // Export helper to check if using real database
 export { isSupabaseConfigured };
 
+
