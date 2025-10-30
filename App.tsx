@@ -149,6 +149,9 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'business-development': BusinessDevelopmentScreen,
   'ai-agents-marketplace': AIAgentsMarketplaceScreen,
   'developer-dashboard': DeveloperWorkspaceScreen,
+  // Role dashboards (normalize route names to concrete components)
+  'super-admin-dashboard': UnifiedAdminDashboard,
+  'company-admin-dashboard': CompanyAdminDashboardV2,
   'automation-studio': ConstructionAutomationStudio,
   'developer-workspace': DeveloperWorkspaceScreen,
   'developer-console': MinimalDeveloperConsole,

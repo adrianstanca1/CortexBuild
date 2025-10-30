@@ -20,6 +20,7 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { supabase, verifyConnection } from './supabase';
+import { db, initDatabase } from './database';
 import * as auth from './auth-supabase';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
@@ -86,7 +87,7 @@ app.post('/api/auth/refresh', async (req, res) => {
         }
 
         const result = await auth.refreshToken(token);
-        
+
         res.json({
             success: true,
             user: result.user,
@@ -94,9 +95,9 @@ app.post('/api/auth/refresh', async (req, res) => {
         });
     } catch (error: any) {
         console.error('Refresh token error:', error);
-        res.status(401).json({ 
+        res.status(401).json({
             success: false,
-            error: error.message || 'Token refresh failed' 
+            error: error.message || 'Token refresh failed'
         });
     }
 });
@@ -139,7 +140,6 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
 
                 // Import chatbot dynamically
                 const { GeminiChatbot } = await import('../lib/ai/gemini-client');
-                const { ChatTools } = await import('../lib/ai/chat-tools');
 
                 // Build context
                 const chatContext = {
@@ -156,7 +156,7 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
                 const chatbot = new GeminiChatbot();
                 await chatbot.initializeChat(chatContext, []);
 
-                // Send message
+                // Send message via Gemini
                 const response = await chatbot.sendMessage(message, chatContext);
 
                 res.json({
@@ -185,8 +185,9 @@ const startServer = async () => {
             throw new Error('Failed to connect to Supabase');
         }
 
-        // Note: MCP, deployment, and SDK tables are already in Supabase
-        // No need to initialize them here
+        // Initialize local SQLite for modules/marketplace/SDK local features
+        console.log('🗄️ Initializing local SQLite (for marketplace/SDK)...');
+        initDatabase();
         console.log('✅ Supabase connection verified');
 
         // Register Auth routes
@@ -346,10 +347,10 @@ const startServer = async () => {
         app.use('/api/admin', createAdminRouter(supabase));
         console.log('  ✓ /api/admin');
 
-        app.use('/api/marketplace', createMarketplaceRouter(supabase));
+        app.use('/api/marketplace', createMarketplaceRouter(db));
         console.log('  ✓ /api/marketplace');
 
-        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(supabase));
+        app.use('/api/global-marketplace', createGlobalMarketplaceRouter(db));
         console.log('  ✓ /api/global-marketplace');
 
         app.use('/api/widgets', createWidgetsRouter(supabase));

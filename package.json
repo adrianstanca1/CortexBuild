@@ -4,11 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "next dev",
+    "start": "next start",
+    "dev:vite": "vite",
     "server": "tsx --env-file=.env server/index.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "build": "vite build",
-    "preview": "vite preview",
+    "build": "next build",
+    "preview": "next build && next start -p 3000",
     "deploy": "npm run build && node deploy-ionos.cjs",
     "vercel:dev": "vercel dev",
     "vercel:deploy": "vercel",
@@ -18,9 +20,17 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
-    "scan:secrets": "bash scripts/scan-secrets.sh"
+    "e2e": "playwright test",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "scan:secrets": "bash scripts/scan-secrets.sh",
+    "db:verify:supabase": "tsx scripts/verify-supabase.ts",
+    "db:init:sqlite": "tsx scripts/sqlite-init.ts"
   },
   "dependencies": {
+    "next": "15.1.6",
+    "@tanstack/react-query": "5.59.16",
+    "next-themes": "0.3.0",
     "@google/genai": "^1.22.0",
     "@google/generative-ai": "0.24.1",
     "@monaco-editor/react": "4.7.0",
@@ -57,6 +67,7 @@
     "ws": "8.18.3"
   },
   "devDependencies": {
+    "@playwright/test": "1.48.2",
     "@eslint/js": "9.37.0",
     "@tailwindcss/postcss": "4.1.14",
     "@testing-library/dom": "10.4.1",

@@ -7,9 +7,17 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get Supabase credentials from environment variables ONLY
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabasePublishableKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY) as string;
+// Get Supabase credentials from environment variables (Next.js or Vite)
+const nextPublicUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL as string) || '';
+const nextPublicAnon = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string) || '';
+// Fallback to Vite env if running under Vite
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const viteEnv: any = (typeof import.meta !== 'undefined' && (import.meta as any).env) ? (import.meta as any).env : {};
+const viteUrl = (viteEnv.VITE_SUPABASE_URL as string) || '';
+const viteAnon = (viteEnv.VITE_SUPABASE_ANON_KEY as string) || (viteEnv.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY as string) || '';
+
+const supabaseUrl = nextPublicUrl || viteUrl;
+const supabasePublishableKey = nextPublicAnon || viteAnon;
 
 if (!supabaseUrl) {
   console.error('❌ Missing Supabase URL!');

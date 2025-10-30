@@ -217,8 +217,8 @@ export const useDatabaseOperations = () => {
     delete: (table: string, filters: any) =>
       db.delete(table, filters),
 
-    // Transaction support
-    transaction: <T>(callback: () => Promise<T>) => db.transaction(callback),
+    // Transaction support (avoid TSX generic parsing)
+    transaction: (callback: () => Promise<any>) => db.transaction(callback),
 
     // Health check
     healthCheck: () => db.healthCheck(),
