@@ -92,9 +92,7 @@
     "rimraf": "^4.4.1",
     "gauge": "^5.0.1",
     "are-we-there-yet": "^4.0.2",
-    "caniuse-lite": "^1.0.30001679",
-    "browserslist": "^4.24.2",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6"
+    "caniuse-lite": "^1.0.30001687",
+    "browserslist": "^4.24.2"
   }
 }
