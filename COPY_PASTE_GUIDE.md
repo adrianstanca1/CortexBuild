@@ -15,7 +15,7 @@ SUPABASE_URL
 
 **Value to copy:**
 ```
-https://zpbuvuxpfemldsknerew.supabase.co
+<YOUR_SUPABASE_URL>
 ```
 
 ---
@@ -29,7 +29,7 @@ SUPABASE_SERVICE_KEY
 
 **Value to copy:**
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik
+<YOUR_SUPABASE_SERVICE_KEY>
 ```
 
 ---
@@ -52,8 +52,8 @@ cortexbuild-prod-secret-key-2025
 
 | # | Name | Value |
 |---|------|-------|
-| 1 | SUPABASE_URL | https://zpbuvuxpfemldsknerew.supabase.co |
-| 2 | SUPABASE_SERVICE_KEY | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik |
+| 1 | SUPABASE_URL | <YOUR_SUPABASE_URL> |
+| 2 | SUPABASE_SERVICE_KEY | <YOUR_SUPABASE_SERVICE_KEY> |
 | 3 | JWT_SECRET | cortexbuild-prod-secret-key-2025 |
 
 ---

@@ -60,8 +60,8 @@ All code fixes have been implemented and deployed. The remaining steps are manua
 **Problem:** API functions need environment variables to connect to Supabase.
 
 **Required Variables:**
-- `SUPABASE_URL` = `https://zpbuvuxpfemldsknerew.supabase.co`
-- `SUPABASE_SERVICE_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik`
+- `SUPABASE_URL` = `<YOUR_SUPABASE_URL>`
+- `SUPABASE_SERVICE_KEY` = `<YOUR_SUPABASE_SERVICE_KEY>`
 - `JWT_SECRET` = `cortexbuild-prod-secret-key-2025`
 
 **Solution:** Set in Vercel Settings → Environment Variables

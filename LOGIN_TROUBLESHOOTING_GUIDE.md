@@ -21,7 +21,7 @@ The frontend was attempting to call `/api/auth/login` as a relative URL, which r
 **Impact:** Tells Vercel to deploy TypeScript files in `/api` directory as serverless functions
 
 ### 2. ✅ CORS Headers (Commit: 4231ddc)
-**Files:** 
+**Files:**
 - `api/auth/login.ts`
 - `api/auth/register.ts`
 - `api/auth/verify.ts`
@@ -58,7 +58,7 @@ if (req.method === 'OPTIONS') {
 You must set these environment variables in Vercel:
 
 1. **SUPABASE_URL**
-   - Value: `https://zpbuvuxpfemldsknerew.supabase.co`
+   - Value: `<YOUR_SUPABASE_URL>`
    - Source: Supabase project settings
 
 2. **SUPABASE_SERVICE_KEY**
@@ -86,7 +86,7 @@ You must set these environment variables in Vercel:
 
 ### Step 3: Verify Deployment
 1. Wait for Vercel to redeploy (check deployment status)
-2. Test login at: https://cortex-build-mcnrk7yba-adrian-b7e84541.vercel.app
+2. Test login at your deployed Vercel URL
 3. Use credentials:
    - Email: `adrian.stanca1@gmail.com`
    - Password: `password123`
@@ -131,7 +131,7 @@ curl -X POST https://cortex-build-mcnrk7yba-adrian-b7e84541.vercel.app/api/auth/
 ## Troubleshooting Common Issues
 
 ### Issue: Still getting 405 error
-**Solution:** 
+**Solution:**
 - Verify Vercel deployment completed
 - Check that `vercel.json` includes the `functions` configuration
 - Clear browser cache and try again
@@ -139,7 +139,7 @@ curl -X POST https://cortex-build-mcnrk7yba-adrian-b7e84541.vercel.app/api/auth/
 ### Issue: 500 error with "Missing Supabase credentials"
 **Solution:**
 - Verify environment variables are set in Vercel dashboard
-- Check that `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` are correct
+   - Check that `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` are correctly set (no secrets in repo)
 - Redeploy after setting environment variables
 
 ### Issue: 401 "Invalid credentials"

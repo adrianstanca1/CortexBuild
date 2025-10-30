@@ -21,7 +21,7 @@ SUPABASE_URL
 
 ### Value (Copy this):
 ```
-https://zpbuvuxpfemldsknerew.supabase.co
+<YOUR_SUPABASE_URL>
 ```
 
 ---
@@ -35,7 +35,7 @@ SUPABASE_SERVICE_KEY
 
 ### Value (Copy this):
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik
+<YOUR_SUPABASE_SERVICE_KEY>
 ```
 
 ---
@@ -58,8 +58,8 @@ cortexbuild-prod-secret-key-2025
 
 | Variable Name | Value |
 |---|---|
-| SUPABASE_URL | https://zpbuvuxpfemldsknerew.supabase.co |
-| SUPABASE_SERVICE_KEY | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik |
+| SUPABASE_URL | <YOUR_SUPABASE_URL> |
+| SUPABASE_SERVICE_KEY | <YOUR_SUPABASE_SERVICE_KEY> |
 | JWT_SECRET | cortexbuild-prod-secret-key-2025 |
 
 ---
@@ -108,9 +108,9 @@ cortexbuild-prod-secret-key-2025
 
 After adding all three variables, verify:
 
-- [ ] SUPABASE_URL is set to: `https://zpbuvuxpfemldsknerew.supabase.co`
+- [ ] SUPABASE_URL is set to: `<YOUR_SUPABASE_URL>`
 - [ ] SUPABASE_SERVICE_KEY is set to: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` (long JWT token)
-- [ ] JWT_SECRET is set to: `cortexbuild-prod-secret-key-2025`
+- [ ] JWT_SECRET is set to a strong random value
 - [ ] All three variables show in the Environment Variables list
 - [ ] All three have checkmarks for Production, Preview, Development
 

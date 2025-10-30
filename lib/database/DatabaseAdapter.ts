@@ -12,8 +12,8 @@ export interface DatabaseConfig {
     path: string;
   };
   supabase?: {
-    url: string;
-    anonKey: string;
+    url: string; // from env only
+    anonKey: string; // from env only
     serviceKey?: string;
   };
 }
@@ -72,7 +72,7 @@ export interface IDatabaseAdapter {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   isConnected(): boolean;
-  
+
   // Generic CRUD Operations
   select<T = any>(table: string, filters?: Record<string, any>, options?: {
     limit?: number;
@@ -80,45 +80,45 @@ export interface IDatabaseAdapter {
     orderBy?: string;
     orderDirection?: 'asc' | 'desc';
   }): Promise<QueryResult<T[]>>;
-  
+
   selectOne<T = any>(table: string, filters: Record<string, any>): Promise<QueryResult<T>>;
-  
+
   insert<T = any>(table: string, data: Record<string, any>): Promise<QueryResult<T>>;
-  
+
   update<T = any>(table: string, filters: Record<string, any>, data: Record<string, any>): Promise<QueryResult<T>>;
-  
+
   delete(table: string, filters: Record<string, any>): Promise<QueryResult<void>>;
-  
+
   // User Operations
   findUserByEmail(email: string): Promise<QueryResult<User>>;
   findUserById(id: string): Promise<QueryResult<User>>;
   createUser(user: Partial<User>): Promise<QueryResult<User>>;
   updateUser(id: string, data: Partial<User>): Promise<QueryResult<User>>;
-  
+
   // Company Operations
   findCompanyById(id: string): Promise<QueryResult<Company>>;
   findCompanyByName(name: string): Promise<QueryResult<Company>>;
   createCompany(company: Partial<Company>): Promise<QueryResult<Company>>;
   updateCompany(id: string, data: Partial<Company>): Promise<QueryResult<Company>>;
   listCompanies(filters?: Record<string, any>): Promise<QueryResult<Company[]>>;
-  
+
   // Project Operations
   findProjectById(id: string | number): Promise<QueryResult<Project>>;
   listProjects(companyId: string, filters?: Record<string, any>): Promise<QueryResult<Project[]>>;
   createProject(project: Partial<Project>): Promise<QueryResult<Project>>;
   updateProject(id: string | number, data: Partial<Project>): Promise<QueryResult<Project>>;
   deleteProject(id: string | number): Promise<QueryResult<void>>;
-  
+
   // Transaction Support
   transaction<T>(callback: () => Promise<T>): Promise<T>;
-  
+
   // Real-time Subscriptions (Supabase only, no-op for SQLite)
   subscribe?(table: string, callback: (payload: any) => void): () => void;
-  
+
   // Migration & Sync
   exportData?(): Promise<Record<string, any[]>>;
   importData?(data: Record<string, any[]>): Promise<void>;
-  
+
   // Health Check
   healthCheck(): Promise<boolean>;
 }

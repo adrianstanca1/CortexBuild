@@ -10,11 +10,11 @@ You need to add **3 environment variables** to your Vercel project. I've created
 
 ### 1️⃣ SUPABASE_URL
 - **Name:** `SUPABASE_URL`
-- **Value:** `https://zpbuvuxpfemldsknerew.supabase.co`
+- **Value:** `<YOUR_SUPABASE_URL>`
 
 ### 2️⃣ SUPABASE_SERVICE_KEY
 - **Name:** `SUPABASE_SERVICE_KEY`
-- **Value:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik`
+- **Value:** `<YOUR_SUPABASE_SERVICE_KEY>`
 
 ### 3️⃣ JWT_SECRET
 - **Name:** `JWT_SECRET`

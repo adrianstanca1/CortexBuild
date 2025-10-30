@@ -5,12 +5,12 @@
   "variables": [
     {
       "name": "SUPABASE_URL",
-      "value": "https://zpbuvuxpfemldsknerew.supabase.co",
+      "value": "<YOUR_SUPABASE_URL>",
       "description": "Supabase project URL"
     },
     {
       "name": "SUPABASE_SERVICE_KEY",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik",
+      "value": "<YOUR_SUPABASE_SERVICE_KEY>",
       "description": "Supabase service role key (JWT token)"
     },
     {

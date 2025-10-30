@@ -22,18 +22,18 @@ export interface DatabaseEnvironmentConfig {
  */
 export function getDatabaseMode(): DatabaseMode {
   const mode = import.meta.env.VITE_DATABASE_MODE;
-  
+
   // Default to Supabase for browser environment
   if (mode === 'sqlite' || mode === 'supabase') {
     return mode;
   }
-  
+
   // Check localStorage for user preference
   const storedMode = localStorage.getItem('cortexbuild_db_mode');
   if (storedMode === 'sqlite' || storedMode === 'supabase') {
     return storedMode;
   }
-  
+
   return 'supabase'; // Default
 }
 
@@ -44,9 +44,8 @@ export function getDatabaseConfig(): DatabaseEnvironmentConfig {
   return {
     mode: getDatabaseMode(),
     supabase: {
-      url: import.meta.env.VITE_SUPABASE_URL || 'https://zpbuvuxpfemldsknerew.supabase.co',
-      anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 
-               import.meta.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY || '',
+      url: import.meta.env.VITE_SUPABASE_URL || '',
+      anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY || '',
       serviceKey: import.meta.env.SUPABASE_SERVICE_KEY,
     },
     sqlite: {

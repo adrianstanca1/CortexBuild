@@ -27,7 +27,7 @@ async function syncDatabases(direction: SyncDirection = 'bidirectional') {
   const supabaseConfig: DatabaseConfig = {
     mode: 'supabase',
     supabase: {
-      url: process.env.VITE_SUPABASE_URL || 'https://zpbuvuxpfemldsknerew.supabase.co',
+      url: process.env.VITE_SUPABASE_URL || '',
       anonKey: process.env.VITE_SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY || '',
       serviceKey: process.env.SUPABASE_SERVICE_KEY,
     },

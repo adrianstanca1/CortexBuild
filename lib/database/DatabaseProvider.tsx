@@ -32,19 +32,19 @@ interface DatabaseProviderProps {
   initialMode?: DatabaseMode;
 }
 
-export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ 
-  children, 
-  initialMode 
+export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
+  children,
+  initialMode
 }) => {
   // Determine initial mode from environment or prop
   const getInitialMode = (): DatabaseMode => {
     if (initialMode) return initialMode;
-    
+
     const envMode = import.meta.env.VITE_DATABASE_MODE as DatabaseMode;
     if (envMode === 'sqlite' || envMode === 'supabase') {
       return envMode;
     }
-    
+
     // Default to Supabase for browser environment
     return 'supabase';
   };
@@ -59,7 +59,7 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
 
     if (dbMode === 'supabase') {
       config.supabase = {
-        url: import.meta.env.VITE_SUPABASE_URL || 'https://zpbuvuxpfemldsknerew.supabase.co',
+        url: import.meta.env.VITE_SUPABASE_URL || '',
         anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY || '',
         serviceKey: import.meta.env.SUPABASE_SERVICE_KEY,
       };
@@ -79,17 +79,17 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
   const connectToDatabase = async (dbMode: DatabaseMode) => {
     try {
       const dbInstance = createDatabaseInstance(dbMode);
-      
+
       if (!dbInstance) {
         throw new Error(`Failed to create database instance for mode: ${dbMode}`);
       }
 
       await dbInstance.connect();
-      
+
       setDb(dbInstance);
       setMode(dbMode);
       setIsConnected(true);
-      
+
       console.log(`✅ Connected to ${dbMode} database`);
     } catch (error) {
       console.error(`❌ Failed to connect to ${dbMode} database:`, error);
@@ -124,10 +124,10 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
 
       // Connect to new database
       await connectToDatabase(newMode);
-      
+
       // Store preference in localStorage
       localStorage.setItem('cortexbuild_db_mode', newMode);
-      
+
       console.log(`🔄 Switched to ${newMode} database`);
     } catch (error) {
       console.error(`❌ Failed to switch to ${newMode} database:`, error);
@@ -190,36 +190,36 @@ export const useDatabaseOperations = () => {
     findUserById: (id: string) => db.findUserById(id),
     createUser: (user: any) => db.createUser(user),
     updateUser: (id: string, data: any) => db.updateUser(id, data),
-    
+
     // Company operations
     findCompanyById: (id: string) => db.findCompanyById(id),
     findCompanyByName: (name: string) => db.findCompanyByName(name),
     createCompany: (company: any) => db.createCompany(company),
     updateCompany: (id: string, data: any) => db.updateCompany(id, data),
     listCompanies: (filters?: any) => db.listCompanies(filters),
-    
+
     // Project operations
     findProjectById: (id: string | number) => db.findProjectById(id),
     listProjects: (companyId: string, filters?: any) => db.listProjects(companyId, filters),
     createProject: (project: any) => db.createProject(project),
     updateProject: (id: string | number, data: any) => db.updateProject(id, data),
     deleteProject: (id: string | number) => db.deleteProject(id),
-    
+
     // Generic operations
-    select: <T = any>(table: string, filters?: any, options?: any) => 
+    select: <T = any>(table: string, filters?: any, options?: any) =>
       db.select<T>(table, filters, options),
-    selectOne: <T = any>(table: string, filters: any) => 
+    selectOne: <T = any>(table: string, filters: any) =>
       db.selectOne<T>(table, filters),
-    insert: <T = any>(table: string, data: any) => 
+    insert: <T = any>(table: string, data: any) =>
       db.insert<T>(table, data),
-    update: <T = any>(table: string, filters: any, data: any) => 
+    update: <T = any>(table: string, filters: any, data: any) =>
       db.update<T>(table, filters, data),
-    delete: (table: string, filters: any) => 
+    delete: (table: string, filters: any) =>
       db.delete(table, filters),
-    
+
     // Transaction support
     transaction: <T>(callback: () => Promise<T>) => db.transaction(callback),
-    
+
     // Health check
     healthCheck: () => db.healthCheck(),
   };

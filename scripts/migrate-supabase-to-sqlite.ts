@@ -16,7 +16,7 @@ async function migrateSupabaseToSQLite() {
   const supabaseConfig: DatabaseConfig = {
     mode: 'supabase',
     supabase: {
-      url: process.env.VITE_SUPABASE_URL || 'https://zpbuvuxpfemldsknerew.supabase.co',
+      url: process.env.VITE_SUPABASE_URL || '',
       anonKey: process.env.VITE_SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY || '',
       serviceKey: process.env.SUPABASE_SERVICE_KEY,
     },
@@ -46,7 +46,7 @@ async function migrateSupabaseToSQLite() {
     // Export data from Supabase
     console.log('📦 Exporting data from Supabase...');
     const data = await supabaseService.exportData();
-    
+
     // Count total records
     const totalRecords = Object.values(data).reduce((sum, records) => sum + records.length, 0);
     console.log(`✅ Exported ${totalRecords} records from ${Object.keys(data).length} tables\n`);
@@ -69,7 +69,7 @@ async function migrateSupabaseToSQLite() {
 
     for (const [table, records] of Object.entries(data)) {
       const { data: sqliteRecords, error } = await sqliteService.select(table);
-      
+
       if (error) {
         console.log(`   ❌ ${table}: Error verifying (${error.message})`);
         verificationPassed = false;

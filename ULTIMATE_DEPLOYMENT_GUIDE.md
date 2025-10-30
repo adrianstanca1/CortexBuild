@@ -46,14 +46,14 @@ cp .env.example .env.local
 VITE_DATABASE_MODE=supabase
 
 # Supabase Configuration
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_URL=<YOUR_SUPABASE_URL>
+VITE_SUPABASE_ANON_KEY=<YOUR_SUPABASE_ANON_KEY>
 SUPABASE_SERVICE_KEY=your-service-key
 
 # AI Services (all optional, enable what you have)
-VITE_OPENAI_API_KEY=sk-...
-VITE_GOOGLE_GEMINI_API_KEY=AI...
-VITE_ANTHROPIC_API_KEY=sk-ant-...
+VITE_OPENAI_API_KEY=<YOUR_OPENAI_KEY>
+VITE_GOOGLE_GEMINI_API_KEY=<YOUR_GEMINI_KEY>
+VITE_ANTHROPIC_API_KEY=<YOUR_ANTHROPIC_KEY>
 
 # Feature Flags (all enabled by default)
 VITE_ENABLE_DESKTOP_MODE=true

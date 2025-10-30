@@ -15,7 +15,7 @@ SUPABASE_URL
 
 **Copy the Value:**
 ```
-https://zpbuvuxpfemldsknerew.supabase.co
+<YOUR_SUPABASE_URL>
 ```
 
 ---
@@ -29,7 +29,7 @@ SUPABASE_SERVICE_KEY
 
 **Copy the Value:**
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik
+<YOUR_SUPABASE_SERVICE_KEY>
 ```
 
 ---

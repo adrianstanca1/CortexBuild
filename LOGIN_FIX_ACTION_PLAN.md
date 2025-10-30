@@ -31,13 +31,13 @@
 
    **Variable 1: SUPABASE_URL**
    - Name: `SUPABASE_URL`
-   - Value: `https://zpbuvuxpfemldsknerew.supabase.co`
+   - Value: `<YOUR_SUPABASE_URL>`
    - Environments: Production, Preview, Development
    - Click **Save**
 
    **Variable 2: SUPABASE_SERVICE_KEY**
    - Name: `SUPABASE_SERVICE_KEY`
-   - Value: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjExNDMxNywiZXhwIjoyMDcxNjkwMzE3fQ.gY8kq22SiOxULPdpdhf-sz-C7V9hC2ZtPy5003UYsik`
+   - Value: `<YOUR_SUPABASE_SERVICE_KEY>`
    - Environments: Production, Preview, Development
    - Click **Save**
 
@@ -165,7 +165,7 @@ Once testing is complete and login works:
 
 ### Issue: 401 Unauthorized
 **Cause:** Invalid credentials or Supabase issue
-**Solution:** 
+**Solution:**
 - Verify email/password are correct
 - Check Supabase database for user
 - Check RPC function exists
@@ -176,7 +176,7 @@ Once testing is complete and login works:
 
 ### Issue: Environment Variables Not Working
 **Cause:** Variables not set in Vercel or redeployment not triggered
-**Solution:** 
+**Solution:**
 - Verify variables in Vercel Settings
 - Trigger redeployment
 - Wait for deployment to complete
