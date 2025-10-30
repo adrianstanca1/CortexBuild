@@ -115,7 +115,7 @@ CortexBuild is a revolutionary construction industry platform combining:
 ## 📦 **Installation**
 
 ### **Prerequisites**
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Supabase account (paid plan recommended)
 
@@ -150,13 +150,13 @@ VITE_API_URL=http://localhost:5000
 4. Update password hashes:
 
 ```sql
-UPDATE users SET password_hash = crypt('parola123', gen_salt('bf', 10)) 
+UPDATE users SET password_hash = crypt('parola123', gen_salt('bf', 10))
 WHERE email = 'adrian.stanca1@gmail.com';
 
-UPDATE users SET password_hash = crypt('lolozania1', gen_salt('bf', 10)) 
+UPDATE users SET password_hash = crypt('lolozania1', gen_salt('bf', 10))
 WHERE email = 'adrian@ascladdingltd.co.uk';
 
-UPDATE users SET password_hash = crypt('password123', gen_salt('bf', 10)) 
+UPDATE users SET password_hash = crypt('password123', gen_salt('bf', 10))
 WHERE email = 'adrian.stanca1@icloud.com';
 ```
 
@@ -238,19 +238,23 @@ CortexBuild/
 ### **Available Scripts**
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
+npm run dev          # Start Next.js development server
+npm run build        # Build for production (Next.js)
+npm run start        # Start production server
 npm run server       # Start backend server
 npm run lint         # Run ESLint
+npm run typecheck    # Run TypeScript checks
+npm test             # Run unit tests (Jest)
+npm run e2e          # Run E2E tests (Playwright)
 ```
 
 ### **Environment Variables**
 
 **Frontend (.env.local):**
-- `VITE_SUPABASE_URL` - Supabase project URL
-- `VITE_SUPABASE_ANON_KEY` - Supabase anon key
-- `VITE_API_URL` - Backend API URL
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+- `NEXT_PUBLIC_API_URL` - Backend API URL
+- (legacy) `VITE_*` vars still supported for compatibility
 
 **Backend:**
 - `SUPABASE_SERVICE_KEY` - Supabase service role key
@@ -330,6 +334,6 @@ MIT License - See LICENSE file for details
 
 ---
 
-**Last Updated:** 2025-10-14  
+**Last Updated:** 2025-10-14
 **Version:** 1.0.0 (Supabase Production)
 

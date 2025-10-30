@@ -44,7 +44,9 @@ export class GeminiChatbot {
     private chatSession: ChatSession | null = null;
 
     constructor() {
-        const apiKey = process.env.GEMINI_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY
+            || process.env.GOOGLE_AI_API_KEY
+            || process.env.VITE_GOOGLE_GEMINI_API_KEY;
         if (!apiKey) {
             throw new Error('GEMINI_API_KEY is not configured');
         }
@@ -68,7 +70,7 @@ export class GeminiChatbot {
      */
     async initializeChat(context: ChatContext, history: ChatMessage[] = []): Promise<void> {
         const systemPrompt = this.buildSystemPrompt(context);
-        
+
         // Convert history to Gemini format
         const geminiHistory = history.map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
@@ -101,7 +103,7 @@ export class GeminiChatbot {
         try {
             // Add context to message if needed
             const enhancedMessage = this.enhanceMessageWithContext(message, context);
-            
+
             const result = await this.chatSession!.sendMessage(enhancedMessage);
             const response = result.response;
             const text = response.text();
@@ -256,7 +258,7 @@ Ești gata să ajuți utilizatorul ${context.userName}!`;
     private extractToolCalls(text: string): ToolCall[] {
         const toolCalls: ToolCall[] = [];
         const regex = /\[TOOL_CALL:\s*(\w+)\]\s*({[\s\S]*?})\s*\[\/TOOL_CALL\]/g;
-        
+
         let match;
         while ((match = regex.exec(text)) !== null) {
             try {

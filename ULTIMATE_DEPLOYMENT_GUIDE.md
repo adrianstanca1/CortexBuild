@@ -105,6 +105,27 @@ SET password_hash = crypt('password123', gen_salt('bf', 10))
 WHERE email = 'adrian.stanca1@icloud.com';
 ```
 
+### 2.4 Automate Setup (Optional)
+
+You can bootstrap Supabase schema and seed data using the included tooling:
+
+```bash
+# Option A: Run the consolidated SQL schema manually (recommended for production)
+#   Location: supabase/COMPLETE_SCHEMA.sql
+
+# Option B: Use the helper script (local/dev convenience)
+node setup-supabase.ts
+
+# Or via npm script if available
+npx tsx setup-supabase.ts
+```
+
+Verify connectivity from backend to Supabase (locally):
+
+```bash
+curl -sS http://localhost:3001/api/health | jq
+```
+
 ---
 
 ## Step 3: Local Testing
@@ -177,6 +198,24 @@ VITE_ENABLE_MARKETPLACE=true
 VITE_ENABLE_REALTIME=true
 ```
 
+### 4.4.1 If Using a Separate Backend (Render/Other)
+
+When deploying the backend separately, set `VITE_API_URL` in Vercel so the frontend calls the external API base:
+
+```
+VITE_API_URL=https://your-backend.onrender.com/api
+```
+
+Optionally add a `vercel.json` to proxy certain routes during preview or to provide fallbacks:
+
+```json
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://your-backend.onrender.com/api/:path*" }
+  ]
+}
+```
+
 ### 4.4 Deploy
 
 **Via CLI:**
@@ -187,6 +226,47 @@ vercel --prod
 **Via Dashboard:**
 - Push to your repository's main branch
 - Vercel will auto-deploy
+
+---
+
+## Step 4B: Backend Deployment (Render.com)
+
+### 4B.1 Create a Web Service
+
+1. Go to Render → New → Web Service
+2. Connect to your GitHub repo (or deploy from Docker if preferred)
+3. Environment: Node 18
+4. Build Command: `npm install`
+5. Start Command: `npm run server`
+
+### 4B.2 Environment Variables (Backend)
+
+Required for full functionality:
+
+```
+PORT=3001
+NODE_ENV=production
+
+# Supabase
+VITE_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+
+# JWT
+JWT_SECRET=your_secure_jwt_secret_min_32_chars
+
+# CORS
+ALLOWED_ORIGIN=https://your-frontend.vercel.app
+```
+
+Optional:
+
+```
+OPENAI_API_KEY=
+GOOGLE_AI_API_KEY=
+ANTHROPIC_API_KEY=
+```
+
+After deploy, note your backend URL, e.g. `https://your-backend.onrender.com`. If the frontend is on Vercel, set `VITE_API_URL` to `https://your-backend.onrender.com/api`.
 
 ---
 
@@ -244,6 +324,24 @@ After deployment, verify all features work:
 - [ ] **Real-time** - Notifications work
 - [ ] **Mobile Responsive** - Works on mobile devices
 
+### 6.1 Fast Verification Commands
+
+```bash
+# Backend health
+curl -sS https://your-backend.onrender.com/api/health | jq
+
+# Auth: login (returns token)
+curl -sS -X POST \
+  https://your-backend.onrender.com/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}' | jq
+
+# Example: projects (requires token)
+TOKEN="$(curl -sS -X POST https://your-backend.onrender.com/api/auth/login -H 'Content-Type: application/json' -d '{"email":"adrian.stanca1@gmail.com","password":"parola123"}' | jq -r .token)"
+curl -sS https://your-backend.onrender.com/api/projects \
+  -H "Authorization: Bearer $TOKEN" | jq
+```
+
 ---
 
 ## Step 7: Performance Optimization
@@ -280,6 +378,11 @@ For any images you add:
 - Check Supabase project is active
 - Confirm anon key is correct
 
+### Issue: "CORS blocked"
+**Solution:**
+- Ensure backend `ALLOWED_ORIGIN` includes your Vercel domain
+- Confirm backend CORS middleware allows credentials and correct origin
+
 ### Issue: "AI features not working"
 **Solution:**
 - Verify API keys are set
@@ -297,6 +400,12 @@ For any images you add:
 - Check Node version (18.x)
 - Clear node_modules: `rm -rf node_modules package-lock.json && npm install`
 - Check for TypeScript errors: `npm run lint`
+
+### Issue: "Login works locally but fails on Vercel"
+**Solution:**
+- If using separate backend, ensure `VITE_API_URL` is set in Vercel
+- If using Vercel serverless only, do not set `VITE_API_URL` (frontend will use `/api`)
+- Verify server URL and HTTPS
 
 ---
 
@@ -318,6 +427,74 @@ For any images you add:
 - Feature usage analysis
 
 ---
+
+## CI/CD Examples
+
+### GitHub Actions: Vercel Frontend Deploy
+
+```yaml
+name: Deploy Frontend
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run build
+      - name: Vercel Deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: .
+          prod: true
+```
+
+### GitHub Actions: Render Backend Deploy (via Deploy Hook)
+
+```yaml
+name: Deploy Backend
+on:
+  push:
+    paths:
+      - 'server/**'
+      - 'package.json'
+      - 'package-lock.json'
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Render Deploy Hook
+        run: |
+          curl -sS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+```
+
+---
+
+## Environment Variable Matrix
+
+| Scope      | Variable                   | Local Dev                        | Vercel (Frontend)                         | Render (Backend)                        |
+|------------|----------------------------|----------------------------------|-------------------------------------------|-----------------------------------------|
+| Frontend   | VITE_DATABASE_MODE         | supabase                         | supabase                                  | n/a                                     |
+| Frontend   | VITE_SUPABASE_URL          | your Supabase URL                | your Supabase URL                         | n/a                                     |
+| Frontend   | VITE_SUPABASE_ANON_KEY     | your Supabase anon key           | your Supabase anon key                    | n/a                                     |
+| Frontend   | VITE_API_URL               | http://localhost:3001/api        | https://your-backend.onrender.com/api     | n/a                                     |
+| Backend    | SUPABASE_SERVICE_KEY       | service role key (secure)        | n/a                                       | service role key (secure)               |
+| Backend    | JWT_SECRET                 | dev secret (>=32 chars)          | n/a                                       | strong secret (>=32 chars)              |
+| Backend    | PORT                       | 3001                             | n/a                                       | 3001                                    |
+| Backend    | ALLOWED_ORIGIN             | http://localhost:3000            | n/a                                       | https://your-frontend.vercel.app        |
+| Optional   | OPENAI_API_KEY             | key or empty                     | set if used                               | set if used                              |
+| Optional   | GOOGLE_AI_API_KEY          | key or empty                     | set if used                               | set if used                              |
+| Optional   | ANTHROPIC_API_KEY          | key or empty                     | set if used                               | set if used                              |
 
 ## Scaling for Production
 

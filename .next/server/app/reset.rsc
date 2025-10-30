@@ -1,0 +1,20 @@
+1:"$Sreact.fragment"
+2:I[1241,["190","static/chunks/190-d0dd0ff3d3610657.js","177","static/chunks/app/layout-6453d4be385ed9cb.js"],"Providers"]
+3:I[5244,[],""]
+4:I[8725,["39","static/chunks/app/error-a8f07abe6a951ce1.js"],"default"]
+5:I[3866,[],""]
+6:I[8173,["345","static/chunks/app/not-found-28345dc1156fda54.js"],""]
+7:I[7033,[],"ClientPageRoot"]
+8:I[9424,["486","static/chunks/app/(auth)/reset/page-cf466bc5fc066509.js"],"default"]
+b:I[6213,[],"OutletBoundary"]
+d:I[6213,[],"MetadataBoundary"]
+f:I[6213,[],"ViewportBoundary"]
+11:I[4835,[],""]
+:HL["/_next/static/media/e4af272ccee01ff0-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/css/f1fd1987b4ef5db3.css","style"]
+0:{"P":null,"b":"zIMis2g1cAI5XH1P5NlKZ","p":"","c":["","reset"],"i":false,"f":[[["",{"children":["(auth)",{"children":["reset",{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/f1fd1987b4ef5db3.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","children":["$","body",null,{"className":"__className_f367f3","children":["$","$L2",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$4","errorStyles":[],"errorScripts":[],"template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[],["$","div",null,{"className":"min-h-screen flex items-center justify-center p-6 text-center","children":["$","div",null,{"children":[["$","h1",null,{"className":"text-3xl font-bold","children":"404 - Page Not Found"}],["$","p",null,{"className":"mt-2 text-gray-600","children":"The page you are looking for does not exist."}],["$","$L6",null,{"href":"/","className":"inline-block mt-4 text-blue-600 underline","children":"Go home"}]]}]}]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]}]]}],{"children":["(auth)",["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","segmentPath":["children","(auth)","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["reset",["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","segmentPath":["children","(auth)","children","reset","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","$L7",null,{"Component":"$8","searchParams":{},"params":{},"promises":["$@9","$@a"]}],null,["$","$Lb",null,{"children":"$Lc"}]]}],{},null,false]},null,false]},null,false]},[["$","div","l",{"className":"min-h-screen flex items-center justify-center p-6","children":["$","div",null,{"className":"animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"}]}],[],[]],false],["$","$1","h",{"children":[null,["$","$1","oznPI211naATV2CMB0j8m",{"children":[["$","$Ld",null,{"children":"$Le"}],["$","$Lf",null,{"children":"$L10"}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}]]}],false]],"m":"$undefined","G":["$11","$undefined"],"s":false,"S":true}
+9:{}
+a:{}
+10:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+e:[["$","meta","0",{"charSet":"utf-8"}],["$","title","1",{"children":"CortexBuild - Quantum Intelligence Platform"}],["$","meta","2",{"name":"description","content":"Advanced AI-powered construction management platform with quantum computing capabilities"}],["$","meta","3",{"name":"author","content":"CortexBuild Team"}],["$","meta","4",{"name":"keywords","content":"AI,construction,quantum computing,project management"}]]
+c:null
