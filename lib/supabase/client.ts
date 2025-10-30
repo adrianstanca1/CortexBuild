@@ -1,27 +1,27 @@
 /**
  * Supabase Client for Frontend
- * 
+ *
  * This module provides a Supabase client configured for client-side use
  * with the publishable key for secure frontend access.
  */
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get Supabase credentials from environment variables
-const supabaseUrl = import.meta.env.REACT_APP_SUPABASE_URL || 'https://zpbuvuxpfemldsknerew.supabase.co';
-const supabasePublishableKey = import.meta.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 'sb_publishable_LJlZdJB0JylgynMF8MCtQw_m0sKjIK3';
+// Get Supabase credentials from environment variables ONLY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabasePublishableKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY) as string;
 
 if (!supabaseUrl) {
   console.error('❌ Missing Supabase URL!');
   console.error('Required environment variables:');
-  console.error('  - REACT_APP_SUPABASE_URL');
+  console.error('  - VITE_SUPABASE_URL');
   throw new Error('Supabase URL not configured');
 }
 
 if (!supabasePublishableKey) {
   console.error('❌ Missing Supabase Publishable Key!');
   console.error('Required environment variables:');
-  console.error('  - REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY');
+  console.error('  - VITE_SUPABASE_ANON_KEY (or REACT_APP_SUPABASE_PUBLISHABLE_DEFAULT_KEY)');
   throw new Error('Supabase Publishable Key not configured');
 }
 
@@ -55,12 +55,12 @@ export const verifyConnection = async () => {
       .from('companies')
       .select('count')
       .limit(1);
-    
+
     if (error) {
       console.error('❌ Supabase connection error:', error);
       return false;
     }
-    
+
     console.log('✅ Supabase connected successfully');
     return true;
   } catch (err) {

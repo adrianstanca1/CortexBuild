@@ -1,0 +1,23 @@
+{
+  "description": "CortexBuild Vercel Environment Variables",
+  "instructions": "Copy each variable name and value into Vercel Settings → Environment Variables",
+  "environments": ["Production", "Preview", "Development"],
+  "variables": [
+    {
+      "name": "SUPABASE_URL",
+      "value": "<YOUR_SUPABASE_URL>",
+      "description": "Supabase project URL"
+    },
+    {
+      "name": "SUPABASE_SERVICE_KEY",
+      "value": "<YOUR_SUPABASE_SERVICE_KEY>",
+      "description": "Supabase service role key (JWT token)"
+    },
+    {
+      "name": "JWT_SECRET",
+      "value": "cortexbuild-prod-secret-key-2025",
+      "description": "JWT secret for token signing"
+    }
+  ]
+}
+

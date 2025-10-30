@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexBuild - AI-Powered Construction Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Animated Gradient Background */
+        .gradient-bg {
+            background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.2);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Pulse Glow */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+            }
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Feature Card Hover */
+        .feature-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        /* Text Gradient */
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Particle Background */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: rise 10s infinite ease-in;
+        }
+
+        @keyframes rise {
+            0% {
+                bottom: -10%;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                bottom: 110%;
+                opacity: 0;
+            }
+        }
+
+        /* Navbar Blur */
+        .navbar-blur {
+            background: rgba(255, 255, 255, 0.8);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 navbar-blur border-b border-white/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl flex items-center justify-center pulse-glow">
+                        <span class="text-xl sm:text-2xl">🧠</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-black text-gradient">CortexBuild</h1>
+                        <p class="text-xs text-gray-600 font-semibold hidden sm:block">AI INTELLIGENCE PLATFORM</p>
+                    </div>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex space-x-6 lg:space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-purple-600 font-medium transition text-sm lg:text-base">Home</a>
+                    <a href="#neural-network" class="text-gray-700 hover:text-purple-600 font-medium transition text-sm lg:text-base">The Neural Network</a>
+                    <a href="#platform-features" class="text-gray-700 hover:text-purple-600 font-medium transition text-sm lg:text-base">Platform Features</a>
+                    <a href="#connectivity" class="text-gray-700 hover:text-purple-600 font-medium transition text-sm lg:text-base">Connectivity</a>
+                    <a href="#developer-platform" class="text-gray-700 hover:text-purple-600 font-medium transition text-sm lg:text-base">Developer Platform</a>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="flex space-x-2 sm:space-x-4">
+                    <button onclick="showAppForLogin()"
+                        class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:shadow-2xl transition transform hover:scale-105 text-sm sm:text-base">
+                        Get Started
+                    </button>
+                    <button onclick="showAppForLogin()"
+                        class="glass text-white px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-bold hover:bg-white/30 transition transform hover:scale-105 text-sm sm:text-base">
+                        Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative min-h-screen flex items-center justify-center gradient-bg overflow-hidden pt-20">
+        <!-- Particles -->
+        <div class="particles">
+            <div class="particle" style="width: 4px; height: 4px; left: 10%; animation-delay: 0s;"></div>
+            <div class="particle" style="width: 6px; height: 6px; left: 20%; animation-delay: 2s;"></div>
+            <div class="particle" style="width: 4px; height: 4px; left: 30%; animation-delay: 4s;"></div>
+            <div class="particle" style="width: 8px; height: 8px; left: 40%; animation-delay: 1s;"></div>
+            <div class="particle" style="width: 4px; height: 4px; left: 50%; animation-delay: 3s;"></div>
+            <div class="particle" style="width: 6px; height: 6px; left: 60%; animation-delay: 5s;"></div>
+            <div class="particle" style="width: 4px; height: 4px; left: 70%; animation-delay: 2s;"></div>
+            <div class="particle" style="width: 8px; height: 8px; left: 80%; animation-delay: 4s;"></div>
+            <div class="particle" style="width: 4px; height: 4px; left: 90%; animation-delay: 1s;"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <!-- Badge -->
+            <div class="inline-flex items-center space-x-2 glass px-6 py-3 rounded-full mb-8 animate-pulse">
+                <span class="text-2xl">🚀</span>
+                <span class="text-white font-semibold">The Future of Construction Intelligence</span>
+            </div>
+
+            <!-- Main Heading -->
+            <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-tight">
+                Build Smarter,<br />
+                <span class="text-yellow-300">Not Harder</span>
+            </h1>
+
+            <!-- Subheading -->
+            <p class="text-lg sm:text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
+                AI-powered construction intelligence platform that gives SMBs the power of enterprise-level tools
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button onclick="showAppForLogin()"
+                    class="glass-dark text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transition transform hover:scale-105 flex items-center space-x-2">
+                    <span>Start Free Trial</span>
+                    <span>→</span>
+                </button>
+                <button onclick="document.getElementById('demo-video').scrollIntoView({behavior: 'smooth'})"
+                    class="glass text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transition transform hover:scale-105">
+                    Watch Demo
+                </button>
+            </div>
+
+            <!-- Floating Dashboard Preview -->
+            <div class="mt-20 float">
+                <div class="glass p-4 rounded-3xl shadow-2xl max-w-5xl mx-auto">
+                    <div class="bg-white rounded-2xl p-8 shadow-xl">
+                        <div class="flex items-center space-x-2 mb-6">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="h-32 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl"></div>
+                            <div class="h-32 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl"></div>
+                            <div class="h-32 bg-gradient-to-br from-green-100 to-green-200 rounded-xl"></div>
+                        </div>
+                        <div class="mt-4 h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-gradient mb-6">Powerful Features</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Everything you need to manage construction projects
+                    with AI-powered intelligence</p>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div
+                    class="feature-card bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-3xl border-2 border-purple-200 hover:border-purple-400">
+                    <div
+                        class="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow">
+                        🤖
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">AI Automation</h3>
+                    <p class="text-gray-600 leading-relaxed">Automate repetitive tasks with intelligent AI agents that
+                        learn from your workflow</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div
+                    class="feature-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl border-2 border-blue-200 hover:border-blue-400">
+                    <div
+                        class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow">
+                        📊
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Real-time Analytics</h3>
+                    <p class="text-gray-600 leading-relaxed">Get instant insights into project performance, costs, and
+                        timelines</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div
+                    class="feature-card bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-3xl border-2 border-green-200 hover:border-green-400">
+                    <div
+                        class="w-16 h-16 bg-gradient-to-br from-green-600 to-green-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow">
+                        🏗️
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Project Management</h3>
+                    <p class="text-gray-600 leading-relaxed">Manage all your projects from one unified, intelligent
+                        platform</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Neural Network Section -->
+    <section id="neural-network" class="py-32 bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-20 w-32 h-32 border border-white/20 rounded-full"></div>
+            <div class="absolute top-40 right-32 w-24 h-24 border border-white/20 rounded-full"></div>
+            <div class="absolute bottom-32 left-1/3 w-16 h-16 border border-white/20 rounded-full"></div>
+            <div class="absolute bottom-20 right-20 w-20 h-20 border border-white/20 rounded-full"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-16 md:mb-20 px-4 sm:px-0">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6">The Neural Network</h2>
+                <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                    Our AI-powered neural network connects construction professionals, automates workflows,
+                    and delivers intelligent insights across your entire operation
+                </p>
+            </div>
+
+            <!-- Neural Network Visualization -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
+                <!-- Network Diagram -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="flex items-center justify-center mb-8">
+                        <div class="relative">
+                            <!-- Central Node -->
+                            <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center pulse-glow">
+                                <span class="text-2xl">🧠</span>
+                            </div>
+                            <!-- Connected Nodes -->
+                            <div class="absolute -top-8 -left-8 w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center">
+                                <span class="text-lg">🏗️</span>
+                            </div>
+                            <div class="absolute -top-8 -right-8 w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                                <span class="text-lg">📊</span>
+                            </div>
+                            <div class="absolute -bottom-8 -left-8 w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+                                <span class="text-lg">👥</span>
+                            </div>
+                            <div class="absolute -bottom-8 -right-8 w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
+                                <span class="text-lg">⚡</span>
+                            </div>
+                            <!-- Connection Lines -->
+                            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 80 80">
+                                <line x1="40" y1="40" x2="16" y2="16" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <line x1="40" y1="40" x2="64" y2="16" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <line x1="40" y1="40" x2="16" y2="64" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <line x1="40" y1="40" x2="64" y2="64" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white text-center mb-4">Intelligent Connections</h3>
+                    <p class="text-white/80 text-center leading-relaxed">
+                        Every component of your construction business is interconnected through our neural network,
+                        creating a unified intelligence that learns and adapts to your specific needs.
+                    </p>
+                </div>
+
+                <!-- Network Features -->
+                <div class="space-y-6">
+                    <div class="glass p-6 rounded-2xl">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                                <span class="text-xl">🔄</span>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-white">Real-time Synchronization</h4>
+                                <p class="text-white/70">All your data syncs instantly across teams and devices</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-2xl">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
+                                <span class="text-xl">🎯</span>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-white">Predictive Analytics</h4>
+                                <p class="text-white/70">AI anticipates issues before they impact your projects</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-2xl">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                                <span class="text-xl">🤖</span>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-white">Automated Workflows</h4>
+                                <p class="text-white/70">Repetitive tasks are handled by intelligent automation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="glass p-6 rounded-2xl">
+                    <div class="text-3xl font-black text-white mb-2">99.9%</div>
+                    <div class="text-white/70">Uptime</div>
+                </div>
+                <div class="glass p-6 rounded-2xl">
+                    <div class="text-3xl font-black text-white mb-2"><50ms</div>
+                    <div class="text-white/70">Response Time</div>
+                </div>
+                <div class="glass p-6 rounded-2xl">
+                    <div class="text-3xl font-black text-white mb-2">10M+</div>
+                    <div class="text-white/70">Data Points</div>
+                </div>
+                <div class="glass p-6 rounded-2xl">
+                    <div class="text-3xl font-black text-white mb-2">24/7</div>
+                    <div class="text-white/70">Monitoring</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Features Section -->
+    <section id="platform-features" class="py-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-gradient mb-6">Platform Features</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    Comprehensive tools designed specifically for construction businesses.
+                    From project management to financial tracking, we have everything you need.
+                </p>
+            </div>
+
+            <!-- Main Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+                <!-- Feature 1: Project Management -->
+                <div class="feature-card bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl border-2 border-blue-200 hover:border-blue-400 group">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow group-hover:scale-110 transition-transform">
+                        📋
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Advanced Project Management</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Complete project lifecycle management with Gantt charts, resource allocation,
+                        milestone tracking, and automated progress reporting.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Real-time collaboration</li>
+                        <li>• Risk assessment tools</li>
+                        <li>• Budget tracking</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 2: Financial Intelligence -->
+                <div class="feature-card bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-3xl border-2 border-green-200 hover:border-green-400 group">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-600 to-green-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow group-hover:scale-110 transition-transform">
+                        💰
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Financial Intelligence</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        AI-powered financial analysis with predictive cash flow, cost optimization,
+                        profit margin analysis, and automated invoicing.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Automated invoicing</li>
+                        <li>• Cost prediction</li>
+                        <li>• Profit optimization</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 3: Team Collaboration -->
+                <div class="feature-card bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-3xl border-2 border-purple-200 hover:border-purple-400 group">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow group-hover:scale-110 transition-transform">
+                        👥
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Team Collaboration</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Seamless communication and collaboration tools designed for distributed
+                        construction teams with real-time updates and mobile access.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Real-time messaging</li>
+                        <li>• File sharing</li>
+                        <li>• Mobile app</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 4: Safety & Compliance -->
+                <div class="feature-card bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-3xl border-2 border-red-200 hover:border-red-400 group">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow group-hover:scale-110 transition-transform">
+                        🛡️
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Safety & Compliance</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Comprehensive safety management with incident tracking, compliance monitoring,
+                        training modules, and automated safety reporting.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Incident reporting</li>
+                        <li>• Safety training</li>
+                        <li>• Compliance tracking</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 5: Inventory Management -->
+                <div class="feature-card bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-3xl border-2 border-orange-200 hover:border-orange-400 group">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-600 to-orange-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow group-hover:scale-110 transition-transform">
+                        📦
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Smart Inventory</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Intelligent inventory management with automated reordering, material tracking,
+                        supplier management, and cost optimization.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Auto-reordering</li>
+                        <li>• Material tracking</li>
+                        <li>• Supplier analytics</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 6: Analytics Dashboard -->
+                <div class="feature-card bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-3xl border-2 border-indigo-200 hover:border-indigo-400 group">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-400 rounded-2xl flex items-center justify-center text-3xl mb-6 pulse-glow group-hover:scale-110 transition-transform">
+                        📊
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Analytics Dashboard</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Powerful analytics with customizable dashboards, KPI tracking,
+                        trend analysis, and predictive insights for better decision making.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• Custom dashboards</li>
+                        <li>• KPI monitoring</li>
+                        <li>• Predictive insights</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Feature Showcase -->
+            <div class="glass-dark p-8 rounded-3xl text-center">
+                <h3 class="text-3xl font-bold text-white mb-6">All Features Work Together</h3>
+                <p class="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
+                    Unlike other platforms, our features are deeply integrated. When you update a project timeline,
+                    it automatically adjusts your financial forecasts, safety schedules, and team assignments.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <div class="bg-white/10 px-4 py-2 rounded-full text-white font-medium">Integrated Workflow</div>
+                    <div class="bg-white/10 px-4 py-2 rounded-full text-white font-medium">Real-time Sync</div>
+                    <div class="bg-white/10 px-4 py-2 rounded-full text-white font-medium">AI-Powered</div>
+                    <div class="bg-white/10 px-4 py-2 rounded-full text-white font-medium">Mobile First</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connectivity Section -->
+    <section id="connectivity" class="py-32 bg-gradient-to-br from-slate-50 to-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-gradient mb-6">Seamless Connectivity</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    Connect with your existing tools and workflows. Our platform integrates with
+                    everything from accounting software to construction management tools.
+                </p>
+            </div>
+
+            <!-- Integration Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-20">
+                <!-- Integration Icons -->
+                <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition-transform">
+                    <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span class="text-2xl">💼</span>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-700">QuickBooks</div>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition-transform">
+                    <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-700">Excel</div>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition-transform">
+                    <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span class="text-2xl">📧</span>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-700">Outlook</div>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition-transform">
+                    <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span class="text-2xl">☁️</span>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-700">AWS</div>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition-transform">
+                    <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span class="text-2xl">🔗</span>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-700">Zapier</div>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition-transform">
+                    <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span class="text-2xl">📱</span>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-700">Slack</div>
+                </div>
+            </div>
+
+            <!-- API Features -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
+                <!-- REST API -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                            <span class="text-2xl">🔌</span>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">REST API</h3>
+                            <p class="text-gray-600">Full REST API access to all platform features</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white/50 p-4 rounded-xl">
+                            <code class="text-sm text-gray-800">GET /api/v1/projects</code>
+                            <p class="text-xs text-gray-600 mt-1">Retrieve all projects</p>
+                        </div>
+                        <div class="bg-white/50 p-4 rounded-xl">
+                            <code class="text-sm text-gray-800">POST /api/v1/invoices</code>
+                            <p class="text-xs text-gray-600 mt-1">Create new invoice</p>
+                        </div>
+                        <div class="bg-white/50 p-4 rounded-xl">
+                            <code class="text-sm text-gray-800">PUT /api/v1/tasks/{id}</code>
+                            <p class="text-xs text-gray-600 mt-1">Update task status</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Webhooks -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center">
+                            <span class="text-2xl">🪝</span>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Webhooks</h3>
+                            <p class="text-gray-600">Real-time notifications for important events</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white/50 p-4 rounded-xl">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-medium text-gray-800">project.created</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">When a new project is created</p>
+                        </div>
+                        <div class="bg-white/50 p-4 rounded-xl">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <span class="text-sm font-medium text-gray-800">invoice.paid</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">When an invoice is paid</p>
+                        </div>
+                        <div class="bg-white/50 p-4 rounded-xl">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                <span class="text-sm font-medium text-gray-800">task.completed</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">When a task is completed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connectivity Benefits -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl">⚡</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Instant Sync</h4>
+                    <p class="text-gray-600 leading-relaxed">
+                        Changes in one system automatically update everywhere.
+                        No more manual data entry or synchronization issues.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl">🔒</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Secure Connections</h4>
+                    <p class="text-gray-600 leading-relaxed">
+                        Enterprise-grade security with OAuth 2.0, API keys,
+                        and encrypted data transmission for all integrations.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl">🚀</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Developer Friendly</h4>
+                    <p class="text-gray-600 leading-relaxed">
+                        Comprehensive documentation, SDKs, and developer tools
+                        make integration fast and easy for any technical level.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Developer Platform Section -->
+    <section id="developer-platform" class="py-32 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute top-10 left-10 w-20 h-20 border border-white rounded-full"></div>
+            <div class="absolute top-20 right-20 w-16 h-16 border border-white rounded-full"></div>
+            <div class="absolute bottom-20 left-1/4 w-12 h-12 border border-white rounded-full"></div>
+            <div class="absolute bottom-10 right-10 w-24 h-24 border border-white rounded-full"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-white mb-6">Developer Platform</h2>
+                <p class="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                    Build powerful integrations and custom solutions with our comprehensive
+                    developer tools, APIs, and documentation.
+                </p>
+            </div>
+
+            <!-- Developer Tools Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+                <!-- API Documentation -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                        📚
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">API Documentation</h3>
+                    <p class="text-white/80 leading-relaxed mb-6">
+                        Comprehensive API documentation with interactive examples,
+                        code samples in multiple languages, and real-time testing.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="text-sm text-white/60">• Interactive API Explorer</div>
+                        <div class="text-sm text-white/60">• Code Examples (JS, Python, PHP)</div>
+                        <div class="text-sm text-white/60">• Rate Limiting Guide</div>
+                    </div>
+                </div>
+
+                <!-- SDKs -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                        🛠️
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">SDK Libraries</h3>
+                    <p class="text-white/80 leading-relaxed mb-6">
+                        Official SDKs for popular languages with automatic updates,
+                        type safety, and comprehensive error handling.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm text-white">JavaScript</span>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm text-white">Python</span>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm text-white">PHP</span>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm text-white">.NET</span>
+                    </div>
+                </div>
+
+                <!-- Webhooks -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                        🪝
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Webhook Management</h3>
+                    <p class="text-white/80 leading-relaxed mb-6">
+                        Real-time event notifications with retry logic, signature verification,
+                        and comprehensive event type coverage.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="text-sm text-white/60">• Event-driven architecture</div>
+                        <div class="text-sm text-white/60">• Automatic retries</div>
+                        <div class="text-sm text-white/60">• Security signatures</div>
+                    </div>
+                </div>
+
+                <!-- Developer Console -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                        💻
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Developer Console</h3>
+                    <p class="text-white/80 leading-relaxed mb-6">
+                        Web-based console for testing APIs, monitoring usage,
+                        managing applications, and debugging integrations.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="text-sm text-white/60">• API Testing Tools</div>
+                        <div class="text-sm text-white/60">• Usage Analytics</div>
+                        <div class="text-sm text-white/60">• Error Logs</div>
+                    </div>
+                </div>
+
+                <!-- OAuth & Auth -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                        🔐
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Authentication</h3>
+                    <p class="text-white/80 leading-relaxed mb-6">
+                        Secure OAuth 2.0 implementation with granular permissions,
+                        token management, and enterprise SSO support.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="text-sm text-white/60">• OAuth 2.0 / OpenID</div>
+                        <div class="text-sm text-white/60">• JWT Tokens</div>
+                        <div class="text-sm text-white/60">• Enterprise SSO</div>
+                    </div>
+                </div>
+
+                <!-- Community & Support -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="w-16 h-16 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl flex items-center justify-center text-3xl mb-6">
+                        🤝
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Community & Support</h3>
+                    <p class="text-white/80 leading-relaxed mb-6">
+                        Active developer community with forums, tutorials,
+                        and dedicated technical support for all developers.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="text-sm text-white/60">• Developer Forums</div>
+                        <div class="text-sm text-white/60">• Video Tutorials</div>
+                        <div class="text-sm text-white/60">• 24/7 Support</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Example -->
+            <div class="glass p-8 rounded-3xl mb-20">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-white">Quick Start Example</h3>
+                    <div class="flex space-x-2">
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm text-white">JavaScript</span>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm text-white">REST API</span>
+                    </div>
+                </div>
+                <div class="bg-black/50 p-6 rounded-2xl overflow-x-auto">
+                    <pre class="text-green-400 text-sm"><code>// Initialize CortexBuild SDK
+const cortex = new CortexBuild({
+  apiKey: 'your-api-key',
+  baseUrl: 'https://api.cortexbuild.com'
+});
+
+// Create a new project
+const project = await cortex.projects.create({
+  name: 'Downtown Office Complex',
+  budget: 2500000,
+  startDate: '2024-01-15',
+  endDate: '2024-12-31'
+});
+
+console.log('Project created:', project.id);</code></pre>
+                </div>
+            </div>
+
+            <!-- Developer Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="text-4xl font-black text-white mb-2">500+</div>
+                    <div class="text-white/70">Integrations Built</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-black text-white mb-2">10M+</div>
+                    <div class="text-white/70">API Calls/Month</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-black text-white mb-2">99.9%</div>
+                    <div class="text-white/70">API Uptime</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-black text-white mb-2"><100ms</div>
+                    <div class="text-white/70">Response Time</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Video Section -->
+    <section id="demo-video" class="py-32 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl font-black text-white mb-6">See CortexBuild in Action</h2>
+                <p class="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                    Watch how our AI-powered platform transforms construction project management
+                    from complex to simple, from manual to automated.
+                </p>
+            </div>
+
+            <!-- Video Container -->
+            <div class="relative max-w-6xl mx-auto mb-16">
+                <div class="glass p-2 rounded-3xl shadow-2xl">
+                    <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-8 text-center">
+                        <!-- Video Placeholder -->
+                        <div class="relative aspect-video bg-gradient-to-br from-purple-900 to-blue-900 rounded-2xl flex items-center justify-center mb-8 overflow-hidden">
+                            <!-- Play Button Overlay -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all pulse-glow">
+                                    <span class="text-4xl text-white ml-2">▶️</span>
+                                </div>
+                            </div>
+
+                            <!-- Video Thumbnail Elements -->
+                            <div class="absolute top-4 left-4 glass px-3 py-1 rounded-full text-xs text-white font-medium">
+                                Live Demo
+                            </div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <span class="text-white text-sm font-medium">CortexBuild Dashboard</span>
+                                </div>
+                                <div class="w-full bg-white/20 rounded-full h-1">
+                                    <div class="bg-white h-1 rounded-full w-1/3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video Info -->
+                        <div class="text-left">
+                            <h3 class="text-2xl font-bold text-white mb-4">Complete Platform Overview</h3>
+                            <p class="text-white/70 mb-6 leading-relaxed">
+                                This comprehensive demo shows how CortexBuild's neural network connects all aspects
+                                of your construction business, from initial project planning to final invoicing.
+                            </p>
+                            <div class="flex flex-wrap gap-4 text-sm">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-green-400">●</span>
+                                    <span class="text-white/80">Project Management</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-blue-400">●</span>
+                                    <span class="text-white/80">AI Automation</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-purple-400">●</span>
+                                    <span class="text-white/80">Financial Intelligence</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-orange-400">●</span>
+                                    <span class="text-white/80">Team Collaboration</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Highlights -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass p-6 rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 pulse-glow">
+                        <span class="text-2xl">🎬</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2">Interactive Demo</h4>
+                    <p class="text-white/70 text-sm leading-relaxed">
+                        Click through real scenarios and see how our AI makes decisions
+                        in real-time based on your business data.
+                    </p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4 pulse-glow">
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2">Live Analytics</h4>
+                    <p class="text-white/70 text-sm leading-relaxed">
+                        Watch as the platform analyzes project data and provides
+                        actionable insights instantly.
+                    </p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 pulse-glow">
+                        <span class="text-2xl">⚡</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2">Automation Showcase</h4>
+                    <p class="text-white/70 text-sm leading-relaxed">
+                        See repetitive tasks being automated and workflows
+                        optimized by our intelligent neural network.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-32 bg-gradient-to-br from-gray-50 to-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-gradient mb-6">Simple, Transparent Pricing</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    Choose the plan that fits your business. All plans include our core AI features
+                    and neural network intelligence. Upgrade or downgrade anytime.
+                </p>
+            </div>
+
+            <!-- Pricing Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Starter Plan -->
+                <div class="glass p-8 rounded-3xl border-2 border-gray-200 hover:border-blue-300 transition-all">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Starter</h3>
+                        <div class="text-5xl font-black text-gradient mb-2">$29<span class="text-lg font-normal text-gray-600">/month</span></div>
+                        <p class="text-gray-600">Perfect for small construction teams</p>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Up to 5 projects</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Basic AI automation</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Mobile app access</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Email support</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Basic reporting</span>
+                        </div>
+                    </div>
+
+                    <button onclick="showAppForLogin()"
+                        class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transition transform hover:scale-105">
+                        Start Free Trial
+                    </button>
+                </div>
+
+                <!-- Professional Plan (Popular) -->
+                <div class="glass p-8 rounded-3xl border-4 border-purple-300 relative shadow-2xl scale-105">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                            Most Popular
+                        </span>
+                    </div>
+
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Professional</h3>
+                        <div class="text-5xl font-black text-gradient mb-2">$99<span class="text-lg font-normal text-gray-600">/month</span></div>
+                        <p class="text-gray-600">Ideal for growing construction businesses</p>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Unlimited projects</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Advanced AI automation</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Neural network insights</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Priority support</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Advanced analytics</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">API access</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Custom integrations</span>
+                        </div>
+                    </div>
+
+                    <button onclick="showAppForLogin()"
+                        class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transition transform hover:scale-105">
+                        Start Free Trial
+                    </button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="glass p-8 rounded-3xl border-2 border-gray-200 hover:border-green-300 transition-all">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Enterprise</h3>
+                        <div class="text-3xl font-black text-gradient mb-2">Custom<span class="text-lg font-normal text-gray-600 block">Pricing</span></div>
+                        <p class="text-gray-600">For large construction enterprises</p>
+                    </div>
+
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Everything in Professional</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Dedicated account manager</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">Custom AI training</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">On-premise deployment</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">24/7 phone support</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500 text-lg">✓</span>
+                            <span class="text-gray-700">SLA guarantees</span>
+                        </div>
+                    </div>
+
+                    <button onclick="showAppForLogin()"
+                        class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl font-bold hover:shadow-lg transition transform hover:scale-105">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="max-w-4xl mx-auto">
+                <h3 class="text-3xl font-bold text-center text-gray-900 mb-12">Frequently Asked Questions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass p-6 rounded-2xl">
+                        <h4 class="text-lg font-bold text-gray-900 mb-3">Can I change plans anytime?</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Yes, you can upgrade or downgrade your plan at any time.
+                            Changes take effect immediately, and we'll prorate the billing.
+                        </p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl">
+                        <h4 class="text-lg font-bold text-gray-900 mb-3">Is there a free trial?</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Yes, all plans come with a 14-day free trial.
+                            No credit card required to get started.
+                        </p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl">
+                        <h4 class="text-lg font-bold text-gray-900 mb-3">What payment methods do you accept?</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            We accept all major credit cards, PayPal, and wire transfers
+                            for enterprise customers.
+                        </p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl">
+                        <h4 class="text-lg font-bold text-gray-900 mb-3">Do you offer refunds?</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Yes, we offer a 30-day money-back guarantee.
+                            If you're not satisfied, we'll refund your payment.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-32 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-20 w-32 h-32 border border-white rounded-full"></div>
+            <div class="absolute top-40 right-32 w-24 h-24 border border-white rounded-full"></div>
+            <div class="absolute bottom-32 left-1/3 w-16 h-16 border border-white rounded-full"></div>
+            <div class="absolute bottom-20 right-20 w-20 h-20 border border-white rounded-full"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-white mb-6">Trusted by Industry Leaders</h2>
+                <p class="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                    See what construction professionals are saying about how CortexBuild
+                    transformed their business operations.
+                </p>
+            </div>
+
+            <!-- Testimonials Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Testimonial 1 -->
+                <div class="glass p-8 rounded-3xl hover:scale-105 transition-transform">
+                    <div class="flex items-center space-x-1 mb-6">
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                    </div>
+                    <p class="text-white/90 leading-relaxed mb-6 italic">
+                        "CortexBuild's AI automation saved us 20 hours per week on administrative tasks.
+                        The neural network actually predicts project delays before they happen!"
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">JD</span>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold">John Davis</div>
+                            <div class="text-white/60 text-sm">CEO, Davis Construction</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="glass p-8 rounded-3xl hover:scale-105 transition-transform">
+                    <div class="flex items-center space-x-1 mb-6">
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                    </div>
+                    <p class="text-white/90 leading-relaxed mb-6 italic">
+                        "The financial intelligence features caught a $50K budget overrun before it happened.
+                        Our profit margins improved by 15% in the first quarter alone."
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">MR</span>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold">Maria Rodriguez</div>
+                            <div class="text-white/60 text-sm">CFO, Rodriguez Builders</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="glass p-8 rounded-3xl hover:scale-105 transition-transform">
+                    <div class="flex items-center space-x-1 mb-6">
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                    </div>
+                    <p class="text-white/90 leading-relaxed mb-6 italic">
+                        "Mobile access changed everything. My team can update project status from the field,
+                        and I get real-time notifications. Game changer for our workflow."
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">TS</span>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold">Tom Stevens</div>
+                            <div class="text-white/60 text-sm">Project Manager, Stevens & Co</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 4 -->
+                <div class="glass p-8 rounded-3xl hover:scale-105 transition-transform">
+                    <div class="flex items-center space-x-1 mb-6">
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                    </div>
+                    <p class="text-white/90 leading-relaxed mb-6 italic">
+                        "The API integrations connected all our existing tools seamlessly.
+                        From QuickBooks to our custom CRM, everything syncs automatically now."
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">LC</span>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold">Lisa Chen</div>
+                            <div class="text-white/60 text-sm">IT Director, Chen Enterprises</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 5 -->
+                <div class="glass p-8 rounded-3xl hover:scale-105 transition-transform">
+                    <div class="flex items-center space-x-1 mb-6">
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                    </div>
+                    <p class="text-white/90 leading-relaxed mb-6 italic">
+                        "Safety compliance is now automated. The system reminds us of inspections,
+                        tracks certifications, and even suggests safety improvements based on our data."
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">RB</span>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold">Robert Brown</div>
+                            <div class="text-white/60 text-sm">Safety Officer, Brown Contractors</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 6 -->
+                <div class="glass p-8 rounded-3xl hover:scale-105 transition-transform">
+                    <div class="flex items-center space-x-1 mb-6">
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                        <span class="text-yellow-400 text-xl">⭐</span>
+                    </div>
+                    <p class="text-white/90 leading-relaxed mb-6 italic">
+                        "Started with the Professional plan, now we're on Enterprise.
+                        The ROI was evident within the first month. This platform pays for itself."
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">AW</span>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold">Amanda Wilson</div>
+                            <div class="text-white/60 text-sm">Owner, Wilson Construction Group</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="glass p-8 rounded-3xl text-center">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="text-4xl font-black text-white mb-2">500+</div>
+                        <div class="text-white/70">Happy Customers</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-white mb-2">4.9/5</div>
+                        <div class="text-white/70">Average Rating</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-white mb-2">98%</div>
+                        <div class="text-white/70">Satisfaction Rate</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-black text-white mb-2">24/7</div>
+                        <div class="text-white/70">Customer Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Footer Section -->
+    <section id="contact" class="py-32 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Contact Section -->
+            <div class="text-center mb-20">
+                <h2 class="text-5xl md:text-6xl font-black text-white mb-6">Ready to Get Started?</h2>
+                <p class="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed mb-12">
+                    Join hundreds of construction businesses already using CortexBuild to transform their operations.
+                    Start your free trial today and see the difference AI-powered intelligence makes.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button onclick="showAppForLogin()"
+                        class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105 flex items-center space-x-2">
+                        <span>Start Free Trial</span>
+                        <span>→</span>
+                    </button>
+                    <button onclick="document.getElementById('demo-video').scrollIntoView({behavior: 'smooth'})"
+                        class="glass text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transition transform hover:scale-105">
+                        Watch Demo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contact Info Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="glass p-8 rounded-3xl text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl">📧</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Email Us</h3>
+                    <p class="text-white/70 mb-4">Get in touch with our team</p>
+                    <a href="mailto:hello@cortexbuild.com" class="text-purple-400 hover:text-purple-300 font-medium">
+                        hello@cortexbuild.com
+                    </a>
+                </div>
+                <div class="glass p-8 rounded-3xl text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl">💬</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Live Chat</h3>
+                    <p class="text-white/70 mb-4">Chat with our support team</p>
+                    <button onclick="showAppForLogin()" class="text-green-400 hover:text-green-300 font-medium">
+                        Start Chat
+                    </button>
+                </div>
+                <div class="glass p-8 rounded-3xl text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl">📞</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Call Us</h3>
+                    <p class="text-white/70 mb-4">Speak with an expert</p>
+                    <a href="tel:+1-800-CORTEX" class="text-orange-400 hover:text-orange-300 font-medium">
+                        +1 (800) CORTEX
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <!-- Company Info -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl flex items-center justify-center pulse-glow">
+                            <span class="text-2xl">🧠</span>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-black text-gradient">CortexBuild</h1>
+                            <p class="text-xs text-gray-400 font-semibold">AI INTELLIGENCE PLATFORM</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-6 max-w-md">
+                        Empowering construction businesses with AI-powered intelligence.
+                        Transform your operations with our neural network platform.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <span class="text-2xl">📘</span>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <span class="text-2xl">🐦</span>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <span class="text-2xl">💼</span>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <span class="text-2xl">🎥</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Product Links -->
+                <div>
+                    <h4 class="text-white font-bold mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#neural-network" class="text-gray-400 hover:text-white transition">Neural Network</a></li>
+                        <li><a href="#platform-features" class="text-gray-400 hover:text-white transition">Features</a></li>
+                        <li><a href="#connectivity" class="text-gray-400 hover:text-white transition">Integrations</a></li>
+                        <li><a href="#pricing" class="text-gray-400 hover:text-white transition">Pricing</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company Links -->
+                <div>
+                    <h4 class="text-white font-bold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">About</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Careers</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 text-sm mb-4 md:mb-0">
+                        © 2024 CortexBuild. All rights reserved.
+                    </p>
+                    <div class="flex space-x-6 text-sm">
+                        <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Login function
+        function showAppForLogin() {
+            window.location.href = '/#login';
+        }
+    </script>
+</body>
+
+</html>
