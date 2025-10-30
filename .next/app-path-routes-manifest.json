@@ -1,1 +1,14 @@
-{"/api/health/route":"/api/health","/_not-found/page":"/_not-found","/(admin)/page":"/","/(app)/dashboard/page":"/dashboard","/(app)/settings/page":"/settings","/(auth)/login/page":"/login","/(auth)/reset/page":"/reset","/(auth)/signup/page":"/signup","/page":"/"}
+{
+  "/(admin)/page": "/",
+  "/(app)/dashboard/page": "/dashboard",
+  "/(app)/settings/page": "/settings",
+  "/(auth)/login/page": "/login",
+  "/(auth)/reset/page": "/reset",
+  "/(auth)/signup/page": "/signup",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/auth/login/route": "/api/auth/login",
+  "/api/auth/me/route": "/api/auth/me",
+  "/api/health/route": "/api/health",
+  "/page": "/"
+}

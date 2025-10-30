@@ -1,11 +1,14 @@
 {
-  "/api/health/route": "app/api/health/route.js",
-  "/_not-found/page": "app/_not-found/page.js",
   "/(admin)/page": "app/(admin)/page.js",
   "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
   "/(app)/settings/page": "app/(app)/settings/page.js",
   "/(auth)/login/page": "app/(auth)/login/page.js",
   "/(auth)/reset/page": "app/(auth)/reset/page.js",
   "/(auth)/signup/page": "app/(auth)/signup/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/auth/me/route": "app/api/auth/me/route.js",
+  "/api/health/route": "app/api/health/route.js",
   "/page": "app/page.js"
 }
