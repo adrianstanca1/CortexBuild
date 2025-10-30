@@ -109,7 +109,7 @@ export const renderWithProviders = (
   options?: Omit<RenderOptions, 'wrapper'>
 ) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
-    return <>{children}</>;
+    return React.createElement(React.Fragment, null, children as any);
   };
 
   return render(ui, { wrapper: Wrapper, ...options });

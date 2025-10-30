@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Bell, Mail, Smartphone, Clock, Save, AlertCircle } from 'lucide-react';
-import { notificationService, NotificationPreferences } from '../../lib/services/notificationService';
+import { notificationService, NotificationPreferences as NotificationPreferencesType } from '../../lib/services/notificationService';
 import toast from 'react-hot-toast';
 
 interface NotificationPreferencesProps {
@@ -18,7 +18,7 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
   userId,
   isDarkMode = false
 }) => {
-  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
+  const [preferences, setPreferences] = useState<NotificationPreferencesType | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -41,7 +41,7 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
     }
   };
 
-  const handleToggle = (key: keyof NotificationPreferences) => {
+  const handleToggle = (key: keyof NotificationPreferencesType) => {
     if (!preferences) return;
 
     setPreferences({
@@ -156,8 +156,8 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={preferences[key as keyof NotificationPreferences] as boolean}
-                    onChange={() => handleToggle(key as keyof NotificationPreferences)}
+                    checked={preferences[key as keyof NotificationPreferencesType] as boolean}
+                    onChange={() => handleToggle(key as keyof NotificationPreferencesType)}
                     className="w-5 h-5 rounded"
                     aria-label={`Toggle ${key.replace(/_/g, ' ')}`}
                     title={`Toggle ${key.replace(/_/g, ' ')}`}

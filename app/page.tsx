@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import HomePage from './components/pages/HomePage';
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'CortexBuild - Quantum Intelligence Platform',
@@ -12,5 +12,10 @@ export const metadata = {
 };
 
 export default function Home() {
-  return <HomePage />;
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold">CortexBuild</h1>
+      <p className="mt-2 text-gray-600">Welcome. Use the navigation or go to /login to start.</p>
+    </div>
+  );
 }
