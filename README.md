@@ -88,10 +88,11 @@ CortexBuild is a revolutionary construction industry platform combining:
 
 ### **Frontend**
 - **React 19.2.0** - UI framework
-- **TypeScript** - Type safety
-- **Vite 6.3.6** - Build tool
-- **Tailwind CSS** - Styling
-- **Lucide React** - Icons
+- **Next.js 16.0.1 (Turbopack)** - Full-stack React framework
+- **TypeScript 5.9.3** - Type safety
+- **Vite 7.1.12** - Build tool
+- **Tailwind CSS 4.1.16** - Styling
+- **Lucide React 0.548.0** - Icons
 
 ### **Backend**
 - **Express.js** - API server
