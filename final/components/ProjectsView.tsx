@@ -18,6 +18,8 @@ import { hasPermission } from '../services/auth';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { ProjectModal } from './CreateProjectModal';
+import AdvancedProjectCreator from './AdvancedProjectCreator';
+import ProjectManagementDashboard from './ProjectManagementDashboard';
 import { ViewHeader } from './layout/ViewHeader';
 import { Tag } from './ui/Tag';
 import { computeProjectPortfolioSummary, PROJECT_STATUS_ORDER } from '../utils/projectPortfolio';
@@ -55,7 +57,7 @@ const formatStatusLabel = (status: ProjectStatus) =>
         .map(part => part.charAt(0).toUpperCase() + part.slice(1))
         .join(' ');
 
-const ProjectCard: React.FC<{ project: Project; onSelect: () => void; }> = ({ project, onSelect }) => {
+const ProjectCard: React.FC<{ project: Project; onSelect: () => void; onManage?: () => void; }> = ({ project, onSelect, onManage }) => {
     const actualCost = typeof project.actualCost === 'number' ? project.actualCost : project.spent ?? 0;
     const budget = typeof project.budget === 'number' ? project.budget : 0;
     const utilisationRaw = budget > 0 ? (actualCost / budget) * 100 : 0;
@@ -84,11 +86,21 @@ const ProjectCard: React.FC<{ project: Project; onSelect: () => void; }> = ({ pr
                     style={{ width: `${Math.min(100, Math.round(utilisation))}%`, height: '100%', borderRadius: 'inherit' }}
                     aria-hidden
                 ></div>
-
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs p-2 text-xs text-white bg-slate-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-                {health.summary}
             </div>
-        </div>
+
+            {onManage && (
+                <div className="mt-3 flex gap-2">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onManage();
+                        }}
+                        className="flex-1 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                        Manage
+                    </button>
+                </div>
+            )}
     );
 };
 
@@ -289,6 +301,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ user, addToast, onSe
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<StatusFilterValue>('ALL');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isAdvancedCreatorOpen, setIsAdvancedCreatorOpen] = useState(false);
+    const [selectedProjectForManagement, setSelectedProjectForManagement] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<'grid' | 'management'>('grid');
 
     const canCreate = hasPermission(user, Permission.CREATE_PROJECT);
 
@@ -531,6 +546,24 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ user, addToast, onSe
     [fetchProjects, onSelectProject]
   );
 
+  // Handle project management view
+  if (selectedProjectForManagement) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setSelectedProjectForManagement(null)}
+            className="flex items-center text-blue-600 hover:text-blue-800"
+          >
+            ← Back to Projects
+          </button>
+          <h1 className="text-2xl font-bold">Project Management</h1>
+        </div>
+        <ProjectManagementDashboard projectId={selectedProjectForManagement} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {isCreateModalOpen && (
@@ -539,6 +572,17 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ user, addToast, onSe
           onClose={() => setIsCreateModalOpen(false)}
           onSuccess={handleSuccess}
           addToast={addToast}
+        />
+      )}
+
+      {isAdvancedCreatorOpen && (
+        <AdvancedProjectCreator
+          isOpen={isAdvancedCreatorOpen}
+          onClose={() => setIsAdvancedCreatorOpen(false)}
+          onProjectCreated={(project) => {
+            handleSuccess(project);
+            setIsAdvancedCreatorOpen(false);
+          }}
         />
       )}
 
@@ -578,13 +622,22 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ user, addToast, onSe
             <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <h2 className="text-3xl font-bold text-slate-800">{isPM ? "Project Manager Dashboard" : "Projects"}</h2>
                 {canCreate && (
-                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <title>Create Project Icon</title>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Create Project
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="secondary" onClick={() => setIsCreateModalOpen(true)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <title>Create Project Icon</title>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Quick Create
+                        </Button>
+                        <Button variant="primary" onClick={() => setIsAdvancedCreatorOpen(true)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <title>Advanced Project Icon</title>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            Advanced Project
+                        </Button>
+                    </div>
                 )}
             </div>
 
@@ -595,7 +648,12 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({ user, addToast, onSe
                     </Card>
                 )}
                 {filteredProjects.map(project => (
-                    <ProjectCard key={project.id} project={project} onSelect={() => onSelectProject(project)} />
+                    <ProjectCard
+                        key={project.id}
+                        project={project}
+                        onSelect={() => onSelectProject(project)}
+                        onManage={() => setSelectedProjectForManagement(project.id)}
+                    />
                 ))}
             </div>
 

@@ -671,7 +671,7 @@ export interface Weather {
 }
 
 // FIX: Added all missing types from across the application
-export type View = 'dashboard' | 'my-day' | 'foreman-dashboard' | 'principal-dashboard' | 'projects' | 'project-detail' | 'all-tasks' | 'map' | 'time' | 'timesheets' | 'documents' | 'safety' | 'financials' | 'users' | 'equipment' | 'templates' | 'tools' | 'audit-log' | 'settings' | 'chat' | 'clients' | 'invoices';
+export type View = 'dashboard' | 'my-day' | 'foreman-dashboard' | 'principal-dashboard' | 'projects' | 'project-detail' | 'all-tasks' | 'map' | 'time' | 'timesheets' | 'documents' | 'safety' | 'financials' | 'users' | 'equipment' | 'templates' | 'tools' | 'audit-log' | 'settings' | 'chat' | 'clients' | 'invoices' | 'field' | 'document-management' | 'project-analytics' | 'advanced-reporting' | 'collaboration' | 'quality-control' | 'safety-dashboard' | 'equipment-dashboard' | 'user-management' | 'settings-dashboard' | 'templates-dashboard';
 
 export interface Quote {
     id: string;

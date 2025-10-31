@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clearing Storage...</title>
+    <style>
+        body {
+            font-family: system-ui;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #667eea;
+            color: white;
+            margin: 0;
+        }
+        .box {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+        }
+        h1 { margin: 0 0 1rem; }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🔄 Clearing Storage...</h1>
+        <div class="spinner"></div>
+        <p id="status">Please wait...</p>
+    </div>
+    <script>
+        const status = document.getElementById('status');
+        
+        setTimeout(() => {
+            // Clear everything
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear cookies
+            document.cookie.split(";").forEach(c => {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            status.textContent = '✅ Storage cleared!';
+            
+            // Redirect
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }, 500);
+    </script>
+</body>
+</html>
+

@@ -27,7 +27,7 @@ const config = {
   uploadPath: '/uploads',
   
   // Local Configuration
-  localPath: './dist',
+  localPath: './deployment',
   
   // IONOS-specific settings
   ionosSettings: {

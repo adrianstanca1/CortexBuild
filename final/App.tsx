@@ -4,6 +4,17 @@ import { Login } from './components/Login';
 import { Card } from './components/ui/Card';
 import { Sidebar as SidebarLite } from './components/layout/SidebarLite';
 import { ToolsView } from './components/ToolsView';
+import FieldManagementDashboard from './components/FieldManagementDashboard';
+import DocumentManagementDashboard from './components/DocumentManagementDashboard';
+import ProjectAnalyticsDashboard from './components/ProjectAnalyticsDashboard';
+import AdvancedReportingDashboard from './components/AdvancedReportingDashboard';
+import CollaborationDashboard from './components/CollaborationDashboard';
+import QualityControlDashboard from './components/QualityControlDashboard';
+import SafetyDashboard from './components/SafetyDashboard';
+import EquipmentDashboard from './components/EquipmentDashboard';
+import UserManagementDashboard from './components/UserManagementDashboard';
+import SettingsDashboard from './components/SettingsDashboard';
+import TemplatesDashboard from './components/TemplatesDashboard';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import type { View } from './types';
 
@@ -111,6 +122,62 @@ const AppInner: React.FC = () => {
         <main className="flex-1 p-4 overflow-auto">
           {activeView === 'tools' ? (
             <ToolsView user={user} addToast={addToast} setActiveView={setActiveView} />
+          ) : activeView === 'field' ? (
+            <FieldManagementDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+              isOnline={navigator.onLine}
+            />
+          ) : activeView === 'document-management' ? (
+            <DocumentManagementDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'project-analytics' ? (
+            <ProjectAnalyticsDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'advanced-reporting' ? (
+            <AdvancedReportingDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'collaboration' ? (
+            <CollaborationDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'quality-control' ? (
+            <QualityControlDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'safety-dashboard' ? (
+            <SafetyDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'equipment-dashboard' ? (
+            <EquipmentDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'user-management' ? (
+            <UserManagementDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'settings-dashboard' ? (
+            <SettingsDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
+          ) : activeView === 'templates-dashboard' ? (
+            <TemplatesDashboard
+              projectId="demo-project-1"
+              userId={user.id}
+            />
           ) : (
             <Card className="p-6">
               <h2 className="text-xl font-semibold text-foreground">Coming soon</h2>
