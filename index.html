@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals with a Deep Blue accent -->
     <!-- Application Structure Plan: The SPA is structured into four thematic, navigable sections: 'Home' (the value proposition), 'Platform Features' (interactive module explorer), 'The AI Core' (a visual deep-dive into the unique AI agents), and 'Connectivity & Vision' (integrations and future plans). This structure was chosen to transform a dense text document into an engaging, explorable pitch. The primary interaction is a persistent top navigation bar. Key interactions include filterable, clickable cards in the 'Features' section and an interactive HTML/CSS diagram in 'The AI Core' that animates a workflow scenario. This approach allows potential stakeholders to quickly grasp the high-level benefits or delve into the specific aspects that interest them most, which is more effective for a proposal than a linear document. -->
-    <!-- Visualization & Content Choices: 
+    <!-- Visualization & Content Choices:
         - Report Info: Core Platform Features -> Goal: Organize/Inform -> Viz: Grid of interactive cards with filters -> Interaction: User clicks a filter (e.g., 'Financial') to see relevant feature cards. Clicking a card expands it to show details and the "AI Improvement". -> Justification: Breaks down a long list of features into a manageable, user-driven discovery process. -> Library/Method: Vanilla JS, Tailwind CSS.
         - Report Info: The Five AI Agents & their interaction -> Goal: Explain a complex system/Wow -> Viz: HTML/CSS-based hub-and-spoke diagram -> Interaction: User clicks an agent's name to view its detailed description. A separate button triggers an animated sequence that highlights each agent in the "Imagine this:" scenario, showing their collaboration. -> Justification: Visually communicates the platform's core differentiator—the multi-agent system—in a way static text cannot. -> Library/Method: Vanilla JS, Tailwind CSS.
         - Report Info: Connectivity & Challenges -> Goal: Inform -> Viz: Structured text sections with icons -> Interaction: None, static information -> Justification: Simple, clear presentation for foundational information. -> Library/Method: HTML/CSS with Unicode characters for icons.
@@ -1844,51 +1844,51 @@
                     // Remove any existing click listeners
                     const newItem = item.cloneNode(true);
                     item.parentNode.replaceChild(newItem, item);
-                    
+
                     // Add fresh click listener
                     newItem.addEventListener('click', function (e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        
+
                         console.log(`🔗 Navigating to: ${targetId}`);
                         const targetSection = document.getElementById(targetId);
-                        
+
                         if (targetSection) {
                             // Remove active class from all nav items
                             document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(navItem => {
                                 navItem.classList.remove('nav-active');
                             });
-                            
+
                             // Add active class to clicked item
                             this.classList.add('nav-active');
-                            
+
                             // Smooth scroll to target
-                            targetSection.scrollIntoView({ 
+                            targetSection.scrollIntoView({
                                 behavior: 'smooth',
                                 block: 'start'
                             });
-                            
+
                             // Close mobile menu if open
                             const mobileMenu = document.getElementById('mobile-menu');
                             if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
                                 mobileMenu.classList.add('hidden');
                             }
-                            
+
                             console.log(`✅ Navigated to: ${targetId}`);
                         } else {
                             console.warn(`⚠️ Section not found: ${targetId}`);
                         }
                     });
-                    
+
                     console.log(`✅ Configured: ${targetId}`);
                 }
             });
-            
+
             // Add scroll spy to highlight active section
             window.addEventListener('scroll', function() {
                 const sections = document.querySelectorAll('.content-section');
                 const navLinks = document.querySelectorAll('[data-target]');
-                
+
                 let current = '';
                 sections.forEach(section => {
                     const sectionTop = section.offsetTop;
@@ -1897,7 +1897,7 @@
                         current = section.getAttribute('id');
                     }
                 });
-                
+
                 navLinks.forEach(link => {
                     link.classList.remove('nav-active');
                     if (link.dataset.target === current) {
@@ -1905,7 +1905,7 @@
                     }
                 });
             });
-            
+
             console.log('✅ Navigation system activated with scroll spy');
         };
 
