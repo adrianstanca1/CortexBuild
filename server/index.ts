@@ -43,7 +43,7 @@ import { createGlobalMarketplaceRouter } from './routes/global-marketplace';
 import { createWidgetsRouter } from './routes/widgets';
 import { createSmartToolsRouter } from './routes/smart-tools';
 import { createSDKRouter, initSdkTables } from './routes/sdk';
-import adminSDKRouter from './routes/admin-sdk';
+import { createAdminSDKRouter } from './routes/admin-sdk';
 import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
 import { createAIChatRoutes } from './routes/ai-chat';
 import { createDeveloperRoutes } from './routes/developer';
@@ -366,7 +366,7 @@ const startServer = async () => {
         app.use('/api/sdk', createSDKRouter(supabase));
         console.log('  ✓ /api/sdk');
 
-        app.use('/api/admin/sdk', adminSDKRouter);
+        app.use('/api/admin/sdk', createAdminSDKRouter(supabase));
         console.log('  ✓ /api/admin/sdk');
 
         app.use('/api/admin/enhanced', createEnhancedAdminRoutes(supabase));

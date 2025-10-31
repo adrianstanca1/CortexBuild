@@ -381,5 +381,41 @@ export const refreshToken = async (token: string) => {
   return { user, token: newToken };
 };
 
+/**
+ * Get current user by token (alias for verifyToken with full user object)
+ */
+export const getCurrentUserByToken = async (token: string): Promise<UserResponse | null> => {
+  try {
+    const user = await verifyToken(token);
+    if (!user) {
+      return null;
+    }
+
+    // Get full user details from database
+    const dbUser = await getUserById(user.id);
+    return mapUserRow(dbUser);
+  } catch (err) {
+    console.error('❌ getCurrentUserByToken error:', err);
+    return null;
+  }
+};
+
+/**
+ * Logout (for compatibility - no-op in JWT model)
+ */
+export const logout = async (token: string): Promise<void> => {
+  // In JWT model, logout is handled client-side by removing the token
+  // No server-side session to invalidate
+  console.log('✅ Logout successful (JWT token removed client-side)');
+};
+
+/**
+ * Cleanup expired sessions (for compatibility - no-op in JWT model)
+ */
+export const cleanupExpiredSessions = async (): Promise<void> => {
+  // In JWT model, tokens expire automatically, no cleanup needed
+  console.log('✅ Session cleanup completed (JWT model - no action needed)');
+};
+
 console.log('✅ Auth service (Supabase) initialized');
 

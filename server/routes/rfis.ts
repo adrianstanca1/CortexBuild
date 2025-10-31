@@ -1,16 +1,16 @@
 // CortexBuild Platform - RFIs API Routes
-// Version: 1.0.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { RFI, ApiResponse, PaginatedResponse } from '../types';
 
-export function createRFIsRouter(db: Database.Database): Router {
+export function createRFIsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/rfis - List all RFIs with filters
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -26,66 +26,72 @@ export function createRFIsRouter(db: Database.Database): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT r.*, 
-               p.name as project_name,
-               u1.name as submitted_by_name,
-               u2.name as assigned_to_name
-        FROM rfis r
-        LEFT JOIN projects p ON r.project_id = p.id
-        LEFT JOIN users u1 ON r.submitted_by = u1.id
-        LEFT JOIN users u2 ON r.assigned_to = u2.id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('rfis')
+        .select(`
+          *,
+          projects!rfis_project_id_fkey(id, name),
+          users!rfis_submitted_by_fkey(id, name),
+          users!rfis_assigned_to_fkey(id, name)
+        `, { count: 'exact' });
 
+      // Apply filters
       if (project_id) {
-        query += ' AND r.project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (status) {
-        query += ' AND r.status = ?';
-        params.push(status);
+        query = query.eq('status', status);
       }
 
       if (priority) {
-        query += ' AND r.priority = ?';
-        params.push(priority);
+        query = query.eq('priority', priority);
       }
 
       if (assigned_to) {
-        query += ' AND r.assigned_to = ?';
-        params.push(parseInt(assigned_to));
+        query = query.eq('assigned_to', assigned_to);
       }
 
       if (search) {
-        query += ' AND (r.subject LIKE ? OR r.question LIKE ? OR r.rfi_number LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm, searchTerm);
+        query = query.or(`subject.ilike.%${search}%,question.ilike.%${search}%,rfi_number.ilike.%${search}%`);
       }
 
-      // Get total count
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      // Add pagination and ordering
+      query = query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      // Add pagination
-      query += ' ORDER BY r.created_at DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      const { data: rfis, error, count } = await query;
 
-      const rfis = db.prepare(query).all(...params);
+      if (error) throw error;
+
+      // Transform data - Supabase returns arrays for joined tables
+      const transformedRFIs = (rfis || []).map((r: any) => {
+        // Handle the case where joined data might be an array or object
+        const projects = Array.isArray(r.projects) ? r.projects[0] : r.projects;
+        const submittedBy = Array.isArray(r.users) ? r.users.find((u: any) => u.id === r.submitted_by) : r.users;
+        const assignedTo = Array.isArray(r.users) ? r.users.find((u: any) => u.id === r.assigned_to) : null;
+
+        return {
+          ...r,
+          project_name: projects?.name || null,
+          submitted_by_name: submittedBy?.name || null,
+          assigned_to_name: assignedTo?.name || null
+        };
+      });
 
       res.json({
         success: true,
-        data: rfis,
+        data: transformedRFIs,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get RFIs error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -94,36 +100,49 @@ export function createRFIsRouter(db: Database.Database): Router {
   });
 
   // GET /api/rfis/:id - Get single RFI
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const rfi = db.prepare(`
-        SELECT r.*, 
-               p.name as project_name,
-               u1.name as submitted_by_name,
-               u1.email as submitted_by_email,
-               u2.name as assigned_to_name,
-               u2.email as assigned_to_email
-        FROM rfis r
-        LEFT JOIN projects p ON r.project_id = p.id
-        LEFT JOIN users u1 ON r.submitted_by = u1.id
-        LEFT JOIN users u2 ON r.assigned_to = u2.id
-        WHERE r.id = ?
-      `).get(id);
+      const { data: rfi, error } = await supabase
+        .from('rfis')
+        .select(`
+          *,
+          projects!rfis_project_id_fkey(id, name),
+          users!rfis_submitted_by_fkey(id, name, email),
+          users!rfis_assigned_to_fkey(id, name, email)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!rfi) {
+      if (error || !rfi) {
         return res.status(404).json({
           success: false,
           error: 'RFI not found'
         });
       }
 
+      // Transform data
+      const projects = Array.isArray(rfi.projects) ? rfi.projects[0] : rfi.projects;
+      const users = Array.isArray(rfi.users) ? rfi.users : [rfi.users].filter(Boolean);
+      const submittedBy = users.find((u: any) => u.id === rfi.submitted_by);
+      const assignedTo = users.find((u: any) => u.id === rfi.assigned_to);
+
+      const transformedRFI = {
+        ...rfi,
+        project_name: projects?.name || null,
+        submitted_by_name: submittedBy?.name || null,
+        submitted_by_email: submittedBy?.email || null,
+        assigned_to_name: assignedTo?.name || null,
+        assigned_to_email: assignedTo?.email || null
+      };
+
       res.json({
         success: true,
-        data: rfi
+        data: transformedRFI
       });
     } catch (error: any) {
+      console.error('Get RFI error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -132,7 +151,7 @@ export function createRFIsRouter(db: Database.Database): Router {
   });
 
   // POST /api/rfis - Create new RFI
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -152,26 +171,38 @@ export function createRFIsRouter(db: Database.Database): Router {
         });
       }
 
-      const result = db.prepare(`
-        INSERT INTO rfis (
-          project_id, rfi_number, subject, question, priority, submitted_by, assigned_to, due_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(project_id, rfi_number, subject, question, priority, submitted_by, assigned_to, due_date);
+      const { data: rfi, error } = await supabase
+        .from('rfis')
+        .insert({
+          project_id,
+          rfi_number,
+          subject,
+          question,
+          priority,
+          submitted_by,
+          assigned_to: assigned_to || null,
+          due_date: due_date || null
+        })
+        .select()
+        .single();
 
-      const rfi = db.prepare('SELECT * FROM rfis WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        submitted_by,
-        project_id,
-        'rfi',
-        result.lastInsertRowid,
-        'created',
-        `Created RFI: ${rfi_number} - ${subject}`
-      );
+      try {
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: submitted_by,
+            project_id,
+            entity_type: 'rfi',
+            entity_id: rfi.id,
+            action: 'created',
+            description: `Created RFI: ${rfi_number} - ${subject}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -179,6 +210,7 @@ export function createRFIsRouter(db: Database.Database): Router {
         message: 'RFI created successfully'
       });
     } catch (error: any) {
+      console.error('Create RFI error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -187,12 +219,17 @@ export function createRFIsRouter(db: Database.Database): Router {
   });
 
   // PUT /api/rfis/:id - Update RFI
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM rfis WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('rfis')
+        .select('id, project_id, rfi_number')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -200,37 +237,39 @@ export function createRFIsRouter(db: Database.Database): Router {
         });
       }
 
-      const fields = Object.keys(updates).filter(key => key !== 'id');
-      if (fields.length === 0) {
+      const { id: _, ...updateData } = updates;
+      if (Object.keys(updateData).length === 0) {
         return res.status(400).json({
           success: false,
           error: 'No fields to update'
         });
       }
 
-      const setClause = fields.map(field => `${field} = ?`).join(', ');
-      const values = fields.map(field => updates[field]);
+      const { data: rfi, error } = await supabase
+        .from('rfis')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-      db.prepare(`
-        UPDATE rfis 
-        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(...values, id);
-
-      const rfi = db.prepare('SELECT * FROM rfis WHERE id = ?').get(id);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        (existing as any).project_id,
-        'rfi',
-        id,
-        'updated',
-        `Updated RFI: ${(existing as any).rfi_number}`
-      );
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id: existing.project_id,
+            entity_type: 'rfi',
+            entity_id: id,
+            action: 'updated',
+            description: `Updated RFI: ${existing.rfi_number}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.json({
         success: true,
@@ -238,6 +277,7 @@ export function createRFIsRouter(db: Database.Database): Router {
         message: 'RFI updated successfully'
       });
     } catch (error: any) {
+      console.error('Update RFI error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -246,7 +286,7 @@ export function createRFIsRouter(db: Database.Database): Router {
   });
 
   // PUT /api/rfis/:id/answer - Answer RFI
-  router.put('/:id/answer', (req: Request, res: Response) => {
+  router.put('/:id/answer', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { answer } = req.body;
@@ -258,7 +298,12 @@ export function createRFIsRouter(db: Database.Database): Router {
         });
       }
 
-      const existing = db.prepare('SELECT * FROM rfis WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('rfis')
+        .select('id, project_id, rfi_number')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -266,26 +311,35 @@ export function createRFIsRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare(`
-        UPDATE rfis 
-        SET answer = ?, status = 'answered', answered_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(answer, id);
+      const { data: rfi, error } = await supabase
+        .from('rfis')
+        .update({
+          answer,
+          status: 'answered',
+          answered_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-      const rfi = db.prepare('SELECT * FROM rfis WHERE id = ?').get(id);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        (existing as any).project_id,
-        'rfi',
-        id,
-        'answered',
-        `Answered RFI: ${(existing as any).rfi_number}`
-      );
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id: existing.project_id,
+            entity_type: 'rfi',
+            entity_id: id,
+            action: 'answered',
+            description: `Answered RFI: ${existing.rfi_number}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.json({
         success: true,
@@ -293,6 +347,7 @@ export function createRFIsRouter(db: Database.Database): Router {
         message: 'RFI answered successfully'
       });
     } catch (error: any) {
+      console.error('Answer RFI error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -301,11 +356,16 @@ export function createRFIsRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/rfis/:id - Delete RFI
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const rfi = db.prepare('SELECT * FROM rfis WHERE id = ?').get(id);
+      const { data: rfi } = await supabase
+        .from('rfis')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!rfi) {
         return res.status(404).json({
           success: false,
@@ -313,13 +373,19 @@ export function createRFIsRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare('DELETE FROM rfis WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('rfis')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'RFI deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete RFI error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -329,4 +395,3 @@ export function createRFIsRouter(db: Database.Database): Router {
 
   return router;
 }
-
