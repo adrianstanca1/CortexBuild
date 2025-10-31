@@ -97,6 +97,24 @@ export const projectsAPI = {
     apiClient.getClient().delete(`/api/projects/${id}`),
 };
 
+// Tasks API
+export const tasksAPI = {
+  getAll: (projectId?: string | number) => 
+    apiClient.getClient().get(`/api/tasks${projectId ? `?project_id=${projectId}` : ''}`),
+  
+  getById: (id: string | number) => 
+    apiClient.getClient().get(`/api/tasks/${id}`),
+  
+  create: (data: any) => 
+    apiClient.getClient().post('/api/tasks', data),
+  
+  update: (id: string | number, data: any) => 
+    apiClient.getClient().put(`/api/tasks/${id}`, data),
+  
+  delete: (id: string | number) => 
+    apiClient.getClient().delete(`/api/tasks/${id}`),
+};
+
 // Gantt API
 export const ganttAPI = {
   getGantt: (projectId: string | number) => 
@@ -228,6 +246,72 @@ export const analyticsAPI = {
   
   getJobCost: (projectId: string | number, params?: any) => 
     apiClient.getClient().get(`/api/projects/${projectId}/analytics/job-cost`, { params }),
+};
+
+// RFIs API
+export const rfisAPI = {
+  getAll: () => apiClient.getClient().get('/api/rfis'),
+  getById: (id: string) => apiClient.getClient().get(`/api/rfis/${id}`),
+  create: (data: any) => apiClient.getClient().post('/api/rfis', data),
+  update: (id: string, data: any) => apiClient.getClient().put(`/api/rfis/${id}`, data),
+  delete: (id: string) => apiClient.getClient().delete(`/api/rfis/${id}`),
+};
+
+// Punch List API
+export const punchListAPI = {
+  getAll: () => apiClient.getClient().get('/api/punch-list'),
+  getById: (id: string) => apiClient.getClient().get(`/api/punch-list/${id}`),
+  create: (data: any) => apiClient.getClient().post('/api/punch-list', data),
+  update: (id: string, data: any) => apiClient.getClient().put(`/api/punch-list/${id}`, data),
+};
+
+// Drawings API
+export const drawingsAPI = {
+  getAll: () => apiClient.getClient().get('/api/drawings'),
+  getById: (id: string) => apiClient.getClient().get(`/api/drawings/${id}`),
+  create: (data: any) => apiClient.getClient().post('/api/drawings', data),
+};
+
+// Daywork Sheets API
+export const dayworkSheetsAPI = {
+  getAll: () => apiClient.getClient().get('/api/daywork-sheets'),
+  create: (data: any) => apiClient.getClient().post('/api/daywork-sheets', data),
+};
+
+// Delivery API
+export const deliveryAPI = {
+  getAll: () => apiClient.getClient().get('/api/deliveries'),
+  create: (data: any) => apiClient.getClient().post('/api/deliveries', data),
+};
+
+// Time Entries API
+export const timeEntriesAPI = {
+  getAll: () => apiClient.getClient().get('/api/time-entries'),
+  create: (data: any) => apiClient.getClient().post('/api/time-entries', data),
+};
+
+// Users API
+export const usersAPI = {
+  getAll: () => apiClient.getClient().get('/api/users'),
+  getById: (id: string) => apiClient.getClient().get(`/api/users/${id}`),
+};
+
+// Companies API
+export const companiesAPI = {
+  getAll: () => apiClient.getClient().get('/api/companies'),
+  getById: (id: string) => apiClient.getClient().get(`/api/companies/${id}`),
+};
+
+// AI API
+export const aiAPI = {
+  chat: (message: string, sessionId?: string) => 
+    apiClient.getClient().post('/api/ai/chat', { message, sessionId }),
+};
+
+// Daily Log API
+export const dailyLogAPI = {
+  getAll: () => apiClient.getClient().get('/api/daily-logs'),
+  create: (data: any) => apiClient.getClient().post('/api/daily-logs', data),
 };
 
 export default apiClient;
