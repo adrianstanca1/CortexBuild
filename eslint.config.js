@@ -16,7 +16,7 @@ export default [
       'index.html',
     ],
   },
-  js.configs.recommended,
+  ...js.configs.recommended,
   {
     files: ['**/*.js'],
     languageOptions: {
