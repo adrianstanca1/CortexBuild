@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { User, Project } from '../../types';
 import { schedulingService, ProjectSchedule, Milestone, ScheduleConflict } from '../../services/schedulingService';
 import { dataService } from '../../services/dataService';
+
+// Lazy load Phase 1 components
+const GanttChart = lazy(() => import('../projects/GanttChart'));
+const WBSBuilder = lazy(() => import('../projects/WBSBuilder'));
+const BudgetManager = lazy(() => import('../financial/BudgetManager'));
 
 interface ProjectPlanningScreenProps {
   currentUser: User;
@@ -15,7 +20,7 @@ const ProjectPlanningScreen: React.FC<ProjectPlanningScreenProps> = ({ currentUs
   const [conflicts, setConflicts] = useState<ScheduleConflict[]>([]);
   const [ganttData, setGanttData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'gantt' | 'milestones' | 'conflicts'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'gantt' | 'wbs' | 'budget' | 'milestones' | 'conflicts'>('overview');
   const [selectedProject, setSelectedProject] = useState<string>(project?.id || '');
   const [projects, setProjects] = useState<Project[]>([]);
 
@@ -177,6 +182,8 @@ const ProjectPlanningScreen: React.FC<ProjectPlanningScreenProps> = ({ currentUs
               {[
                 { id: 'overview', name: 'Overview', icon: '📊' },
                 { id: 'gantt', name: 'Gantt Chart', icon: '📅' },
+                { id: 'wbs', name: 'WBS', icon: '🗂️' },
+                { id: 'budget', name: 'Budget', icon: '💰' },
                 { id: 'milestones', name: 'Milestones', icon: '🎯' },
                 { id: 'conflicts', name: 'Conflicts', icon: '⚠️', badge: conflicts.length }
               ].map(tab => (
@@ -306,61 +313,36 @@ const ProjectPlanningScreen: React.FC<ProjectPlanningScreenProps> = ({ currentUs
           )}
 
           {/* Gantt Chart Tab */}
-          {activeTab === 'gantt' && ganttData && (
-            <div className="bg-white rounded-lg shadow border">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-bold text-gray-900">Gantt Chart</h2>
-                <p className="text-sm text-gray-600 mt-1">Visual timeline of project phases and milestones</p>
+          {activeTab === 'gantt' && (
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               </div>
-              
-              <div className="p-6">
-                {/* Simplified Gantt Chart Representation */}
-                <div className="space-y-4">
-                  {ganttData.tasks.map((task: any) => (
-                    <div key={task.id} className="flex items-center gap-4">
-                      <div className="w-48 text-sm">
-                        <div className="font-medium text-gray-900">{task.name}</div>
-                        <div className="text-xs text-gray-500">{task.type}</div>
-                      </div>
-                      
-                      <div className="flex-1 relative">
-                        <div className="h-8 bg-gray-100 rounded relative">
-                          <div
-                            className={`h-full rounded ${
-                              task.critical ? 'bg-red-500' : 
-                              task.type === 'milestone' ? 'bg-yellow-500' : 'bg-blue-500'
-                            }`}
-                            style={{ 
-                              width: task.type === 'milestone' ? '4px' : `${Math.max(task.duration / ganttData.timeline.totalDuration * 100, 2)}%`,
-                              marginLeft: `${((new Date(task.start).getTime() - new Date(ganttData.timeline.start).getTime()) / (new Date(ganttData.timeline.end).getTime() - new Date(ganttData.timeline.start).getTime())) * 100}%`
-                            }}
-                          ></div>
-                          {task.progress > 0 && task.type !== 'milestone' && (
-                            <div
-                              className="absolute top-0 h-full bg-green-400 rounded opacity-75"
-                              style={{ 
-                                width: `${(task.duration / ganttData.timeline.totalDuration * 100) * (task.progress / 100)}%`,
-                                marginLeft: `${((new Date(task.start).getTime() - new Date(ganttData.timeline.start).getTime()) / (new Date(ganttData.timeline.end).getTime() - new Date(ganttData.timeline.start).getTime())) * 100}%`
-                              }}
-                            ></div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="w-24 text-xs text-gray-600">
-                        {task.type === 'milestone' ? formatDate(task.start) : `${task.duration}d`}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Timeline Scale */}
-                <div className="mt-6 flex justify-between text-xs text-gray-500 border-t pt-2">
-                  <span>{formatDate(ganttData.timeline.start)}</span>
-                  <span>{formatDate(ganttData.timeline.end)}</span>
-                </div>
+            }>
+              <GanttChart projectId={selectedProject} />
+            </Suspense>
+          )}
+
+          {/* WBS Tab */}
+          {activeTab === 'wbs' && (
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               </div>
-            </div>
+            }>
+              <WBSBuilder projectId={selectedProject} />
+            </Suspense>
+          )}
+
+          {/* Budget Tab */}
+          {activeTab === 'budget' && (
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            }>
+              <BudgetManager projectId={selectedProject} />
+            </Suspense>
           )}
 
           {/* Milestones Tab */}
