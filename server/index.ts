@@ -21,7 +21,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { supabase, verifyConnection } from './supabase';
 import { db, initDatabase } from './database';
-import * as auth from './auth-supabase';
+import * as auth from './auth';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
 import { setupWebSocket } from './websocket';
@@ -86,7 +86,7 @@ app.post('/api/auth/refresh', async (req, res) => {
             return res.status(400).json({ error: 'Token is required' });
         }
 
-        const result = await auth.refreshToken(token);
+        const result = auth.refreshToken(db, token);
 
         res.json({
             success: true,
@@ -201,7 +201,7 @@ const startServer = async () => {
                     return res.status(400).json({ error: 'Email and password are required' });
                 }
 
-                const result = await auth.login(email, password);
+                const result = auth.login(db, email, password);
 
                 if (!result) {
                     return res.status(401).json({
@@ -234,7 +234,7 @@ const startServer = async () => {
                     });
                 }
 
-                const result = await auth.register(email, password, firstName, lastName, role, companyId);
+                const result = auth.register(db, email, password, firstName, lastName, role, companyId);
 
                 if (!result) {
                     return res.status(400).json({
@@ -304,35 +304,35 @@ const startServer = async () => {
 
         // Register API routes
         console.log('📝 Registering API routes...');
-        const clientsRouter = createClientsRouter(supabase);
+        const clientsRouter = createClientsRouter(db);
         app.use('/api/clients', clientsRouter);
         console.log('  ✓ /api/clients');
 
-        app.use('/api/projects', createProjectsRouter(supabase));
+        app.use('/api/projects', createProjectsRouter(db));
         console.log('  ✓ /api/projects');
 
-        app.use('/api/rfis', createRFIsRouter(supabase));
+        app.use('/api/rfis', createRFIsRouter(db));
         console.log('  ✓ /api/rfis');
 
-        app.use('/api/invoices', createInvoicesRouter(supabase));
+        app.use('/api/invoices', createInvoicesRouter(db));
         console.log('  ✓ /api/invoices');
 
-        app.use('/api/time-entries', createTimeEntriesRouter(supabase));
+        app.use('/api/time-entries', createTimeEntriesRouter(db));
         console.log('  ✓ /api/time-entries');
 
-        app.use('/api/subcontractors', createSubcontractorsRouter(supabase));
+        app.use('/api/subcontractors', createSubcontractorsRouter(db));
         console.log('  ✓ /api/subcontractors');
 
-        app.use('/api/purchase-orders', createPurchaseOrdersRouter(supabase));
+        app.use('/api/purchase-orders', createPurchaseOrdersRouter(db));
         console.log('  ✓ /api/purchase-orders');
 
-        app.use('/api/tasks', createTasksRouter(supabase));
+        app.use('/api/tasks', createTasksRouter(db));
         console.log('  ✓ /api/tasks');
 
-        app.use('/api/milestones', createMilestonesRouter(supabase));
+        app.use('/api/milestones', createMilestonesRouter(db));
         console.log('  ✓ /api/milestones');
 
-        app.use('/api/documents', createDocumentsRouter(supabase));
+        app.use('/api/documents', createDocumentsRouter(db));
         console.log('  ✓ /api/documents');
 
         app.use('/api/tenders', tendersRouter);
@@ -341,10 +341,10 @@ const startServer = async () => {
         app.use('/api/bids', bidsRouter);
         console.log('  ✓ /api/bids');
 
-        app.use('/api/modules', createModulesRouter(supabase));
+        app.use('/api/modules', createModulesRouter(db));
         console.log('  ✓ /api/modules');
 
-        app.use('/api/admin', createAdminRouter(supabase));
+        app.use('/api/admin', createAdminRouter(db));
         console.log('  ✓ /api/admin');
 
         app.use('/api/marketplace', createMarketplaceRouter(db));
@@ -353,37 +353,37 @@ const startServer = async () => {
         app.use('/api/global-marketplace', createGlobalMarketplaceRouter(db));
         console.log('  ✓ /api/global-marketplace');
 
-        app.use('/api/widgets', createWidgetsRouter(supabase));
+        app.use('/api/widgets', createWidgetsRouter(db));
         console.log('  ✓ /api/widgets');
 
-        app.use('/api/smart-tools', createSmartToolsRouter(supabase));
+        app.use('/api/smart-tools', createSmartToolsRouter(db));
         console.log('  ✓ /api/smart-tools');
 
-        app.use('/api/sdk', createSDKRouter(supabase));
+        app.use('/api/sdk', createSDKRouter(db));
         console.log('  ✓ /api/sdk');
 
         app.use('/api/admin/sdk', adminSDKRouter);
         console.log('  ✓ /api/admin/sdk');
 
-        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(supabase));
+        app.use('/api/admin/enhanced', createEnhancedAdminRoutes(db));
         console.log('  ✓ /api/admin/enhanced');
 
-        app.use('/api/ai', createAIChatRoutes(supabase));
+        app.use('/api/ai', createAIChatRoutes(db));
         console.log('  ✓ /api/ai');
 
-        app.use('/api/developer', createDeveloperRoutes(supabase));
+        app.use('/api/developer', createDeveloperRoutes(db));
         console.log('  ✓ /api/developer');
 
-        app.use('/api/integrations', createIntegrationsRouter(supabase));
+        app.use('/api/integrations', createIntegrationsRouter(db));
         console.log('  ✓ /api/integrations');
 
-        app.use('/api/agentkit', createAgentKitRouter(supabase));
+        app.use('/api/agentkit', createAgentKitRouter(db));
         console.log('  ✓ /api/agentkit');
 
-        app.use('/api/workflows', createWorkflowsRouter(supabase));
+        app.use('/api/workflows', createWorkflowsRouter(db));
         console.log('  ✓ /api/workflows');
 
-        app.use('/api/automations', createAutomationsRouter(supabase));
+        app.use('/api/automations', createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
         console.log('✅ All 24 API routes registered successfully');
