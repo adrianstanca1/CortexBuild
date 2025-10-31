@@ -51,6 +51,9 @@ import { createIntegrationsRouter } from './routes/integrations';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
+import { createGanttRouter } from './routes/gantt';
+import { createWBSRouter } from './routes/wbs';
+import { createBudgetsRouter } from './routes/budgets';
 
 
 
@@ -387,7 +390,16 @@ const startServer = async () => {
         app.use('/api/automations', createAutomationsRouter(supabase));
         console.log('  ✓ /api/automations');
 
-        console.log('✅ All 24 API routes registered successfully');
+        app.use('/api', createGanttRouter(supabase));
+        console.log('  ✓ /api/gantt');
+
+        app.use('/api', createWBSRouter(supabase));
+        console.log('  ✓ /api/wbs');
+
+        app.use('/api', createBudgetsRouter(supabase));
+        console.log('  ✓ /api/budgets');
+
+        console.log('✅ All 27 API routes registered successfully');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
