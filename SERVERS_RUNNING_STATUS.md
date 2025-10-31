@@ -1,6 +1,6 @@
 # ✅ CORTEXBUILD - SERVERE FUNCȚIONEAZĂ
 
-**Data:** 31 Octombrie 2025  
+**Data:** 31 Octombrie 2025
 **Status:** ✅ **TOTUL FUNCȚIONEAZĂ**
 
 ---
@@ -54,7 +54,7 @@ curl http://localhost:3001/api/auth/me
 ## 🔧 PROBLEME REZOLVATE
 
 ### **1. Script-uri Package.json Greșite** ✅
-**Problema:** 
+**Problema:**
 - Script-urile erau configurate pentru Next.js (`next dev`, `next build`)
 - Aplicația este făcută cu Vite, nu Next.js
 
@@ -62,7 +62,7 @@ curl http://localhost:3001/api/auth/me
 ```json
 "scripts": {
   "dev": "vite",                          // Era: "next dev"
-  "build": "vite build",                  // Era: "next build"  
+  "build": "vite build",                  // Era: "next build"
   "preview": "vite preview --port 3000",  // Era: "next build && next start"
   "start": "vite preview --port 3000",    // Era: "next start"
   "server": "tsx --env-file=.env server/index.ts",
@@ -91,7 +91,7 @@ npm run db:init:sqlite
 # Start backend
 npm run server
 
-# Start frontend  
+# Start frontend
 npm run dev
 
 # Start AMBELE (recomandat)
@@ -256,6 +256,6 @@ npm run server > server.log 2>&1 &
 
 ---
 
-**Generat:** 31 Octombrie 2025, 00:43 UTC  
+**Generat:** 31 Octombrie 2025, 00:43 UTC
 **Status:** 🟢 **TOTUL FUNCȚIONEAZĂ**
 

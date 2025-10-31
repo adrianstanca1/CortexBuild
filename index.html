@@ -568,14 +568,14 @@
                             </svg>
                             Logout
                         </button>
-                        <!-- Mobile menu button hidden - desktop nav always visible -->
-                        <div class="hidden">
-                            <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800">
+                        <!-- Mobile menu button - visible on small screens -->
+                        <div class="md:hidden">
+                            <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors">
                                 <span class="sr-only">Open main menu</span>
                                 <div class="w-6 h-6 flex flex-col justify-around">
-                                    <span class="block w-full h-0.5 bg-current"></span>
-                                    <span class="block w-full h-0.5 bg-current"></span>
-                                    <span class="block w-full h-0.5 bg-current"></span>
+                                    <span class="block w-full h-0.5 bg-current transition-all"></span>
+                                    <span class="block w-full h-0.5 bg-current transition-all"></span>
+                                    <span class="block w-full h-0.5 bg-current transition-all"></span>
                                 </div>
                             </button>
                         </div>
@@ -1830,40 +1830,83 @@
             console.log('✅ showLoginScreen event dispatched');
         };
 
-        // Setup navigation button handlers
+        // Setup navigation button handlers - IMPROVED VERSION
         window.setupNavigationButtons = function () {
             console.log('🔧 Setting up navigation buttons...');
 
-            // Handle "Watch Demo" button
-            const demoButton = document.querySelector('[data-target="features"]');
-            if (demoButton) {
-                demoButton.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    console.log('📺 Watch Demo clicked');
-                    const featuresSection = document.getElementById('features');
-                    if (featuresSection) {
-                        featuresSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-                console.log('✅ Watch Demo button configured');
-            }
-
-            // Handle all navigation items
+            // Handle all navigation items (unified approach)
             const navItems = document.querySelectorAll('[data-target]');
+            console.log(`📍 Found ${navItems.length} navigation items`);
+
             navItems.forEach(item => {
-                if (item.dataset.target && item.dataset.target !== 'features') {
-                    item.addEventListener('click', function (e) {
+                const targetId = item.dataset.target;
+                if (targetId) {
+                    // Remove any existing click listeners
+                    const newItem = item.cloneNode(true);
+                    item.parentNode.replaceChild(newItem, item);
+                    
+                    // Add fresh click listener
+                    newItem.addEventListener('click', function (e) {
                         e.preventDefault();
-                        const targetId = this.dataset.target;
-                        console.log('🔗 Navigating to:', targetId);
+                        e.stopPropagation();
+                        
+                        console.log(`🔗 Navigating to: ${targetId}`);
                         const targetSection = document.getElementById(targetId);
+                        
                         if (targetSection) {
-                            targetSection.scrollIntoView({ behavior: 'smooth' });
+                            // Remove active class from all nav items
+                            document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(navItem => {
+                                navItem.classList.remove('nav-active');
+                            });
+                            
+                            // Add active class to clicked item
+                            this.classList.add('nav-active');
+                            
+                            // Smooth scroll to target
+                            targetSection.scrollIntoView({ 
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                            
+                            // Close mobile menu if open
+                            const mobileMenu = document.getElementById('mobile-menu');
+                            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                                mobileMenu.classList.add('hidden');
+                            }
+                            
+                            console.log(`✅ Navigated to: ${targetId}`);
+                        } else {
+                            console.warn(`⚠️ Section not found: ${targetId}`);
                         }
                     });
+                    
+                    console.log(`✅ Configured: ${targetId}`);
                 }
             });
-            console.log('✅ Navigation buttons configured');
+            
+            // Add scroll spy to highlight active section
+            window.addEventListener('scroll', function() {
+                const sections = document.querySelectorAll('.content-section');
+                const navLinks = document.querySelectorAll('[data-target]');
+                
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('nav-active');
+                    if (link.dataset.target === current) {
+                        link.classList.add('nav-active');
+                    }
+                });
+            });
+            
+            console.log('✅ Navigation system activated with scroll spy');
         };
 
         // Setup buttons when DOM is ready
