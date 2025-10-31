@@ -39,7 +39,7 @@
 
 2. **Create PR on GitHub**
 
-   ```
+   ```text
    https://github.com/adrianstanca1/CortexBuild/compare/main...2025-10-31-ksub-65eda
    ```
 
@@ -273,4 +273,4 @@
 
 ---
 
-*Phase 1 Ready for Pull Request Creation! 🚀*
+### Phase 1 Ready for Pull Request Creation! 🚀
