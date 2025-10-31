@@ -6,9 +6,17 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
-    ignores: ['dist/**'],
+    ignores: [
+      'dist/**',
+      '.next/**',
+      'node_modules/**',
+      'node_modules_bak_*/**',
+      'public/service-worker.js',
+      'landing-page-backup.html',
+      'index.html',
+    ],
   },
-  js.configs.recommended,
+  ...js.configs.recommended,
   {
     files: ['**/*.js'],
     languageOptions: {
