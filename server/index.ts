@@ -223,15 +223,25 @@ const startServer = async () => {
 
         app.post('/api/auth/register', async (req, res) => {
             try {
-                const { email, password, firstName, lastName, role, companyId } = req.body;
+                const { email, password, name, companyName, firstName, lastName, role, companyId } = req.body;
 
-                if (!email || !password || !firstName || !lastName) {
+                // Support both naming conventions: name + companyName OR firstName + lastName
+                const displayName = name || (firstName && lastName ? `${firstName} ${lastName}` : null);
+                const finalCompanyId = companyId || null;
+                const finalRole = role || 'operative';
+
+                if (!email || !password || !displayName) {
                     return res.status(400).json({
-                        error: 'Email, password, first name, and last name are required'
+                        error: 'Email, password, and name are required'
                     });
                 }
 
-                const result = await auth.register(email, password, firstName, lastName, role, companyId);
+                // Split name into first and last for auth.register
+                const nameParts = displayName.trim().split(/\s+/);
+                const first = nameParts[0] || '';
+                const last = nameParts.slice(1).join(' ') || first;
+
+                const result = await auth.register(email, password, first, last, finalRole, finalCompanyId);
 
                 if (!result) {
                     return res.status(400).json({
@@ -254,7 +264,7 @@ const startServer = async () => {
             }
         });
 
-        app.post('/api/auth/logout', (req, res) => {
+        app.post('/api/auth/logout', async (req, res) => {
             try {
                 const token = req.headers.authorization?.replace('Bearer ', '');
 
@@ -262,7 +272,7 @@ const startServer = async () => {
                     return res.status(400).json({ error: 'Token is required' });
                 }
 
-                auth.logout(db, token);
+                await auth.logout(token);
 
                 res.json({ success: true });
             } catch (error: any) {
@@ -274,7 +284,7 @@ const startServer = async () => {
             }
         });
 
-        app.get('/api/auth/me', (req, res) => {
+        app.get('/api/auth/me', async (req, res) => {
             try {
                 const token = req.headers.authorization?.replace('Bearer ', '');
 
@@ -282,7 +292,7 @@ const startServer = async () => {
                     return res.status(401).json({ error: 'Token is required' });
                 }
 
-                const user = auth.getCurrentUserByToken(db, token);
+                const user = await auth.getCurrentUserByToken(token);
 
                 res.json({
                     success: true,

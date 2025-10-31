@@ -6,6 +6,7 @@
  */
 
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { supabase } from './supabase';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cortexbuild-secret-2025';
@@ -125,7 +126,6 @@ export const login = async (
     if (error) {
       console.error('❌ Password verification error:', error);
       // Fallback: Try direct bcrypt comparison if RPC fails
-      const bcrypt = require('bcryptjs');
       const isValid = await bcrypt.compare(password, dbUser.password_hash);
       if (!isValid) {
         console.log('❌ Login failed: Invalid password');
@@ -181,7 +181,6 @@ export const register = async (
     }
 
     // Hash password using bcrypt
-    const bcrypt = require('bcryptjs');
     const passwordHash = await bcrypt.hash(password, 10);
 
     // Create user
@@ -304,7 +303,6 @@ export const changePassword = async (
     }
 
     // Verify old password
-    const bcrypt = require('bcryptjs');
     const isValid = await bcrypt.compare(oldPassword, dbUser.password_hash);
     if (!isValid) {
       console.log('❌ Password change failed: Invalid old password');

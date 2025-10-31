@@ -1,10 +1,9 @@
 // CortexBuild Main App Component - Clean Version
-import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import { Screen, User, Project, NotificationLink, AISuggestion } from './types';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
 import MainSidebar from './components/layout/MainSidebar';
-import { MOCK_PROJECT } from './constants';
 import AISuggestionModal from './components/modals/AISuggestionModal';
 import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
 import FloatingMenu from './components/layout/FloatingMenu';
@@ -17,7 +16,6 @@ import { useToast } from './hooks/useToast';
 import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
-import { supabase } from './lib/supabase/client';
 
 // Inline API functions to avoid import issues
 const api = {
@@ -43,7 +41,6 @@ const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/Plac
 const AnalyticsScreen = lazy(() => import('./components/screens/AnalyticsScreen'));
 const ReportsScreen = lazy(() => import('./components/screens/ReportsScreen'));
 const TeamManagementScreen = lazy(() => import('./components/screens/TeamManagementScreen'));
-const TimeTrackingScreen = lazy(() => import('./components/screens/TimeTrackingScreen'));
 const NotificationsScreen = lazy(() => import('./components/screens/NotificationsScreen'));
 const ProjectPlanningScreen = lazy(() => import('./components/screens/ProjectPlanningScreen'));
 
@@ -65,6 +62,68 @@ const BusinessIntelligenceScreen = lazy(() => import('./components/screens/Busin
 
 // Advanced Enterprise screens
 const SystemAdminScreen = lazy(() => import('./components/screens/SystemAdminScreen'));
+
+// Additional project screens
+const TaskDetailScreen = lazy(() => import('./components/screens/TaskDetailScreen'));
+const NewTaskScreen = lazy(() => import('./components/screens/NewTaskScreen'));
+const DailyLogScreen = lazy(() => import('./components/screens/DailyLogScreen'));
+const PhotoGalleryScreen = lazy(() => import('./components/screens/PhotoGalleryScreen'));
+const RFIDetailScreen = lazy(() => import('./components/screens/RFIDetailScreen'));
+const NewRFIScreen = lazy(() => import('./components/screens/NewRFIScreen'));
+const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
+const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
+const NewPunchListItemScreen = lazy(() => import('./components/screens/NewPunchListItemScreen'));
+const DrawingsScreen = lazy(() => import('./components/screens/DrawingsScreen'));
+const PlansViewerScreen = lazy(() => import('./components/screens/PlansViewerScreen'));
+const DayworkSheetsListScreen = lazy(() => import('./components/screens/DayworkSheetsListScreen'));
+const DayworkSheetDetailScreen = lazy(() => import('./components/screens/DayworkSheetDetailScreen'));
+const NewDayworkSheetScreen = lazy(() => import('./components/screens/NewDayworkSheetScreen'));
+const DeliveryScreen = lazy(() => import('./components/screens/DeliveryScreen'));
+const DrawingComparisonScreen = lazy(() => import('./components/screens/DrawingComparisonScreen'));
+const TMTicketScreen = lazy(() => import('./components/screens/TMTicketScreen'));
+
+// Module screens
+const AccountingScreen = lazy(() => import('./components/screens/modules/AccountingScreen'));
+const AIToolsScreen = lazy(() => import('./components/screens/modules/AIToolsScreen'));
+const DocumentManagementScreen = lazy(() => import('./components/screens/modules/DocumentManagementScreen'));
+const TimeTrackingScreen = lazy(() => import('./components/screens/modules/TimeTrackingScreen'));
+const ProjectOperationsScreen = lazy(() => import('./components/screens/modules/ProjectOperationsScreen'));
+const FinancialManagementScreen = lazy(() => import('./components/screens/modules/FinancialManagementScreen'));
+const BusinessDevelopmentScreen = lazy(() => import('./components/screens/modules/BusinessDevelopmentScreen'));
+const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/modules/AIAgentsMarketplaceScreen'));
+
+// Developer & SDK screens
+const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
+const ProductionSDKDeveloperView = lazy(() => import('./components/sdk/ProductionSDKDeveloperView').then(module => ({
+  default: module.ProductionSDKDeveloperView
+})));
+const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
+const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
+
+// Company Admin Legacy & Additional Dashboards
+const CompanyAdminDashboardLegacy = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
+const CompanyAdminDashboardNew = lazy(() => import('./components/screens/dashboards/CompanyAdminDashboardNew'));
+const SupervisorDashboard = lazy(() => import('./components/screens/dashboards/SupervisorDashboard'));
+const OperativeDashboard = lazy(() => import('./components/screens/dashboards/OperativeDashboard'));
+
+// Admin Control Panel
+const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
+
+// Marketing & Landing Pages
+const MainLandingPage = lazy(() => import('./components/marketing/MainLandingPage'));
+const DeveloperLandingPage = lazy(() => import('./components/sdk/DeveloperLandingPage'));
+
+// Marketplace & App screens
+const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
+const MyApplicationsDesktop = lazy(() => import('./components/desktop/MyApplicationsDesktop'));
+const AdminReviewInterface = lazy(() => import('./components/marketplace/AdminReviewInterface'));
+const DeveloperSubmissionInterface = lazy(() => import('./components/marketplace/DeveloperSubmissionInterface'));
+const Base44Clone = lazy(() => import('./components/base44/Base44Clone').then(module => ({
+  default: module.Base44Clone
+})));
+
+// ML & Advanced Analytics
+const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 
 const ScreenLoader: React.FC = () => (
   <div className="py-16 text-center text-slate-500">
@@ -92,21 +151,73 @@ const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'project-home': ProjectHomeScreen,
   'tasks': TasksScreen,
   'my-tasks': MyTasksScreen,
+  'task-detail': TaskDetailScreen,
+  'new-task': NewTaskScreen,
   'rfis': RFIsScreen,
+  'rfi-detail': RFIDetailScreen,
+  'new-rfi': NewRFIScreen,
   'documents': DocumentsScreen,
   'my-day': MyDayScreen,
+  'daily-log': DailyLogScreen,
+  'photos': PhotoGalleryScreen,
+  'punch-list': PunchListScreen,
+  'punch-list-item-detail': PunchListItemDetailScreen,
+  'new-punch-list-item': NewPunchListItemScreen,
+  'drawings': DrawingsScreen,
+  'plans': PlansViewerScreen,
+  'daywork-sheets': DayworkSheetsListScreen,
+  'daywork-sheet-detail': DayworkSheetDetailScreen,
+  'new-daywork-sheet': NewDayworkSheetScreen,
+  'delivery': DeliveryScreen,
+  'drawing-comparison': DrawingComparisonScreen,
+  'tm-ticket': TMTicketScreen,
 
   // Advanced feature screens
   'analytics': AnalyticsScreen,
   'reports': ReportsScreen,
   'team-management': TeamManagementScreen,
-  'time-tracking': TimeTrackingScreen,
   'notifications': NotificationsScreen,
   'project-planning': ProjectPlanningScreen,
   'ai-insights': AIInsightsScreen,
   'quality-safety': QualitySafetyScreen,
   'business-intelligence': BusinessIntelligenceScreen,
   'system-admin': SystemAdminScreen,
+
+  // Module screens
+  'accounting': AccountingScreen,
+  'ai-tools': AIToolsScreen,
+  'document-management': DocumentManagementScreen,
+  'time-tracking': TimeTrackingScreen,
+  'project-operations': ProjectOperationsScreen,
+  'financial-management': FinancialManagementScreen,
+  'business-development': BusinessDevelopmentScreen,
+  'ai-agents-marketplace': AIAgentsMarketplaceScreen,
+
+  // Developer & SDK screens
+  'automation-studio': ConstructionAutomationStudio,
+  'sdk-developer': ProductionSDKDeveloperView,
+  'developer-workspace': DeveloperWorkspaceScreen,
+  'developer-console': EnhancedDeveloperConsole,
+
+  // Company Admin Legacy & Dashboards
+  'company-admin-legacy': CompanyAdminDashboardLegacy,
+
+  // Admin Control Panel
+  'admin-control-panel': AdminControlPanel,
+
+  // Marketing & Landing Pages
+  'landing': MainLandingPage,
+  'developer-landing': DeveloperLandingPage,
+
+  // Marketplace & App screens
+  'marketplace': GlobalMarketplace,
+  'my-applications': MyApplicationsDesktop,
+  'admin-review': AdminReviewInterface,
+  'developer-submissions': DeveloperSubmissionInterface,
+  'my-apps-desktop': Base44Clone,
+
+  // ML & Advanced Analytics
+  'ml-analytics': AdvancedMLDashboard,
 };
 
 // CortexBuild 2.0 - Powered by Vite + React with HMR
@@ -120,7 +231,7 @@ const App: React.FC = () => {
   const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
 
   const { toasts, addToast, removeToast } = useToast();
-  const { navigationStack, currentNavItem, navigateTo, goBack, canGoBack } = useNavigation();
+  const { currentNavItem, navigateTo, goBack } = useNavigation();
   const { can: hasPermission } = usePermissions(currentUser);
 
   // Check for existing session on app load
@@ -219,79 +330,100 @@ const App: React.FC = () => {
   };
   const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
 
+  // Define which screens need module props
+  const moduleScreens = ['accounting', 'ai-tools', 'document-management', 'time-tracking',
+    'project-operations', 'financial-management', 'business-development', 'ai-agents-marketplace'];
+  const isModuleScreen = moduleScreens.includes(screen);
+
   return (
     <ErrorBoundary>
       <InfiniteLoopErrorBoundary>
         <div className="min-h-screen bg-gray-50">
-        <AppLayout
-          sidebar={
-            <MainSidebar
-              currentUser={currentUser}
-              onNavigate={navigateTo}
-              currentScreen={screen}
-              hasPermission={hasPermission}
-            />
-          }
-          floatingMenu={
-            <FloatingMenu
-              currentUser={currentUser}
-              navigateToModule={navigateTo}
-              openProjectSelector={(title: string, onSelect: (projectId: string) => void) => {
-                setIsProjectSelectorOpen(true);
-              }}
-              onDeepLink={(projectId: string | null, screen: Screen, params: any) => {
-                navigateTo(screen, params);
-              }}
-            />
-          }
-        >
-          <main className="flex-1 overflow-auto">
-            <Suspense fallback={<ScreenLoader />}>
-              <ScreenComponent
+          <AppLayout
+            sidebar={
+              <MainSidebar
                 currentUser={currentUser}
-                navigateTo={navigateTo}
-                goBack={goBack}
-                project={project}
-                params={params}
-                allProjects={allProjects}
+                onNavigate={navigateTo}
+                currentScreen={screen}
                 hasPermission={hasPermission}
               />
-            </Suspense>
-          </main>
-        </AppLayout>
+            }
+            floatingMenu={
+              <FloatingMenu
+                currentUser={currentUser}
+                navigateToModule={navigateTo}
+                openProjectSelector={(title: string, onSelect: (projectId: string) => void) => {
+                  setIsProjectSelectorOpen(true);
+                }}
+                onDeepLink={(projectId: string | null, screen: Screen, params: any) => {
+                  navigateTo(screen, params);
+                }}
+              />
+            }
+          >
+            <main className="flex-1 overflow-auto">
+              <Suspense fallback={<ScreenLoader />}>
+                <ScreenComponent
+                  currentUser={currentUser}
+                  navigateTo={navigateTo}
+                  goBack={goBack}
+                  {...(project && { project })}
+                  {...(params && { params })}
+                  {...(screen !== 'placeholder-tool' && { allProjects })}
+                  {...(screen !== 'placeholder-tool' && { hasPermission })}
+                  {...(isModuleScreen && {
+                    openProjectSelector: (title: string, onSelect: (projectId: string) => void) => {
+                      setIsProjectSelectorOpen(true);
+                    },
+                    onDeepLink: (projectId: string | null, screenName: Screen, linkParams: any) => {
+                      if (projectId) {
+                        const selectedProject = allProjects.find(p => p.id === projectId);
+                        if (selectedProject) {
+                          navigateTo(screenName, linkParams, selectedProject);
+                        }
+                      } else {
+                        navigateTo(screenName, linkParams);
+                      }
+                    },
+                    can: hasPermission
+                  })}
+                />
+              </Suspense>
+            </main>
+          </AppLayout>
 
 
 
-        <ChatbotWidget currentUser={currentUser} />
+          <ChatbotWidget />
 
-        <AISuggestionModal
-          isOpen={isAISuggestionModalOpen}
-          isLoading={isAISuggestionLoading}
-          suggestion={aiSuggestion}
-          onClose={() => setIsAISuggestionModalOpen(false)}
-          onAction={(link: NotificationLink) => {
-            navigateTo(link.screen as Screen, link.params);
-            setIsAISuggestionModalOpen(false);
-          }}
-          currentUser={currentUser}
-        />
-
-        {isProjectSelectorOpen && (
-          <ProjectSelectorModal
-            onSelectProject={(projectId: string) => {
-              const selectedProject = allProjects.find(p => p.id === projectId);
-              if (selectedProject) {
-                navigateTo('project-home', { projectId }, selectedProject);
-              }
-              setIsProjectSelectorOpen(false);
+          <AISuggestionModal
+            isOpen={isAISuggestionModalOpen}
+            isLoading={isAISuggestionLoading}
+            suggestion={aiSuggestion}
+            onClose={() => setIsAISuggestionModalOpen(false)}
+            onAction={(link: NotificationLink) => {
+              navigateTo(link.screen, link.params);
+              setIsAISuggestionModalOpen(false);
             }}
-            onClose={() => setIsProjectSelectorOpen(false)}
-            title="Select Project"
             currentUser={currentUser}
           />
-        )}
 
-        <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+          {isProjectSelectorOpen && (
+            <ProjectSelectorModal
+              onSelectProject={(projectId: string) => {
+                const selectedProject = allProjects.find(p => p.id === projectId);
+                if (selectedProject) {
+                  navigateTo('project-home', { projectId }, selectedProject);
+                }
+                setIsProjectSelectorOpen(false);
+              }}
+              onClose={() => setIsProjectSelectorOpen(false)}
+              title="Select Project"
+              currentUser={currentUser}
+            />
+          )}
+
+          <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
         </div>
       </InfiniteLoopErrorBoundary>
     </ErrorBoundary>

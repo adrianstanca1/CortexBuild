@@ -101,6 +101,17 @@ export type Screen =
     | 'documents'
     | 'delivery'
     | 'drawing-comparison'
+    // Advanced Features
+    | 'analytics'
+    | 'reports'
+    | 'notifications'
+    | 'team-management'
+    | 'project-planning'
+    | 'ai-insights'
+    | 'quality-safety'
+    | 'business-intelligence'
+    | 'system-admin'
+    | 'tm-ticket'
     // Module Screens
     | 'accounting'
     | 'ai-tools'
@@ -129,6 +140,9 @@ export type Screen =
     | 'admin-control-panel'
     // ML & Advanced Analytics
     | 'ml-analytics'
+    // Marketing & Landing
+    | 'landing'
+    | 'developer-landing'
     // Tool screens
     | 'placeholder-tool';
 
