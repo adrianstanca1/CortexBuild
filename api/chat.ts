@@ -1,19 +1,6 @@
 // Chat API for CortexBuild
-export interface ChatMessage {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
-  timestamp: string;
-  sessionId: string;
-}
-
-export interface ChatSession {
-  id: string;
-  userId: string;
-  messages: ChatMessage[];
-  createdAt: string;
-  updatedAt: string;
-}
+// Types are exported from mockApi.ts to avoid duplication
+import type { ChatMessage, ChatSession } from './mockApi';
 
 // Mock chat sessions storage
 const chatSessions = new Map<string, ChatSession>();

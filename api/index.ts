@@ -2,13 +2,11 @@
 // Central export point for all API modules
 
 // Export mock API for development
-export * from './mockApi';
+export { mockApi } from './mockApi';
+export type { ChatMessage, ChatSession } from './mockApi';
 
-// Export chat API
+// Export chat API functions
 export * from './chat';
 
 // Export platform admin API
 export * from './platformAdmin';
-
-// Re-export specific functions for convenience
-export { mockApi } from './mockApi';

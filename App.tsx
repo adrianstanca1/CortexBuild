@@ -417,14 +417,17 @@ const App: React.FC = () => {
           {isProjectSelectorOpen && (
             <ProjectSelectorModal
               onSelectProject={(projectId: string) => {
-                const selectedProject = allProjects.find(p => p.id === projectId);
-                if (selectedProject) {
-                  navigateTo('project-home', { projectId }, selectedProject);
+                if (projectSelectorCallback) {
+                  projectSelectorCallback(projectId);
                 }
+                setProjectSelectorCallback(null);
                 setIsProjectSelectorOpen(false);
               }}
-              onClose={() => setIsProjectSelectorOpen(false)}
-              title="Select Project"
+              onClose={() => {
+                setProjectSelectorCallback(null);
+                setIsProjectSelectorOpen(false);
+              }}
+              title={projectSelectorTitle}
               currentUser={currentUser}
             />
           )}
