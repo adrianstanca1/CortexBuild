@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '../../../types';
+import { User, AIAgent } from '../../../types';
 import * as api from '../../../api';
 
 interface AIAgentsManagementProps {
@@ -7,15 +7,15 @@ interface AIAgentsManagementProps {
 }
 
 const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) => {
-    const [agents, setAgents] = useState<api.AIAgent[]>([]);
+    const [agents, setAgents] = useState<AIAgent[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [editingAgent, setEditingAgent] = useState<api.AIAgent | null>(null);
+    const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        category: 'safety' as api.AIAgent['category'],
+        category: 'safety' as AIAgent['category'],
         priceMonthly: 0,
         priceYearly: 0,
         features: [] as string[],
@@ -24,7 +24,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         bannerUrl: '',
         isActive: true,
         isFeatured: false,
-        minPlan: 'basic' as api.AIAgent['minPlan']
+        minPlan: 'basic' as AIAgent['minPlan']
     });
 
     useEffect(() => {
@@ -77,7 +77,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         }
     };
 
-    const handleEditAgent = (agent: api.AIAgent) => {
+    const handleEditAgent = (agent: AIAgent) => {
         setEditingAgent(agent);
         setFormData({
             name: agent.name,
