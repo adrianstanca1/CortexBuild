@@ -40,11 +40,11 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
                 ]);
                 // Ensure arrays are extracted from responses
                 const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks :
-                    (fetchedTasks?.data && Array.isArray(fetchedTasks.data)) ? fetchedTasks.data : [];
+                    (fetchedTasks && typeof fetchedTasks === 'object' && 'data' in fetchedTasks && Array.isArray((fetchedTasks as any).data)) ? (fetchedTasks as any).data : [];
                 const activitiesArray = Array.isArray(fetchedActivities) ? fetchedActivities :
-                    (fetchedActivities?.data && Array.isArray(fetchedActivities.data)) ? fetchedActivities.data : [];
+                    (fetchedActivities && typeof fetchedActivities === 'object' && 'data' in fetchedActivities && Array.isArray((fetchedActivities as any).data)) ? (fetchedActivities as any).data : [];
                 const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
-                    (fetchedProjects?.data && Array.isArray(fetchedProjects.data)) ? fetchedProjects.data : [];
+                    (fetchedProjects && typeof fetchedProjects === 'object' && 'data' in fetchedProjects && Array.isArray((fetchedProjects as any).data)) ? (fetchedProjects as any).data : [];
 
                 setTasks(tasksArray);
                 setActivities(activitiesArray);
@@ -128,12 +128,12 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
                         />
                     )}
 
-                    <MyTasksWidget tasks={tasks} onDeepLink={onDeepLink} />
+                    <MyTasksWidget tasks={tasks} onNavigate={navigateTo} />
                     <RecentActivityWidget activities={activities} onDeepLink={onDeepLink} />
                 </div>
                 <div className="lg:col-span-1 space-y-8">
                     <NotificationsWidget currentUser={currentUser} onDeepLink={onDeepLink} />
-                    <ProjectsOverviewWidget projects={projects} navigateTo={navigateTo} onDeepLink={onDeepLink} />
+                    <ProjectsOverviewWidget projects={projects} onNavigate={navigateTo} hasPermission={hasPermission} />
                 </div>
             </main>
         </div>
