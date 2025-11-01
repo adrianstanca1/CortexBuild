@@ -154,6 +154,8 @@ export interface AuditLogEntry {
   userName: string;
   timestamp: string;
   createdAt?: string;
+  ipAddress?: string;
+  userAgent?: string;
   metadata?: Record<string, any>;
 }
 
