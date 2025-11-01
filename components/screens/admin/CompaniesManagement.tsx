@@ -28,10 +28,10 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                 api.getAllCompanyPlans()
             ]);
             // Ensure arrays are extracted from responses
-            const companiesArray = Array.isArray(companiesData) ? companiesData : 
-                (companiesData?.data && Array.isArray(companiesData.data)) ? companiesData.data : [];
-            const plansArray = Array.isArray(plansData) ? plansData : 
-                (plansData?.data && Array.isArray(plansData.data)) ? plansData.data : [];
+            const companiesArray: any[] = Array.isArray(companiesData) ? companiesData : 
+                (companiesData && typeof companiesData === 'object' && 'data' in companiesData && Array.isArray((companiesData as any).data)) ? (companiesData as any).data : [];
+            const plansArray: CompanyPlan[] = Array.isArray(plansData) ? plansData : 
+                (plansData && typeof plansData === 'object' && 'data' in plansData && Array.isArray((plansData as any).data)) ? (plansData as any).data : [];
             setCompanies(companiesArray);
             setPlans(plansArray);
         } catch (err: any) {

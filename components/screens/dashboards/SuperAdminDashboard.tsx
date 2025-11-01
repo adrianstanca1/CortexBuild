@@ -31,7 +31,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
         const loadData = async () => {
             setIsLoading(true);
             const [fetchedCompanies, fetchedUsers, fetchedProjects] = await Promise.all([
-                api.fetchCompanies(currentUser),
+                api.fetchAllCompanies ? await api.fetchAllCompanies() : [],
                 api.fetchUsers(),
                 api.fetchAllProjects(currentUser)
             ]);

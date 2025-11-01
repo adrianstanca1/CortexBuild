@@ -250,8 +250,8 @@ const App: React.FC = () => {
       const loadProjects = async () => {
         const projects = await fetchAllProjects(currentUser);
         // Ensure we extract array from response if needed
-        const projectsArray = Array.isArray(projects) ? projects : 
-            (projects?.data && Array.isArray(projects.data)) ? projects.data : [];
+        const projectsArray = Array.isArray(projects) ? projects :
+          (projects?.data && Array.isArray(projects.data)) ? projects.data : [];
         setAllProjects(projectsArray);
       };
       loadProjects();

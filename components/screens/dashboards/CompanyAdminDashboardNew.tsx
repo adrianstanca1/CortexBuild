@@ -33,13 +33,13 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
                     api.fetchAllProjects(currentUser),
                     api.fetchTasksForUser(currentUser.id)
                 ]);
-                
+
                 // Ensure arrays are extracted from responses
-                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects : 
+                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
                     (fetchedProjects?.data && Array.isArray(fetchedProjects.data)) ? fetchedProjects.data : [];
-                const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks : 
+                const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks :
                     (fetchedTasks?.data && Array.isArray(fetchedTasks.data)) ? fetchedTasks.data : [];
-                
+
                 setProjects(projectsArray);
                 setTasks(tasksArray);
 
@@ -54,7 +54,7 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
         };
 
         loadDashboardData();
-        api.checkAndCreateDueDateNotifications(currentUser);
+        api.checkAndCreateDueDateNotifications();
     }, [currentUser]);
 
     const handleNavigateToProject = (projectId: string) => {
@@ -81,7 +81,7 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
 
     const activeProjects = projects.filter(p => p.status === 'in_progress').length;
     const totalRevenue = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
-    const completionRate = projects.length > 0 
+    const completionRate = projects.length > 0
         ? Math.round((projects.filter(p => p.status === 'completed').length / projects.length) * 100)
         : 0;
 
@@ -280,7 +280,7 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
 
                             <button
                                 type="button"
-                                onClick={() => navigateTo('agents')}
+                                onClick={() => navigateTo('ai-agents-marketplace')}
                                 className="w-full flex items-center gap-3 px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors text-left"
                             >
                                 <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
