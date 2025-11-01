@@ -80,6 +80,7 @@ export type Screen =
     | 'global-dashboard'
     | 'projects'
     | 'project-home'
+    | 'project-detail'
     | 'my-day'
     | 'tasks'
     | 'my-tasks'
