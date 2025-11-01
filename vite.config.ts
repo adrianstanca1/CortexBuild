@@ -48,8 +48,6 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [
         react({
-          // Enable Fast Refresh for optimal React development
-          fastRefresh: true,
           // Include TypeScript React files
           include: "**/*.{jsx,tsx}",
         })

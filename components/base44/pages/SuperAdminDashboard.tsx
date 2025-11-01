@@ -34,7 +34,7 @@ interface DashboardStats {
 export const SuperAdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'companies' | 'system' | 'analytics' | 'logs' | 'developer' | 'marketplace' | 'dashboards' | 'sdk' | 'automation' | 'webhooks' | 'reviews' | 'sdk-env' | 'access-control' | 'usage-monitoring' | 'database-manager' | 'ai-collab' | 'developer-hub' | 'developer-dashboard'>('overview');
+  const [activeTab, setActiveTab] = useState<string>('overview');
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -142,7 +142,7 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Content Tabs */}
-      {(activeTab === 'overview' || activeTab === 'overview') && (
+      {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

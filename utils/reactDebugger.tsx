@@ -111,7 +111,7 @@ export function useEffectDebugger(
 
   useEffect(() => {
     if (previousDeps.current) {
-      const changed = dependencies.reduce((acc: string[], dep, index) => {
+      const changed = (dependencies as any[]).reduce((acc: string[], dep: any, index: number) => {
         if (dep !== previousDeps.current![index]) {
           const depName = dependencyNames[index] || `dep${index}`;
           acc.push(depName);
@@ -136,7 +136,7 @@ export function useWhyDidYouUpdate(name: string, props: Record<string, any>): vo
 
   useEffect(() => {
     if (previousProps.current) {
-      const allKeys = Object.keys({ ...previousProps.current, ...props });
+      const allKeys = Object.keys({ ...previousProps.current, ...props }) as string[];
       const changedProps: Record<string, { from: any; to: any }> = {};
 
       allKeys.forEach(key => {
