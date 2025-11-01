@@ -62,7 +62,7 @@ const mapUserRow = (row: AppUser | null): UserResponse | null => {
 const getUserByEmail = async (email: string): Promise<AppUser | null> => {
   try {
     const { data, error } = await supabase
-      .from('app_users')
+      .from('users')
       .select('*')
       .ilike('email', email)
       .single();
@@ -85,7 +85,7 @@ const getUserByEmail = async (email: string): Promise<AppUser | null> => {
 const getUserById = async (id: string): Promise<AppUser | null> => {
   try {
     const { data, error } = await supabase
-      .from('app_users')
+      .from('users')
       .select('*')
       .eq('id', id)
       .single();
@@ -185,7 +185,7 @@ export const register = async (
 
     // Create user
     const { data: newUser, error } = await supabase
-      .from('app_users')
+      .from('users')
       .insert({
         email,
         password_hash: passwordHash,
@@ -265,7 +265,7 @@ export const updateUserProfile = async (
 ): Promise<UserResponse | null> => {
   try {
     const { data, error } = await supabase
-      .from('app_users')
+      .from('users')
       .update({
         ...updates,
         updated_at: new Date().toISOString(),
@@ -314,7 +314,7 @@ export const changePassword = async (
 
     // Update password
     const { error } = await supabase
-      .from('app_users')
+      .from('users')
       .update({
         password_hash: newPasswordHash,
         updated_at: new Date().toISOString(),
