@@ -3,8 +3,14 @@
  */
 
 import React, { useState } from 'react';
+import { User } from '../../../types';
 
-export const SettingsPage: React.FC = () => {
+interface SettingsPageProps {
+    user?: User;
+    onLogout?: () => void;
+}
+
+export const SettingsPage: React.FC<SettingsPageProps> = ({ user, onLogout }) => {
     const [activeTab, setActiveTab] = useState<'profile' | 'company' | 'notifications' | 'security'>('profile');
 
     return (

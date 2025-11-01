@@ -263,7 +263,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = ({
                                 Company Dashboard
                             </h1>
                             <p className={`mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Welcome back, {currentUser.name} - {currentUser.company?.name || 'Your Company'}
+                                Welcome back, {currentUser.name} - Company ID: {currentUser.companyId || 'N/A'}
                             </p>
                         </div>
                         <div className="flex items-center space-x-3">

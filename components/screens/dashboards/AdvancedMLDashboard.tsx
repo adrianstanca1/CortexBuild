@@ -34,7 +34,7 @@ const AdvancedMLDashboard: React.FC<AdvancedMLDashboardProps> = ({
         setError(null);
 
         try {
-            const data = await api.getAllProjectsPredictions(currentUser);
+            const data = await api.getAllProjectsPredictions();
             setPredictions(data);
         } catch (err: any) {
             console.error('❌ Error loading predictions:', err);
