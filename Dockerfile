@@ -62,8 +62,12 @@ USER cortexbuild
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
+# Copy startup script for process management
+COPY --chown=cortexbuild:nodejs scripts/start-production.sh ./scripts/start-production.sh
+RUN chmod +x ./scripts/start-production.sh
+
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
-CMD ["sh", "-c", "node api-server-simple.cjs & npm start"]
+# Start the application using process manager script
+CMD ["./scripts/start-production.sh"]
