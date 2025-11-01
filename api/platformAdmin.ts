@@ -173,12 +173,19 @@ export interface CompanyPlan {
   priceMonthly: number;
   priceYearly: number;
   features: string[];
-  limits: {
+  limits?: {
     users: number;
     projects: number;
     storage: number;
   };
+  maxUsers?: number;
+  maxProjects?: number;
+  aiAgentsIncluded?: string[];
+  aiAgentsLimit?: number;
+  storageGb?: number;
+  sortOrder?: number;
   isActive: boolean;
+  isFeatured?: boolean;
 }
 
 export const getAllCompanies = async (): Promise<any[]> => {
