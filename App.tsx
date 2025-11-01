@@ -16,18 +16,7 @@ import { useToast } from './hooks/useToast';
 import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
-
-// Inline API functions to avoid import issues
-const api = {
-  fetchAllProjects: async (user: any) => {
-    console.log('Mock fetchAllProjects called for user:', user?.email);
-    return [];
-  },
-  getAISuggestedAction: async (user: any) => {
-    console.log('Mock getAISuggestedAction called for user:', user?.email);
-    return null;
-  }
-};
+import { fetchAllProjects, getAISuggestedAction } from './api';
 
 // Core screen imports - only the essential ones
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
