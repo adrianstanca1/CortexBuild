@@ -40,7 +40,7 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
                 ]);
                 setTasks(fetchedTasks);
                 setActivities(fetchedActivities);
-                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects : 
+                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
                     (fetchedProjects?.data && Array.isArray(fetchedProjects.data)) ? fetchedProjects.data : [];
                 setProjects(projectsArray);
 
