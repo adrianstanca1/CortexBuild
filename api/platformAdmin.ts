@@ -144,6 +144,82 @@ export const deleteAIAgent = async (agentId: string): Promise<void> => {
   // TODO: Implement actual API call
 };
 
+// Audit Log API functions
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  userId: string;
+  userName: string;
+  timestamp: string;
+  createdAt?: string;
+  metadata?: Record<string, any>;
+}
+
+export const getPlatformAuditLogs = async (limit: number = 50, offset: number = 0): Promise<AuditLogEntry[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+// Company Management API functions
+export interface CompanyPlan {
+  id: string;
+  name: string;
+  description: string;
+  priceMonthly: number;
+  priceYearly: number;
+  features: string[];
+  limits: {
+    users: number;
+    projects: number;
+    storage: number;
+  };
+  isActive: boolean;
+}
+
+export const getAllCompanies = async (): Promise<any[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+export const getAllCompanyPlans = async (): Promise<CompanyPlan[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+export const updateCompanyPlan = async (companyId: string, planId: string): Promise<boolean> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // TODO: Implement actual API call
+  return true;
+};
+
+// Platform Invitations API functions
+export interface PlatformInvitation {
+  id: string;
+  email: string;
+  companyName?: string;
+  invitationType: 'company_admin' | 'super_admin' | 'platform_partner';
+  status: 'pending' | 'accepted' | 'expired';
+  sentAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+}
+
+export const getPlatformInvitations = async (): Promise<PlatformInvitation[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+export const sendPlatformInvitation = async (email: string, companyName: string, invitationType: 'company_admin' | 'super_admin' | 'platform_partner'): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // TODO: Implement actual API call
+};
+
 export const getPlatformDashboardData = async () => {
   await new Promise(resolve => setTimeout(resolve, 500));
 

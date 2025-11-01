@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { User, Company } from '../../../types';
 import * as api from '../../../api';
+import type { CompanyPlan } from '../../../api';
 
 interface CompaniesManagementProps {
     currentUser: User;
 }
 
 const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }) => {
-    const [companies, setCompanies] = useState<(Company & { plan?: api.CompanyPlan; userCount: number; projectCount: number })[]>([]);
-    const [plans, setPlans] = useState<api.CompanyPlan[]>([]);
+    const [companies, setCompanies] = useState<(Company & { plan?: CompanyPlan; userCount: number; projectCount: number })[]>([]);
+    const [plans, setPlans] = useState<CompanyPlan[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
@@ -23,7 +24,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
         setError(null);
         try {
             const [companiesData, plansData] = await Promise.all([
-                api.getAllCompanies(currentUser),
+                api.getAllCompanies(),
                 api.getAllCompanyPlans()
             ]);
             setCompanies(companiesData);
@@ -38,7 +39,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
 
     const handlePlanUpdate = async (companyId: string, planId: string) => {
         try {
-            const success = await api.updateCompanyPlan(currentUser, companyId, planId);
+            const success = await api.updateCompanyPlan(companyId, planId);
             if (success) {
                 await loadData(); // Reload data
                 setSelectedCompany(null);
@@ -149,7 +150,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                                         )}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {company.plan && company.plan.maxUsers > 0 && 
+                                        {company.plan && company.plan.maxUsers > 0 &&
                                             `${Math.round((company.userCount / company.plan.maxUsers) * 100)}% used`
                                         }
                                     </div>
@@ -164,7 +165,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                                         )}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {company.plan && company.plan.maxProjects > 0 && 
+                                        {company.plan && company.plan.maxProjects > 0 &&
                                             `${Math.round((company.projectCount / company.plan.maxProjects) * 100)}% used`
                                         }
                                     </div>
@@ -201,7 +202,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
                             Change Company Plan
                         </h3>
-                        
+
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Select New Plan
