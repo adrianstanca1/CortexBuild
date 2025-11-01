@@ -18,6 +18,7 @@ export const AIAppBuilder: React.FC<AIAppBuilderProps> = ({ subscriptionTier }) 
   const [analysis, setAnalysis] = useState<any>(null);
   const [generatingTests, setGeneratingTests] = useState(false);
   const [tests, setTests] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{ role: string; content: string }>>([]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;

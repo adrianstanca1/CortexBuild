@@ -33,7 +33,8 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
         const loadItem = async () => {
             setIsLoading(true);
             const fetchedItem = await api.fetchPunchListItemById(itemId);
-            setItem(fetchedItem || null);
+            const item = Array.isArray(fetchedItem) ? null : (fetchedItem && typeof fetchedItem === 'object' && 'data' in fetchedItem ? (fetchedItem as any).data : fetchedItem);
+            setItem(item || null);
             setIsLoading(false);
         };
         loadItem();
@@ -47,7 +48,8 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
         setItem(updatedItemData); // Optimistic update
         try {
             const savedItem = await api.updatePunchListItem(updatedItemData.id, updatedItemData);
-            setItem(savedItem); // Update with response from API to get history
+            const itemData = Array.isArray(savedItem) ? null : (savedItem && typeof savedItem === 'object' && 'data' in savedItem ? (savedItem as any).data : savedItem);
+            setItem(itemData || null); // Update with response from API to get history
         } catch (error: any) {
             alert(error.message);
             setItem(originalItem); // Revert on error

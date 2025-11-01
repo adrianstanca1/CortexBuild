@@ -96,7 +96,7 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
             }))
         );
 
-        const comment = await api.addCommentToTask(task.id, newComment, attachments, currentUser);
+        const comment = await api.addCommentToTask(task.id, { content: newComment, attachments });
         setTask(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
         setNewComment('');
         setCommentFiles([]);

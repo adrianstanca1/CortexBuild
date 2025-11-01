@@ -78,14 +78,17 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
             return;
         }
         try {
-            const newEntry = await api.startTimeEntry(task.id, task.projectId, currentUser.id);
-            setTimeEntries(prev => [...prev, newEntry]);
+            const newEntry = await api.createTimeEntry({ taskId: task.id, projectId: task.projectId, userId: currentUser.id });
+            const entryData = Array.isArray(newEntry) ? null : (newEntry && typeof newEntry === 'object' && 'data' in newEntry ? (newEntry as any).data : newEntry);
+            if (entryData) {
+                setTimeEntries(prev => [...prev, entryData]);
+            }
         } catch (error) {
             console.error(error);
             alert('Failed to clock in.');
         }
     };
-    
+
     const handleClockOut = async () => {
         if (!activeEntry) return;
         try {
@@ -133,7 +136,7 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
                                                             <ClockIcon className="w-6 h-6" />
                                                             <TimeDuration startTime={activeEntry!.startTime} />
                                                         </div>
-                                                        <button 
+                                                        <button
                                                             onClick={handleClockOut}
                                                             className="px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 transition-colors"
                                                         >
@@ -141,7 +144,7 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleClockIn(task)}
                                                         disabled={!!activeEntry}
                                                         className="px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed w-full sm:w-auto"
@@ -157,9 +160,9 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
                         );
                     })
                 )}
-                 {Object.keys(tasksByProject).length === 0 && !isLoading && (
+                {Object.keys(tasksByProject).length === 0 && !isLoading && (
                     <div className="text-center text-gray-500 p-8 bg-white rounded-lg shadow-md border">You have no open tasks assigned to you.</div>
-                 )}
+                )}
             </main>
         </div>
     );

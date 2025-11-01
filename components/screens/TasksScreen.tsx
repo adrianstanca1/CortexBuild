@@ -75,7 +75,7 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
         const loadData = async () => {
             setIsLoading(true);
             const [projectTasks, companyUsers] = await Promise.all([
-                api.fetchTasksForProject(project.id, currentUser),
+                api.fetchTasksForProject(project.id),
                 api.fetchUsersByCompany(project.companyId)
             ]);
             setAllTasks(projectTasks);
@@ -84,7 +84,7 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
         };
         loadData();
     }, [project.id, currentUser]);
-    
+
     const displayedTasks = useMemo(() => {
         let filteredTasks = [...allTasks];
 
@@ -101,17 +101,17 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
         if (filters.assignee !== 'all') {
             filteredTasks = filteredTasks.filter(t => t.assignee === filters.assignee);
         }
-        
+
         // Apply date range filter
         if (filters.dueDateStart) {
             const startDate = new Date(filters.dueDateStart);
-            startDate.setHours(0,0,0,0);
+            startDate.setHours(0, 0, 0, 0);
             filteredTasks = filteredTasks.filter(t => new Date(t.dueDate) >= startDate);
         }
-        
+
         if (filters.dueDateEnd) {
             const endDate = new Date(filters.dueDateEnd);
-            endDate.setHours(23,59,59,999);
+            endDate.setHours(23, 59, 59, 999);
             filteredTasks = filteredTasks.filter(t => new Date(t.dueDate) <= endDate);
         }
 
@@ -165,9 +165,9 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
                         <p className="text-sm text-gray-500">{project.name}</p>
                     </div>
                 </div>
-                { canCreate &&
+                {canCreate &&
                     <button onClick={() => navigateTo('new-task')} className="bg-blue-600 text-white p-2.5 rounded-full shadow hover:bg-blue-700">
-                        <PlusIcon className="w-6 h-6"/>
+                        <PlusIcon className="w-6 h-6" />
                     </button>
                 }
             </header>
@@ -216,11 +216,11 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
                             <div className="lg:col-span-2 grid grid-cols-2 gap-2">
                                 <div>
                                     <label htmlFor="dueDateStart" className="block text-sm font-medium text-gray-700">Due From</label>
-                                    <input type="date" id="dueDateStart" name="dueDateStart" value={filters.dueDateStart} onChange={handleFilterChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                    <input type="date" id="dueDateStart" name="dueDateStart" value={filters.dueDateStart} onChange={handleFilterChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white" />
                                 </div>
                                 <div>
                                     <label htmlFor="dueDateEnd" className="block text-sm font-medium text-gray-700">Due To</label>
-                                    <input type="date" id="dueDateEnd" name="dueDateEnd" value={filters.dueDateEnd} onChange={handleFilterChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                    <input type="date" id="dueDateEnd" name="dueDateEnd" value={filters.dueDateEnd} onChange={handleFilterChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white" />
                                 </div>
                             </div>
                         </div>
@@ -240,14 +240,14 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
                             Showing {displayedTasks.length} of {allTasks.length} tasks.
                         </div>
                         <ul className="divide-y divide-gray-200">
-                             {displayedTasks.length === 0 ? (
+                            {displayedTasks.length === 0 ? (
                                 <p className="p-4 text-sm text-center text-gray-500">No tasks match the current filters.</p>
                             ) : (
                                 displayedTasks.map(task => {
                                     const overdue = isTaskOverdue(task);
                                     return (
-                                        <li 
-                                            key={task.id} 
+                                        <li
+                                            key={task.id}
                                             onClick={() => navigateTo('task-detail', { taskId: task.id })}
                                             className={`p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer border-l-4 ${overdue ? 'bg-red-100 border-red-500' : 'border-transparent'}`}
                                         >
