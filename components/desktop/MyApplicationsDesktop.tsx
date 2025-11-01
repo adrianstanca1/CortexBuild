@@ -10,6 +10,7 @@ import {
     Play, Pause, RefreshCw, Settings
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAPIUrl } from '../../config/api.config';
 
 interface App {
     id: string;
@@ -70,7 +71,7 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                 return;
             }
 
-            const response = await fetch('http://localhost:3001/api/global-marketplace/my-installed-apps', {
+            const response = await fetch(getAPIUrl('/global-marketplace/my-installed-apps'), {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

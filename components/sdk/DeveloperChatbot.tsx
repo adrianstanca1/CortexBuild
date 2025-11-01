@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, Sparkles, Code, FileText, Zap, X, Minimize2, Maximize2 } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -42,7 +43,7 @@ export const DeveloperChatbot: React.FC<DeveloperChatbotProps> = ({ subscription
   const loadChatHistory = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/sdk/ai/chat-history?limit=20', {
+      const response = await fetch(`${getAPIUrl('/sdk/ai/chat-history')}?limit=20`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -74,7 +75,7 @@ export const DeveloperChatbot: React.FC<DeveloperChatbotProps> = ({ subscription
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/sdk/ai/chat', {
+      const response = await fetch(getAPIUrl('/sdk/ai/chat'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

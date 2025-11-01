@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, TrendingUp, AlertCircle, Zap, Users, Database } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface AnalyticsData {
   apiCalls: { time: string; count: number }[];
@@ -29,7 +30,7 @@ export const DeveloperAnalytics: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/developer/analytics', {
+      const response = await fetch(getAPIUrl('/developer/analytics'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

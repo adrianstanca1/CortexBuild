@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Code, Package, Upload, Download, Book, Play, CheckCircle, AlertCircle } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface ModuleTemplate {
   name: string;
@@ -68,7 +69,7 @@ export const metadata = {
   const handleCreateModule = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/modules/create', {
+      const response = await fetch(getAPIUrl('/admin/modules/create'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -109,7 +110,7 @@ export const metadata = {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/modules/publish', {
+      const response = await fetch(getAPIUrl('/admin/modules/publish'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Webhook, Plus, Trash2, Copy, CheckCircle, XCircle, Activity } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface WebhookConfig {
   id: number;
@@ -34,7 +35,7 @@ export const WebhookManager: React.FC = () => {
   const fetchWebhooks = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/webhooks', {
+      const response = await fetch(getAPIUrl('/webhooks'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -49,7 +50,7 @@ export const WebhookManager: React.FC = () => {
   const fetchLogs = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/webhooks/logs', {
+      const response = await fetch(getAPIUrl('/webhooks/logs'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -64,7 +65,7 @@ export const WebhookManager: React.FC = () => {
   const createWebhook = async (webhookData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/webhooks', {
+      const response = await fetch(getAPIUrl('/webhooks'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -87,7 +88,7 @@ export const WebhookManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/webhooks/${webhookId}`, {
+      await fetch(getAPIUrl(`/webhooks/${webhookId}`), {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -105,7 +106,7 @@ export const WebhookManager: React.FC = () => {
   const testWebhook = async (webhookId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/webhooks/${webhookId}/test`, {
+      const response = await fetch(getAPIUrl(`/webhooks/${webhookId}/test`), {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

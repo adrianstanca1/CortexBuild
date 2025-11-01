@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Code, Workflow, Bot, FileCode, Puzzle, Settings, Sparkles, Lock, Crown, BarChart3 } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 import { AIAppBuilder } from './AIAppBuilder';
 import { WorkflowBuilder } from './WorkflowBuilder';
 import { AgentDashboard } from './AgentDashboard';
@@ -37,7 +38,7 @@ export const SDKDeveloperEnvironment: React.FC<{ user: User }> = ({ user }) => {
   const fetchSDKDeveloperStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/sdk/developer/status', {
+      const response = await fetch(getAPIUrl('/sdk/developer/status'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

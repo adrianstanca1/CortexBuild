@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Database, Code, Zap, Activity, Lock, Key, Terminal, Users, Building2, Package, TrendingUp, AlertCircle, Cpu, Server } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface SystemStats {
   totalUsers: number;
@@ -28,7 +29,7 @@ export const SuperAdminAIPanel: React.FC = () => {
   const fetchSystemStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/stats', {
+      const response = await fetch(getAPIUrl('/admin/stats'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

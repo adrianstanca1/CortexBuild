@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getWSUrl } from '../../config/api.config';
 import { Users, MessageCircle, Activity as ActivityIcon, Wifi, WifiOff, Circle } from 'lucide-react';
 
 interface User {
@@ -54,7 +55,7 @@ export const RealtimeCollaboration: React.FC = () => {
   const connectWebSocket = () => {
     try {
       const token = localStorage.getItem('token');
-      const ws = new WebSocket(`ws://localhost:3001/ws?token=${token}`);
+      const ws = new WebSocket(`${getWSUrl()}?token=${token}`);
 
       ws.onopen = () => {
         console.log('✅ WebSocket connected');

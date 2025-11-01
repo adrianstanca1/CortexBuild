@@ -65,8 +65,9 @@ interface SdkApp {
   created_at: string;
 }
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { getAPIUrl } from '../../config/api.config';
 
+const API_URL = getAPIUrl();
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' }

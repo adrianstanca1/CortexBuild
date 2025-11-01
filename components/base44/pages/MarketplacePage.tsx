@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Star, Download, TrendingUp, Package, Check, X } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface Module {
   id: number;
@@ -45,7 +46,7 @@ export const MarketplacePage: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/marketplace/categories', {
+      const response = await fetch(getAPIUrl('/marketplace/categories'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -64,7 +65,7 @@ export const MarketplacePage: React.FC = () => {
       if (selectedCategory) params.append('category', selectedCategory);
       if (sortBy) params.append('sort', sortBy);
 
-      const response = await fetch(`http://localhost:3001/api/marketplace/modules?${params}`, {
+      const response = await fetch(`${getAPIUrl('/marketplace/modules')}?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -81,12 +82,12 @@ export const MarketplacePage: React.FC = () => {
   const fetchInstalledModules = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/marketplace/installed', {
+      const response = await fetch(getAPIUrl('/marketplace/installed'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       if (data.success) {
-        const installed = new Set(data.data.map((m: any) => m.module_id));
+        const installed = new Set<number>(data.data.map((m: any) => Number(m.module_id)));
         setInstalledModules(installed);
       }
     } catch (error) {
@@ -97,7 +98,7 @@ export const MarketplacePage: React.FC = () => {
   const handleInstall = async (moduleId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/marketplace/install', {
+      const response = await fetch(getAPIUrl('/marketplace/install'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -124,7 +125,7 @@ export const MarketplacePage: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/marketplace/uninstall/${moduleId}`, {
+      const response = await fetch(getAPIUrl(`/marketplace/uninstall/${moduleId}`), {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -195,9 +196,8 @@ export const MarketplacePage: React.FC = () => {
               <div className="space-y-2">
                 <button
                   onClick={() => setSelectedCategory('')}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                    selectedCategory === '' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-                  }`}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === '' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <span>All Modules</span>
@@ -208,9 +208,8 @@ export const MarketplacePage: React.FC = () => {
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.slug)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      selectedCategory === category.slug ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-                    }`}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === category.slug ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <span>{category.name}</span>

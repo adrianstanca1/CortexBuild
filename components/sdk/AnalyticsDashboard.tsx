@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, DollarSign, Zap, Clock, BarChart3, Activity, Code, Users } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface UsageStats {
   totalRequests: number;
@@ -31,7 +32,7 @@ export const AnalyticsDashboard: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/sdk/usage?range=${timeRange}`, {
+      const response = await fetch(`${getAPIUrl('/sdk/usage')}?range=${timeRange}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

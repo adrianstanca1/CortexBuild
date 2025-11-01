@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, FolderOpen, FileText, TrendingUp, DollarSign, Calendar } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface CompanyStats {
   totalProjects: number;
@@ -30,7 +31,7 @@ export const CompanyAdminDashboard: React.FC = () => {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/auth/me', {
+      const response = await fetch(getAPIUrl('/auth/me'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -45,32 +46,32 @@ export const CompanyAdminDashboard: React.FC = () => {
   const fetchCompanyStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       // Fetch projects
-      const projectsRes = await fetch('http://localhost:3001/api/projects', {
+      const projectsRes = await fetch(getAPIUrl('/projects'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const projectsData = await projectsRes.json();
       const projects = projectsData.data || [];
-      
+
       // Fetch clients
-      const clientsRes = await fetch('http://localhost:3001/api/clients', {
+      const clientsRes = await fetch(getAPIUrl('/clients'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const clientsData = await clientsRes.json();
       const clients = clientsData.data || [];
-      
+
       // Fetch invoices
-      const invoicesRes = await fetch('http://localhost:3001/api/invoices', {
+      const invoicesRes = await fetch(getAPIUrl('/invoices'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const invoicesData = await invoicesRes.json();
       const invoices = invoicesData.data || [];
-      
+
       // Calculate stats
       const activeProjects = projects.filter((p: any) => p.status === 'active').length;
       const totalRevenue = invoices.reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0);
-      
+
       setStats({
         totalProjects: projects.length,
         activeProjects,

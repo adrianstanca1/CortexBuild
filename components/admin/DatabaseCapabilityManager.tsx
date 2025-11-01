@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Database, HardDrive, Users, Building2, AlertTriangle, TrendingUp, Download, RefreshCw } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface DatabaseStats {
   total_size_mb: number;
@@ -50,7 +51,7 @@ export const DatabaseCapabilityManager: React.FC = () => {
       const token = localStorage.getItem('token');
       
       // Load database stats
-      const statsResponse = await fetch('http://localhost:3001/api/admin/sdk/database-stats', {
+      const statsResponse = await fetch(getAPIUrl('/admin/sdk/database-stats'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const statsData = await statsResponse.json();
@@ -59,7 +60,7 @@ export const DatabaseCapabilityManager: React.FC = () => {
       }
 
       // Load company quotas
-      const companyResponse = await fetch('http://localhost:3001/api/admin/sdk/company-quotas', {
+      const companyResponse = await fetch(getAPIUrl('/admin/sdk/company-quotas'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const companyData = await companyResponse.json();
@@ -68,7 +69,7 @@ export const DatabaseCapabilityManager: React.FC = () => {
       }
 
       // Load user quotas
-      const userResponse = await fetch('http://localhost:3001/api/admin/sdk/user-quotas', {
+      const userResponse = await fetch(getAPIUrl('/admin/sdk/user-quotas'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const userData = await userResponse.json();
@@ -85,7 +86,7 @@ export const DatabaseCapabilityManager: React.FC = () => {
   const updateCompanyQuota = async (companyId: string, field: string, value: number) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/admin/sdk/company-quotas/${companyId}`, {
+      await fetch(getAPIUrl(`/admin/sdk/company-quotas/${companyId}`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -102,7 +103,7 @@ export const DatabaseCapabilityManager: React.FC = () => {
   const updateUserQuota = async (userId: string, field: string, value: number) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/admin/sdk/user-quotas/${userId}`, {
+      await fetch(getAPIUrl(`/admin/sdk/user-quotas/${userId}`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -119,7 +120,7 @@ export const DatabaseCapabilityManager: React.FC = () => {
   const runDatabaseBackup = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/sdk/database-backup', {
+      const response = await fetch(getAPIUrl('/admin/sdk/database-backup'), {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Code, Package, Zap, Book, Settings, Play, CheckCircle, XCircle } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface InstalledModule {
   id: number;
@@ -25,7 +26,7 @@ export const DeveloperPlatform: React.FC = () => {
   const fetchInstalledModules = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/marketplace/installed', {
+      const response = await fetch(getAPIUrl('/marketplace/installed'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -42,7 +43,7 @@ export const DeveloperPlatform: React.FC = () => {
   const toggleModuleStatus = async (moduleId: number, currentStatus: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/marketplace/configure/${moduleId}`, {
+      const response = await fetch(getAPIUrl(`/marketplace/configure/${moduleId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

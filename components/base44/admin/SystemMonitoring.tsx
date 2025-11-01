@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Server, Database, Activity, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface SystemStats {
   database: {
@@ -31,7 +32,7 @@ export const SystemMonitoring: React.FC = () => {
   const fetchSystemStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/system-stats', {
+      const response = await fetch(getAPIUrl('/admin/system-stats'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

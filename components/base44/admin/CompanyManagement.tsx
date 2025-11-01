@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Building2, Users, FolderOpen } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface Company {
   id: string;
@@ -29,7 +30,7 @@ export const CompanyManagement: React.FC = () => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
+      const response = await fetch(getAPIUrl('/admin/companies'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -46,7 +47,7 @@ export const CompanyManagement: React.FC = () => {
   const handleCreateCompany = async (companyData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
+      const response = await fetch(getAPIUrl('/admin/companies'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -70,7 +71,7 @@ export const CompanyManagement: React.FC = () => {
   const handleUpdateCompany = async (companyId: string, updates: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/companies/${companyId}`, {
+      const response = await fetch(getAPIUrl(`/admin/companies/${companyId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

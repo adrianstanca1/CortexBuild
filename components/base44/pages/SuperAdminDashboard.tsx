@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Building2, Activity, Database, TrendingUp, AlertCircle, FileText, BarChart3, Code, Package, Zap, Webhook, Grid, Star, Cpu, Shield, HardDrive, Sparkles } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 import { EnhancedSuperAdminDashboard } from './EnhancedSuperAdminDashboard';
 import { UserManagement } from '../admin/UserManagement';
 import { CompanyManagement } from '../admin/CompanyManagement';
@@ -41,7 +42,7 @@ export const SuperAdminDashboard: React.FC = () => {
     const fetchCurrentUser = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3001/api/auth/me', {
+        const response = await fetch(getAPIUrl('/auth/me'), {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -62,7 +63,7 @@ export const SuperAdminDashboard: React.FC = () => {
   const fetchDashboardStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/dashboard', {
+      const response = await fetch(getAPIUrl('/admin/dashboard'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

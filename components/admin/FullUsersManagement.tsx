@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Edit2, Trash2, UserPlus, RefreshCw, Mail, Shield, Building2 } from 'lucide-react';
 import { AddUserModal } from './AddUserModal';
+import { getAPIUrl } from '../../config/api.config';
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+const API_URL = getAPIUrl();
 
 const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
 

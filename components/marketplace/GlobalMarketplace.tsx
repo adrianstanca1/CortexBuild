@@ -10,6 +10,7 @@ import {
     Eye, Users, Building2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAPIUrl } from '../../config/api.config';
 
 interface App {
     id: string;
@@ -61,7 +62,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/global-marketplace/categories');
+            const response = await fetch(getAPIUrl('/global-marketplace/categories'));
             const data = await response.json();
             if (data.success) {
                 setCategories(data.categories);
@@ -76,21 +77,21 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             setLoading(true);
             const token = localStorage.getItem('token');
             const params = new URLSearchParams();
-            
+
             if (selectedCategory !== 'all') params.append('category', selectedCategory);
             if (searchQuery) params.append('search', searchQuery);
             params.append('sort', sortBy);
 
-            const endpoint = token 
-                ? 'http://localhost:3001/api/global-marketplace/apps/detailed'
-                : 'http://localhost:3001/api/global-marketplace/apps';
+            const endpoint = token
+                ? getAPIUrl('/global-marketplace/apps/detailed')
+                : getAPIUrl('/global-marketplace/apps');
 
             const headers: any = { 'Content-Type': 'application/json' };
             if (token) headers['Authorization'] = `Bearer ${token}`;
 
             const response = await fetch(`${endpoint}?${params}`, { headers });
             const data = await response.json();
-            
+
             if (data.success) {
                 setApps(data.apps);
             }
@@ -110,7 +111,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                 return;
             }
 
-            const response = await fetch(`http://localhost:3001/api/global-marketplace/install/individual/${appId}`, {
+            const response = await fetch(getAPIUrl(`/global-marketplace/install/individual/${appId}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -119,7 +120,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 toast.success('App installed successfully!');
                 fetchApps(); // Refresh to update install status
@@ -140,7 +141,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                 return;
             }
 
-            const response = await fetch(`http://localhost:3001/api/global-marketplace/install/company/${appId}`, {
+            const response = await fetch(getAPIUrl(`/global-marketplace/install/company/${appId}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -149,7 +150,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 toast.success('App installed for entire company!');
                 fetchApps(); // Refresh to update install status
@@ -301,11 +302,10 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                         <button
                             key={category.id}
                             onClick={() => setSelectedCategory(category.id)}
-                            className={`px-4 py-2 rounded-lg transition-all ${
-                                selectedCategory === category.id
+                            className={`px-4 py-2 rounded-lg transition-all ${selectedCategory === category.id
                                     ? 'bg-blue-600 text-white'
                                     : `${cardClass} ${textClass} hover:bg-blue-600 hover:text-white`
-                            }`}
+                                }`}
                         >
                             <span className="mr-2">{category.icon}</span>
                             {category.name}

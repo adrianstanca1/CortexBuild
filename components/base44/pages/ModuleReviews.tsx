@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Star, ThumbsUp, MessageSquare, Filter } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface Review {
   id: number;
@@ -31,7 +32,7 @@ export const ModuleReviews: React.FC<{ moduleId?: number }> = ({ moduleId }) => 
       if (filterRating) params.append('rating', filterRating.toString());
       params.append('sort', sortBy);
 
-      const response = await fetch(`http://localhost:3001/api/module-reviews?${params}`, {
+      const response = await fetch(`${getAPIUrl('/module-reviews')}?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -46,7 +47,7 @@ export const ModuleReviews: React.FC<{ moduleId?: number }> = ({ moduleId }) => 
   const submitReview = async (reviewData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/module-reviews', {
+      const response = await fetch(getAPIUrl('/module-reviews'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -67,7 +68,7 @@ export const ModuleReviews: React.FC<{ moduleId?: number }> = ({ moduleId }) => 
   const markHelpful = async (reviewId: number) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/module-reviews/${reviewId}/helpful`, {
+      await fetch(getAPIUrl(`/module-reviews/${reviewId}/helpful`), {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal, Code, Database, Activity, Settings, BookOpen, Package, Zap, TrendingUp, Shield } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 import { DeveloperConsole } from './DeveloperConsole';
 import { DeveloperEnvironment } from './DeveloperEnvironment';
 import { DeveloperAPIExplorer } from './DeveloperAPIExplorer';
@@ -40,7 +41,7 @@ export const DeveloperHub: React.FC = () => {
   const fetchDeveloperStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/developer/stats', {
+      const response = await fetch(getAPIUrl('/developer/stats'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

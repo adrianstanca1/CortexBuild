@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Lock, Unlock, Users, Search, Filter, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface User {
   id: string;
@@ -31,7 +32,7 @@ export const UserAccessControl: React.FC = () => {
   const loadUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/users', {
+      const response = await fetch(getAPIUrl('/admin/users'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -48,7 +49,7 @@ export const UserAccessControl: React.FC = () => {
   const toggleSDKAccess = async (userId: string, currentAccess: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/sdk/users/${userId}/access`, {
+      const response = await fetch(getAPIUrl(`/admin/sdk/users/${userId}/access`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -69,7 +70,7 @@ export const UserAccessControl: React.FC = () => {
   const updateSDKTier = async (userId: string, tier: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/sdk/users/${userId}/tier`, {
+      const response = await fetch(getAPIUrl(`/admin/sdk/users/${userId}/tier`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -91,7 +92,7 @@ export const UserAccessControl: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       const promises = Array.from(selectedUsers).map(userId =>
-        fetch(`http://localhost:3001/api/admin/sdk/users/${userId}/access`, {
+        fetch(getAPIUrl(`/admin/sdk/users/${userId}/access`), {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,

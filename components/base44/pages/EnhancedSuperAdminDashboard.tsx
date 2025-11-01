@@ -119,8 +119,9 @@ interface DashboardData {
 
 type Section = 'overview' | 'users' | 'companies' | 'sdk' | 'system';
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { getAPIUrl } from '../../../config/api.config';
 
+const API_URL = getAPIUrl();
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' }
@@ -351,9 +352,8 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveSection(tab.id as Section)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                  activeSection === tab.id ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${activeSection === tab.id ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}

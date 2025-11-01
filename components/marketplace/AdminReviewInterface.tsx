@@ -9,6 +9,7 @@ import {
     MessageSquare, Send, AlertCircle, Package, Code
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAPIUrl } from '../../config/api.config';
 
 interface PendingApp {
     id: string;
@@ -59,7 +60,7 @@ const AdminReviewInterface: React.FC<AdminReviewInterfaceProps> = ({
                 return;
             }
 
-            const response = await fetch('http://localhost:3001/api/global-marketplace/pending-review', {
+            const response = await fetch(getAPIUrl('/global-marketplace/pending-review'), {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -88,7 +89,7 @@ const AdminReviewInterface: React.FC<AdminReviewInterfaceProps> = ({
             setSubmitting(true);
             const token = localStorage.getItem('token');
 
-            const response = await fetch(`http://localhost:3001/api/global-marketplace/approve/${selectedApp.id}`, {
+            const response = await fetch(getAPIUrl(`/global-marketplace/approve/${selectedApp.id}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -126,7 +127,7 @@ const AdminReviewInterface: React.FC<AdminReviewInterfaceProps> = ({
             setSubmitting(true);
             const token = localStorage.getItem('token');
 
-            const response = await fetch(`http://localhost:3001/api/global-marketplace/reject/${selectedApp.id}`, {
+            const response = await fetch(getAPIUrl(`/global-marketplace/reject/${selectedApp.id}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
