@@ -204,7 +204,8 @@ export const fetchDocuments = async (user: any) => {
 
 export const createDocument = async (docData: any) => {
   try {
-    return await documentsAPI.create(docData);
+    const response = await apiClient.getClient().post('/api/documents', docData);
+    return response.data;
   } catch (error) {
     console.error('Error creating document:', error);
     throw error;
@@ -223,7 +224,8 @@ export const fetchPunchListItems = async (user: any) => {
 
 export const fetchPunchListItemsForProject = async (projectId: string) => {
   try {
-    return await punchListAPI.getAll({ project_id: projectId });
+    const response = await apiClient.getClient().get(`/api/punch-list?project_id=${projectId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching punch list:', error);
     return [];
@@ -259,7 +261,8 @@ export const updatePunchListItem = async (itemId: string, updates: any) => {
 
 export const addCommentToPunchListItem = async (itemId: string, comment: any) => {
   try {
-    return await punchListAPI.addComment(itemId, comment);
+    const response = await apiClient.getClient().post(`/api/punch-list/${itemId}/comments`, comment);
+    return response.data;
   } catch (error) {
     console.error('Error adding comment:', error);
     throw error;
@@ -278,7 +281,8 @@ export const fetchDayworkSheets = async (user: any) => {
 
 export const fetchDayworkSheetsForProject = async (projectId: string) => {
   try {
-    return await dayworkSheetsAPI.getAll(projectId);
+    const response = await apiClient.getClient().get(`/api/daywork-sheets?project_id=${projectId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching daywork sheets:', error);
     return [];
@@ -287,7 +291,8 @@ export const fetchDayworkSheetsForProject = async (projectId: string) => {
 
 export const fetchDayworkSheetById = async (sheetId: string) => {
   try {
-    return await dayworkSheetsAPI.getById(sheetId);
+    const response = await apiClient.getClient().get(`/api/daywork-sheets/${sheetId}`);
+    return response.data?.data || response.data || null;
   } catch (error) {
     console.error('Error fetching daywork sheet:', error);
     return null;
@@ -316,7 +321,8 @@ export const updateDayworkSheetStatus = async (sheetId: string, status: string) 
 // Drawings API
 export const fetchDrawings = async (projectId: string) => {
   try {
-    return await drawingsAPI.getAll(projectId);
+    const response = await apiClient.getClient().get(`/api/drawings?project_id=${projectId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching drawings:', error);
     return [];

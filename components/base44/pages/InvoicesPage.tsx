@@ -19,6 +19,14 @@ interface Invoice {
     due_date?: string;
     paid_amount?: number;
     paid_date?: string;
+    // Legacy properties for compatibility
+    client?: string;
+    project?: string;
+    amount?: number;
+    issueDate?: string;
+    dueDate?: string;
+    paidAmount?: number;
+    paidDate?: string | null;
 }
 
 export const InvoicesPage: React.FC = () => {
@@ -217,10 +225,10 @@ export const InvoicesPage: React.FC = () => {
                                         <span>{getStatusIcon(invoice.status)}</span>
                                         <span>{invoice.status}</span>
                                     </span>
-                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency(invoice.amount)}</span>
+                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency((invoice as any).amount || invoice.total || 0)}</span>
                                 </div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Invoice #{invoice.id}</h3>
-                                <p className="text-sm text-gray-600">{invoice.client}</p>
+                                <p className="text-sm text-gray-600">{(invoice as any).client || invoice.client_name || 'N/A'}</p>
                             </div>
                         </div>
 
@@ -228,7 +236,7 @@ export const InvoicesPage: React.FC = () => {
                         <div className="space-y-2">
                             <div className="flex items-start">
                                 <span className="text-sm text-gray-600 mr-2">Project:</span>
-                                <p className="text-sm font-medium text-gray-900">{invoice.project}</p>
+                                <p className="text-sm font-medium text-gray-900">{(invoice as any).project || invoice.project_name || 'N/A'}</p>
                             </div>
                             <p className="text-sm text-gray-600">{invoice.description}</p>
 
