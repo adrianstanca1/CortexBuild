@@ -229,9 +229,11 @@ const App: React.FC = () => {
   const [isAISuggestionLoading, setIsAISuggestionLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
   const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
+  const [projectSelectorTitle, setProjectSelectorTitle] = useState<string>('Select a project');
+  const [projectSelectorCallback, setProjectSelectorCallback] = useState<((projectId: string) => void) | null>(null);
 
   const { toasts, addToast, removeToast } = useToast();
-  const { currentNavItem, navigateTo, goBack } = useNavigation();
+  const { currentNavItem, navigateTo, navigateToModule, goBack } = useNavigation();
   const { can: hasPermission } = usePermissions(currentUser);
 
   // Check for existing session on app load
@@ -351,8 +353,10 @@ const App: React.FC = () => {
             floatingMenu={
               <FloatingMenu
                 currentUser={currentUser}
-                navigateToModule={navigateTo}
+                navigateToModule={navigateToModule}
                 openProjectSelector={(title: string, onSelect: (projectId: string) => void) => {
+                  setProjectSelectorTitle(title);
+                  setProjectSelectorCallback(() => onSelect);
                   setIsProjectSelectorOpen(true);
                 }}
                 onDeepLink={(projectId: string | null, screen: Screen, params: any) => {
@@ -373,6 +377,8 @@ const App: React.FC = () => {
                   {...(screen !== 'placeholder-tool' && { hasPermission })}
                   {...(isModuleScreen && {
                     openProjectSelector: (title: string, onSelect: (projectId: string) => void) => {
+                      setProjectSelectorTitle(title);
+                      setProjectSelectorCallback(() => onSelect);
                       setIsProjectSelectorOpen(true);
                     },
                     onDeepLink: (projectId: string | null, screenName: Screen, linkParams: any) => {
