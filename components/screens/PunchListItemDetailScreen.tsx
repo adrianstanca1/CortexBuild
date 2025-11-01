@@ -46,7 +46,7 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
         const updatedItemData = { ...item, status: newStatus };
         setItem(updatedItemData); // Optimistic update
         try {
-            const savedItem = await api.updatePunchListItem(updatedItemData, currentUser);
+            const savedItem = await api.updatePunchListItem(updatedItemData.id, updatedItemData);
             setItem(savedItem); // Update with response from API to get history
         } catch (error: any) {
             alert(error.message);
@@ -56,7 +56,7 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
 
     const handleAddComment = async () => {
         if (!item || !newComment.trim()) return;
-        const comment = await api.addCommentToPunchListItem(item.id, newComment, currentUser);
+        const comment = await api.addCommentToPunchListItem(item.id, newComment);
         setItem(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
         setNewComment('');
     };

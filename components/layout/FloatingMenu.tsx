@@ -9,9 +9,10 @@ interface FloatingMenuProps {
     navigateToModule: (screen: Screen, params?: any) => void;
     openProjectSelector: (title: string, onSelect: (projectId: string) => void) => void;
     onDeepLink: (projectId: string | null, screen: Screen, params: any) => void;
+    openSmartAssistant: () => void;
 }
 
-const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModule, openProjectSelector, onDeepLink }) => {
+const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModule, openProjectSelector, onDeepLink, openSmartAssistant }) => {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const { can } = usePermissions(currentUser);
@@ -86,6 +87,16 @@ const FloatingMenu: React.FC<FloatingMenuProps> = ({ currentUser, navigateToModu
         <nav ref={menuRef} className="sticky top-0 bg-white/80 backdrop-blur-lg shadow-sm z-20 border-b border-gray-200">
             <div className="container mx-auto px-6">
                 <div className="flex items-center h-14">
+                    {/* Smart Assistant Button */}
+                    <button
+                        onClick={openSmartAssistant}
+                        className="flex items-center gap-1 px-3 py-2 mr-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                        title="Open Smart Construction Assistant"
+                    >
+                        <span>🤖</span>
+                        <span>AI Assistant</span>
+                    </button>
+
                     {visibleMenuItems.map(item => (
                         <div key={item.label} className="relative">
                             {item.children ? (

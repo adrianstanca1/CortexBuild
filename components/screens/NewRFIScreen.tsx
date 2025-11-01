@@ -61,7 +61,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
             attachments: attachmentsForApi,
         };
         
-        await api.createRFI(newRFI, currentUser);
+        await api.createRFI(newRFI);
         alert('RFI created successfully!');
         goBack();
     };
@@ -75,7 +75,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
         setIsSuggesting(true);
         setAiSuggestion(null);
         try {
-            const suggestions = await api.getAIRFISuggestions(subject, question, possibleAssignees);
+            const suggestions = await api.getAIRFISuggestions(subject, question);
             if (suggestions) {
                 setAiSuggestion(suggestions);
             } else {

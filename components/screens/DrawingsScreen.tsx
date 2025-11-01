@@ -84,7 +84,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
 
     const handleUploadSubmit = async (drawingData: { drawingNumber: string; title: string; date: string; file: File }) => {
         try {
-            const newDrawing = await api.createDrawing(project.id, drawingData, currentUser);
+            const newDrawing = await api.createDrawing(project.id, drawingData);
             // Instead of just adding, we should refetch or cleverly update the state
             // For simplicity in mock environment, let's just add it. The grouping will handle it.
             setAllDrawings(prevDrawings => [newDrawing, ...prevDrawings]);

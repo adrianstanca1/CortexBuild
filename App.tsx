@@ -224,6 +224,7 @@ const App: React.FC = () => {
   const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
   const [projectSelectorTitle, setProjectSelectorTitle] = useState<string>('Select a project');
   const [projectSelectorCallback, setProjectSelectorCallback] = useState<((projectId: string) => void) | null>(null);
+  const [isSmartAssistantOpen, setIsSmartAssistantOpen] = useState(false);
 
   const { toasts, addToast, removeToast } = useToast();
   const { currentNavItem, navigateTo, navigateToModule, goBack } = useNavigation();
@@ -364,6 +365,7 @@ const App: React.FC = () => {
                 onDeepLink={(projectId: string | null, screen: Screen, params: any) => {
                   navigateTo(screen, params);
                 }}
+                openSmartAssistant={() => setIsSmartAssistantOpen(true)}
               />
             }
           >
@@ -404,6 +406,17 @@ const App: React.FC = () => {
 
 
           <ChatbotWidget />
+
+          <SmartConstructionAssistant
+            currentUser={currentUser}
+            isOpen={isSmartAssistantOpen}
+            onClose={() => setIsSmartAssistantOpen(false)}
+            onAction={(action: string) => {
+              // Handle assistant actions
+              console.log('Assistant action:', action);
+              addToast({ type: 'info', title: `Action: ${action}` });
+            }}
+          />
 
           <AISuggestionModal
             isOpen={isAISuggestionModalOpen}

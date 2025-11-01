@@ -45,7 +45,7 @@ const NewPunchListItemScreen: React.FC<NewPunchListItemScreenProps> = ({ project
             photos,
         };
         
-        await api.createPunchListItem(newItem, currentUser);
+        await api.createPunchListItem(newItem);
         alert('Punch list item created successfully!');
         goBack();
     };

@@ -52,7 +52,7 @@ const DayworkSheetDetailScreen: React.FC<DayworkSheetDetailScreenProps> = ({ she
 
     const handleUpdateStatus = async (status: 'Approved' | 'Rejected') => {
         if (!sheet) return;
-        const updatedSheet = await api.updateDayworkSheetStatus(sheet.id, status, currentUser);
+        const updatedSheet = await api.updateDayworkSheetStatus(sheet.id, status);
         if (updatedSheet) {
             setSheet(updatedSheet);
             if (updatedSheet.status === 'Approved') {
