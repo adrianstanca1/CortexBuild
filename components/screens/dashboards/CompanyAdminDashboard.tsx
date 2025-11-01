@@ -25,6 +25,8 @@ interface CompanyAdminDashboardProps {
 
 const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = (props) => {
     const { currentUser, navigateTo, onDeepLink, onQuickAction, onSuggestAction, selectProject } = props;
+    const { can } = usePermissions(currentUser);
+    const hasPermission = can;
     const [projects, setProjects] = useState<Project[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);

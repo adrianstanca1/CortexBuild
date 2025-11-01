@@ -46,6 +46,7 @@ const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
 // Advanced AI & Quality screens
 const AIInsightsScreen = lazy(() => import('./components/screens/AIInsightsScreen'));
 const QualitySafetyScreen = lazy(() => import('./components/screens/QualitySafetyScreen'));
+const ProjectHealthDashboard = lazy(() => import('./components/screens/ProjectHealthDashboard'));
 
 // Business Intelligence & Automation screens
 const BusinessIntelligenceScreen = lazy(() => import('./components/screens/BusinessIntelligenceScreen'));
@@ -172,6 +173,7 @@ const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'quality-safety': QualitySafetyScreen,
   'business-intelligence': BusinessIntelligenceScreen,
   'system-admin': SystemAdminScreen,
+  'project-health': ProjectHealthDashboard,
 
   // Module screens
   'accounting': AccountingScreen,
