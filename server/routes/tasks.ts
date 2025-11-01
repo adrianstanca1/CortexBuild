@@ -58,7 +58,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
 
       // Add pagination and ordering
       query = query
-        .order('due_date', { ascending: true })
+        .order('end_date', { ascending: true })
         .order('priority', { ascending: false })
         .range(offset, offset + limitNum - 1);
 
