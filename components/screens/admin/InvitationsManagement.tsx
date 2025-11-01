@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
 import * as api from '../../../api';
-import type { PlatformInvitation } from '../../../api';
+import type { PlatformInvitation } from '../../../api/platformAdmin';
 
 interface InvitationsManagementProps {
     currentUser: User;
@@ -41,7 +41,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({ currentUs
         setError(null);
 
         try {
-            await api.sendPlatformInvitation(formData.email, formData.companyName, formData.invitationType);
+            await api.sendPlatformInvitation(formData.email, formData.invitationType, formData.companyName);
             setFormData({ email: '', companyName: '', invitationType: 'company_admin' });
             setShowSendForm(false);
             loadInvitations();

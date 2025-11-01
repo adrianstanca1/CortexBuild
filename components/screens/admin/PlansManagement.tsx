@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
 import * as api from '../../../api';
-import type { CompanyPlan } from '../../../api';
+import type { CompanyPlan } from '../../../api/platformAdmin';
 
 interface PlansManagementProps {
     currentUser: User;
@@ -105,7 +105,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
         setError(null);
 
         try {
-            await api.updateCompanyPlanDetails(currentUser, editingPlan!.id, formData);
+            await api.updateCompanyPlanDetails(editingPlan!.id, formData);
             resetForm();
             loadPlans();
         } catch (err: any) {

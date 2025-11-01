@@ -570,7 +570,7 @@ export const updateAIAgent = async (agentId: string, agentData: any) => {
   return { success: true };
 };
 
-export const toggleAIAgentStatus = async (agentId: string) => {
+export const toggleAIAgentStatus = async (agentId: string, isActive: boolean) => {
   console.log('Mock API: toggleAIAgentStatus called');
   return { success: true };
 };

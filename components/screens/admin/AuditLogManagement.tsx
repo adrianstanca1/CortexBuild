@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
 import * as api from '../../../api';
-import type { AuditLogEntry } from '../../../api';
+import type { AuditLogEntry } from '../../../api/platformAdmin';
 
 interface AuditLogManagementProps {
     currentUser: User;
@@ -32,7 +32,7 @@ const AuditLogManagement: React.FC<AuditLogManagementProps> = ({ currentUser }) 
         setError(null);
         try {
             const offset = (currentPage - 1) * logsPerPage;
-            const logs = await api.getPlatformAuditLogs(logsPerPage, offset);
+            const logs = await api.getPlatformAuditLogs(offset, logsPerPage);
 
             // Apply client-side filters
             let filteredLogs = logs;

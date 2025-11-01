@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Company } from '../../../types';
 import * as api from '../../../api';
-import type { CompanyPlan } from '../../../api';
+import type { CompanyPlan } from '../../../api/platformAdmin';
 
 interface CompaniesManagementProps {
     currentUser: User;
@@ -27,7 +27,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                 api.getAllCompanies(),
                 api.getAllCompanyPlans()
             ]);
-            setCompanies(companiesData);
+            setCompanies(Array.isArray(companiesData) ? companiesData : []);
             setPlans(plansData);
         } catch (err: any) {
             console.error('Error loading data:', err);

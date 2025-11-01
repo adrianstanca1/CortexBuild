@@ -38,7 +38,7 @@ export const RealtimeCollaboration: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'users' | 'chat' | 'activity'>('users');
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     connectWebSocket();

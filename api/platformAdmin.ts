@@ -157,7 +157,7 @@ export interface AuditLogEntry {
   metadata?: Record<string, any>;
 }
 
-export const getPlatformAuditLogs = async (limit: number = 50, offset: number = 0): Promise<AuditLogEntry[]> => {
+export const getPlatformAuditLogs = async (offset: number = 0, limit: number = 50): Promise<AuditLogEntry[]> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   // TODO: Implement actual API call
   return [];
@@ -215,7 +215,7 @@ export const getPlatformInvitations = async (): Promise<PlatformInvitation[]> =>
   return [];
 };
 
-export const sendPlatformInvitation = async (email: string, companyName: string, invitationType: 'company_admin' | 'super_admin' | 'platform_partner'): Promise<void> => {
+export const sendPlatformInvitation = async (email: string, invitationType: 'company_admin' | 'super_admin' | 'platform_partner', companyName?: string): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   // TODO: Implement actual API call
 };
