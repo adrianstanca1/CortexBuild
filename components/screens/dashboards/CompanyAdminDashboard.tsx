@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Screen, Project, Task } from '../../../types';
 // Fix: Added .ts extension to import
 import * as api from '../../../api';
+import { usePermissions } from '../../../hooks/usePermissions';
 // Fix: Added .tsx extension to widget imports
 import QuickActionsWidget from '../../widgets/QuickActionsWidget';
 import NotificationsWidget from '../../widgets/NotificationsWidget';
