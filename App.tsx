@@ -18,6 +18,7 @@ import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { fetchAllProjects, getAISuggestedAction } from './api';
 import PerformanceMonitor from './components/performance/PerformanceMonitor';
+import SmartConstructionAssistant from './components/features/SmartConstructionAssistant';
 
 // Core screen imports - only the essential ones
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));

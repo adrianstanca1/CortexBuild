@@ -10,6 +10,7 @@ export * from './chat';
 
 // Export platform admin API
 export * from './platformAdmin';
+export { toggleCompanyPlanStatus } from './platformAdmin';
 
 // Re-export types from types.ts for API usage
 export type { AIAgent } from '../types';

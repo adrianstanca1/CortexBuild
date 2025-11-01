@@ -17,7 +17,7 @@ const MyTasksScreen: React.FC<MyTasksScreenProps> = ({ currentUser, navigateTo, 
     useEffect(() => {
         const loadData = async () => {
             setIsLoading(true);
-            const tasks = await api.fetchTasksForUser(currentUser);
+            const tasks = await api.fetchTasksForUser(currentUser.id);
             setAllTasks(tasks);
             setIsLoading(false);
         };

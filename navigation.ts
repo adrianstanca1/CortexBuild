@@ -27,6 +27,7 @@ export const MENU_ITEMS: MenuItem[] = [
         children: [
             { label: 'AI Agents Marketplace', screen: 'ai-agents-marketplace', permission: { subject: 'user', action: 'read' } },
             { label: 'AI Tools Suite', screen: 'ai-tools', permission: { subject: 'task', action: 'read' } },
+            { label: 'Project Health Dashboard', screen: 'project-health', permission: { subject: 'project', action: 'read' } },
             { label: 'My Application Desktop', screen: 'myapplicationdesktop', permission: { subject: 'user', action: 'read' } },
         ]
     },

@@ -235,6 +235,11 @@ export const updateCompanyPlan = async (companyId: string, planId: string): Prom
   return true;
 };
 
+export const toggleCompanyPlanStatus = async (planId: string, isActive: boolean): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+};
+
 // Platform Invitations API functions
 export interface PlatformInvitation {
   id: string;

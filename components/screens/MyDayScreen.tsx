@@ -40,7 +40,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
             setInstructions(siteInstructions);
             setIsLoading(false);
 
-            const aiInsights = await api.getAIInsightsForMyDay(filteredTasks, project, weatherData);
+            const aiInsights = await api.getAIInsightsForMyDay();
             setInsights(aiInsights);
             setIsInsightsLoading(false);
         };
@@ -49,7 +49,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
     
     const handleRefreshInsights = async () => {
         setIsInsightsRefreshing(true);
-        const aiInsights = await api.getAIInsightsForMyDay(myTasks, project, weatherData);
+        const aiInsights = await api.getAIInsightsForMyDay();
         setInsights(aiInsights);
         setIsInsightsRefreshing(false);
     };
