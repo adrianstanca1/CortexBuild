@@ -286,7 +286,7 @@ const App: React.FC = () => {
     setIsAISuggestionModalOpen(true);
     setIsAISuggestionLoading(true);
     setAiSuggestion(null);
-    const suggestion = await api.getAISuggestedAction(currentUser);
+    const suggestion = await getAISuggestedAction(currentUser);
     setAiSuggestion(suggestion);
     setIsAISuggestionLoading(false);
   };
