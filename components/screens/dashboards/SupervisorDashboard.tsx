@@ -39,13 +39,13 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
                     api.fetchAllProjects(currentUser)
                 ]);
                 // Ensure arrays are extracted from responses
-                const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks : 
+                const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks :
                     (fetchedTasks?.data && Array.isArray(fetchedTasks.data)) ? fetchedTasks.data : [];
-                const activitiesArray = Array.isArray(fetchedActivities) ? fetchedActivities : 
+                const activitiesArray = Array.isArray(fetchedActivities) ? fetchedActivities :
                     (fetchedActivities?.data && Array.isArray(fetchedActivities.data)) ? fetchedActivities.data : [];
-                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects : 
+                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
                     (fetchedProjects?.data && Array.isArray(fetchedProjects.data)) ? fetchedProjects.data : [];
-                
+
                 setTasks(tasksArray);
                 setActivities(activitiesArray);
                 setProjects(projectsArray);
