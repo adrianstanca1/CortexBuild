@@ -27,8 +27,13 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                 api.getAllCompanies(),
                 api.getAllCompanyPlans()
             ]);
-            setCompanies(Array.isArray(companiesData) ? companiesData : []);
-            setPlans(plansData);
+            // Ensure arrays are extracted from responses
+            const companiesArray = Array.isArray(companiesData) ? companiesData : 
+                (companiesData?.data && Array.isArray(companiesData.data)) ? companiesData.data : [];
+            const plansArray = Array.isArray(plansData) ? plansData : 
+                (plansData?.data && Array.isArray(plansData.data)) ? plansData.data : [];
+            setCompanies(companiesArray);
+            setPlans(plansArray);
         } catch (err: any) {
             console.error('Error loading data:', err);
             setError(err.message || 'Failed to load data');

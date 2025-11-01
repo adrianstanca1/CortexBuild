@@ -31,13 +31,20 @@ const CompanyAdminDashboardNew: React.FC<CompanyAdminDashboardNewProps> = (props
             try {
                 const [fetchedProjects, fetchedTasks] = await Promise.all([
                     api.fetchAllProjects(currentUser),
-                    api.fetchTasksForUser(currentUser)
+                    api.fetchTasksForUser(currentUser.id)
                 ]);
-                setProjects(fetchedProjects);
-                setTasks(fetchedTasks);
+                
+                // Ensure arrays are extracted from responses
+                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects : 
+                    (fetchedProjects?.data && Array.isArray(fetchedProjects.data)) ? fetchedProjects.data : [];
+                const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks : 
+                    (fetchedTasks?.data && Array.isArray(fetchedTasks.data)) ? fetchedTasks.data : [];
+                
+                setProjects(projectsArray);
+                setTasks(tasksArray);
 
                 // Process dashboard data with ML integration
-                const processedData = await processDashboardData(fetchedProjects, fetchedTasks, currentUser);
+                const processedData = await processDashboardData(projectsArray, tasksArray, currentUser);
                 setDashboardData(processedData);
             } catch (error) {
                 console.error('Error loading dashboard data:', error);

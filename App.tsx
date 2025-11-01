@@ -249,7 +249,10 @@ const App: React.FC = () => {
     if (currentUser) {
       const loadProjects = async () => {
         const projects = await fetchAllProjects(currentUser);
-        setAllProjects(projects);
+        // Ensure we extract array from response if needed
+        const projectsArray = Array.isArray(projects) ? projects : 
+            (projects?.data && Array.isArray(projects.data)) ? projects.data : [];
+        setAllProjects(projectsArray);
       };
       loadProjects();
     }

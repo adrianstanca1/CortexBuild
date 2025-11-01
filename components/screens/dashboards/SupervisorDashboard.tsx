@@ -34,13 +34,15 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
             setIsLoading(true);
             try {
                 const [fetchedTasks, fetchedActivities, fetchedProjects] = await Promise.all([
-                    api.fetchTasksForUser(currentUser),
+                    api.fetchTasksForUser(currentUser.id),
                     api.fetchRecentActivity(currentUser),
                     api.fetchAllProjects(currentUser)
                 ]);
                 setTasks(fetchedTasks);
                 setActivities(fetchedActivities);
-                setProjects(fetchedProjects);
+                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects : 
+                    (fetchedProjects?.data && Array.isArray(fetchedProjects.data)) ? fetchedProjects.data : [];
+                setProjects(projectsArray);
 
                 // Process dashboard data with ML integration
                 const processedData = await processDashboardData(fetchedProjects, fetchedTasks, currentUser);

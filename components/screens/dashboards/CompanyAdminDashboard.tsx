@@ -56,7 +56,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = (props) => {
 
     const handleNavigateToProject = (projectId: string) => {
         selectProject(projectId);
-        navigateTo('project-detail');
+        navigateTo('project-home' as Screen, { projectId });
     };
 
     if (isLoading) {
