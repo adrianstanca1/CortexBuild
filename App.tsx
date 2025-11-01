@@ -248,7 +248,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (currentUser) {
       const loadProjects = async () => {
-        const projects = await api.fetchAllProjects(currentUser);
+        const projects = await fetchAllProjects(currentUser);
         setAllProjects(projects);
       };
       loadProjects();
