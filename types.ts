@@ -74,6 +74,9 @@ export interface Project {
     projectManagerId?: string;
     createdAt?: string;
     updatedAt?: string;
+    progress?: number;
+    client?: string;
+    client_name?: string;
 }
 
 export type Screen =
