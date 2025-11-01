@@ -70,5 +70,9 @@ module.exports = {
     'build/',
     '.next/',
     '*.min.js',
+    'api-server*.cjs',
+    'production-server.cjs',
+    'middleware/*.cjs',
+    'api-tester.js',
   ],
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, Send, Copy, Check, Download } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface APIEndpoint {
   method: string;

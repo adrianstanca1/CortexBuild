@@ -142,7 +142,7 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Content Tabs */}
-      {activeTab === 'overview' && (
+      {(activeTab === 'overview' || activeTab === 'overview') && (
         <div className="space-y-6">
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

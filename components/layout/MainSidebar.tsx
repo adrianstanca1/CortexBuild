@@ -22,7 +22,7 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
   currentScreen,
   hasPermission
 }) => {
-  
+
   const navItems: NavItem[] = [
     // Dashboard Items
     {
@@ -180,7 +180,7 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
 
     // System Administration (Super Admin only)
     ...(currentUser.role === 'super_admin' ? [{
-      id: 'system-admin',
+      id: 'system-admin' as Screen,
       label: 'System Admin',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,12 +211,12 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
     if (item.roles && !item.roles.includes(currentUser.role)) {
       return false;
     }
-    
+
     // Check specific permissions if defined
     if (item.permission && !hasPermission(item.permission.action, item.permission.subject)) {
       return false;
     }
-    
+
     return true;
   });
 
@@ -259,11 +259,10 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
             <li key={item.id}>
               <button
                 onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  currentScreen === item.id
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentScreen === item.id
                     ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 <span className="mr-3">{item.icon}</span>
                 {item.label}

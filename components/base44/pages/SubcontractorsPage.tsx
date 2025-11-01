@@ -7,16 +7,20 @@ import React, { useState, useEffect } from 'react';
 import { CreateSubcontractorModal } from '../modals/CreateSubcontractorModal';
 
 interface Subcontractor {
-    id: number;
+    id: number | string;
     name: string;
     trade?: string;
     contact_name?: string;
+    contact?: string; // Legacy property
     email?: string;
     phone?: string;
     license_number?: string;
+    license?: string; // Legacy property
     status: string;
     rating?: number;
     projects?: number;
+    insuranceExpiring?: boolean;
+    onTimeRate?: number;
 }
 
 export const SubcontractorsPage: React.FC = () => {

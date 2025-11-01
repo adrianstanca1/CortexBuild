@@ -94,7 +94,7 @@ export const login = async (email: string, password: string): Promise<User> => {
                 name: mockUser.name,
                 role: mockUser.role,
                 companyId: mockUser.companyId,
-                avatar: mockUser.avatar || ''
+                avatar: (mockUser as any).avatar || ''
             };
 
             // Save mock token

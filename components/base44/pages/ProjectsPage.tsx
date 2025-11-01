@@ -8,17 +8,18 @@ import { ProjectDetailPage } from './ProjectDetailPage';
 import { CreateProjectModal } from '../modals/CreateProjectModal';
 
 interface Project {
-    id: number;
+    id: number | string;
     name: string;
     client_name?: string;
+    client?: string;
     location?: string;
     budget?: number;
     spent?: number;
     progress?: number;
     status: string;
     priority?: string;
-    startDate?: string;
-    endDate?: string;
+    startDate?: string | null;
+    endDate?: string | null;
 }
 
 export const ProjectsPage: React.FC = () => {
@@ -82,6 +83,7 @@ export const ProjectsPage: React.FC = () => {
             id: '1',
             name: 'ASasdad',
             client: 'Green Valley Homes',
+            client_name: 'Green Valley Homes',
             location: 'rm82ul',
             budget: 123333,
             spent: 0,
@@ -265,7 +267,7 @@ export const ProjectsPage: React.FC = () => {
                 {projects.map((project) => (
                     <div
                         key={project.id}
-                        onClick={() => setSelectedProjectId(project.id)}
+                        onClick={() => setSelectedProjectId(String(project.id))}
                         className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer hover:scale-105"
                     >
                         {/* Header */}
@@ -281,7 +283,7 @@ export const ProjectsPage: React.FC = () => {
                                 </div>
                             </div>
                             <h3 className="text-lg font-semibold text-gray-900 mb-1">{project.name}</h3>
-                            <p className="text-sm text-gray-600">{project.client}</p>
+                            <p className="text-sm text-gray-600">{project.client || project.client_name || 'N/A'}</p>
                         </div>
 
                         {/* Details */}

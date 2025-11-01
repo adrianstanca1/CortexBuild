@@ -7,7 +7,7 @@ import React from 'react';
 import {
     Sparkles, Building2, Code, BarChart3, Shield, Zap,
     CheckCircle, ArrowRight, Users, Globe, TrendingUp, Award,
-    Rocket, Star, Play, GitHub
+    Rocket, Star, Play, Github
 } from 'lucide-react';
 
 interface MainLandingPageProps {

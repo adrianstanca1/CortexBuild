@@ -8,19 +8,26 @@ import React, { useState, useEffect } from 'react';
 import { CreateRFIModal } from '../modals/CreateRFIModal';
 
 interface RFI {
-    id: number;
+    id: number | string;
     rfi_number?: string;
     title: string;
     description?: string;
     project_name?: string;
+    project?: string; // Legacy property
     status: string;
     priority?: string;
     category?: string;
     submitted_to?: string;
+    submittedTo?: string; // Legacy property
     due_date?: string;
+    dueDate?: string; // Legacy property
     response?: string;
     responded_by?: string;
+    respondedBy?: string; // Legacy property
     response_date?: string;
+    responseDate?: string | null; // Legacy property
+    overdue?: boolean;
+    overdueDays?: number;
 }
 
 export const RFIsPage: React.FC = () => {
@@ -261,17 +268,17 @@ export const RFIsPage: React.FC = () => {
                                     <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(rfi.priority)}`}>
                                         {rfi.priority}
                                     </span>
-                                    {rfi.overdue && (
+                                    {(rfi as any).overdue && (
                                         <span className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800 flex items-center space-x-1">
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
-                                            <span>{rfi.overdueDays}d overdue</span>
+                                            <span>{(rfi as any).overdueDays}d overdue</span>
                                         </span>
                                     )}
                                 </div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">RFI #{rfi.id}</h3>
-                                <p className="text-sm text-gray-600">{rfi.project}</p>
+                                <p className="text-sm text-gray-600">{rfi.project || rfi.project_name || 'N/A'}</p>
                             </div>
                         </div>
 
@@ -288,11 +295,11 @@ export const RFIsPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <span className="text-gray-600">Submitted to: </span>
-                                    <span className="font-medium text-gray-900">{rfi.submittedTo}</span>
+                                    <span className="font-medium text-gray-900">{(rfi as any).submittedTo || rfi.submitted_to || 'N/A'}</span>
                                 </div>
                                 <div>
                                     <span className="text-gray-600">Due: </span>
-                                    <span className="font-medium text-gray-900">{rfi.dueDate}</span>
+                                    <span className="font-medium text-gray-900">{(rfi as any).dueDate || rfi.due_date || 'N/A'}</span>
                                 </div>
                             </div>
 
@@ -301,7 +308,7 @@ export const RFIsPage: React.FC = () => {
                                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                                     <p className="text-sm font-medium text-gray-900 mb-1">Response:</p>
                                     <p className="text-sm text-gray-700 mb-2">{rfi.response}</p>
-                                    <p className="text-xs text-gray-500">By {rfi.respondedBy} on {rfi.responseDate}</p>
+                                    <p className="text-xs text-gray-500">By {(rfi as any).respondedBy || rfi.responded_by || 'N/A'} on {(rfi as any).responseDate || rfi.response_date || 'N/A'}</p>
                                 </div>
                             )}
                         </div>

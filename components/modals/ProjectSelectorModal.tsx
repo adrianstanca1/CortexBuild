@@ -27,34 +27,31 @@ const ProjectSelectorModal: React.FC<ProjectSelectorModalProps> = ({ onSelectPro
                         name: 'Office Building Construction',
                         description: 'Modern office complex with 15 floors',
                         status: 'active',
-                        progress: 75,
                         startDate: '2024-01-15',
                         endDate: '2024-12-15',
                         budget: 2500000,
                         location: 'London, UK'
-                    },
+                    } as Project,
                     {
                         id: '2',
                         name: 'Residential Complex',
                         description: 'Luxury residential development with 50 units',
                         status: 'active',
-                        progress: 45,
                         startDate: '2024-03-01',
                         endDate: '2025-06-30',
                         budget: 1800000,
                         location: 'Manchester, UK'
-                    },
+                    } as Project,
                     {
                         id: '3',
                         name: 'Shopping Center Renovation',
                         description: 'Complete renovation of existing shopping center',
                         status: 'planning',
-                        progress: 15,
                         startDate: '2024-06-01',
                         endDate: '2024-11-30',
                         budget: 950000,
                         location: 'Birmingham, UK'
-                    }
+                    } as Project
                 ];
                 setProjects(mockProjects);
             } catch (error) {
