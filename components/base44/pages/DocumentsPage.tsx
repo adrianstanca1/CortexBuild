@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { CreateDocumentModal } from '../modals/CreateDocumentModal';
 
 interface Document {
-    id: number;
+    id: string | number;
     name: string;
     file_type?: string;
     file_size?: number;
@@ -15,6 +15,11 @@ interface Document {
     uploaded_by_name?: string;
     created_at?: string;
     category?: string;
+    type?: string;
+    size?: string;
+    project?: string;
+    uploadedBy?: string;
+    uploadDate?: string;
 }
 
 export const DocumentsPage: React.FC = () => {
@@ -56,26 +61,35 @@ export const DocumentsPage: React.FC = () => {
         {
             id: '1',
             name: 'Project Blueprint - Phase 1.pdf',
+            file_type: 'pdf',
             type: 'pdf',
             size: '2.4 MB',
             project: 'Downtown Office Complex',
+            project_name: 'Downtown Office Complex',
             uploadedBy: 'Adrian Stanca',
+            uploaded_by_name: 'Adrian Stanca',
             uploadDate: 'Dec 1, 2024',
+            created_at: 'Dec 1, 2024',
             category: 'blueprints'
         },
         {
             id: '2',
             name: 'Safety Inspection Report.docx',
+            file_type: 'docx',
             type: 'docx',
             size: '156 KB',
             project: 'Riverside Luxury Apartments',
+            project_name: 'Riverside Luxury Apartments',
             uploadedBy: 'John Smith',
+            uploaded_by_name: 'John Smith',
             uploadDate: 'Dec 5, 2024',
+            created_at: 'Dec 5, 2024',
             category: 'reports'
         },
         {
             id: '3',
             name: 'Material Specifications.xlsx',
+            file_type: 'xlsx',
             type: 'xlsx',
             size: '89 KB',
             project: 'Manufacturing Facility Expansion',

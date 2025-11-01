@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { InvoiceBuilder } from '../components/InvoiceBuilder';
 
 interface Invoice {
-    id: number;
+    id: number | string;
     invoice_number?: string;
     client_name?: string;
     project_name?: string;
@@ -58,7 +58,8 @@ export const InvoicesPage: React.FC = () => {
 
     const mockInvoices: Invoice[] = [
         {
-            id: 'INV-2024-001',
+            id: 'INV-2024-001' as any,
+            client_name: 'Metro Construction Group',
             client: 'Metro Construction Group',
             project: 'Downtown Office Complex',
             description: 'Progress billing - Phase 1 completion',

@@ -111,7 +111,7 @@ const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPane
 
 // Marketing & Landing Pages
 const MainLandingPage = lazy(() => import('./components/marketing/MainLandingPage'));
-const DeveloperLandingPage = lazy(() => import('./components/sdk/DeveloperLandingPage'));
+const DeveloperLandingPage = lazy(() => import('./components/sdk/DeveloperLandingPage').then(module => ({ default: module.DeveloperLandingPage })));
 
 // Marketplace & App screens
 const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));

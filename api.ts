@@ -17,7 +17,8 @@ import {
   companiesAPI, 
   aiAPI, 
   dailyLogAPI, 
-  analyticsAPI 
+  analyticsAPI,
+  apiClient
 } from './lib/api-client';
 
 // Projects API
@@ -69,7 +70,8 @@ export const fetchTaskById = async (taskId: string) => {
 
 export const fetchTasksForUser = async (userId: string) => {
   try {
-    return await tasksAPI.getAll({ user_id: userId });
+    const response = await apiClient.getClient().get(`/api/tasks?user_id=${userId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching tasks:', error);
     return [];
@@ -78,7 +80,7 @@ export const fetchTasksForUser = async (userId: string) => {
 
 export const fetchTasksForProject = async (projectId: string) => {
   try {
-    return await tasksAPI.getAll({ project_id: projectId });
+    return await tasksAPI.getAll(projectId);
   } catch (error) {
     console.error('Error fetching tasks:', error);
     return [];
@@ -114,7 +116,8 @@ export const deleteTask = async (taskId: string) => {
 
 export const addCommentToTask = async (taskId: string, comment: any) => {
   try {
-    return await tasksAPI.addComment(taskId, comment);
+    const response = await apiClient.getClient().post(`/api/tasks/${taskId}/comments`, comment);
+    return response.data;
   } catch (error) {
     console.error('Error adding comment:', error);
     throw error;
@@ -142,7 +145,8 @@ export const fetchRFIById = async (rfiId: string) => {
 
 export const fetchRFIVersions = async (rfiNumber: string) => {
   try {
-    return await rfisAPI.getVersions(rfiNumber);
+    const response = await apiClient.getClient().get(`/api/rfis/${rfiNumber}/versions`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching RFI versions:', error);
     return [];
@@ -151,7 +155,8 @@ export const fetchRFIVersions = async (rfiNumber: string) => {
 
 export const fetchRFIsForProject = async (projectId: string) => {
   try {
-    return await rfisAPI.getAll({ project_id: projectId });
+    const response = await apiClient.getClient().get(`/api/rfis?project_id=${projectId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching RFIs:', error);
     return [];
@@ -169,7 +174,8 @@ export const createRFI = async (rfiData: any) => {
 
 export const addCommentToRFI = async (rfiId: string, comment: any) => {
   try {
-    return await rfisAPI.addComment(rfiId, comment);
+    const response = await apiClient.getClient().post(`/api/rfis/${rfiId}/comments`, comment);
+    return response.data;
   } catch (error) {
     console.error('Error adding comment:', error);
     throw error;
@@ -178,7 +184,8 @@ export const addCommentToRFI = async (rfiId: string, comment: any) => {
 
 export const addAnswerToRFI = async (rfiId: string, answer: any) => {
   try {
-    return await rfisAPI.addAnswer(rfiId, answer);
+    const response = await apiClient.getClient().post(`/api/rfis/${rfiId}/answers`, answer);
+    return response.data;
   } catch (error) {
     console.error('Error adding answer:', error);
     throw error;
@@ -298,7 +305,8 @@ export const createDayworkSheet = async (sheetData: any) => {
 
 export const updateDayworkSheetStatus = async (sheetId: string, status: string) => {
   try {
-    return await dayworkSheetsAPI.updateStatus(sheetId, status);
+    const response = await apiClient.getClient().put(`/api/daywork-sheets/${sheetId}/status`, { status });
+    return response.data;
   } catch (error) {
     console.error('Error updating status:', error);
     throw error;
@@ -317,7 +325,8 @@ export const fetchDrawings = async (projectId: string) => {
 
 export const createDrawing = async (drawingData: any) => {
   try {
-    return await drawingsAPI.create(drawingData);
+    const response = await apiClient.getClient().post('/api/drawings', drawingData);
+    return response.data;
   } catch (error) {
     console.error('Error creating drawing:', error);
     throw error;
@@ -327,7 +336,8 @@ export const createDrawing = async (drawingData: any) => {
 // Delivery API
 export const fetchDeliveryItems = async (projectId: string) => {
   try {
-    return await deliveryAPI.getItems(projectId);
+    const response = await apiClient.getClient().get(`/api/delivery?project_id=${projectId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching delivery items:', error);
     return [];
@@ -346,7 +356,8 @@ export const fetchUsers = async () => {
 
 export const fetchUsersByCompany = async (companyId: string) => {
   try {
-    return await usersAPI.getByCompany(companyId);
+    const response = await apiClient.getClient().get(`/api/users?company_id=${companyId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching users:', error);
     return [];
@@ -366,7 +377,8 @@ export const getAllCompanies = async () => {
 // Time Entries API
 export const fetchTimeEntriesForUser = async (userId: string) => {
   try {
-    return await timeEntriesAPI.getAll({ user_id: userId });
+    const response = await apiClient.getClient().get(`/api/time-entries?user_id=${userId}`);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching time entries:', error);
     return [];
@@ -388,9 +400,10 @@ export const startTimeEntry = async (taskId: string, userId: string) => {
 
 export const stopTimeEntry = async (timeEntryId: string) => {
   try {
-    return await timeEntriesAPI.update(timeEntryId, {
+    const response = await apiClient.getClient().put(`/api/time-entries/${timeEntryId}`, {
       end_time: new Date().toISOString()
     });
+    return response.data;
   } catch (error) {
     console.error('Error stopping time entry:', error);
     throw error;
@@ -409,7 +422,8 @@ export const createDailyLog = async (logData: any) => {
 
 export const fetchDailyLogForUser = async (userId: string) => {
   try {
-    return await dailyLogAPI.getByUser(userId);
+    const response = await apiClient.getClient().get(`/api/daily-logs?user_id=${userId}`);
+    return response.data?.data || response.data || { entries: [] };
   } catch (error) {
     console.error('Error fetching daily log:', error);
     return { entries: [] };
@@ -419,7 +433,8 @@ export const fetchDailyLogForUser = async (userId: string) => {
 // AI API
 export const getAISuggestedAction = async (user: any) => {
   try {
-    return await aiAPI.getSuggestedAction(user.id);
+    const response = await apiClient.getClient().get(`/api/ai/suggested-action?user_id=${user.id}`);
+    return response.data?.data || response.data || null;
   } catch (error) {
     console.error('Error fetching AI suggestions:', error);
     return null;
@@ -428,7 +443,8 @@ export const getAISuggestedAction = async (user: any) => {
 
 export const getAITaskSuggestions = async (taskData: any) => {
   try {
-    return await aiAPI.getTaskSuggestions(taskData);
+    const response = await apiClient.getClient().post('/api/ai/task-suggestions', taskData);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching AI suggestions:', error);
     return [];
@@ -437,7 +453,8 @@ export const getAITaskSuggestions = async (taskData: any) => {
 
 export const getAIRFISuggestions = async (rfiData: any) => {
   try {
-    return await aiAPI.getRFISuggestions(rfiData);
+    const response = await apiClient.getClient().post('/api/ai/rfi-suggestions', rfiData);
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching AI suggestions:', error);
     return [];
@@ -446,7 +463,8 @@ export const getAIRFISuggestions = async (rfiData: any) => {
 
 export const getAIInsightsForMyDay = async () => {
   try {
-    return await aiAPI.getInsights();
+    const response = await apiClient.getClient().get('/api/ai/insights');
+    return response.data?.data || response.data || { insights: [], recommendations: [] };
   } catch (error) {
     console.error('Error fetching AI insights:', error);
     return { insights: [], recommendations: [] };
@@ -455,7 +473,8 @@ export const getAIInsightsForMyDay = async () => {
 
 export const getAllProjectsPredictions = async () => {
   try {
-    return await aiAPI.getProjectPredictions();
+    const response = await apiClient.getClient().get('/api/ai/project-predictions');
+    return response.data?.data || response.data || [];
   } catch (error) {
     console.error('Error fetching predictions:', error);
     return [];
