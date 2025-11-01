@@ -29,7 +29,8 @@ const PlatformAdminDashboard: React.FC<PlatformAdminDashboardProps> = ({ current
             setIsLoading(true);
             setError(null);
             const data = await platformAPI.getPlatformDashboardData();
-            setDashboardData(data);
+            // Type assertion to handle return type mismatch
+            setDashboardData(data as any);
         } catch (err: any) {
             console.error('Error loading platform dashboard:', err);
             setError(err.message || 'Failed to load dashboard data');
