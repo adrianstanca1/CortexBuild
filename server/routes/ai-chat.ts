@@ -5,7 +5,7 @@
 import { Router, Request, Response } from 'express';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { authenticateToken } from '../auth-supabase';
-import { getOpenAIClient } from '../services/ai';
+import { getOpenAIClient, generateGeminiResponse } from '../services/ai';
 
 export function createAIChatRoutes(supabase: SupabaseClient) {
   const router = Router();

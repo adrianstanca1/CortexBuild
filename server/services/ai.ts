@@ -1,9 +1,44 @@
-// CortexBuild AI Service - OpenAI Integration
+// CortexBuild AI Service - Multi-Provider AI Integration
 // Handles all AI operations: code generation, chat, analysis, etc.
 
 import OpenAI from 'openai';
 import Database from 'better-sqlite3';
 import * as mcp from './mcp';
+
+// Gemini AI Integration
+interface GeminiResponse {
+  candidates: Array<{
+    content: {
+      parts: Array<{ text: string }>;
+    };
+  }>;
+}
+
+async function callGeminiAPI(message: string): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'test-gemini-key-for-development-only') {
+    throw new Error('Gemini API key not configured');
+  }
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: message }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data: GeminiResponse = await response.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini';
+}
 
 // Initialize OpenAI clients with multiple API keys for load balancing
 const primaryOpenAI = new OpenAI({
@@ -370,5 +405,46 @@ export function addProjectContext(
 // Get MCP session statistics
 export function getMCPStats(db: Database.Database, userId: string): any {
   return mcp.getSessionStats(db, userId);
+}
+
+// Gemini Chat Function
+export async function generateGeminiResponse(
+  message: string,
+  context: any = {},
+  userId: string,
+  companyId: string
+): Promise<string> {
+  try {
+    // Create construction-focused prompt
+    const constructionPrompt = `You are an AI assistant specialized in construction management and project coordination.
+
+User Context:
+- User ID: ${userId}
+- Company: ${companyId}
+- Projects: ${JSON.stringify(context.projects || [])}
+- Recent Tasks: ${JSON.stringify(context.tasks || [])}
+
+Please provide helpful, accurate, and construction-industry-specific advice for the following question:
+
+${message}
+
+Focus on practical solutions, safety considerations, and industry best practices.`;
+
+    const response = await callGeminiAPI(constructionPrompt);
+
+    return response;
+  } catch (error: any) {
+    console.error('Gemini chat error:', error);
+    // Fallback to a helpful error message
+    return `I apologize, but I'm currently unable to process your request. Please try again later.
+
+For immediate construction management assistance, consider:
+- Checking project documentation
+- Consulting with your project manager
+- Reviewing safety protocols
+- Contacting technical support
+
+Error: ${error.message}`;
+  }
 }
 
