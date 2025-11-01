@@ -41,7 +41,7 @@ export const RealtimeCollaboration: React.FC = () => {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
-    connectWebSocket();
+    const wsCleanup = connectWebSocket();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => {
       if (wsRef.current) {
@@ -50,10 +50,11 @@ export const RealtimeCollaboration: React.FC = () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
+      wsCleanup();
     };
   }, []);
 
-  const connectWebSocket = () => {
+  const connectWebSocket = (): (() => void) => {
     try {
       const token = localStorage.getItem('token');
       const ws = new WebSocket(`${getWSUrl()}?token=${token}`);
@@ -83,6 +84,13 @@ export const RealtimeCollaboration: React.FC = () => {
       };
 
       wsRef.current = ws;
+
+      return () => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.close();
+        }
+      };
+
     } catch (error) {
       console.error('Failed to connect WebSocket:', error);
       setIsConnected(false);
@@ -323,4 +331,3 @@ export const RealtimeCollaboration: React.FC = () => {
     </div>
   );
 };
-

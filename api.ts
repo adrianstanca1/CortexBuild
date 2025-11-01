@@ -575,7 +575,7 @@ export const toggleAIAgentStatus = async (agentId: string, isActive: boolean) =>
   return { success: true };
 };
 
-export const getPlatformAuditLogs = async () => {
+export const getPlatformAuditLogs = async (offset: number = 0, limit: number = 50) => {
   console.log('Mock API: getPlatformAuditLogs called');
   return [];
 };
