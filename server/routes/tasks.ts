@@ -28,12 +28,10 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
       const offset = (pageNum - 1) * limitNum;
 
       let query = supabase
-        .from('tasks')
+        .from('project_tasks_gantt')
         .select(`
           *,
-          projects!tasks_project_id_fkey(id, name),
-          milestones!tasks_milestone_id_fkey(id, name),
-          users!tasks_assigned_to_fkey(id, name)
+          projects!project_tasks_gantt_project_id_fkey(id, name)
         `, { count: 'exact' });
 
       // Apply filters
