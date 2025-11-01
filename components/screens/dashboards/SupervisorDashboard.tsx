@@ -24,6 +24,7 @@ interface SupervisorDashboardProps {
 
 const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
     const { currentUser, navigateTo, onDeepLink, onQuickAction, onSuggestAction } = props;
+    const { hasPermission } = usePermissions(currentUser);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [activities, setActivities] = useState<ActivityEvent[]>([]);
     const [projects, setProjects] = useState<Project[]>([]);
