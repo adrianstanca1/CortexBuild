@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Screen, Task, ActivityEvent, Project } from '../../../types';
 // Fix: Added .ts extension to import
 import * as api from '../../../api';
+import { usePermissions } from '../../../hooks/usePermissions';
 // Fix: Added .tsx extension to widget imports
 import QuickActionsWidget from '../../widgets/QuickActionsWidget';
 import MyTasksWidget from '../../widgets/MyTasksWidget';
