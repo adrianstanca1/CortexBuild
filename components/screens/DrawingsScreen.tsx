@@ -35,8 +35,11 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
     useEffect(() => {
         const loadDrawings = async () => {
             setIsLoading(true);
-            const fetchedDrawings = await api.fetchDrawings();
-            setAllDrawings(fetchedDrawings.filter(d => d.projectId === project.id));
+            const fetchedDrawings = await api.fetchDrawings(project?.id || '');
+            // Ensure array is extracted if needed
+            const drawingsArray = Array.isArray(fetchedDrawings) ? fetchedDrawings : 
+                (fetchedDrawings?.data && Array.isArray(fetchedDrawings.data)) ? fetchedDrawings.data : [];
+            setAllDrawings(drawingsArray.filter(d => d.projectId === project.id));
             setIsLoading(false);
         };
         loadDrawings();

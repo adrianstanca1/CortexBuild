@@ -28,14 +28,10 @@ export function createProjectsRouter(supabase: SupabaseClient): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      // Build query with joins
+      // Build query
       let query = supabase
         .from('projects')
-        .select(`
-          *,
-          companies!projects_company_id_fkey(id, name),
-          users!projects_project_manager_id_fkey(id, name)
-        `, { count: 'exact' });
+        .select('*', { count: 'exact' });
 
       // Apply filters
       if (status) {

@@ -20,7 +20,7 @@ const DeliveryScreen: React.FC<DeliveryScreenProps> = ({ project, goBack }) => {
     useEffect(() => {
         const loadItems = async () => {
             setIsLoading(true);
-            const fetchedItems = await api.fetchDeliveryItems();
+            const fetchedItems = await api.fetchDeliveryItems(project?.id || '');
             setItems(fetchedItems);
             setIsLoading(false);
         };
