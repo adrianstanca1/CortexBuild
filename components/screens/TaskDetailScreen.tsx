@@ -60,7 +60,8 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
         const loadTask = async () => {
             setIsLoading(true);
             const fetchedTask = await api.fetchTaskById(taskId);
-            setTask(fetchedTask || null);
+            const task = Array.isArray(fetchedTask) ? null : (fetchedTask && typeof fetchedTask === 'object' && 'data' in fetchedTask ? (fetchedTask as any).data : fetchedTask);
+            setTask(task || null);
             setIsLoading(false);
         };
         loadTask();
@@ -72,13 +73,15 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
         const updatedTask = { ...task, status: newStatus };
         setTask(updatedTask); // Optimistic update
         try {
-            const savedTask = await api.updateTask(updatedTask, currentUser);
-            setTask(savedTask); // Update with response from API to get history
+            const savedTask = await api.updateTask(task.id, updatedTask);
+            const taskData = Array.isArray(savedTask) ? null : (savedTask && typeof savedTask === 'object' && 'data' in savedTask ? (savedTask as any).data : savedTask);
+            setTask(taskData || null); // Update with response from API to get history
         } catch (error: any) {
             alert(error.message);
             // Revert on error by re-fetching
             const fetchedTask = await api.fetchTaskById(taskId);
-            setTask(fetchedTask || null);
+            const task = Array.isArray(fetchedTask) ? null : (fetchedTask && typeof fetchedTask === 'object' && 'data' in fetchedTask ? (fetchedTask as any).data : fetchedTask);
+            setTask(task || null);
         }
     };
 
@@ -101,7 +104,7 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
         setNewComment('');
         setCommentFiles([]);
     };
-    
+
     const processFiles = (files: FileList) => {
         if (files) {
             setCommentFiles(prev => [...prev, ...Array.from(files)]);
@@ -114,7 +117,7 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
         }
         if (event.target) event.target.value = '';
     };
-    
+
     const handleRemoveFile = (indexToRemove: number) => {
         setCommentFiles(prev => prev.filter((_, index) => index !== indexToRemove));
     };
@@ -171,9 +174,9 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                     <div className="space-y-4">
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase">Status</label>
-                            <select 
-                                value={task.status} 
-                                onChange={handleStatusChange} 
+                            <select
+                                value={task.status}
+                                onChange={handleStatusChange}
                                 className="w-full mt-1 p-2 border border-gray-300 rounded-md disabled:opacity-70 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 disabled={!canEditStatus}
                             >
@@ -183,18 +186,18 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                             </select>
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><AlertTriangleIcon className="w-4 h-4"/>Priority</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><AlertTriangleIcon className="w-4 h-4" />Priority</p>
                             <span className={`font-semibold inline-block px-2 py-0.5 text-xs rounded-full ${getPriorityColor(task.priority)}`}>
                                 {task.priority}
                             </span>
                         </div>
-                         <div>
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><UsersIcon className="w-4 h-4"/>Assignee</p>
+                        <div>
+                            <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><UsersIcon className="w-4 h-4" />Assignee</p>
                             <p className="text-gray-800 font-semibold">{formatAssignee(task)}</p>
                         </div>
                         <div>
                             <p className={`text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5 ${overdue ? 'text-red-600' : ''}`}>
-                                <CalendarDaysIcon className="w-4 h-4"/>Due Date
+                                <CalendarDaysIcon className="w-4 h-4" />Due Date
                             </p>
                             <p className={`font-semibold ${overdue ? 'text-red-600' : 'text-gray-800'}`}>{new Date(task.dueDate).toLocaleDateString()}</p>
                         </div>
@@ -202,22 +205,22 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                 </div>
 
                 {task.attachments && task.attachments.length > 0 && (
-                     <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
-                        <h3 className="font-bold text-lg text-gray-800 mb-2 flex items-center gap-2"><PaperClipIcon className="w-5 h-5"/>Attachments</h3>
-                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
+                        <h3 className="font-bold text-lg text-gray-800 mb-2 flex items-center gap-2"><PaperClipIcon className="w-5 h-5" />Attachments</h3>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                             {imageAttachments.map((att, index) => (
                                 <button key={index} onClick={() => openLightbox(index)} className="block group relative focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md">
-                                    <img src={att.url} alt={att.name} className="w-full h-24 object-cover rounded-md group-hover:opacity-80 transition-opacity"/>
+                                    <img src={att.url} alt={att.name} className="w-full h-24 object-cover rounded-md group-hover:opacity-80 transition-opacity" />
                                 </button>
                             ))}
                         </div>
                         {task.attachments.filter(att => !isImageAttachment(att)).length > 0 && (
-                             <div className="mt-4">
+                            <div className="mt-4">
                                 <h4 className="text-sm font-semibold text-gray-700">Other Files:</h4>
                                 <ul className="mt-2 space-y-1">
                                     {task.attachments.filter(att => !isImageAttachment(att)).map((att, index) => (
                                         <li key={index}>
-                                             <a href={att.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">{att.name}</a>
+                                            <a href={att.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">{att.name}</a>
                                         </li>
                                     ))}
                                 </ul>
@@ -225,7 +228,7 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                         )}
                     </div>
                 )}
-                
+
                 <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
                     <h3 className="font-bold text-lg text-gray-800 mb-4">Comments ({task.comments.length})</h3>
                     <div className="space-y-4">
@@ -246,7 +249,7 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                                             <div className="flex flex-wrap gap-2">
                                                 {comment.attachments.map((att, index) => (
                                                     <a key={index} href={att.url} target="_blank" rel="noopener noreferrer" className="text-sm bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md flex items-center gap-1.5">
-                                                        <PaperClipIcon className="w-4 h-4 text-gray-500"/>
+                                                        <PaperClipIcon className="w-4 h-4 text-gray-500" />
                                                         <span className="truncate max-w-xs">{att.name}</span>
                                                     </a>
                                                 ))}
@@ -257,9 +260,9 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
                             </div>
                         ))}
                     </div>
-                     <div className="mt-6 pt-4 border-t">
-                        <textarea 
-                            rows={3} 
+                    <div className="mt-6 pt-4 border-t">
+                        <textarea
+                            rows={3}
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             placeholder="Add a comment..."

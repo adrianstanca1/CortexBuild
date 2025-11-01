@@ -77,10 +77,10 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
     }
 
     const statusColors = getStatusColor(item.status);
-    
+
     const isOperative = currentUser.role === 'operative';
     const canChangeStatus = !isOperative || (isOperative && item.status === 'Open');
-    
+
     const lightboxPhotos: LightboxPhoto[] = item.photos.map((url, index) => ({
         url: url,
         caption: `${item.title} - Photo ${index + 1}`
@@ -107,9 +107,9 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
                     <div className="space-y-4">
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase">Status</label>
-                            <select 
-                                value={item.status} 
-                                onChange={handleStatusChange} 
+                            <select
+                                value={item.status}
+                                onChange={handleStatusChange}
                                 className={`w-full mt-1 p-2 border border-gray-300 rounded-md font-semibold ${statusColors.text} ${statusColors.bg} disabled:opacity-70 disabled:bg-gray-200 disabled:cursor-not-allowed`}
                                 disabled={!canChangeStatus}
                             >
@@ -118,30 +118,30 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
                                 <option value="Closed" disabled={isOperative}>Closed</option>
                             </select>
                         </div>
-                         <div>
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><UsersIcon className="w-4 h-4"/>Assignee</p>
+                        <div>
+                            <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><UsersIcon className="w-4 h-4" />Assignee</p>
                             <p className="text-gray-800 font-semibold">{item.assignee}</p>
                         </div>
                         <div>
-                           <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><MapPinIcon className="w-4 h-4"/>Location</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase mb-1 flex items-center gap-1.5"><MapPinIcon className="w-4 h-4" />Location</p>
                             <p className="text-gray-800 font-semibold">{item.location}</p>
                         </div>
                     </div>
                 </div>
 
                 {item.photos && item.photos.length > 0 && (
-                     <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
-                        <h3 className="font-bold text-lg text-gray-800 mb-2 flex items-center gap-2"><PaperClipIcon className="w-5 h-5"/>Photos</h3>
-                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
+                        <h3 className="font-bold text-lg text-gray-800 mb-2 flex items-center gap-2"><PaperClipIcon className="w-5 h-5" />Photos</h3>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                             {item.photos.map((photo, index) => (
                                 <button key={index} onClick={() => openLightbox(index)} className="block group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md">
-                                    <img src={photo} alt={`item-photo-${index}`} className="w-full h-24 object-cover rounded-md group-hover:opacity-80 transition-opacity"/>
+                                    <img src={photo} alt={`item-photo-${index}`} className="w-full h-24 object-cover rounded-md group-hover:opacity-80 transition-opacity" />
                                 </button>
                             ))}
                         </div>
                     </div>
                 )}
-                
+
                 <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
                     <h3 className="font-bold text-lg text-gray-800 mb-4">Comments ({item.comments.length})</h3>
                     <div className="space-y-4">
@@ -160,9 +160,9 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
                             </div>
                         ))}
                     </div>
-                     <div className="mt-6 pt-4 border-t">
-                        <textarea 
-                            rows={3} 
+                    <div className="mt-6 pt-4 border-t">
+                        <textarea
+                            rows={3}
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             placeholder="Add a comment..."

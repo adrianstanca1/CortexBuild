@@ -78,7 +78,9 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ project, navigateTo, goBack, 
                 api.fetchTasksForProject(project.id),
                 api.fetchUsersByCompany(project.companyId)
             ]);
-            setAllTasks(projectTasks);
+            const tasksArray = Array.isArray(projectTasks) ? projectTasks :
+                (projectTasks && typeof projectTasks === 'object' && 'data' in projectTasks && Array.isArray((projectTasks as any).data)) ? (projectTasks as any).data : [];
+            setAllTasks(tasksArray);
             setUsers(companyUsers);
             setIsLoading(false);
         };
