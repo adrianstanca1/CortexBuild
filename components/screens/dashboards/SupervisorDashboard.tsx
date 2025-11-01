@@ -38,10 +38,16 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
                     api.fetchRecentActivity(),
                     api.fetchAllProjects(currentUser)
                 ]);
-                setTasks(fetchedTasks);
-                setActivities(fetchedActivities);
-                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
+                // Ensure arrays are extracted from responses
+                const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks : 
+                    (fetchedTasks?.data && Array.isArray(fetchedTasks.data)) ? fetchedTasks.data : [];
+                const activitiesArray = Array.isArray(fetchedActivities) ? fetchedActivities : 
+                    (fetchedActivities?.data && Array.isArray(fetchedActivities.data)) ? fetchedActivities.data : [];
+                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects : 
                     (fetchedProjects?.data && Array.isArray(fetchedProjects.data)) ? fetchedProjects.data : [];
+                
+                setTasks(tasksArray);
+                setActivities(activitiesArray);
                 setProjects(projectsArray);
 
                 // Process dashboard data with ML integration
@@ -55,7 +61,7 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
         };
 
         loadDashboardData();
-        api.checkAndCreateDueDateNotifications(currentUser);
+        api.checkAndCreateDueDateNotifications();
     }, [currentUser]);
 
     const handleNavigateToProject = (projectId: string) => {

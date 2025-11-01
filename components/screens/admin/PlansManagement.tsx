@@ -39,8 +39,8 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
         try {
             const plansData = await api.getAllCompanyPlans();
             // Ensure array is extracted from response if needed
-            const plansArray = Array.isArray(plansData) ? plansData : 
-                (plansData?.data && Array.isArray(plansData.data)) ? plansData.data : [];
+            const plansArray: CompanyPlan[] = Array.isArray(plansData) ? plansData : 
+                (plansData && typeof plansData === 'object' && 'data' in plansData && Array.isArray((plansData as any).data)) ? (plansData as any).data : [];
             setPlans(plansArray);
         } catch (err: any) {
             console.error('Error loading plans:', err);

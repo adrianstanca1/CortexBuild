@@ -127,7 +127,7 @@ const CompanyAdminDashboard: React.FC<CompanyAdminDashboardProps> = (props) => {
                         />
                     )}
 
-                    <ProjectsOverviewWidget projects={projects} navigateTo={navigateTo} onDeepLink={onDeepLink} />
+                    <ProjectsOverviewWidget projects={projects} onNavigate={navigateTo} hasPermission={hasPermission} />
                     <UpcomingDeadlinesWidget tasks={tasks} onDeepLink={onDeepLink} />
                 </div>
                 <div className="lg:col-span-1 space-y-8">
