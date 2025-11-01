@@ -53,7 +53,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
       }
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
       }
 
       // Add pagination and ordering
