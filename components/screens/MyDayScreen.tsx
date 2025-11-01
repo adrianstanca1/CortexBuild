@@ -31,7 +31,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
             setIsLoading(true);
             setIsInsightsLoading(true);
             const [allTasks, siteInstructions] = await Promise.all([
-                api.fetchTasksForUser(currentUser),
+                api.fetchTasksForUser(currentUser.id),
                 api.fetchSiteInstructions()
             ]);
             

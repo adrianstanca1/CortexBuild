@@ -38,7 +38,10 @@ const DayworkSheetDetailScreen: React.FC<DayworkSheetDetailScreenProps> = ({ she
 
             if (fetchedSheet?.approvedBy) {
                 // Find the user object by ID or name
-                const approver = allUsers.find(u => u.id === fetchedSheet.approvedBy || u.name === fetchedSheet.approvedBy);
+                // Ensure array is extracted if needed
+                const usersArray = Array.isArray(allUsers) ? allUsers : 
+                    (allUsers?.data && Array.isArray(allUsers.data)) ? allUsers.data : [];
+                const approver = usersArray.find(u => u.id === fetchedSheet.approvedBy || u.name === fetchedSheet.approvedBy);
                 setApprovedByUser(approver || null);
             }
 

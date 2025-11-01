@@ -29,10 +29,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
 
       let query = supabase
         .from('project_tasks_gantt')
-        .select(`
-          *,
-          projects!project_tasks_gantt_project_id_fkey(id, name)
-        `, { count: 'exact' });
+        .select('*', { count: 'exact' });
 
       // Apply filters
       if (project_id) {
