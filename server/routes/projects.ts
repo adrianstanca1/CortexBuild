@@ -33,7 +33,7 @@ export function createProjectsRouter(supabase: SupabaseClient): Router {
         .from('projects')
         .select(`
           *,
-          clients!projects_client_id_fkey(id, name),
+          companies!projects_company_id_fkey(id, name),
           users!projects_project_manager_id_fkey(id, name)
         `, { count: 'exact' });
 
