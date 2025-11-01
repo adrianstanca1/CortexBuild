@@ -35,9 +35,9 @@ export function createAIChatRoutes(supabase: SupabaseClient) {
         .limit(5);
 
       const { data: recentTasks } = await supabase
-        .from('tasks')
+        .from('project_tasks_gantt')
         .select('*')
-        .eq('company_id', companyId)
+        .eq('project_id', userProjects?.[0]?.id || '')
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -49,6 +49,8 @@ export function createAIChatRoutes(supabase: SupabaseClient) {
           company_name: companies?.name || null
         };
       });
+
+      const tasks = recentTasks || [];
 
       // Build context-aware system prompt
       let systemPrompt = `You are an advanced AI assistant for CortexBuild, a construction management platform. 
@@ -99,16 +101,14 @@ Recent Tasks: ${recentTasks?.length || 0}
         content: message
       });
 
-      // Call OpenAI
-      const openai = getOpenAIClient(true); // Use SDK user key
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
-        messages,
-        temperature: mode === 'predict' ? 0.3 : mode === 'analyze' ? 0.5 : 0.7,
-        max_tokens: 1000
-      });
+      // Call Gemini AI
+      const context = {
+        projects: projects,
+        tasks: tasks,
+        mode: mode
+      };
 
-      const response = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
+      const response = await generateGeminiResponse(message, context, userId, companyId);
 
       // Log AI request
       try {
@@ -117,11 +117,11 @@ Recent Tasks: ${recentTasks?.length || 0}
           .insert({
             user_id: userId,
             company_id: companyId,
-            model: 'gpt-4-turbo-preview',
+            model: 'gemini-pro',
             prompt: message,
             response: response,
-            tokens_used: completion.usage?.total_tokens || 0,
-            cost: ((completion.usage?.total_tokens || 0) * 0.00003) // Approximate cost
+            tokens_used: Math.ceil(message.length / 4), // Approximate token count
+            cost: 0.001 // Approximate cost for Gemini
           });
       } catch (logError) {
         console.warn('Failed to log AI request:', logError);
@@ -134,7 +134,7 @@ Recent Tasks: ${recentTasks?.length || 0}
           mode,
           projectsCount: projects.length,
           tasksCount: recentTasks?.length || 0,
-          tokensUsed: completion.usage?.total_tokens || 0
+          tokensUsed: Math.ceil(message.length / 4) // Approximate token count
         }
       });
 

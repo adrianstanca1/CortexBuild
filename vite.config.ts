@@ -11,12 +11,10 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3002,
         host: '0.0.0.0',
-        // Aggressive cache busting for development
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
+        // Optimized cache headers for development
+        headers: mode === 'development' ? {
+          'Cache-Control': 'no-cache',
+        } : {},
         // Enable proxy for API calls
         proxy: {
           '/api': {
@@ -25,14 +23,15 @@ export default defineConfig(({ mode }) => {
             secure: false,
           }
         },
-        // Force HMR to always reload
+        // Optimized HMR
         hmr: {
           overlay: true,
+          port: 24678, // Use a specific port for HMR
         },
-        // Watch for changes aggressively
+        // Optimized file watching
         watch: {
-          usePolling: true,
-          interval: 100,
+          usePolling: false, // Use native file watching for better performance
+          ignored: ['**/node_modules/**', '**/dist/**'],
         }
       },
       preview: {
@@ -57,13 +56,50 @@ export default defineConfig(({ mode }) => {
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       build: {
+        // Optimize build performance
+        target: 'esnext',
+        minify: 'esbuild',
+        sourcemap: mode === 'development',
+        // Increase chunk size warning limit
+        chunkSizeWarningLimit: 1000,
         rollupOptions: {
           output: {
+            // Optimize chunk naming for better caching
+            chunkFileNames: 'assets/[name]-[hash].js',
+            entryFileNames: 'assets/[name]-[hash].js',
+            assetFileNames: 'assets/[name]-[hash].[ext]',
             manualChunks(id) {
+              // Core React libraries
+              if (id.includes('node_modules/react-dom') || id.includes('node_modules/react') || id.includes('node_modules/scheduler')) {
+                return 'react-core';
+              }
+              // Large editor components
               if (id.includes('node_modules/@monaco-editor')) {
                 return 'monaco';
               }
-              // Fix: Don't separate developer tools to avoid circular dependencies
+              // PDF generation tools
+              if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable')) {
+                return 'pdf-tools';
+              }
+              // Icon libraries
+              if (id.includes('node_modules/lucide-react')) {
+                return 'icon-pack';
+              }
+              // Database and API
+              if (id.includes('node_modules/@supabase')) {
+                return 'supabase';
+              }
+              if (id.includes('node_modules/axios')) {
+                return 'axios';
+              }
+              // AI and workflow tools
+              if (id.includes('node_modules/@google')) {
+                return 'google-ai';
+              }
+              if (id.includes('node_modules/@xyflow')) {
+                return 'workflow';
+              }
+              // Application components (keep together for better performance)
               if (id.includes('components/sdk/')) {
                 return 'sdk-tools';
               }
@@ -73,27 +109,7 @@ export default defineConfig(({ mode }) => {
               if (id.includes('components/screens/modules/')) {
                 return 'module-screens';
               }
-              if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable')) {
-                return 'pdf-tools';
-              }
-              if (id.includes('node_modules/react-dom') || id.includes('node_modules/react') || id.includes('node_modules/scheduler')) {
-                return 'react-core';
-              }
-              if (id.includes('node_modules/lucide-react')) {
-                return 'icon-pack';
-              }
-              if (id.includes('node_modules/@supabase')) {
-                return 'supabase';
-              }
-              if (id.includes('node_modules/@xyflow')) {
-                return 'workflow';
-              }
-              if (id.includes('node_modules/axios')) {
-                return 'axios';
-              }
-              if (id.includes('node_modules/@google')) {
-                return 'google-ai';
-              }
+              // All other vendor libraries
               if (id.includes('node_modules')) {
                 return 'vendor';
               }
@@ -117,12 +133,16 @@ export default defineConfig(({ mode }) => {
           'axios',
           'uuid',
           '@google/genai',
-          'react-markdown'
+          'react-markdown',
+          'lucide-react',
+          'react-router-dom'
         ],
-        // Force re-optimization on every start
-        force: true
+        // Only force re-optimization in development when needed
+        force: mode === 'development' ? false : true,
+        // Exclude large dependencies that should be loaded on demand
+        exclude: ['@monaco-editor/react']
       },
-      // Clear cache on startup
+      // Optimized cache directory
       cacheDir: 'node_modules/.vite',
       // Test configuration
       test: {

@@ -1,5 +1,5 @@
-// CortexBuild Main App Component - Clean Version
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+// CortexBuild Main App Component - Performance Optimized
+import React, { useState, useEffect, useCallback, Suspense, lazy, useMemo } from 'react';
 import { Screen, User, Project, NotificationLink, AISuggestion } from './types';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
@@ -17,6 +17,7 @@ import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { fetchAllProjects, getAISuggestedAction } from './api';
+import PerformanceMonitor from './components/performance/PerformanceMonitor';
 
 // Core screen imports - only the essential ones
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
@@ -114,11 +115,11 @@ const Base44Clone = lazy(() => import('./components/base44/Base44Clone').then(mo
 // ML & Advanced Analytics
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 
-const ScreenLoader: React.FC = () => (
+const ScreenLoader: React.FC = React.memo(() => (
   <div className="py-16 text-center text-slate-500">
     Loading experience...
   </div>
-);
+));
 
 type NavigationItem = {
   screen: Screen;
@@ -316,18 +317,24 @@ const App: React.FC = () => {
     );
   }
 
-  // Get current screen component with safety check
-  const { screen, params, project } = currentNavItem || {
-    screen: 'global-dashboard' as Screen,
-    params: {},
-    project: undefined
-  };
-  const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
+  // Get current screen component with safety check - memoized for performance
+  const currentScreenData = useMemo(() => {
+    const { screen, params, project } = currentNavItem || {
+      screen: 'global-dashboard' as Screen,
+      params: {},
+      project: undefined
+    };
+    const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
 
-  // Define which screens need module props
-  const moduleScreens = ['accounting', 'ai-tools', 'document-management', 'time-tracking',
-    'project-operations', 'financial-management', 'business-development', 'ai-agents-marketplace'];
-  const isModuleScreen = moduleScreens.includes(screen);
+    // Define which screens need module props
+    const moduleScreens = ['accounting', 'ai-tools', 'document-management', 'time-tracking',
+      'project-operations', 'financial-management', 'business-development', 'ai-agents-marketplace'];
+    const isModuleScreen = moduleScreens.includes(screen);
+
+    return { screen, params, project, ScreenComponent, isModuleScreen };
+  }, [currentNavItem]);
+
+  const { screen, params, project, ScreenComponent, isModuleScreen } = currentScreenData;
 
   return (
     <ErrorBoundary>
@@ -360,31 +367,32 @@ const App: React.FC = () => {
             <main className="flex-1 overflow-auto">
               <Suspense fallback={<ScreenLoader />}>
                 <ScreenComponent
-                  currentUser={currentUser}
-                  navigateTo={navigateTo}
-                  goBack={goBack}
-                  {...(project && { project })}
-                  {...(params && { params })}
-                  {...(screen !== 'placeholder-tool' && { allProjects })}
-                  {...(screen !== 'placeholder-tool' && { hasPermission })}
-                  {...(isModuleScreen && {
-                    openProjectSelector: (title: string, onSelect: (projectId: string) => void) => {
-                      setProjectSelectorTitle(title);
-                      setProjectSelectorCallback(() => onSelect);
-                      setIsProjectSelectorOpen(true);
-                    },
-                    onDeepLink: (projectId: string | null, screenName: Screen, linkParams: any) => {
-                      if (projectId) {
-                        const selectedProject = allProjects.find(p => p.id === projectId);
-                        if (selectedProject) {
-                          navigateTo(screenName, linkParams, selectedProject);
+                  {...useMemo(() => ({
+                    currentUser,
+                    navigateTo,
+                    goBack,
+                    ...(project && { project }),
+                    ...(params && { params }),
+                    ...(screen !== 'placeholder-tool' && { allProjects, hasPermission }),
+                    ...(isModuleScreen && {
+                      openProjectSelector: (title: string, onSelect: (projectId: string) => void) => {
+                        setProjectSelectorTitle(title);
+                        setProjectSelectorCallback(() => onSelect);
+                        setIsProjectSelectorOpen(true);
+                      },
+                      onDeepLink: (projectId: string | null, screenName: Screen, linkParams: any) => {
+                        if (projectId) {
+                          const selectedProject = allProjects.find(p => p.id === projectId);
+                          if (selectedProject) {
+                            navigateTo(screenName, linkParams, selectedProject);
+                          }
+                        } else {
+                          navigateTo(screenName, linkParams);
                         }
-                      } else {
-                        navigateTo(screenName, linkParams);
-                      }
-                    },
-                    can: hasPermission
-                  })}
+                      },
+                      can: hasPermission
+                    })
+                  }), [currentUser, navigateTo, goBack, project, params, screen, allProjects, hasPermission, isModuleScreen])}
                 />
               </Suspense>
             </main>
@@ -425,6 +433,7 @@ const App: React.FC = () => {
           )}
 
           <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+          <PerformanceMonitor />
         </div>
       </InfiniteLoopErrorBoundary>
     </ErrorBoundary>
