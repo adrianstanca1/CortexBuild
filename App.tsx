@@ -22,10 +22,9 @@ import SmartConstructionAssistant from './components/features/SmartConstructionA
 
 // Core screen imports - only the essential ones
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
-const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
+const DeveloperDashboardScreen = lazy(() => import('./components/screens/developer/DeveloperDashboardScreen'));
 const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
-const SuperAdminDashboardV2 = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
-const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
+const SuperAdminDashboard = lazy(() => import('./components/screens/dashboards/SuperAdminDashboard'));
 const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
 
 // Advanced feature screens
@@ -105,7 +104,7 @@ const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/develop
 const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
 
 // Company Admin Legacy & Additional Dashboards
-const CompanyAdminDashboardLegacy = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
+// const CompanyAdminDashboardLegacy = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
 
 // Admin Control Panel
 const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
@@ -136,9 +135,8 @@ const ScreenLoader: React.FC = React.memo(() => (
 const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'global-dashboard': UnifiedDashboardScreen,
   'company-admin-dashboard': CompanyAdminDashboardV2,
-  'developer-dashboard': DeveloperDashboardV2,
-  'super-admin-dashboard': SuperAdminDashboardV2,
-  'platform-admin': PlatformAdminScreen,
+  'developer-dashboard': DeveloperDashboardScreen,
+  'super-admin-dashboard': SuperAdminDashboard,
   'placeholder-tool': PlaceholderToolScreen,
 
   // Core feature screens
@@ -182,7 +180,7 @@ const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   // Advanced feature screens
   'analytics': AnalyticsScreen,
   'reports': ReportsScreen,
-  'team-management': TeamManagementScreen,
+  'team-management-advanced': TeamManagementScreen,
   'notifications': NotificationsScreen,
   'project-planning': ProjectPlanningScreen,
   'ai-insights': AIInsightsScreen,
@@ -208,7 +206,7 @@ const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'developer-console': EnhancedDeveloperConsole,
 
   // Company Admin Legacy & Dashboards
-  'company-admin-legacy': CompanyAdminDashboardLegacy,
+  // 'company-admin-legacy': CompanyAdminDashboardLegacy,
 
   // Admin Control Panel
   'admin-control-panel': AdminControlPanel,

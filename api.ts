@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import {
     User, Project, Task, RFI, PunchListItem, Drawing, Document, SiteInstruction, DeliveryItem, DayworkSheet,
-    Comment, Notification, ActivityEvent, Company, AISuggestion, AIInsight, AIFeedback, DailyLog, LogItem, Attachment,
+    Comment, Notification, ActivityEvent, Company, AISuggestion, AIInsight, AIFeedback, DailyLog, Attachment,
     TimeEntry,
     PermissionAction,
     PermissionSubject,
@@ -1351,7 +1351,7 @@ export const fetchNotificationsForUser = async (currentUser: User): Promise<Noti
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
-export const markNotificationsAsRead = async (ids: string[], currentUser: User): Promise<void> => {
+export const markNotificationsAsRead = async (ids: string[], _currentUser: User): Promise<void> => {
     await delay(LATENCY / 2);
     // In a real app, you'd also check ownership here on the backend
     db.markNotificationsAsReadInDb(ids);
