@@ -140,24 +140,6 @@ export default defineConfig(async ({ mode }) => {
               if (id.includes('node_modules')) {
                 return 'vendor';
               }
-            },
-            // Optimize chunk file names for better caching
-            chunkFileNames: (chunkInfo) => {
-              const facadeModuleId = chunkInfo.facadeModuleId ?
-                chunkInfo.facadeModuleId.split('/').pop()?.replace('.tsx', '').replace('.ts', '') :
-                'chunk';
-              return `assets/[name]-[hash].js`;
-            },
-            assetFileNames: (assetInfo) => {
-              const info = assetInfo.name!.split('.');
-              const ext = info[info.length - 1];
-              if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-                return `assets/images/[name]-[hash].${ext}`;
-              }
-              if (/css/i.test(ext)) {
-                return `assets/styles/[name]-[hash].${ext}`;
-              }
-              return `assets/[name]-[hash].${ext}`;
             }
           }
         },
