@@ -145,12 +145,12 @@ const MyTasksWidget: React.FC<MyTasksWidgetProps> = ({ tasks, onNavigate }) => {
                             </div>
 
                             {/* Progress Bar */}
-                            {task.progress !== undefined && (
+                            {(task as any).progress !== undefined && (
                                 <div className="mt-3">
                                     <div className="w-full bg-gray-200 rounded-full h-2">
                                         <div
                                             className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                                            style={{ width: `${task.progress}%` }}
+                                            style={{ width: `${(task as any).progress}%` }}
                                         ></div>
                                     </div>
                                 </div>
