@@ -59,7 +59,7 @@ class MockApiService {
     }
 
     // Mock data based on endpoint
-    let mockData: any;
+    let mockData;
     switch (endpoint) {
       case '/projects':
         mockData = [
