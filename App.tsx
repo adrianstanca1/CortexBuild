@@ -80,12 +80,11 @@ const ProductionSDKDeveloperView = lazy(() =>
 );
 const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
 const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
-const ModernDeveloperDashboard = lazy(() => import('./components/screens/developer/ModernDeveloperDashboard'));
 const DeveloperDashboardV2 = lazy(() => import('./components/screens/developer/DeveloperDashboardV2'));
 const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
 // Removed CompanyAdminDashboardScreen - has missing dependencies
-const CompanyAdminDashboard = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
-const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
+// CompanyAdminDashboard doesn't exist, using CompanyAdminDashboardV2 instead
+// CompanyAdminDashboardV2 already declared above
 const PunchListScreen = lazy(() => import('./components/screens/PunchListScreen'));
 const PunchListItemDetailScreen = lazy(() => import('./components/screens/PunchListItemDetailScreen'));
 const NewPunchListItemScreen = lazy(() => import('./components/screens/NewPunchListItemScreen'));
@@ -109,22 +108,17 @@ const BusinessDevelopmentScreen = lazy(() => import('./components/screens/module
 const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/modules/AIAgentsMarketplaceScreen'));
 
 // Developer & SDK screens
-const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
-const ProductionSDKDeveloperView = lazy(() => import('./components/sdk/ProductionSDKDeveloperView').then(module => ({
-  default: module.ProductionSDKDeveloperView
-})));
-const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
-const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
+// ConstructionAutomationStudio already declared above
+// ProductionSDKDeveloperView already declared above
+// DeveloperWorkspaceScreen already declared above
 
 // Company Admin Legacy & Additional Dashboards
 // const CompanyAdminDashboardLegacy = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
 
-// Admin Control Panel
-const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
-
 // Marketing & Landing Pages
 const MainLandingPage = lazy(() => import('./components/marketing/MainLandingPage'));
-const DeveloperLandingPage = lazy(() => import('./components/sdk/DeveloperLandingPage').then(module => ({ default: module.DeveloperLandingPage })));
+// DeveloperLandingPage removed - file doesn't exist
+// const DeveloperLandingPage = lazy(() => import('./components/sdk/DeveloperLandingPage').then(module => ({ default: module.DeveloperLandingPage })));
 
 // Marketplace & App screens
 const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
@@ -138,7 +132,6 @@ const Base44Clone = lazy(() =>
 );
 const PlatformAdminScreen = lazy(() => import('./components/screens/admin/PlatformAdminScreen'));
 const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
-const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
 
@@ -149,14 +142,6 @@ const ScreenLoader: React.FC = () => (
 );
 
 // Comprehensive screen components mapping
-const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
-  'global-dashboard': UnifiedDashboardScreen,
-  'company-admin-dashboard': CompanyAdminDashboardV2,
-  'developer-dashboard': DeveloperDashboardScreen,
-  'super-admin-dashboard': SuperAdminDashboard,
-  'platform-admin': UnifiedAdminDashboard,
-  'placeholder-tool': PlaceholderToolScreen,
-
 type NavigationItem = {
   screen: Screen;
   params?: any;
@@ -165,8 +150,8 @@ type NavigationItem = {
 
 const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'global-dashboard': UnifiedDashboardScreen,
-  'company-admin-dashboard': CompanyAdminDashboard,
-  'company-admin-legacy': CompanyAdminDashboard, // Use same as main company admin
+  'company-admin-dashboard': CompanyAdminDashboardV2,
+  'company-admin-legacy': CompanyAdminDashboardV2, // Use same as main company admin
   'projects': ProjectsListScreen,
   'project-home': ProjectHomeScreen,
   'my-day': MyDayScreen,
@@ -199,7 +184,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'financial-management': FinancialManagementScreen,
   'business-development': BusinessDevelopmentScreen,
   'ai-agents-marketplace': AIAgentsMarketplaceScreen,
-  'developer-dashboard': ModernDeveloperDashboard,
+  'developer-dashboard': DeveloperDashboardScreen,
   'automation-studio': ConstructionAutomationStudio,
   'developer-workspace': DeveloperWorkspaceScreen,
   'developer-console': EnhancedDeveloperConsole,
@@ -310,14 +295,14 @@ const App: React.FC = () => {
 
   const handleUserSignIn = async (user: any) => {
     try {
-      console.log('🔐 Handling user sign in for:', user.email);
+      console.log('?? Handling user sign in for:', user.email);
 
       // Try to fetch from users table first (our main table)
       let profile = null;
       let fetchError = null;
 
       try {
-        console.log('📊 Fetching user profile from users table...');
+        console.log('?? Fetching user profile from users table...');
         const result = await supabase
           .from('users')
           .select('id, name, email, role, avatar, company_id')
@@ -328,18 +313,18 @@ const App: React.FC = () => {
         fetchError = result.error;
 
         if (profile) {
-          console.log('✅ Profile found in users table:', profile.name);
+          console.log('? Profile found in users table:', profile.name);
         } else if (fetchError) {
-          console.warn('⚠️ Error fetching from users table:', fetchError.message);
+          console.warn('?? Error fetching from users table:', fetchError.message);
         }
       } catch (error) {
-        console.warn('⚠️ Exception fetching from users table:', error);
+        console.warn('?? Exception fetching from users table:', error);
       }
 
       // If not found in users table, try profiles table as fallback
       if (!profile) {
         try {
-          console.log('📊 Trying profiles table as fallback...');
+          console.log('?? Trying profiles table as fallback...');
           const result = await supabase
             .from('profiles')
             .select('id, name, email, role, avatar, company_id')
@@ -348,10 +333,10 @@ const App: React.FC = () => {
 
           profile = result.data;
           if (profile) {
-            console.log('✅ Profile found in profiles table:', profile.name);
+            console.log('? Profile found in profiles table:', profile.name);
           }
         } catch (error) {
-          console.warn('⚠️ Profiles table also failed:', error);
+          console.warn('?? Profiles table also failed:', error);
         }
       }
 
@@ -359,7 +344,7 @@ const App: React.FC = () => {
 
       // If no profile exists in either table, create a profile from user metadata
       if (!profile) {
-        console.warn('⚠️ No profile found in database, creating from user metadata');
+        console.warn('?? No profile found in database, creating from user metadata');
         finalProfile = {
           id: user.id,
           email: user.email || '',
@@ -370,7 +355,7 @@ const App: React.FC = () => {
           avatar: user.user_metadata?.avatar_url || user.user_metadata?.picture,
           company_id: undefined
         };
-        console.log('✅ Created profile from metadata:', finalProfile);
+        console.log('? Created profile from metadata:', finalProfile);
       }
 
       // Convert snake_case to camelCase
@@ -383,33 +368,33 @@ const App: React.FC = () => {
         companyId: finalProfile.company_id
       } : null;
 
-      console.log('👤 Final user profile:', userProfile);
-      console.log('🎯 User role from profile:', userProfile?.role);
-      console.log('🎯 Is developer?', userProfile?.role === 'developer');
+      console.log('?? Final user profile:', userProfile);
+      console.log('?? User role from profile:', userProfile?.role);
+      console.log('?? Is developer?', userProfile?.role === 'developer');
 
-      console.log('📝 Setting currentUser state:', userProfile);
+      console.log('?? Setting currentUser state:', userProfile);
       setCurrentUser(userProfile);
 
       if (userProfile) {
         // Navigate to dashboard after successful login
-        console.log('🚀 Navigating to dashboard...');
-        console.log('📍 Current navigation stack before:', navigationStack);
+        console.log('?? Navigating to dashboard...');
+        console.log('?? Current navigation stack before:', navigationStack);
         const defaultScreenForRole: Screen = userProfile.role === 'developer'
           ? 'developer-console'
           : userProfile.role === 'super_admin'
             ? 'super-admin-dashboard'
             : 'company-admin-dashboard';
         navigateToModule(defaultScreenForRole, {});
-        console.log('📍 Navigation stack set to', defaultScreenForRole);
+        console.log('?? Navigation stack set to', defaultScreenForRole);
 
         window.dispatchEvent(new CustomEvent('userLoggedIn'));
         showSuccess('Welcome back!', `Hello ${userProfile.name}`);
         logger.logUserAction('login_successful', { userId: userProfile.id, userEmail: userProfile.email }, userProfile.id);
-        console.log('✅ User sign in completed successfully');
-        console.log('👤 Current user should now be:', userProfile);
+        console.log('? User sign in completed successfully');
+        console.log('?? Current user should now be:', userProfile);
       }
     } catch (error) {
-      console.error('❌ Error in sign in:', error);
+      console.error('? Error in sign in:', error);
       // Even on error, try to set a basic user profile so the app doesn't break
       const fallbackProfile: User = {
         id: user.id,
@@ -419,7 +404,7 @@ const App: React.FC = () => {
         avatar: null,
         companyId: undefined
       };
-      console.log('🔄 Using fallback profile:', fallbackProfile);
+      console.log('?? Using fallback profile:', fallbackProfile);
       setCurrentUser(fallbackProfile);
       const fallbackScreen: Screen = fallbackProfile.role === 'developer'
         ? 'developer-console'
@@ -435,8 +420,8 @@ const App: React.FC = () => {
     // Marketing site stays visible until user clicks Login button
     const checkSession = async () => {
       try {
-        console.log('🔍 Session check disabled - marketing site stays visible');
-        console.log('ℹ️ User must click Login button to authenticate');
+        console.log('?? Session check disabled - marketing site stays visible');
+        console.log('?? User must click Login button to authenticate');
         // Don't check for existing session - always show marketing site first
       } catch (error) {
         console.error('Session check error:', error);
@@ -482,7 +467,7 @@ const App: React.FC = () => {
 
       // Ensure user is navigated to dashboard if no navigation exists
       if (navigationStack.length === 0) {
-        console.log('🔄 No navigation stack - navigating to dashboard...');
+        console.log('?? No navigation stack - navigating to dashboard...');
         const defaultScreen: Screen = currentUser.role === 'developer'
           ? 'developer-console'
           : currentUser.role === 'super_admin'
@@ -510,7 +495,7 @@ const App: React.FC = () => {
   // Listen for login button click from marketing site
   useEffect(() => {
     const handleShowLogin = () => {
-      console.log('🔐 Login button clicked - showing login screen');
+      console.log('?? Login button clicked - showing login screen');
       setShowLoginScreen(true);
     };
     window.addEventListener('showLoginScreen', handleShowLogin);
@@ -518,14 +503,14 @@ const App: React.FC = () => {
   }, []);
 
   const handleLoginSuccess = (user: User) => {
-    console.log('✅ Login successful:', user.name);
-    console.log('🔄 Setting current user...');
+    console.log('? Login successful:', user.name);
+    console.log('?? Setting current user...');
     setCurrentUser(user);
 
     window.dispatchEvent(new CustomEvent('userLoggedIn'));
     showSuccess('Welcome back!', `Hello ${user.name}`);
 
-    console.log('✅ User set - dashboard will render automatically');
+    console.log('? User set - dashboard will render automatically');
   };
 
   const handleLogout = async () => {
@@ -596,12 +581,12 @@ const App: React.FC = () => {
   }
 
   if (!currentUser) {
-    console.log('🚫 No currentUser - checking if login screen should show');
-    console.log('📊 Show login screen:', showLoginScreen);
+    console.log('?? No currentUser - checking if login screen should show');
+    console.log('?? Show login screen:', showLoginScreen);
 
     // If login button was clicked, show login screen
     if (showLoginScreen) {
-      console.log('🔐 Showing login screen');
+      console.log('?? Showing login screen');
       return (
         <div className="bg-slate-100 min-h-screen flex items-center justify-center">
           <AuthScreen onLoginSuccess={handleLoginSuccess} />
@@ -610,19 +595,19 @@ const App: React.FC = () => {
     }
 
     // Otherwise, show marketing landing pages
-    console.log('📊 Marketing site visible - waiting for login click');
+    console.log('?? Marketing site visible - waiting for login click');
     return <LandingRouter onLoginSuccess={handleLoginSuccess} />;
   }
 
-  console.log('✅ Current user exists - showing app:', currentUser.name);
-  console.log('📊 Navigation stack length:', navigationStack.length);
-  console.log('📊 Current nav item:', currentNavItem);
+  console.log('? Current user exists - showing app:', currentUser.name);
+  console.log('?? Navigation stack length:', navigationStack.length);
+  console.log('?? Current nav item:', currentNavItem);
 
   // If no navigation stack, show dashboard directly
   if (!currentNavItem || navigationStack.length === 0) {
-    console.log('🏠 No navigation - showing dashboard directly');
-    console.log('🎯 Current user role at render:', currentUser?.role);
-    console.log('🎯 Is developer at render?', currentUser?.role === 'developer');
+    console.log('?? No navigation - showing dashboard directly');
+    console.log('?? Current user role at render:', currentUser?.role);
+    console.log('?? Is developer at render?', currentUser?.role === 'developer');
     const dashboardProps = {
       currentUser,
       navigateTo,
@@ -638,8 +623,8 @@ const App: React.FC = () => {
     };
 
     if (currentUser.role === 'developer') {
-      console.log('🎯 DEVELOPER ROLE DETECTED - Rendering Developer Dashboard V2');
-      console.log('👤 Current user:', currentUser);
+      console.log('?? DEVELOPER ROLE DETECTED - Rendering Developer Dashboard V2');
+      console.log('?? Current user:', currentUser);
       return (
         <Suspense fallback={<ScreenLoader />}>
           <DeveloperDashboardV2 currentUser={currentUser} navigateTo={navigateToModule} isDarkMode={true} />
@@ -647,7 +632,7 @@ const App: React.FC = () => {
       );
     }
     if (currentUser.role === 'super_admin') {
-      console.log('🎯 SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
+      console.log('?? SUPER ADMIN ROLE DETECTED - Rendering Super Admin Dashboard V2');
       return (
         <Suspense fallback={<ScreenLoader />}>
           <SuperAdminDashboardV2
@@ -678,7 +663,7 @@ const App: React.FC = () => {
       );
     }
     if (currentUser.role === 'company_admin') {
-      console.log('🎯 COMPANY ADMIN ROLE DETECTED - Rendering Company Admin Dashboard V2');
+      console.log('?? COMPANY ADMIN ROLE DETECTED - Rendering Company Admin Dashboard V2');
       return (
         <Suspense fallback={<ScreenLoader />}>
           <CompanyAdminDashboardV2
@@ -722,11 +707,11 @@ const App: React.FC = () => {
   }
 
   const { screen, params, project } = currentNavItem;
-  console.log('📺 Rendering screen:', screen);
-  console.log('📺 Current user role:', currentUser?.role);
-  console.log('📺 Navigation stack:', navigationStack);
+  console.log('?? Rendering screen:', screen);
+  console.log('?? Current user role:', currentUser?.role);
+  console.log('?? Navigation stack:', navigationStack);
   const ScreenComponent = SCREEN_COMPONENTS[screen] || PlaceholderToolScreen;
-  console.log('📺 Screen component:', ScreenComponent.name);
+  console.log('?? Screen component:', ScreenComponent.name);
 
   if (screen === 'my-apps-desktop') {
     return (
