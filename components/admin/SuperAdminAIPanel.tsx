@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Database, Code, Zap, Activity, Lock, Key, Terminal, Users, Building2, Package, TrendingUp, AlertCircle, Cpu, Server } from 'lucide-react';
+import { Shield, Database, Code, Zap, Activity, Key, Terminal, Users, Building2, Package, TrendingUp, AlertCircle, Cpu, Server } from 'lucide-react';
 import { getAPIUrl } from '../../config/api.config';
 
 interface SystemStats {
@@ -339,4 +339,3 @@ export const SuperAdminAIPanel: React.FC = () => {
     </div>
   );
 };
-

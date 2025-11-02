@@ -65,6 +65,7 @@ export const FullCompaniesManagement: React.FC = () => {
         alert(data.error || 'Failed to delete company');
       }
     } catch (error) {
+      console.error('Failed to delete company:', error);
       alert('Failed to delete company');
     }
   };

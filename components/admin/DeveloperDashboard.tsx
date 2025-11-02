@@ -1,23 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import {
-  Code,
   Users,
   Activity,
   DollarSign,
-  TrendingUp,
   Package,
-  Zap,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Database,
-  Server,
-  GitBranch,
-  Terminal,
-  FileCode,
-  BarChart3,
-  Settings
+  BarChart3
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -375,4 +363,3 @@ export const DeveloperDashboard: React.FC = () => {
     </div>
   );
 };
-

@@ -109,7 +109,7 @@ export const getUserActivity = async (): Promise<UserActivity[]> => {
 };
 
 // AIAgent API functions
-import type { AIAgent, User } from '../types';
+import type { AIAgent } from '../types';
 
 export const getAIAgents = async (): Promise<AIAgent[]> => {
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -164,11 +164,13 @@ export const updateAIAgent = async (agentId: string, formData: Partial<AIAgent>)
 export const toggleAIAgentStatus = async (agentId: string, isActive: boolean): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   // TODO: Implement actual API call
+  console.info('Mock toggleAIAgentStatus', { agentId, isActive });
 };
 
 export const deleteAIAgent = async (agentId: string): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   // TODO: Implement actual API call
+  console.info('Mock deleteAIAgent', { agentId });
 };
 
 // Audit Log API functions
@@ -191,6 +193,7 @@ export interface AuditLogEntry {
 export const getPlatformAuditLogs = async (offset: number = 0, limit: number = 50): Promise<AuditLogEntry[]> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   // TODO: Implement actual API call
+  console.info('Mock getPlatformAuditLogs', { offset, limit });
   return [];
 };
 
@@ -232,12 +235,14 @@ export const getAllCompanyPlans = async (): Promise<CompanyPlan[]> => {
 export const updateCompanyPlan = async (companyId: string, planId: string): Promise<boolean> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   // TODO: Implement actual API call
+  console.info('Mock updateCompanyPlan', { companyId, planId });
   return true;
 };
 
 export const toggleCompanyPlanStatus = async (planId: string, isActive: boolean): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   // TODO: Implement actual API call
+  console.info('Mock toggleCompanyPlanStatus', { planId, isActive });
 };
 
 // Platform Invitations API functions
@@ -262,6 +267,7 @@ export const getPlatformInvitations = async (): Promise<PlatformInvitation[]> =>
 export const sendPlatformInvitation = async (email: string, invitationType: 'company_admin' | 'super_admin' | 'platform_partner', companyName?: string): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   // TODO: Implement actual API call
+  console.info('Mock sendPlatformInvitation', { email, invitationType, companyName });
 };
 
 // Helper functions for dashboard data

@@ -94,9 +94,6 @@ const EnhancedDeveloperConsole = lazy(() => import('./components/screens/develop
 
 // Company Admin Legacy & Additional Dashboards
 const CompanyAdminDashboardLegacy = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
-const CompanyAdminDashboardNew = lazy(() => import('./components/screens/dashboards/CompanyAdminDashboardNew'));
-const SupervisorDashboard = lazy(() => import('./components/screens/dashboards/SupervisorDashboard'));
-const OperativeDashboard = lazy(() => import('./components/screens/dashboards/OperativeDashboard'));
 
 // Admin Control Panel
 const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
@@ -122,12 +119,6 @@ const ScreenLoader: React.FC = React.memo(() => (
     Loading experience...
   </div>
 ));
-
-type NavigationItem = {
-  screen: Screen;
-  params?: any;
-  project?: Project;
-};
 
 // Comprehensive screen components mapping
 const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
@@ -227,7 +218,14 @@ const App: React.FC = () => {
   const [isSmartAssistantOpen, setIsSmartAssistantOpen] = useState(false);
 
   const { toasts, addToast, removeToast } = useToast();
-  const { currentNavItem, navigateTo, navigateToModule, goBack } = useNavigation();
+  const {
+    currentNavItem,
+    navigateTo,
+    navigateToModule,
+    goBack,
+    handleDeepLink: handleDeepLinkFromNavigation,
+    selectProject: selectProjectFromNavigation
+  } = useNavigation();
   const { can: hasPermission } = usePermissions(currentUser);
 
   // Check for existing session on app load
@@ -263,41 +261,46 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
-  const handleLogin = useCallback(async (email: string, password: string) => {
-    try {
-      const user = await authService.login(email, password);
-      setCurrentUser(user);
-      addToast({ type: 'success', title: 'Welcome back!' });
-      logger.info('User logged in', { userId: user.id, role: user.role });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login failed';
-      addToast({ type: 'error', title: message });
-      logger.error('Login failed', error);
-      throw error;
+  const handleSelectProject = useCallback((projectId: string) => {
+    const project = allProjects.find(p => p.id === projectId);
+    if (!project) {
+      logger.warn('Project not found for selection', { projectId });
+      return;
     }
-  }, [addToast]);
+    selectProjectFromNavigation(project);
+  }, [allProjects, selectProjectFromNavigation]);
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await authService.logout();
-      setCurrentUser(null);
-      setAllProjects([]);
-      addToast({ type: 'success', title: 'Logged out successfully' });
-      logger.info('User logged out');
-    } catch (error) {
-      logger.error('Logout failed', error);
+  const handleDeepLink = useCallback((projectId: string | null, screenName: Screen, params: any) => {
+    handleDeepLinkFromNavigation(projectId, screenName, params, allProjects);
+  }, [allProjects, handleDeepLinkFromNavigation]);
+
+  const handleQuickAction = useCallback((screenName: Screen, projectId?: string) => {
+    if (projectId) {
+      const project = allProjects.find(p => p.id === projectId);
+      if (project) {
+        navigateTo(screenName, { projectId }, project);
+        return;
+      }
+      logger.warn('Project not found for quick action', { projectId, screen: screenName });
     }
-  }, [addToast]);
+    navigateTo(screenName);
+  }, [allProjects, navigateTo]);
 
-  const handleSuggestAction = async () => {
+  const handleSuggestAction = useCallback(async () => {
     if (!currentUser) return;
     setIsAISuggestionModalOpen(true);
     setIsAISuggestionLoading(true);
     setAiSuggestion(null);
-    const suggestion = await getAISuggestedAction(currentUser);
-    setAiSuggestion(suggestion);
-    setIsAISuggestionLoading(false);
-  };
+    try {
+      const suggestion = await getAISuggestedAction(currentUser);
+      setAiSuggestion(suggestion);
+    } catch (error) {
+      logger.error('Failed to fetch AI suggestion', error);
+      addToast({ type: 'error', title: 'Unable to fetch AI suggestion right now.' });
+    } finally {
+      setIsAISuggestionLoading(false);
+    }
+  }, [addToast, currentUser]);
 
   // Show loading screen while checking session
   if (!sessionChecked) {
@@ -375,26 +378,22 @@ const App: React.FC = () => {
                   currentUser={currentUser}
                   navigateTo={navigateTo}
                   goBack={goBack}
+                  onQuickAction={handleQuickAction}
+                  onSuggestAction={handleSuggestAction}
+                  onDeepLink={handleDeepLink}
+                  selectProject={handleSelectProject}
+                  can={hasPermission}
+                  hasPermission={hasPermission}
                   {...(project && { project })}
                   {...(params && { params })}
-                  {...(screen !== 'placeholder-tool' && { allProjects, hasPermission })}
+                  {...(screen !== 'placeholder-tool' && { allProjects })}
                   {...(isModuleScreen && {
                     openProjectSelector: (title: string, onSelect: (projectId: string) => void) => {
                       setProjectSelectorTitle(title);
                       setProjectSelectorCallback(() => onSelect);
                       setIsProjectSelectorOpen(true);
                     },
-                    onDeepLink: (projectId: string | null, screenName: Screen, linkParams: any) => {
-                      if (projectId) {
-                        const selectedProject = allProjects.find(p => p.id === projectId);
-                        if (selectedProject) {
-                          navigateTo(screenName, linkParams, selectedProject);
-                        }
-                      } else {
-                        navigateTo(screenName, linkParams);
-                      }
-                    },
-                    can: hasPermission
+                    onDeepLink: handleDeepLink
                   })}
                 />
               </Suspense>

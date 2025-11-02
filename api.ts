@@ -9,20 +9,16 @@ import {
   rfisAPI, 
   documentsAPI, 
   punchListAPI, 
-  drawingsAPI, 
   dayworkSheetsAPI, 
-  deliveryAPI, 
   timeEntriesAPI, 
   usersAPI, 
   companiesAPI, 
-  aiAPI, 
   dailyLogAPI, 
-  analyticsAPI,
   apiClient
 } from './lib/api-client';
 
 // Projects API
-export const fetchAllProjects = async (user: any) => {
+export const fetchAllProjects = async (_user: any) => {
   try {
     return await projectsAPI.getAll();
   } catch (error) {
@@ -31,7 +27,7 @@ export const fetchAllProjects = async (user: any) => {
   }
 };
 
-export const fetchProjects = async (user: any) => {
+export const fetchProjects = async (_user: any) => {
   try {
     return await projectsAPI.getAll();
   } catch (error) {
@@ -77,7 +73,7 @@ export const fetchProjectById = async (projectId: string) => {
 };
 
 // Tasks API
-export const fetchTasks = async (user: any) => {
+export const fetchTasks = async (_user: any) => {
   try {
     return await tasksAPI.getAll();
   } catch (error) {
@@ -152,7 +148,7 @@ export const addCommentToTask = async (taskId: string, comment: any) => {
 };
 
 // RFIs API
-export const fetchRFIs = async (user: any) => {
+export const fetchRFIs = async (_user: any) => {
   try {
     return await rfisAPI.getAll();
   } catch (error) {
@@ -220,7 +216,7 @@ export const addAnswerToRFI = async (rfiId: string, answer: any) => {
 };
 
 // Documents API
-export const fetchDocuments = async (user: any) => {
+export const fetchDocuments = async (_user: any) => {
   try {
     return await documentsAPI.getAll();
   } catch (error) {
@@ -240,7 +236,7 @@ export const createDocument = async (docData: any) => {
 };
 
 // Punch List API
-export const fetchPunchListItems = async (user: any) => {
+export const fetchPunchListItems = async (_user: any) => {
   try {
     return await punchListAPI.getAll();
   } catch (error) {
@@ -297,7 +293,7 @@ export const addCommentToPunchListItem = async (itemId: string, comment: any) =>
 };
 
 // Daywork Sheets API
-export const fetchDayworkSheets = async (user: any) => {
+export const fetchDayworkSheets = async (_user: any) => {
   try {
     return await dayworkSheetsAPI.getAll();
   } catch (error) {
@@ -464,7 +460,7 @@ export const fetchDailyLogForUser = async (userId: string) => {
 };
 
 // AI API
-export const getAISuggestedAction = async (user: any) => {
+export const getAISuggestedAction = async (_user: any) => {
   try {
     const response = await apiClient.getClient().get(`/api/ai/suggested-action?user_id=${user.id}`);
     return response.data?.data || response.data || null;
@@ -522,12 +518,12 @@ export const fetchSiteInstructions = async () => {
 
 // Notifications - Temporary mock
 export const fetchNotificationsForUser = async (userId: string) => {
-  console.log('Mock API: fetchNotificationsForUser called');
+  console.log('Mock API: fetchNotificationsForUser called', { userId });
   return [];
 };
 
 export const markNotificationsAsRead = async (notificationIds: string[]) => {
-  console.log('Mock API: markNotificationsAsRead called');
+  console.log('Mock API: markNotificationsAsRead called', { notificationIds });
   return { success: true };
 };
 
@@ -553,7 +549,7 @@ export const getAllCompanyPlans = async () => {
 };
 
 export const updateCompanyPlan = async (companyId: string, planId: string) => {
-  console.log('Mock API: updateCompanyPlan called');
+  console.log('Mock API: updateCompanyPlan called', { companyId, planId });
   return { success: true };
 };
 
@@ -562,23 +558,27 @@ export const getPlatformInvitations = async () => {
   return [];
 };
 
-export const sendPlatformInvitation = async (email: string, invitationType: 'company_admin' | 'super_admin' | 'platform_partner', companyName?: string) => {
-  console.log('Mock API: sendPlatformInvitation called');
+export const sendPlatformInvitation = async (
+  email: string,
+  invitationType: 'company_admin' | 'super_admin' | 'platform_partner',
+  companyName?: string
+) => {
+  console.log('Mock API: sendPlatformInvitation called', { email, invitationType, companyName });
   return { success: true };
 };
 
 export const createCompanyPlan = async (planData: any) => {
-  console.log('Mock API: createCompanyPlan called');
+  console.log('Mock API: createCompanyPlan called', { planData });
   return { success: true };
 };
 
 export const updateCompanyPlanDetails = async (planId: string, planData: any) => {
-  console.log('Mock API: updateCompanyPlanDetails called');
+  console.log('Mock API: updateCompanyPlanDetails called', { planId, planData });
   return { success: true };
 };
 
 export const toggleCompanyPlanStatus = async (planId: string, isActive: boolean) => {
-  console.log('Mock API: toggleCompanyPlanStatus called');
+  console.log('Mock API: toggleCompanyPlanStatus called', { planId, isActive });
   return { success: true };
 };
 
@@ -588,22 +588,22 @@ export const fetchAvailableAIAgents = async () => {
 };
 
 export const createAIAgent = async (agentData: any) => {
-  console.log('Mock API: createAIAgent called');
+  console.log('Mock API: createAIAgent called', { agentData });
   return { success: true };
 };
 
 export const updateAIAgent = async (agentId: string, agentData: any) => {
-  console.log('Mock API: updateAIAgent called');
+  console.log('Mock API: updateAIAgent called', { agentId, agentData });
   return { success: true };
 };
 
 export const toggleAIAgentStatus = async (agentId: string, isActive: boolean) => {
-  console.log('Mock API: toggleAIAgentStatus called');
+  console.log('Mock API: toggleAIAgentStatus called', { agentId, isActive });
   return { success: true };
 };
 
 export const getPlatformAuditLogs = async (offset: number = 0, limit: number = 50) => {
-  console.log('Mock API: getPlatformAuditLogs called');
+  console.log('Mock API: getPlatformAuditLogs called', { offset, limit });
   return [];
 };
 
@@ -613,7 +613,7 @@ export const fetchCompanySubscriptions = async () => {
 };
 
 export const subscribeToAgent = async (agentId: string) => {
-  console.log('Mock API: subscribeToAgent called');
+  console.log('Mock API: subscribeToAgent called', { agentId });
   return { success: true };
 };
 

@@ -63,6 +63,7 @@ export const FullUsersManagement: React.FC = () => {
         alert(data.error || 'Failed to delete user');
       }
     } catch (error) {
+      console.error('Failed to delete user:', error);
       alert('Failed to delete user');
     }
   };

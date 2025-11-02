@@ -14,13 +14,11 @@ import {
     CreditCard,
     FileText,
     Bell,
-    Lock,
     Globe,
     Zap
 } from 'lucide-react';
 
 // Import all admin components
-import SuperAdminDashboard from './SuperAdminDashboard';
 import EnhancedSuperAdminDashboard from './EnhancedSuperAdminDashboard';
 import UserRolesPermissions from '../user-management/UserRolesPermissions';
 import TeamCollaboration from '../user-management/TeamCollaboration';
@@ -235,4 +233,3 @@ const AdminControlPanel: React.FC<AdminControlPanelProps> = ({ isDarkMode = true
 };
 
 export default AdminControlPanel;
-

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, HardDrive, Users, Building2, AlertTriangle, TrendingUp, Download, RefreshCw } from 'lucide-react';
+import { Database, HardDrive, Users, Building2, TrendingUp, Download, RefreshCw } from 'lucide-react';
 import { getAPIUrl } from '../../config/api.config';
 
 interface DatabaseStats {
@@ -80,40 +80,6 @@ export const DatabaseCapabilityManager: React.FC = () => {
       console.error('Load database data error:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const updateCompanyQuota = async (companyId: string, field: string, value: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(getAPIUrl(`/admin/sdk/company-quotas/${companyId}`), {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ [field]: value })
-      });
-      loadDatabaseData();
-    } catch (error) {
-      console.error('Update company quota error:', error);
-    }
-  };
-
-  const updateUserQuota = async (userId: string, field: string, value: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(getAPIUrl(`/admin/sdk/user-quotas/${userId}`), {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ [field]: value })
-      });
-      loadDatabaseData();
-    } catch (error) {
-      console.error('Update user quota error:', error);
     }
   };
 
@@ -415,4 +381,3 @@ export const DatabaseCapabilityManager: React.FC = () => {
     </div>
   );
 };
-

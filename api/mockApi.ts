@@ -37,6 +37,7 @@ const mockResponses = [
 // Generate AI response based on user input
 function generateAIResponse(userMessage: string, conversationHistory: ChatMessage[]): string {
   const lowerMessage = userMessage.toLowerCase();
+  const recentHistory = conversationHistory.slice(-3).map(message => message.content.toLowerCase());
   
   // Context-aware responses based on keywords
   if (lowerMessage.includes('project') && lowerMessage.includes('status')) {
@@ -60,7 +61,9 @@ function generateAIResponse(userMessage: string, conversationHistory: ChatMessag
   }
   
   // Default responses with some variety
-  const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
+  const historyOffset = recentHistory.length % mockResponses.length;
+  const randomIndex = (Math.floor(Math.random() * mockResponses.length) + historyOffset) % mockResponses.length;
+  const randomResponse = mockResponses[randomIndex];
   return randomResponse;
 }
 
@@ -133,6 +136,9 @@ export const mockApi = {
 
   // Auth endpoints
   async login(email: string, password: string): Promise<{ success: boolean; token: string; user: any }> {
+    const passwordStrength = password.length >= 8 ? 'strong' : 'weak';
+    console.info('Mock login attempt', { email, passwordStrength });
+
     return {
       success: true,
       token: 'demo-token-' + Date.now(),
