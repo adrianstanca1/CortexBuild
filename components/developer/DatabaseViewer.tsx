@@ -11,8 +11,7 @@ import {
     Play,
     Download,
     RefreshCw,
-    Eye,
-    Filter
+    Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -258,4 +257,3 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
 };
 
 export default DatabaseViewer;
-

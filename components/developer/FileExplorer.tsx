@@ -10,12 +10,7 @@ import {
     ChevronRight,
     ChevronDown,
     Search,
-    Plus,
-    Trash2,
-    Edit,
-    Download,
-    Upload,
-    RefreshCw
+    Plus
 } from 'lucide-react';
 
 interface FileNode {
@@ -224,4 +219,3 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
 };
 
 export default FileExplorer;
-

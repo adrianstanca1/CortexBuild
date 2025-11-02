@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Code, Play, Save, FolderOpen, File, Plus, Trash2, Download } from 'lucide-react';
+import { Code, Play, Save, FolderOpen, File, Plus, Trash2 } from 'lucide-react';
 import { getAPIUrl } from '../../config/api.config';
 
 interface FileItem {
@@ -220,4 +220,3 @@ export const DeveloperEnvironment: React.FC = () => {
     </div>
   );
 };
-

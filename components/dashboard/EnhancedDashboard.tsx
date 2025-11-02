@@ -39,7 +39,7 @@ interface HealthStatus {
 }
 
 export const EnhancedDashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats>({
+  const [stats] = useState<DashboardStats>({
     totalProjects: 12,
     activeProjects: 8,
     completedProjects: 4,
@@ -341,4 +341,3 @@ export const EnhancedDashboard: React.FC = () => {
     </div>
   );
 };
-
