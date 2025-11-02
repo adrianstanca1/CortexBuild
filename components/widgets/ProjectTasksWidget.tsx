@@ -61,8 +61,10 @@ const ProjectTasksWidget: React.FC<ProjectTasksWidgetProps> = ({ project, naviga
             }
             setIsLoading(true);
             // Fix: Pass currentUser to fetchTasksForProject.
-            const projectTasks = await api.fetchTasksForProject(project.id, currentUser);
-            const openTasks = projectTasks
+            const projectTasks = await api.fetchTasksForProject(project.id);
+            const tasksArray = Array.isArray(projectTasks) ? projectTasks :
+                (projectTasks && typeof projectTasks === 'object' && 'data' in projectTasks && Array.isArray((projectTasks as any).data)) ? (projectTasks as any).data : [];
+            const openTasks = tasksArray
                 .filter(task => task.status !== 'Done')
                 .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
             setTasks(openTasks);

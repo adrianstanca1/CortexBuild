@@ -47,7 +47,7 @@ const MyTasksWidget: React.FC<MyTasksWidgetProps> = ({ tasks, onNavigate }) => {
         return date.toLocaleDateString();
     };
 
-    const activeTasks = tasks.filter(task => task.status !== 'Completed');
+    const activeTasks = tasks.filter(task => task.status !== 'Done');
     const overdueTasks = activeTasks.filter(task => isOverdue(task.dueDate));
     const todayTasks = activeTasks.filter(task => {
         if (!task.dueDate) return false;
@@ -117,9 +117,9 @@ const MyTasksWidget: React.FC<MyTasksWidgetProps> = ({ tasks, onNavigate }) => {
                                                 {task.priority}
                                             </span>
                                         )}
-                                        {task.progress !== undefined && (
+                                        {(task as any).progress !== undefined && (
                                             <span className="text-gray-600">
-                                                {task.progress}% complete
+                                                {(task as any).progress}% complete
                                             </span>
                                         )}
                                     </div>
@@ -131,9 +131,14 @@ const MyTasksWidget: React.FC<MyTasksWidgetProps> = ({ tasks, onNavigate }) => {
                                     }`}>
                                         {formatDate(task.dueDate)}
                                     </div>
-                                    {task.assignedTo && (
+                                    {(task as any).assignedTo && (
                                         <div className="text-xs text-gray-500 mt-1">
-                                            Assigned to: {task.assignedTo}
+                                            Assigned to: {(task as any).assignedTo}
+                                        </div>
+                                    )}
+                                    {task.assignee && (
+                                        <div className="text-xs text-gray-500 mt-1">
+                                            Assigned to: {task.assignee}
                                         </div>
                                     )}
                                 </div>

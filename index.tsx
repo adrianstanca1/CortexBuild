@@ -31,7 +31,7 @@ console.log('✅ [index.tsx] React app rendered');
 // React DevTools integration for development
 if (import.meta.env.DEV) {
   // Enable React DevTools profiler
-  if (typeof window !== 'undefined' && window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+  if (typeof window !== 'undefined' && (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__) {
     console.log('🔧 [DevTools] React DevTools detected and enabled');
   } else {
     console.log('💡 [DevTools] Install React DevTools browser extension for enhanced debugging');
