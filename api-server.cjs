@@ -218,13 +218,8 @@ app.get('/api/chat/message', auth.requireUser(), async (req, res) => {
   }
 });
 
-// Add OPTIONS handler for CORS preflight
-app.options('/api/chat/message', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.sendStatus(200);
-});
+// OPTIONS handler removed - CORS middleware (line 32-37) handles preflight requests
+// The CORS middleware properly restricts origins to configured values
 
 app.post('/api/chat/message', auth.requireUser(), async (req, res) => {
   try {
@@ -328,41 +323,11 @@ app.post('/api/platformAdmin', auth.requireAdmin(), (req, res) => {
   });
 });
 
-// Add general API endpoints
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    service: 'CortexBuild API Server',
-    version: '2.0.0'
-  });
-});
-
-// Add auth endpoints for demo
-app.post('/api/auth/login', (req, res) => {
-  res.json({
-    success: true,
-    token: 'demo-token-' + Date.now(),
-    user: {
-      id: 'demo-user-123',
-      email: 'demo@cortexbuild.com',
-      name: 'Demo User',
-      role: 'admin'
-    }
-  });
-});
-
-app.get('/api/auth/me', (req, res) => {
-  res.json({
-    success: true,
-    user: {
-      id: 'demo-user-123',
-      email: 'demo@cortexbuild.com',
-      name: 'Demo User',
-      role: 'admin'
-    }
-  });
-});
+// Duplicate handlers removed:
+// - /api/health (duplicate at line 301-307)
+// - /api/auth/login (duplicate at line 53-103) - removed hardcoded demo handler
+// - /api/auth/me (duplicate at line 105-138) - removed hardcoded demo handler
+// The proper implementations with authentication are kept at lines 53-138
 
 // Simple fallback for unknown routes
 app.use((req, res) => {
