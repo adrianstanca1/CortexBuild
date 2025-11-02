@@ -535,7 +535,7 @@ export const getPlatformInvitations = async () => {
   return [];
 };
 
-export const sendPlatformInvitation = async (email: string, role: string) => {
+export const sendPlatformInvitation = async (email: string, invitationType: 'company_admin' | 'super_admin' | 'platform_partner', companyName?: string) => {
   console.log('Mock API: sendPlatformInvitation called');
   return { success: true };
 };
@@ -550,7 +550,7 @@ export const updateCompanyPlanDetails = async (planId: string, planData: any) =>
   return { success: true };
 };
 
-export const toggleCompanyPlanStatus = async (planId: string) => {
+export const toggleCompanyPlanStatus = async (planId: string, isActive: boolean) => {
   console.log('Mock API: toggleCompanyPlanStatus called');
   return { success: true };
 };
