@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, UserCheck, UserX, Key } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, UserCheck, UserX } from 'lucide-react';
 import { UserFormModal } from './UserFormModal';
 import { getAPIUrl } from '../../../config/api.config';
 
@@ -22,7 +22,6 @@ interface Company {
 export const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [filterCompany, setFilterCompany] = useState('');
@@ -53,9 +52,6 @@ export const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch users:', error);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const fetchCompanies = async () => {
@@ -93,6 +89,7 @@ export const UserManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to create user');
       }
     } catch (error) {
+      console.error('Failed to create user:', error);
       showNotification('error', 'Failed to create user');
     }
   };
@@ -117,6 +114,7 @@ export const UserManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to update user');
       }
     } catch (error) {
+      console.error('Failed to update user:', error);
       showNotification('error', 'Failed to update user');
     }
   };
@@ -140,6 +138,7 @@ export const UserManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to delete user');
       }
     } catch (error) {
+      console.error('Failed to delete user:', error);
       showNotification('error', 'Failed to delete user');
     }
   };
@@ -309,6 +308,3 @@ export const UserManagement: React.FC = () => {
     </div>
   );
 };
-
-
-

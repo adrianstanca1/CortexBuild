@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Webhook, Plus, Trash2, Copy, CheckCircle, XCircle, Activity } from 'lucide-react';
+import { Webhook, Plus, Trash2, Copy, CheckCircle, XCircle } from 'lucide-react';
 import { getAPIUrl } from '../../../config/api.config';
 
 interface WebhookConfig {
@@ -363,4 +363,3 @@ const CreateWebhookModal: React.FC<{ onClose: () => void; onCreate: (data: any) 
     </div>
   );
 };
-

@@ -30,8 +30,6 @@ export const ClientsPage: React.FC = () => {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -41,7 +39,7 @@ export const ClientsPage: React.FC = () => {
     // Fetch clients from API
     useEffect(() => {
         fetchClients();
-    }, [searchQuery, statusFilter, page]);
+    }, [searchQuery, statusFilter]);
 
     const fetchClients = async () => {
         try {
@@ -49,7 +47,7 @@ export const ClientsPage: React.FC = () => {
             setError(null);
 
             const params = new URLSearchParams({
-                page: page.toString(),
+                page: '1',
                 limit: '20'
             });
 
@@ -61,7 +59,6 @@ export const ClientsPage: React.FC = () => {
 
             if (data.success) {
                 setClients(data.data);
-                setTotalPages(data.pagination?.totalPages || 1);
             } else {
                 setError(data.error || 'Failed to fetch clients');
             }
@@ -421,4 +418,3 @@ export const ClientsPage: React.FC = () => {
         </div>
     );
 };
-
