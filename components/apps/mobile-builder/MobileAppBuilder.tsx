@@ -16,15 +16,11 @@ import {
     Database,
     Code,
     Eye,
-    Download,
     Upload,
-    Settings,
     Layers,
-    Zap,
     CheckCircle,
     ArrowRight,
-    ArrowLeft,
-    Package
+    ArrowLeft
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DatabaseConfig from './DatabaseConfig';
@@ -54,9 +50,6 @@ interface AppProject {
 
 const MobileAppBuilder: React.FC<MobileAppBuilderProps> = ({ isDarkMode = true }) => {
     const [currentStep, setCurrentStep] = useState<BuilderStep>('info');
-    const [projects, setProjects] = useState<AppProject[]>([]);
-    const [currentProject, setCurrentProject] = useState<AppProject | null>(null);
-
     // App Info State
     const [appName, setAppName] = useState('');
     const [appDescription, setAppDescription] = useState('');
@@ -116,29 +109,6 @@ const MobileAppBuilder: React.FC<MobileAppBuilderProps> = ({ isDarkMode = true }
             ]
         }
     ];
-
-    const createNewProject = () => {
-        if (!appName.trim()) {
-            toast.error('Please enter an app name');
-            return;
-        }
-
-        const newProject: AppProject = {
-            id: Date.now().toString(),
-            name: appName,
-            description: appDescription,
-            icon: appIcon,
-            databaseType: selectedDatabase,
-            databaseConfig: databaseConfig,
-            screens: [],
-            logic: '',
-            createdAt: new Date()
-        };
-
-        setProjects([...projects, newProject]);
-        setCurrentProject(newProject);
-        toast.success('Project created!');
-    };
 
     const nextStep = () => {
         const currentIndex = steps.findIndex(s => s.id === currentStep);
@@ -396,4 +366,3 @@ const MobileAppBuilder: React.FC<MobileAppBuilderProps> = ({ isDarkMode = true }
 };
 
 export default MobileAppBuilder;
-

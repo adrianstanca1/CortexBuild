@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Search, Filter, Calendar } from 'lucide-react';
+import { Activity, Search } from 'lucide-react';
 import { getAPIUrl } from '../../../config/api.config';
 
 interface ActivityLog {
@@ -14,7 +14,6 @@ interface ActivityLog {
 
 export const ActivityLogs: React.FC = () => {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAction, setFilterAction] = useState('');
   const [page, setPage] = useState(1);
@@ -42,8 +41,6 @@ export const ActivityLogs: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch activity logs:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -172,4 +169,3 @@ export const ActivityLogs: React.FC = () => {
     </div>
   );
 };
-

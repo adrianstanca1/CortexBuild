@@ -66,7 +66,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(({ onLoginSuccess }
         setIsOAuthLoading(provider);
 
         try {
-            const { data, error } = await supabase.auth.signInWithOAuth({
+            const { error } = await supabase.auth.signInWithOAuth({
                 provider: provider,
                 options: {
                     redirectTo: `${window.location.origin}/#dashboard`,
