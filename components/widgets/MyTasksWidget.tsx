@@ -18,10 +18,9 @@ const MyTasksWidget: React.FC<MyTasksWidgetProps> = ({ tasks, onNavigate }) => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'Completed': return 'text-green-600 bg-green-100';
+            case 'To Do': return 'text-yellow-600 bg-yellow-100';
             case 'In Progress': return 'text-blue-600 bg-blue-100';
-            case 'Pending': return 'text-yellow-600 bg-yellow-100';
-            case 'Blocked': return 'text-red-600 bg-red-100';
+            case 'Done': return 'text-green-600 bg-green-100';
             default: return 'text-gray-600 bg-gray-100';
         }
     };
