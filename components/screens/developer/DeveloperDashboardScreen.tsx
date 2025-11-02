@@ -659,6 +659,11 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     [handleSandboxRun, navigateTo]
   );
 
+  const canPublishModules = useMemo(() => {
+    if (!capabilities) return true;
+    return capabilities.canPublishModules !== false;
+  }, [capabilities]);
+
   const handlePublishApp = useCallback(async (appId: string, nextStatus: 'pending_review' | 'approved' = 'pending_review') => {
     if (!canPublishModules) {
       toast.error('Publishing is not permitted for your role');
@@ -760,11 +765,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     return capabilitySummary.runsRemaining <= 0;
   }, [capabilitySummary]);
 
-  // canPublishModules must be declared before handlePublishApp
-  const canPublishModules = useMemo(() => {
-    if (!capabilities) return true;
-    return capabilities.canPublishModules !== false;
-  }, [capabilities]);
+
 
   if (loading) {
     return (

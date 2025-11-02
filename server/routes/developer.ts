@@ -871,7 +871,7 @@ export function createDeveloperRoutes(supabase: SupabaseClient) {
     }
   });
 
-  router.post('/files', (_req, res) => {
+  router.post('/files', (req, res) => {
     try {
       const { path, content } = req.body;
       // In production, this would save to file system
@@ -894,7 +894,7 @@ export function createDeveloperRoutes(supabase: SupabaseClient) {
     }
   });
 
-  router.post('/api-keys', (_req, res) => {
+  router.post('/api-keys', (req, res) => {
     try {
       const { name } = req.body;
       const newKey = {
@@ -909,7 +909,7 @@ export function createDeveloperRoutes(supabase: SupabaseClient) {
     }
   });
 
-  router.delete('/api-keys/:id', (_req, res) => {
+  router.delete('/api-keys/:id', (req, res) => {
     try {
       const { id } = req.params;
       res.json({ success: true, message: 'API key deleted' });
@@ -935,7 +935,7 @@ export function createDeveloperRoutes(supabase: SupabaseClient) {
     }
   });
 
-  router.post('/git/commit', (_req, res) => {
+  router.post('/git/commit', (req, res) => {
     try {
       const { message } = req.body;
       res.json({ success: true, message: 'Changes committed successfully' });
@@ -958,7 +958,7 @@ export function createDeveloperRoutes(supabase: SupabaseClient) {
     }
   });
 
-  router.post('/modules/install', (_req, res) => {
+  router.post('/modules/install', (req, res) => {
     try {
       const { moduleId } = req.body;
       res.json({ success: true, message: 'Module installed successfully' });
@@ -967,7 +967,7 @@ export function createDeveloperRoutes(supabase: SupabaseClient) {
     }
   });
 
-  router.delete('/modules/:id', (_req, res) => {
+  router.delete('/modules/:id', (req, res) => {
     try {
       const { id } = req.params;
       res.json({ success: true, message: 'Module uninstalled successfully' });
@@ -985,7 +985,7 @@ export function createDeveloperRoutes(supabase: SupabaseClient) {
     }
   });
 
-  router.post('/deploy', (_req, res) => {
+  router.post('/deploy', (req, res) => {
     try {
       const { environment } = req.body;
       res.json({ success: true, message: `Deployment to ${environment} started` });

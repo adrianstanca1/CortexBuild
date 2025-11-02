@@ -9,7 +9,7 @@ import { toast } from 'react-hot-toast';
 export function useProjects(params?: { status?: string; priority?: string; search?: string }) {
     return useQuery({
         queryKey: ['projects', params],
-        queryFn: () => api.fetchProjects(),
+        queryFn: () => api.fetchProjects(null), // Pass null as user parameter
         staleTime: 30000, // 30 seconds
     });
 }

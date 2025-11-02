@@ -215,14 +215,14 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ subscriptionTi
                 {/* Features */}
                 <div className="mb-4">
                   <div className="flex flex-wrap gap-1">
-                    {(JSON.parse(template.features) as string[]).slice(0, 3).map((feature: string, index: number) => (
+                    {template.features.slice(0, 3).map((feature: string, index: number) => (
                       <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
                         {feature}
                       </span>
                     ))}
-                    {(JSON.parse(template.features) as string[]).length > 3 && (
+                    {template.features.length > 3 && (
                       <span className="text-xs text-gray-500">
-                        +{(JSON.parse(template.features) as string[]).length - 3} more
+                        +{template.features.length - 3} more
                       </span>
                     )}
                   </div>

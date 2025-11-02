@@ -6,13 +6,11 @@
 import { BaseAgent } from './base-agent';
 
 export class CommercialGuardianAgent extends BaseAgent {
-    constructor() {
-        super({
-            name: 'Commercial Guardian',
-            model: 'claude-3-sonnet',
-            temperature: 0.4,
-            maxTokens: 2000,
-            systemPrompt: `You are Commercial Guardian AI, an expert in construction contract management, claims, disputes, and commercial risk.
+    private name = 'Commercial Guardian';
+    private model = 'claude-3-sonnet';
+    private temperature = 0.4;
+    private maxTokens = 2000;
+    private systemPrompt = `You are Commercial Guardian AI, an expert in construction contract management, claims, disputes, and commercial risk.
 
 Your expertise includes:
 - Contract interpretation and compliance
@@ -28,9 +26,7 @@ You provide:
 - Risk mitigation strategies
 - Commercially sound advice
 
-Always prioritize protecting the client's commercial interests while maintaining fairness.`,
-        });
-    }
+Always prioritize protecting the client's commercial interests while maintaining fairness.`;
 
     /**
      * Draft contract violation notice

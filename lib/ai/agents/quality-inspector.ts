@@ -6,13 +6,11 @@
 import { BaseAgent } from './base-agent';
 
 export class QualityInspectorAgent extends BaseAgent {
-    constructor() {
-        super({
-            name: 'Quality Inspector',
-            model: 'gpt-4-turbo',
-            temperature: 0.3,
-            maxTokens: 2000,
-            systemPrompt: `You are Quality Inspector AI, an expert in construction quality control, defect analysis, and standards compliance.
+    private name = 'Quality Inspector';
+    private model = 'gpt-4-turbo';
+    private temperature = 0.3;
+    private maxTokens = 2000;
+    private systemPrompt = `You are Quality Inspector AI, an expert in construction quality control, defect analysis, and standards compliance.
 
 Your expertise includes:
 - Quality standards and specifications
@@ -28,9 +26,7 @@ You provide:
 - Practical remediation plans
 - Standards compliance verification
 
-Always prioritize quality and safety while being practical and cost-effective.`,
-        });
-    }
+Always prioritize quality and safety while being practical and cost-effective.`;
 
     /**
      * Analyze quality defect

@@ -46,8 +46,7 @@ export async function extractTextFromImage(
       }
     });
 
-    // Process words with bounding boxes
-    const words = data.words.map(word => ({
+    const words = (data as any).words.map(word => ({
       text: word.text,
       confidence: word.confidence,
       bbox: {
@@ -122,7 +121,7 @@ export async function extractTextFromImageWithLanguage(
       }
     });
 
-    const words = data.words.map(word => ({
+    const words = (data as any).words.map(word => ({
       text: word.text,
       confidence: word.confidence,
       bbox: {
@@ -154,15 +153,15 @@ export async function extractTextFromImageWithLanguage(
 /**
  * Get available OCR languages
  */
-export async function getAvailableLanguages(): Promise<string[]> {
-  try {
-    const { data } = await Tesseract.getLanguages();
-    return data.languages;
-  } catch (error) {
-    console.error('Error fetching languages:', error);
-    return ['eng']; // Fallback to English
-  }
-}
+// export async function getAvailableLanguages(): Promise<string[]> {
+//   try {
+//     const { data } = await Tesseract.getLanguages();
+//     return data.languages;
+//   } catch (error) {
+//     console.error('Error fetching languages:', error);
+//     return ['eng']; // Fallback to English
+//   }
+// }
 
 /**
  * Process PDF page as image (requires pdf.js conversion first)

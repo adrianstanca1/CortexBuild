@@ -60,7 +60,7 @@ export const useAIAgents = (currentUser: User | null): UseAIAgentsReturn => {
         
         try {
             console.log('📋 Loading company subscriptions...');
-            const subscriptions = await api.fetchCompanySubscriptions ? await api.fetchCompanySubscriptions(currentUser) : [];
+            const subscriptions = await api.fetchCompanySubscriptions();
             setCompanySubscriptions(subscriptions);
             console.log('✅ Loaded', subscriptions.length, 'active subscriptions');
         } catch (err: any) {

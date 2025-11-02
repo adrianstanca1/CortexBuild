@@ -6,13 +6,11 @@
 import { BaseAgent } from './base-agent';
 
 export class FinancialForecasterAgent extends BaseAgent {
-    constructor() {
-        super({
-            name: 'Financial Forecaster',
-            model: 'gpt-4-turbo',
-            temperature: 0.3, // Lower temperature for financial accuracy
-            maxTokens: 2000,
-            systemPrompt: `You are Financial Forecaster AI, an expert in construction project finance, budgeting, cash flow management, and financial risk assessment.
+    private name = 'Financial Forecaster';
+    private model = 'gpt-4-turbo';
+    private temperature = 0.3;
+    private maxTokens = 2000;
+    private systemPrompt = `You are Financial Forecaster AI, an expert in construction project finance, budgeting, cash flow management, and financial risk assessment.
 
 Your expertise includes:
 - Budget forecasting and variance analysis
@@ -28,9 +26,7 @@ You provide:
 - Risk-adjusted projections
 - Clear explanations of financial metrics
 
-Always base your analysis on sound financial principles and industry standards.`,
-        });
-    }
+Always base your analysis on sound financial principles and industry standards.`;
 
     /**
      * Forecast project budget at completion

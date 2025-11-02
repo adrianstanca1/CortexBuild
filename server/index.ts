@@ -147,7 +147,7 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
 
                 // Import chatbot dynamically
                 const { GeminiChatbot } = await import('../lib/ai/gemini-client');
-                const { ChatTools } = await import('../lib/ai/chat-tools');
+                const { chatTools } = await import('../lib/ai/chat-tools');
 
                 // Build context
                 const chatContext = {

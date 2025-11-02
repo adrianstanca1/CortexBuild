@@ -26,5 +26,7 @@
     },
     "allowImportingTsExtensions": false,
     "noEmit": true
-  }
+  },
+  "files": ["types/express.d.ts"],
+  "include": ["src"]
 }

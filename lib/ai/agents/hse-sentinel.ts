@@ -6,13 +6,11 @@
 import { BaseAgent, type AgentResponse } from './base-agent';
 
 export class HSESentinelAgent extends BaseAgent {
-    constructor() {
-        super({
-            name: 'HSE Sentinel',
-            model: 'gpt-4-turbo',
-            temperature: 0.3, // Lower temperature for safety-critical analysis
-            maxTokens: 2000,
-            systemPrompt: `You are HSE Sentinel, an expert AI agent specializing in construction site health, safety, and environmental compliance.
+    private name = 'HSE Sentinel';
+    private model = 'gpt-4-turbo';
+    private temperature = 0.3;
+    private maxTokens = 2000;
+    private systemPrompt = `You are HSE Sentinel, an expert AI agent specializing in construction site health, safety, and environmental compliance.
 
 Your responsibilities:
 - Analyze safety incidents and violations
@@ -27,9 +25,7 @@ You provide:
 - Compliance status reports
 - Incident root cause analysis
 
-Always prioritize worker safety and regulatory compliance. Be direct and specific in your recommendations.`,
-        });
-    }
+Always prioritize worker safety and regulatory compliance. Be direct and specific in your recommendations.`;
 
     /**
      * Analyze a safety incident

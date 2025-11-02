@@ -8,16 +8,20 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'react', 'react-hooks'],
   rules: {
-    // Disable some rules for .cjs files
     'no-console': 'off',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { 
@@ -25,54 +29,25 @@ module.exports = {
       varsIgnorePattern: '^_',
     }],
     'no-redeclare': 'error',
-    'no-undef': 'off', // TypeScript handles this
+    'react/react-in-jsx-scope': 'off',
   },
-  overrides: [
-    {
-      files: ['*.cjs', '*.js'],
-      env: {
-        node: true,
-        commonjs: true,
-      },
-      rules: {
-        'no-console': 'off',
-        'no-unused-vars': 'off',
-        'no-undef': 'off',
-      },
+  settings: {
+    react: {
+      version: 'detect',
     },
-    {
-      files: ['public/sw.js'],
-      env: {
-        serviceworker: true,
-      },
-      globals: {
-        self: 'readonly',
-        caches: 'readonly',
-        fetch: 'readonly',
-        Response: 'readonly',
-        URL: 'readonly',
-        clients: 'readonly',
-      },
-    },
-    {
-      files: ['*.tsx', '*.ts'],
-      rules: {
-        '@typescript-eslint/no-unused-vars': ['error', { 
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        }],
-      },
-    },
-  ],
-  ignorePatterns: [
-    'node_modules/',
-    'dist/',
-    'build/',
-    '.next/',
-    '*.min.js',
-    'api-server*.cjs',
-    'production-server.cjs',
-    'middleware/*.cjs',
-    'api-tester.js',
-  ],
+  },
+  globals: {
+    process: 'readonly',
+    __dirname: 'readonly',
+    console: 'readonly',
+    URL: 'readonly',
+    fetch: 'readonly',
+    caches: 'readonly',
+    self: 'readonly',
+    Response: 'readonly',
+    clients: 'readonly',
+    setTimeout: 'readonly',
+    setInterval: 'readonly',
+    clearInterval: 'readonly',
+  }
 };

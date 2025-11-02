@@ -84,7 +84,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
     }
 
     // Check company scope requirement
-    if (requireCompanyScope && !currentUser.company_id) {
+    if (requireCompanyScope && !currentUser.companyId) {
         return fallback || (
             <UnauthorizedScreen 
                 message="You must be associated with a company to access this page"
@@ -279,7 +279,7 @@ export const CompanyScopeGuard: React.FC<{
         return fallback || <UnauthorizedScreen message="Please log in to continue" />;
     }
 
-    if (!currentUser.company_id && currentUser.role !== 'super_admin') {
+    if (!currentUser.companyId && currentUser.role !== 'super_admin') {
         return fallback || (
             <UnauthorizedScreen 
                 message="You must be associated with a company to access this page"

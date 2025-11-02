@@ -13,7 +13,7 @@ import { WebSocketServer } from 'ws';
 
 // Import your existing server modules
 import { authenticateToken } from './auth-supabase.js';
-import { initializeDatabase } from './database.js';
+import { initDatabase } from './database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

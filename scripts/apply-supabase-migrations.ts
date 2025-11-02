@@ -67,35 +67,30 @@ async function applyMigrations() {
             // Execute via RPC if available, otherwise direct query
             const { error } = await supabase.rpc('exec_sql', {
               sql_query: statement + ';'
-            }).catch(async () => {
-              // If RPC doesn't exist, try direct SQL execution
-              // Note: Supabase JS client doesn't support raw SQL directly
-              // We'll use the REST API instead
-              const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'apikey': supabaseServiceKey,
-                  'Authorization': `Bearer ${supabaseServiceKey}`
-                },
-                body: JSON.stringify({ sql_query: statement + ';' })
-              });
-              
-              if (!response.ok) {
-                const text = await response.text();
-                return { error: new Error(text) };
-              }
-              
-              return { error: null };
             });
 
             if (error && !error.message.includes('already exists') && !error.message.includes('duplicate')) {
               console.error(`   ❌ Error: ${error.message.substring(0, 100)}`);
             }
           } catch (err: any) {
-            // Ignore "already exists" errors
-            if (!err.message?.includes('already exists') && !err.message?.includes('duplicate')) {
-              console.error(`   ⚠️  Warning: ${err.message?.substring(0, 100)}`);
+            // If RPC doesn't exist, try direct SQL execution
+            // Note: Supabase JS client doesn't support raw SQL directly
+            // We'll use the REST API instead
+            const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': supabaseServiceKey,
+                'Authorization': `Bearer ${supabaseServiceKey}`
+              },
+              body: JSON.stringify({ sql_query: statement + ';' })
+            });
+            
+            if (!response.ok) {
+              const text = await response.text();
+              if (!text.includes('already exists') && !text.includes('duplicate')) {
+                console.error(`   ❌ Error: ${text.substring(0, 100)}`);
+              }
             }
           }
         }

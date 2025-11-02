@@ -6,13 +6,11 @@
 import { BaseAgent, type AgentResponse } from './base-agent';
 
 export class ProjectControlsAgent extends BaseAgent {
-    constructor() {
-        super({
-            name: 'Project Controls',
-            model: 'gpt-4-turbo',
-            temperature: 0.4,
-            maxTokens: 2000,
-            systemPrompt: `You are Project Controls AI, an expert in construction project management, scheduling, cost control, and performance analysis.
+    private name = 'Project Controls';
+    private model = 'gpt-4-turbo';
+    private temperature = 0.4;
+    private maxTokens = 2000;
+    private systemPrompt = `You are Project Controls AI, an expert in construction project management, scheduling, cost control, and performance analysis.
 
 Your expertise includes:
 - Schedule analysis and critical path identification
@@ -27,9 +25,7 @@ You provide:
 - Clear explanations of variances
 - Actionable improvement strategies
 
-Always base your analysis on quantitative data and industry best practices.`,
-        });
-    }
+Always base your analysis on quantitative data and industry best practices.`;
 
     /**
      * Analyze project schedule performance

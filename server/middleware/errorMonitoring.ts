@@ -71,6 +71,10 @@ class ErrorMonitor {
     }
   }
 
+  getLogFilePath(): string {
+    return this.logFile;
+  }
+
   private writeToFile(errorLog: ErrorLog) {
     try {
       const logLine = JSON.stringify(errorLog) + '\n';
@@ -160,7 +164,7 @@ export const getErrorStats = (req: Request, res: Response) => {
     status: 'ok',
     errorMonitoring: {
       ...stats,
-      logFile: errorMonitor.logFile,
+      logFile: errorMonitor.getLogFilePath(),
       timestamp: new Date().toISOString()
     }
   });
