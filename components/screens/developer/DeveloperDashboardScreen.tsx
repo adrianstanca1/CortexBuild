@@ -760,6 +760,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     return capabilitySummary.runsRemaining <= 0;
   }, [capabilitySummary]);
 
+  // canPublishModules must be declared before handlePublishApp
   const canPublishModules = useMemo(() => {
     if (!capabilities) return true;
     return capabilities.canPublishModules !== false;

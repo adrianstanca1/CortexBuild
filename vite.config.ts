@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
         // Optimized HMR
         hmr: {
           overlay: true,
-          port: 24678, // Use a specific port for HMR
+          port: 24679, // Use a different port for HMR to avoid conflicts
         },
         // Optimized file watching
         watch: {

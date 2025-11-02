@@ -127,8 +127,8 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ subscriptionTi
             <button
               onClick={() => setShowAIOnly(!showAIOnly)}
               className={`w-full px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${showAIOnly
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               <Sparkles className="w-4 h-4" />
@@ -150,8 +150,8 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ subscriptionTi
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === cat.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               {cat.label} ({cat.count})
