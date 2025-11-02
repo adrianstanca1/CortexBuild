@@ -58,7 +58,7 @@ const DailyLogScreen: React.FC<DailyLogScreenProps> = ({ project, goBack, curren
             equipment,
             materials
         };
-        await api.createDailyLog(dailyLogData, currentUser);
+        await api.createDailyLog(dailyLogData);
         alert('Daily log submitted successfully!');
         goBack();
     };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Code, Play, Save, FolderOpen, File, Plus, Trash2, Download } from 'lucide-react';
+import { Code, Play, Save, FolderOpen, File, Plus, Trash2 } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface FileItem {
   id: string;
@@ -40,7 +41,7 @@ export const DeveloperEnvironment: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/developer/code/run', {
+      const response = await fetch(getAPIUrl('/developer/code/run'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -71,7 +72,7 @@ export const DeveloperEnvironment: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:3001/api/developer/files', {
+      await fetch(getAPIUrl('/developer/files'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -219,4 +220,3 @@ export const DeveloperEnvironment: React.FC = () => {
     </div>
   );
 };
-

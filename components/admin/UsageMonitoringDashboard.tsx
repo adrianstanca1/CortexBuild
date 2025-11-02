@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, TrendingUp, DollarSign, Zap, Users, Code, MessageSquare, AlertCircle, Download } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface UsageStats {
   total_requests: number;
@@ -54,7 +55,7 @@ export const UsageMonitoringDashboard: React.FC = () => {
       const token = localStorage.getItem('token');
       
       // Load overall stats
-      const statsResponse = await fetch(`http://localhost:3001/api/admin/sdk/usage?range=${timeRange}`, {
+      const statsResponse = await fetch(`${getAPIUrl('/admin/sdk/usage')}?range=${timeRange}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const statsData = await statsResponse.json();
@@ -63,7 +64,7 @@ export const UsageMonitoringDashboard: React.FC = () => {
       }
 
       // Load user usage
-      const userResponse = await fetch('http://localhost:3001/api/admin/sdk/usage/by-user', {
+      const userResponse = await fetch(getAPIUrl('/admin/sdk/usage/by-user'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const userData = await userResponse.json();
@@ -72,7 +73,7 @@ export const UsageMonitoringDashboard: React.FC = () => {
       }
 
       // Load recent requests
-      const requestsResponse = await fetch('http://localhost:3001/api/admin/sdk/usage/recent', {
+      const requestsResponse = await fetch(getAPIUrl('/admin/sdk/usage/recent'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const requestsData = await requestsResponse.json();
@@ -89,7 +90,7 @@ export const UsageMonitoringDashboard: React.FC = () => {
   const exportUsageReport = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/sdk/usage/export?range=${timeRange}`, {
+      const response = await fetch(`${getAPIUrl('/admin/sdk/usage/export')}?range=${timeRange}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const blob = await response.blob();

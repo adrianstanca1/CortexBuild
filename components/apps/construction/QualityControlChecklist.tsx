@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { CheckSquare, Camera, FileText, Download, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { CheckSquare, Camera, Download, TrendingUp, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface QualityControlChecklistProps {
@@ -312,4 +312,3 @@ const QualityControlChecklist: React.FC<QualityControlChecklistProps> = ({ isDar
 };
 
 export default QualityControlChecklist;
-

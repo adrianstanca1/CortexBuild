@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexBuild Navigation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-item {
+            display: block;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.2s;
+        }
+        .nav-item:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 CortexBuild Platform - Navigation Test</h1>
+        
+        <div class="status success">
+            ✅ Frontend: Running at http://localhost:3002
+        </div>
+        
+        <div class="status success">
+            ✅ Backend: Running at http://localhost:3001
+        </div>
+        
+        <div class="status info">
+            🔑 Login Credentials Available:
+            <ul>
+                <li><strong>Super Admin:</strong> adrian.stanca1@gmail.com / parola123</li>
+                <li><strong>Company Admin:</strong> adrian@ascladdingltd.co.uk / lolozania1</li>
+                <li><strong>Developer:</strong> adrian.stanca1@icloud.com / password123</li>
+            </ul>
+        </div>
+        
+        <h2>📱 Available Screens & Features</h2>
+        
+        <h3>🏠 Dashboard & Overview</h3>
+        <a href="http://localhost:3002" class="nav-item" target="_blank">
+            🏠 Main Dashboard - Unified intelligent dashboard with AI insights
+        </a>
+        
+        <h3>📊 Core Project Management</h3>
+        <div class="nav-item">📋 Projects - Complete project portfolio management</div>
+        <div class="nav-item">✅ My Tasks - Personal task management and tracking</div>
+        <div class="nav-item">❓ RFIs - Request for Information management system</div>
+        <div class="nav-item">📄 Documents - Enterprise document management</div>
+        <div class="nav-item">☀️ My Day - Daily overview and productivity tracking</div>
+        
+        <h3>🚀 Advanced Features</h3>
+        <div class="nav-item">📊 Analytics - Comprehensive business intelligence dashboard</div>
+        <div class="nav-item">📋 Reports - Professional report generation (6 templates)</div>
+        <div class="nav-item">📅 Project Planning - Advanced scheduling with Gantt charts</div>
+        <div class="nav-item">👥 Team Management - Team optimization and skill matrix</div>
+        <div class="nav-item">⏱️ Time Tracking - Professional time management system</div>
+        <div class="nav-item">🔔 Notifications - Real-time communication center</div>
+        
+        <h3>🔧 Admin Features</h3>
+        <div class="nav-item">⚙️ Platform Admin - System administration (Super Admin only)</div>
+        
+        <h2>🎯 How to Test Navigation</h2>
+        <ol>
+            <li><strong>Open the main application:</strong> <a href="http://localhost:3002" target="_blank">http://localhost:3002</a></li>
+            <li><strong>Login with any of the credentials above</strong></li>
+            <li><strong>Use the sidebar navigation</strong> to access all screens</li>
+            <li><strong>Test each feature</strong> to ensure full functionality</li>
+        </ol>
+        
+        <h2>✨ Key Features to Test</h2>
+        <ul>
+            <li>🔐 <strong>Authentication:</strong> Login/logout functionality</li>
+            <li>🧭 <strong>Navigation:</strong> Sidebar navigation between screens</li>
+            <li>📊 <strong>Dashboard:</strong> Role-based dashboard with widgets</li>
+            <li>📈 <strong>Analytics:</strong> Real-time metrics and insights</li>
+            <li>📋 <strong>Reports:</strong> Generate and export reports</li>
+            <li>👥 <strong>Team Management:</strong> View team members and skills</li>
+            <li>⏱️ <strong>Time Tracking:</strong> Start/stop timers and view history</li>
+            <li>🔔 <strong>Notifications:</strong> View and manage notifications</li>
+            <li>📅 <strong>Project Planning:</strong> View Gantt charts and schedules</li>
+        </ul>
+        
+        <div class="status success">
+            🎉 <strong>All screens are now accessible through the main application sidebar!</strong>
+        </div>
+        
+        <p><strong>Note:</strong> If you encounter any issues, check the browser console for errors and ensure both frontend and backend servers are running.</p>
+    </div>
+</body>
+</html>

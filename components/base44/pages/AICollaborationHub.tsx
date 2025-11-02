@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bot, Users, Sparkles, MessageCircle, Shield, Database, Code, Zap, Activity, Lock, Key, Terminal } from 'lucide-react';
+import { Bot, Users, Sparkles, MessageCircle, Shield } from 'lucide-react';
 import { RealtimeCollaboration } from '../../collaboration/RealtimeCollaboration';
 import { AdvancedAIAssistant } from '../../ai/AdvancedAIAssistant';
 import { SuperAdminAIPanel } from '../../admin/SuperAdminAIPanel';
@@ -172,4 +172,3 @@ export const AICollaborationHub: React.FC = () => {
     </div>
   );
 };
-

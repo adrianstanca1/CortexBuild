@@ -6,6 +6,7 @@
  */
 
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { supabase } from './supabase';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cortexbuild-secret-2025';
@@ -61,7 +62,7 @@ const mapUserRow = (row: AppUser | null): UserResponse | null => {
 const getUserByEmail = async (email: string): Promise<AppUser | null> => {
   try {
     const { data, error } = await supabase
-      .from('app_users')
+      .from('users')
       .select('*')
       .ilike('email', email)
       .single();
@@ -84,7 +85,7 @@ const getUserByEmail = async (email: string): Promise<AppUser | null> => {
 const getUserById = async (id: string): Promise<AppUser | null> => {
   try {
     const { data, error } = await supabase
-      .from('app_users')
+      .from('users')
       .select('*')
       .eq('id', id)
       .single();
@@ -125,7 +126,6 @@ export const login = async (
     if (error) {
       console.error('❌ Password verification error:', error);
       // Fallback: Try direct bcrypt comparison if RPC fails
-      const bcrypt = require('bcryptjs');
       const isValid = await bcrypt.compare(password, dbUser.password_hash);
       if (!isValid) {
         console.log('❌ Login failed: Invalid password');
@@ -181,12 +181,11 @@ export const register = async (
     }
 
     // Hash password using bcrypt
-    const bcrypt = require('bcryptjs');
     const passwordHash = await bcrypt.hash(password, 10);
 
     // Create user
     const { data: newUser, error } = await supabase
-      .from('app_users')
+      .from('users')
       .insert({
         email,
         password_hash: passwordHash,
@@ -266,7 +265,7 @@ export const updateUserProfile = async (
 ): Promise<UserResponse | null> => {
   try {
     const { data, error } = await supabase
-      .from('app_users')
+      .from('users')
       .update({
         ...updates,
         updated_at: new Date().toISOString(),
@@ -304,7 +303,6 @@ export const changePassword = async (
     }
 
     // Verify old password
-    const bcrypt = require('bcryptjs');
     const isValid = await bcrypt.compare(oldPassword, dbUser.password_hash);
     if (!isValid) {
       console.log('❌ Password change failed: Invalid old password');
@@ -316,7 +314,7 @@ export const changePassword = async (
 
     // Update password
     const { error } = await supabase
-      .from('app_users')
+      .from('users')
       .update({
         password_hash: newPasswordHash,
         updated_at: new Date().toISOString(),
@@ -381,6 +379,42 @@ export const refreshToken = async (token: string) => {
   );
 
   return { user, token: newToken };
+};
+
+/**
+ * Get current user by token (alias for verifyToken with full user object)
+ */
+export const getCurrentUserByToken = async (token: string): Promise<UserResponse | null> => {
+  try {
+    const user = await verifyToken(token);
+    if (!user) {
+      return null;
+    }
+
+    // Get full user details from database
+    const dbUser = await getUserById(user.id);
+    return mapUserRow(dbUser);
+  } catch (err) {
+    console.error('❌ getCurrentUserByToken error:', err);
+    return null;
+  }
+};
+
+/**
+ * Logout (for compatibility - no-op in JWT model)
+ */
+export const logout = async (token: string): Promise<void> => {
+  // In JWT model, logout is handled client-side by removing the token
+  // No server-side session to invalidate
+  console.log('✅ Logout successful (JWT token removed client-side)');
+};
+
+/**
+ * Cleanup expired sessions (for compatibility - no-op in JWT model)
+ */
+export const cleanupExpiredSessions = async (): Promise<void> => {
+  // In JWT model, tokens expire automatically, no cleanup needed
+  console.log('✅ Session cleanup completed (JWT model - no action needed)');
 };
 
 console.log('✅ Auth service (Supabase) initialized');

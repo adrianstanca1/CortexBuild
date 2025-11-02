@@ -21,7 +21,9 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, 
         const loadProjects = async () => {
             setIsLoading(true);
             const fetchedProjects = await api.fetchAllProjects(currentUser);
-            setProjects(fetchedProjects);
+            const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
+                (fetchedProjects && typeof fetchedProjects === 'object' && 'data' in fetchedProjects && Array.isArray((fetchedProjects as any).data)) ? (fetchedProjects as any).data : [];
+            setProjects(projectsArray);
             setIsLoading(false);
         };
         loadProjects();

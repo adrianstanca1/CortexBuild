@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Search, Edit2, Trash2, Plus, RefreshCw, Mail, Phone, MapPin, Globe } from 'lucide-react';
 import { AddCompanyModal } from './AddCompanyModal';
+import { getAPIUrl } from '../../config/api.config';
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+const API_URL = getAPIUrl();
 
 const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
 
@@ -64,6 +65,7 @@ export const FullCompaniesManagement: React.FC = () => {
         alert(data.error || 'Failed to delete company');
       }
     } catch (error) {
+      console.error('Failed to delete company:', error);
       alert('Failed to delete company');
     }
   };

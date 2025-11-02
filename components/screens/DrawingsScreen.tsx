@@ -27,16 +27,19 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [expandedHistories, setExpandedHistories] = useState<Set<string>>(new Set());
-    const [compareSelection, setCompareSelection] = useState<{[key: string]: string[]}>({});
-    
+    const [compareSelection, setCompareSelection] = useState<{ [key: string]: string[] }>({});
+
     const { can } = usePermissions(currentUser);
     const canCreate = can('create', 'drawing');
 
     useEffect(() => {
         const loadDrawings = async () => {
             setIsLoading(true);
-            const fetchedDrawings = await api.fetchDrawings();
-            setAllDrawings(fetchedDrawings.filter(d => d.projectId === project.id));
+            const fetchedDrawings = await api.fetchDrawings(project?.id || '');
+            // Ensure array is extracted if needed
+            const drawingsArray = Array.isArray(fetchedDrawings) ? fetchedDrawings :
+                (fetchedDrawings?.data && Array.isArray(fetchedDrawings.data)) ? fetchedDrawings.data : [];
+            setAllDrawings(drawingsArray.filter(d => d.projectId === project.id));
             setIsLoading(false);
         };
         loadDrawings();
@@ -81,7 +84,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
 
     const handleUploadSubmit = async (drawingData: { drawingNumber: string; title: string; date: string; file: File }) => {
         try {
-            const newDrawing = await api.createDrawing(project.id, drawingData, currentUser);
+            const newDrawing = await api.createDrawing({ ...drawingData, projectId: project.id });
             // Instead of just adding, we should refetch or cleverly update the state
             // For simplicity in mock environment, let's just add it. The grouping will handle it.
             setAllDrawings(prevDrawings => [newDrawing, ...prevDrawings]);
@@ -107,7 +110,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
             return newSet;
         });
     };
-    
+
     const handleCompareSelect = (drawingNumber: string, drawingId: string) => {
         setCompareSelection(prev => {
             const currentSelection = prev[drawingNumber] || [];
@@ -128,7 +131,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
             const drawingB = allDrawings.find(d => d.id === selection[1]);
             if (drawingA && drawingB) {
                 // Ensure A is the older revision
-                const [older, newer] = [drawingA, drawingB].sort((a,b) => a.revision - b.revision);
+                const [older, newer] = [drawingA, drawingB].sort((a, b) => a.revision - b.revision);
                 navigateTo('drawing-comparison', { drawingA: older, drawingB: newer });
             }
         }
@@ -148,16 +151,16 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
                 </div>
                 {canCreate && (
                     <button onClick={() => setIsUploadModalOpen(true)} className="bg-blue-600 text-white p-2.5 rounded-full shadow hover:bg-blue-700">
-                        <PlusIcon className="w-6 h-6"/>
+                        <PlusIcon className="w-6 h-6" />
                     </button>
                 )}
             </header>
-            
+
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
                 <div className="relative mb-4">
-                    <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"/>
-                    <input 
-                        type="text" 
+                    <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                        type="text"
                         placeholder="Search by drawing number or title..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
@@ -165,7 +168,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
                     />
                 </div>
                 <div>
-                    <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><SparklesIcon className="w-5 h-5 text-purple-500"/> AI Generated Tags</h3>
+                    <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><SparklesIcon className="w-5 h-5 text-purple-500" /> AI Generated Tags</h3>
                     <div className="flex flex-wrap gap-2">
                         {allTags.map(tag => (
                             <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1 text-xs font-semibold rounded-full border transition-colors ${selectedTags.includes(tag) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:border-blue-500'}`}>
@@ -182,7 +185,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
                 ) : (
                     <ul className="divide-y divide-slate-200">
                         {filteredDrawingGroups.map(group => (
-                             <li key={group.drawingNumber}>
+                            <li key={group.drawingNumber}>
                                 <div onClick={() => navigateTo('plans', { url: group.latest.url, title: `${group.latest.drawingNumber} - ${group.latest.title}` })} className="p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer">
                                     <div className="flex items-center gap-4">
                                         <DocumentDuplicateIcon className="w-8 h-8 text-fuchsia-500 flex-shrink-0" />
@@ -211,7 +214,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
                                                             checked={(compareSelection[d.drawingNumber] || []).includes(d.id)}
                                                             onChange={() => handleCompareSelect(d.drawingNumber, d.id)}
                                                             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                         />
+                                                        />
                                                         <span className="font-semibold text-sm">Rev {d.revision}</span>
                                                         <span className="text-xs text-gray-500">({d.date})</span>
                                                     </div>
@@ -220,15 +223,15 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
                                             ))}
                                         </ul>
                                         <div className="mt-3 text-right">
-                                             <button
+                                            <button
                                                 onClick={() => handleCompare(group.drawingNumber)}
                                                 disabled={(compareSelection[group.drawingNumber] || []).length !== 2}
                                                 className="px-3 py-1.5 bg-blue-600 text-white font-bold rounded-md text-sm disabled:bg-gray-400"
-                                             >Compare Selected</button>
+                                            >Compare Selected</button>
                                         </div>
                                     </div>
                                 )}
-                             </li>
+                            </li>
                         ))}
                     </ul>
                 )}

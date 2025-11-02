@@ -7,7 +7,15 @@ import React, { useState, useEffect } from 'react';
 import { CreatePurchaseOrderModal } from '../modals/CreatePurchaseOrderModal';
 
 interface PurchaseOrder {
-    id: number;
+    id: number | string;
+    // Legacy properties
+    vendor?: string;
+    project?: string;
+    items?: string;
+    amount?: number;
+    orderDate?: string;
+    deliveryDate?: string;
+    receivedDate?: string | null;
     po_number?: string;
     vendor_name?: string;
     project_name?: string;
@@ -21,8 +29,6 @@ export const PurchaseOrdersPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
@@ -31,7 +37,6 @@ export const PurchaseOrdersPage: React.FC = () => {
 
     const fetchPurchaseOrders = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
@@ -42,37 +47,45 @@ export const PurchaseOrdersPage: React.FC = () => {
             if (data.success) {
                 setPurchaseOrders(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch purchase orders:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch purchase orders:', err);
             setPurchaseOrders(mockPurchaseOrders);
-        } finally {
-            setLoading(false);
         }
     };
 
     const mockPurchaseOrders: PurchaseOrder[] = [
         {
-            id: 'PO-2024-001',
+            id: 'PO-2024-001' as any,
             vendor: 'ABC Supplies Inc',
+            vendor_name: 'ABC Supplies Inc',
             project: 'Downtown Office Complex',
+            project_name: 'Downtown Office Complex',
             items: 'Steel beams, concrete mix',
             amount: 45000,
+            total: 45000,
             status: 'approved',
             orderDate: 'Dec 1, 2024',
+            order_date: 'Dec 1, 2024',
             deliveryDate: 'Dec 15, 2024',
+            delivery_date: 'Dec 15, 2024',
             receivedDate: null
         },
         {
-            id: 'PO-2024-002',
+            id: 'PO-2024-002' as any,
             vendor: 'BuildMart Wholesale',
+            vendor_name: 'BuildMart Wholesale',
             project: 'Riverside Luxury Apartments',
+            project_name: 'Riverside Luxury Apartments',
             items: 'Lumber, drywall, insulation',
             amount: 32500,
+            total: 32500,
             status: 'pending',
             orderDate: 'Dec 5, 2024',
+            order_date: 'Dec 5, 2024',
             deliveryDate: 'Dec 20, 2024',
+            delivery_date: 'Dec 20, 2024',
             receivedDate: null
         }
     ];
@@ -154,21 +167,21 @@ export const PurchaseOrdersPage: React.FC = () => {
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(po.status)}`}>
                                         {po.status}
                                     </span>
-                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency(po.amount)}</span>
+                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency((po as any).amount || po.total || 0)}</span>
                                 </div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">PO #{po.id}</h3>
-                                <p className="text-sm text-gray-600">{po.vendor}</p>
+                                <p className="text-sm text-gray-600">{(po as any).vendor || po.vendor_name || 'N/A'}</p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-start">
                                 <span className="text-sm text-gray-600 mr-2">Project:</span>
-                                <p className="text-sm font-medium text-gray-900">{po.project}</p>
+                                <p className="text-sm font-medium text-gray-900">{(po as any).project || po.project_name || 'N/A'}</p>
                             </div>
                             <div className="flex items-start">
                                 <span className="text-sm text-gray-600 mr-2">Items:</span>
-                                <p className="text-sm text-gray-600">{po.items}</p>
+                                <p className="text-sm text-gray-600">{(po as any).items || 'N/A'}</p>
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 pt-4">
@@ -204,4 +217,3 @@ export const PurchaseOrdersPage: React.FC = () => {
         </div>
     );
 };
-

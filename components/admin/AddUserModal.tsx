@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Lock, Building2, Shield } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+const API_URL = getAPIUrl();
 
 const getAuthToken = () => localStorage.getItem('constructai_token') || localStorage.getItem('token') || '';
 

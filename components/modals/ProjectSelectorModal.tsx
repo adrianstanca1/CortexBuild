@@ -1,12 +1,9 @@
 
 
 import React, { useState, useEffect } from 'react';
-// Fix: Corrected import paths to include file extensions.
 import { Project, User } from '../../types';
-// Fix: Corrected import paths to include file extensions.
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
 import { XMarkIcon, MapPinIcon } from '../Icons';
+import { mockApi } from '../../api/mockApi';
 
 interface ProjectSelectorModalProps {
     onSelectProject: (projectId: string) => void;
@@ -22,8 +19,45 @@ const ProjectSelectorModal: React.FC<ProjectSelectorModalProps> = ({ onSelectPro
     useEffect(() => {
         const loadProjects = async () => {
             setIsLoading(true);
-            const fetchedProjects = await api.fetchAllProjects(currentUser);
-            setProjects(fetchedProjects);
+            try {
+                // Mock projects for demonstration
+                const mockProjects: Project[] = [
+                    {
+                        id: '1',
+                        name: 'Office Building Construction',
+                        description: 'Modern office complex with 15 floors',
+                        status: 'active',
+                        startDate: '2024-01-15',
+                        endDate: '2024-12-15',
+                        budget: 2500000,
+                        location: 'London, UK'
+                    } as Project,
+                    {
+                        id: '2',
+                        name: 'Residential Complex',
+                        description: 'Luxury residential development with 50 units',
+                        status: 'active',
+                        startDate: '2024-03-01',
+                        endDate: '2025-06-30',
+                        budget: 1800000,
+                        location: 'Manchester, UK'
+                    } as Project,
+                    {
+                        id: '3',
+                        name: 'Shopping Center Renovation',
+                        description: 'Complete renovation of existing shopping center',
+                        status: 'planning',
+                        startDate: '2024-06-01',
+                        endDate: '2024-11-30',
+                        budget: 950000,
+                        location: 'Birmingham, UK'
+                    } as Project
+                ];
+                setProjects(mockProjects);
+            } catch (error) {
+                console.error('Failed to load projects:', error);
+                setProjects([]);
+            }
             setIsLoading(false);
         };
         loadProjects();

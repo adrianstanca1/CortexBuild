@@ -4,7 +4,7 @@
  * Features: Real-time stats, animations, advanced analytics
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Users,
     Building2,
@@ -18,21 +18,9 @@ import {
     Bell,
     Lock,
     Globe,
-    Package,
-    Zap,
-    TrendingUp,
     DollarSign,
-    UserCheck,
-    AlertCircle,
     CheckCircle,
-    Clock,
-    Download,
-    ArrowUpRight,
-    ArrowDownRight,
-    Sparkles,
-    Target,
-    Award,
-    Cpu
+    Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -57,7 +45,7 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
     onNavigate
 }) => {
     const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'companies' | 'billing' | 'system'>('overview');
-    const [stats, setStats] = useState<AdminStats>({
+    const [stats] = useState<AdminStats>({
         totalUsers: 1247,
         activeUsers: 892,
         totalCompanies: 156,
@@ -367,4 +355,3 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
 };
 
 export default EnhancedSuperAdminDashboard;
-

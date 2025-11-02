@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { X, Minimize2, Maximize2, Settings } from 'lucide-react';
+import { X, Minimize2, Maximize2 } from 'lucide-react';
 
 export interface MiniApp {
     id: string;
@@ -99,4 +99,3 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
 };
 
 export default AppContainer;
-

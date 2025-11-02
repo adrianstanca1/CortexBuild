@@ -1,13 +1,17 @@
-import { Router } from 'express';
-import type { Database } from 'better-sqlite3';
-import { getCurrentUser } from '../auth';
-import { getOpenAIClient } from '../services/ai';
+// CortexBuild - AI Chat Routes
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
-export function createAIChatRoutes(db: Database) {
+import { Router, Request, Response } from 'express';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { authenticateToken } from '../auth-supabase';
+import { getOpenAIClient, generateGeminiResponse } from '../services/ai';
+
+export function createAIChatRoutes(supabase: SupabaseClient) {
   const router = Router();
 
   // AI Chat endpoint
-  router.post('/chat', getCurrentUser, async (req, res) => {
+  router.post('/chat', authenticateToken, async (req: Request, res: Response) => {
     try {
       const { message, mode, conversationId, history } = req.body;
       const user = (req as any).user;
@@ -16,33 +20,48 @@ export function createAIChatRoutes(db: Database) {
         return res.status(400).json({ error: 'Message is required' });
       }
 
-      // Get user context from database
-      const userProjects = db.prepare(`
-        SELECT p.*, c.name as company_name
-        FROM projects p
-        LEFT JOIN companies c ON p.company_id = c.id
-        WHERE p.company_id = ?
-        ORDER BY p.created_at DESC
-        LIMIT 5
-      `).all(user.companyId);
+      const userId = user.id;
+      const companyId = user.company_id || user.companyId;
 
-      const recentTasks = db.prepare(`
-        SELECT * FROM tasks
-        WHERE company_id = ?
-        ORDER BY created_at DESC
-        LIMIT 10
-      `).all(user.companyId);
+      // Get user context from database
+      const { data: userProjects } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          companies!projects_company_id_fkey(id, name)
+        `)
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      const { data: recentTasks } = await supabase
+        .from('project_tasks_gantt')
+        .select('*')
+        .eq('project_id', userProjects?.[0]?.id || '')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      // Transform data
+      const projects = (userProjects || []).map((p: any) => {
+        const companies = Array.isArray(p.companies) ? p.companies[0] : p.companies;
+        return {
+          ...p,
+          company_name: companies?.name || null
+        };
+      });
+
+      const tasks = recentTasks || [];
 
       // Build context-aware system prompt
       let systemPrompt = `You are an advanced AI assistant for CortexBuild, a construction management platform. 
 You have access to the user's project data and can provide intelligent insights.
 
 User: ${user.name} (${user.email})
-Company: ${user.companyName}
+Company: ${user.company?.name || 'Company'}
 Role: ${user.role}
 
-Current Projects: ${userProjects.length}
-Recent Tasks: ${recentTasks.length}
+Current Projects: ${projects.length}
+Recent Tasks: ${recentTasks?.length || 0}
 `;
 
       if (mode === 'analyze') {
@@ -54,9 +73,9 @@ Recent Tasks: ${recentTasks.length}
       }
 
       // Add project context if available
-      if (userProjects.length > 0) {
+      if (projects.length > 0) {
         systemPrompt += `\n\nActive Projects:\n`;
-        userProjects.forEach((p: any) => {
+        projects.forEach((p: any) => {
           systemPrompt += `- ${p.name} (Status: ${p.status}, Budget: $${p.budget || 'N/A'})\n`;
         });
       }
@@ -82,41 +101,40 @@ Recent Tasks: ${recentTasks.length}
         content: message
       });
 
-      // Call OpenAI
-      const openai = getOpenAIClient(true); // Use SDK user key
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
-        messages,
-        temperature: mode === 'predict' ? 0.3 : mode === 'analyze' ? 0.5 : 0.7,
-        max_tokens: 1000
-      });
+      // Call Gemini AI
+      const context = {
+        projects: projects,
+        tasks: tasks,
+        mode: mode
+      };
 
-      const response = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
+      const response = await generateGeminiResponse(message, context, userId, companyId);
 
       // Log AI request
-      db.prepare(`
-        INSERT INTO ai_requests (
-          user_id, company_id, model, prompt, response, 
-          tokens_used, cost, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
-      `).run(
-        user.userId,
-        user.companyId,
-        'gpt-4-turbo-preview',
-        message,
-        response,
-        completion.usage?.total_tokens || 0,
-        ((completion.usage?.total_tokens || 0) * 0.00003) // Approximate cost
-      );
+      try {
+        await supabase
+          .from('ai_requests')
+          .insert({
+            user_id: userId,
+            company_id: companyId,
+            model: 'gemini-pro',
+            prompt: message,
+            response: response,
+            tokens_used: Math.ceil(message.length / 4), // Approximate token count
+            cost: 0.001 // Approximate cost for Gemini
+          });
+      } catch (logError) {
+        console.warn('Failed to log AI request:', logError);
+      }
 
       res.json({
         success: true,
         response,
         context: {
           mode,
-          projectsCount: userProjects.length,
-          tasksCount: recentTasks.length,
-          tokensUsed: completion.usage?.total_tokens || 0
+          projectsCount: projects.length,
+          tasksCount: recentTasks?.length || 0,
+          tokensUsed: Math.ceil(message.length / 4) // Approximate token count
         }
       });
 
@@ -130,152 +148,79 @@ Recent Tasks: ${recentTasks.length}
   });
 
   // Get AI conversation history
-  router.get('/conversations', getCurrentUser, async (req, res) => {
+  router.get('/conversations', authenticateToken, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
 
-      const conversations = db.prepare(`
-        SELECT 
-          id,
-          model,
-          prompt,
-          response,
-          tokens_used,
-          cost,
-          created_at
-        FROM ai_requests
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        LIMIT 50
-      `).all(user.userId);
+      const { data: conversations, error } = await supabase
+        .from('ai_requests')
+        .select('id, model, prompt, response, tokens_used, cost, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
 
       res.json({
         success: true,
-        conversations
+        conversations: conversations || []
       });
-
     } catch (error: any) {
       console.error('Get conversations error:', error);
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message || 'Failed to load conversations'
       });
     }
   });
 
-  // Get AI usage statistics
-  router.get('/usage', getCurrentUser, async (req, res) => {
+  // Get AI usage stats
+  router.get('/stats', authenticateToken, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
+      const companyId = user.company_id || user.companyId;
 
-      const stats = db.prepare(`
-        SELECT 
-          COUNT(*) as total_requests,
-          SUM(tokens_used) as total_tokens,
-          SUM(cost) as total_cost,
-          AVG(tokens_used) as avg_tokens_per_request
-        FROM ai_requests
-        WHERE user_id = ?
-      `).get(user.userId) as any;
+      // Get usage stats for user
+      const { data: userStats } = await supabase
+        .from('ai_requests')
+        .select('tokens_used, cost')
+        .eq('user_id', user.id);
 
-      const recentRequests = db.prepare(`
-        SELECT 
-          model,
-          tokens_used,
-          cost,
-          created_at
-        FROM ai_requests
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        LIMIT 10
-      `).all(user.userId);
+      // Get usage stats for company
+      const { data: companyStats } = await supabase
+        .from('ai_requests')
+        .select('tokens_used, cost')
+        .eq('company_id', companyId);
+
+      const userTotalTokens = (userStats || []).reduce((sum: number, s: any) => sum + (s.tokens_used || 0), 0);
+      const userTotalCost = (userStats || []).reduce((sum: number, s: any) => sum + (s.cost || 0), 0);
+
+      const companyTotalTokens = (companyStats || []).reduce((sum: number, s: any) => sum + (s.tokens_used || 0), 0);
+      const companyTotalCost = (companyStats || []).reduce((sum: number, s: any) => sum + (s.cost || 0), 0);
 
       res.json({
         success: true,
         stats: {
-          totalRequests: stats.total_requests || 0,
-          totalTokens: stats.total_tokens || 0,
-          totalCost: stats.total_cost || 0,
-          avgTokensPerRequest: Math.round(stats.avg_tokens_per_request || 0)
-        },
-        recentRequests
-      });
-
-    } catch (error: any) {
-      console.error('Get AI usage error:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message
-      });
-    }
-  });
-
-  // Smart suggestions based on context
-  router.post('/suggest', getCurrentUser, async (req, res) => {
-    try {
-      const { context, type } = req.body;
-      const user = (req as any).user;
-
-      let prompt = '';
-
-      switch (type) {
-        case 'project_name':
-          prompt = `Suggest 5 professional project names for a construction project with these details: ${JSON.stringify(context)}. Return only the names as a JSON array.`;
-          break;
-        case 'task_breakdown':
-          prompt = `Break down this project into key tasks: ${JSON.stringify(context)}. Return as a JSON array of task objects with name, description, and estimated_hours.`;
-          break;
-        case 'budget_estimate':
-          prompt = `Provide a budget estimate for this project: ${JSON.stringify(context)}. Return as JSON with categories and amounts.`;
-          break;
-        case 'risk_analysis':
-          prompt = `Analyze potential risks for this project: ${JSON.stringify(context)}. Return as JSON array of risks with severity and mitigation strategies.`;
-          break;
-        default:
-          return res.status(400).json({ error: 'Invalid suggestion type' });
-      }
-
-      const openai = getOpenAIClient(true);
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a construction project management expert. Provide concise, actionable suggestions in valid JSON format.'
+          user: {
+            requests: userStats?.length || 0,
+            totalTokens: userTotalTokens,
+            totalCost: userTotalCost
           },
-          {
-            role: 'user',
-            content: prompt
+          company: {
+            requests: companyStats?.length || 0,
+            totalTokens: companyTotalTokens,
+            totalCost: companyTotalCost
           }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
+        }
       });
-
-      const response = completion.choices[0]?.message?.content || '[]';
-      
-      try {
-        const suggestions = JSON.parse(response);
-        res.json({
-          success: true,
-          suggestions
-        });
-      } catch {
-        res.json({
-          success: true,
-          suggestions: response
-        });
-      }
-
     } catch (error: any) {
-      console.error('AI Suggest error:', error);
+      console.error('Get AI stats error:', error);
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message || 'Failed to load stats'
       });
     }
   });
 
   return router;
 }
-

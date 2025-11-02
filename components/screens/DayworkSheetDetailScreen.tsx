@@ -38,7 +38,10 @@ const DayworkSheetDetailScreen: React.FC<DayworkSheetDetailScreenProps> = ({ she
 
             if (fetchedSheet?.approvedBy) {
                 // Find the user object by ID or name
-                const approver = allUsers.find(u => u.id === fetchedSheet.approvedBy || u.name === fetchedSheet.approvedBy);
+                // Ensure array is extracted if needed
+                const usersArray = Array.isArray(allUsers) ? allUsers : 
+                    (allUsers?.data && Array.isArray(allUsers.data)) ? allUsers.data : [];
+                const approver = usersArray.find(u => u.id === fetchedSheet.approvedBy || u.name === fetchedSheet.approvedBy);
                 setApprovedByUser(approver || null);
             }
 
@@ -49,7 +52,7 @@ const DayworkSheetDetailScreen: React.FC<DayworkSheetDetailScreenProps> = ({ she
 
     const handleUpdateStatus = async (status: 'Approved' | 'Rejected') => {
         if (!sheet) return;
-        const updatedSheet = await api.updateDayworkSheetStatus(sheet.id, status, currentUser);
+        const updatedSheet = await api.updateDayworkSheetStatus(sheet.id, status);
         if (updatedSheet) {
             setSheet(updatedSheet);
             if (updatedSheet.status === 'Approved') {

@@ -76,7 +76,7 @@ const NewTaskScreen: React.FC<NewTaskScreenProps> = ({ project, goBack, currentU
             return;
         }
 
-        await api.createTask(taskData, currentUser);
+        await api.createTask(taskData);
         alert('Task created successfully!');
         goBack();
     };
@@ -90,7 +90,7 @@ const NewTaskScreen: React.FC<NewTaskScreenProps> = ({ project, goBack, currentU
         setIsSuggesting(true);
         setAiSuggestion(null);
         try {
-            const suggestions = await api.getAITaskSuggestions(description, allUsers);
+            const suggestions = await api.getAITaskSuggestions(description);
             if (suggestions) {
                 setAiSuggestion(suggestions);
             } else {

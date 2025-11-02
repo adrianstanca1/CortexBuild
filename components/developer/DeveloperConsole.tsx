@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Play, Trash2, Download, Copy, Check } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface ConsoleOutput {
   id: string;
@@ -112,7 +113,7 @@ export const DeveloperConsole: React.FC = () => {
 
   const executeAPIList = async () => {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:3001/api/developer/endpoints', {
+    const response = await fetch(getAPIUrl('/developer/endpoints'), {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await response.json();
@@ -152,7 +153,7 @@ export const DeveloperConsole: React.FC = () => {
 
   const executeDatabaseQuery = async (sql: string) => {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:3001/api/developer/database/query', {
+    const response = await fetch(getAPIUrl('/developer/database/query'), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -176,7 +177,7 @@ export const DeveloperConsole: React.FC = () => {
 
   const executeDatabaseTables = async () => {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:3001/api/developer/database/tables', {
+    const response = await fetch(getAPIUrl('/developer/database/tables'), {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await response.json();
@@ -211,7 +212,7 @@ export const DeveloperConsole: React.FC = () => {
 
   const executeRemoteCommand = async (command: string) => {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:3001/api/developer/console/execute', {
+    const response = await fetch(getAPIUrl('/developer/console/execute'), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

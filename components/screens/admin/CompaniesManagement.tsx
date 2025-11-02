@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { User, Company } from '../../../types';
 import * as api from '../../../api';
+import type { CompanyPlan } from '../../../api/platformAdmin';
 
 interface CompaniesManagementProps {
     currentUser: User;
 }
 
 const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }) => {
-    const [companies, setCompanies] = useState<(Company & { plan?: api.CompanyPlan; userCount: number; projectCount: number })[]>([]);
-    const [plans, setPlans] = useState<api.CompanyPlan[]>([]);
+    const [companies, setCompanies] = useState<(Company & { plan?: CompanyPlan; userCount: number; projectCount: number })[]>([]);
+    const [plans, setPlans] = useState<CompanyPlan[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
@@ -23,11 +24,16 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
         setError(null);
         try {
             const [companiesData, plansData] = await Promise.all([
-                api.getAllCompanies(currentUser),
+                api.getAllCompanies(),
                 api.getAllCompanyPlans()
             ]);
-            setCompanies(companiesData);
-            setPlans(plansData);
+            // Ensure arrays are extracted from responses
+            const companiesArray: any[] = Array.isArray(companiesData) ? companiesData : 
+                (companiesData && typeof companiesData === 'object' && 'data' in companiesData && Array.isArray((companiesData as any).data)) ? (companiesData as any).data : [];
+            const plansArray: CompanyPlan[] = Array.isArray(plansData) ? plansData : 
+                (plansData && typeof plansData === 'object' && 'data' in plansData && Array.isArray((plansData as any).data)) ? (plansData as any).data : [];
+            setCompanies(companiesArray);
+            setPlans(plansArray);
         } catch (err: any) {
             console.error('Error loading data:', err);
             setError(err.message || 'Failed to load data');
@@ -38,7 +44,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
 
     const handlePlanUpdate = async (companyId: string, planId: string) => {
         try {
-            const success = await api.updateCompanyPlan(currentUser, companyId, planId);
+            const success = await api.updateCompanyPlan(companyId, planId);
             if (success) {
                 await loadData(); // Reload data
                 setSelectedCompany(null);

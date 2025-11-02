@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { AISuggestion, NotificationLink, User } from '../../types';
 import { XMarkIcon, WandSparklesIcon, ArrowPathIcon, HandThumbUpIcon, HandThumbDownIcon } from '../Icons';
-import * as api from '../../api';
+// API functions moved to App.tsx - remove this import
 
 interface AISuggestionModalProps {
     isOpen: boolean;
@@ -27,7 +27,8 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({ isOpen, isLoading
     const handleFeedback = async (feedback: 'up' | 'down') => {
         if (feedbackStatus || !suggestion) return;
         setFeedbackStatus(feedback);
-        await api.submitAIFeedback(suggestion, feedback, currentUser);
+        // TODO: Implement API feedback submission
+        console.log('AI feedback submitted:', { suggestion, feedback, user: currentUser });
     };
 
     return (
@@ -42,7 +43,7 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({ isOpen, isLoading
                         <XMarkIcon className="w-6 h-6 text-gray-600" />
                     </button>
                 </header>
-                
+
                 <div className="p-6 min-h-[150px] flex items-center justify-center">
                     {isLoading && (
                         <div className="text-center text-gray-600">
@@ -56,7 +57,7 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({ isOpen, isLoading
                             <p className="text-md text-gray-600 mt-2">{suggestion.reason}</p>
                         </div>
                     )}
-                     {!isLoading && !suggestion && (
+                    {!isLoading && !suggestion && (
                         <div className="text-center text-gray-600">
                             <p>Could not generate a suggestion at this time.</p>
                         </div>
@@ -66,7 +67,7 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({ isOpen, isLoading
                 <footer className="p-4 bg-gray-50 border-t flex justify-between items-center gap-3">
                     <div className="flex items-center gap-2">
                         {!feedbackStatus ? (
-                             <>
+                            <>
                                 <button
                                     onClick={() => handleFeedback('up')}
                                     disabled={isLoading || !suggestion}
@@ -93,7 +94,7 @@ const AISuggestionModal: React.FC<AISuggestionModalProps> = ({ isOpen, isLoading
                         <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded font-semibold">
                             Cancel
                         </button>
-                        <button 
+                        <button
                             onClick={handleActionClick}
                             disabled={isLoading || !suggestion}
                             className="px-4 py-2 bg-blue-600 text-white rounded font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"

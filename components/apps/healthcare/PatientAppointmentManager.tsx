@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { Calendar, Clock, User, Phone, Mail, CheckCircle, XCircle, AlertCircle, Plus } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, CheckCircle, XCircle, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface PatientAppointmentManagerProps {
@@ -50,9 +50,6 @@ const PatientAppointmentManager: React.FC<PatientAppointmentManagerProps> = ({ i
             notes: 'Post-surgery checkup'
         }
     ]);
-
-    const appointmentTypes = ['General Checkup', 'Follow-up', 'Consultation', 'Emergency', 'Vaccination'];
-    const doctors = ['Dr. Sarah Johnson', 'Dr. Michael Chen', 'Dr. Lisa Anderson', 'Dr. Robert Taylor'];
 
     const updateStatus = (id: string, status: Appointment['status']) => {
         setAppointments(appointments.map(apt => apt.id === id ? { ...apt, status } : apt));
@@ -220,4 +217,3 @@ const PatientAppointmentManager: React.FC<PatientAppointmentManagerProps> = ({ i
 };
 
 export default PatientAppointmentManager;
-

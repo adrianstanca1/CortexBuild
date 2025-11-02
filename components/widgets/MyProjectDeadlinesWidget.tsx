@@ -20,9 +20,11 @@ const MyProjectDeadlinesWidget: React.FC<MyProjectDeadlinesWidgetProps> = ({ cur
                 return;
             }
             setIsLoading(true);
-            const projectTasks = await api.fetchTasksForProject(project.id, currentUser);
+            const projectTasks = await api.fetchTasksForProject(project.id);
+            const tasksArray = Array.isArray(projectTasks) ? projectTasks :
+                (projectTasks && typeof projectTasks === 'object' && 'data' in projectTasks && Array.isArray((projectTasks as any).data)) ? (projectTasks as any).data : [];
             
-            const userTasks = projectTasks.filter(task => 
+            const userTasks = tasksArray.filter(task => 
                 task.assignee === currentUser.name || 
                 (task.targetRoles && task.targetRoles.includes(currentUser.role))
             );

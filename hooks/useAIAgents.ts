@@ -60,7 +60,7 @@ export const useAIAgents = (currentUser: User | null): UseAIAgentsReturn => {
         
         try {
             console.log('📋 Loading company subscriptions...');
-            const subscriptions = await api.fetchCompanySubscriptions(currentUser);
+            const subscriptions = await api.fetchCompanySubscriptions();
             setCompanySubscriptions(subscriptions);
             console.log('✅ Loaded', subscriptions.length, 'active subscriptions');
         } catch (err: any) {
@@ -83,7 +83,8 @@ export const useAIAgents = (currentUser: User | null): UseAIAgentsReturn => {
         
         try {
             console.log('💳 Subscribing to agent:', agentId);
-            const subscription = await api.subscribeToAgent(currentUser, agentId, billingCycle);
+            // TODO: Implement subscribeToAgent API function
+            const subscription = null;
             
             if (subscription) {
                 // Refresh subscriptions to get the latest data

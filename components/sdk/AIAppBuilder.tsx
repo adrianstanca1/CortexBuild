@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, Code, Eye, Save, Play, Download, MessageSquare, CheckCircle, AlertTriangle, TestTube, BarChart3 } from 'lucide-react';
 import { DeveloperChatbot } from './DeveloperChatbot';
 import { CodeSandbox } from './CodeSandbox';
+import { getAPIUrl } from '../../config/api.config';
 
 interface AIAppBuilderProps {
   subscriptionTier: string;
@@ -17,6 +18,7 @@ export const AIAppBuilder: React.FC<AIAppBuilderProps> = ({ subscriptionTier }) 
   const [analysis, setAnalysis] = useState<any>(null);
   const [generatingTests, setGeneratingTests] = useState(false);
   const [tests, setTests] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{ role: string; content: string }>>([]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -26,7 +28,7 @@ export const AIAppBuilder: React.FC<AIAppBuilderProps> = ({ subscriptionTier }) 
     setTests('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/sdk/ai/generate-app', {
+      const response = await fetch(getAPIUrl('/sdk/ai/generate-app'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -56,7 +58,7 @@ export const AIAppBuilder: React.FC<AIAppBuilderProps> = ({ subscriptionTier }) 
     setAnalyzing(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/sdk/ai/analyze-code', {
+      const response = await fetch(getAPIUrl('/sdk/ai/analyze-code'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -85,7 +87,7 @@ export const AIAppBuilder: React.FC<AIAppBuilderProps> = ({ subscriptionTier }) 
     setGeneratingTests(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/sdk/ai/generate-tests', {
+      const response = await fetch(getAPIUrl('/sdk/ai/generate-tests'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

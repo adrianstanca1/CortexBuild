@@ -42,13 +42,19 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
         const loadData = async () => {
             setIsLoading(true);
             const [userTasks, userProjects, userTimeEntries] = await Promise.all([
-                api.fetchTasksForUser(currentUser),
+                api.fetchTasksForUser(currentUser.id),
                 api.fetchAllProjects(currentUser),
                 api.fetchTimeEntriesForUser(currentUser.id)
             ]);
-            setTasks(userTasks.filter(t => t.status !== 'Done'));
-            setProjects(userProjects);
-            setTimeEntries(userTimeEntries);
+            const tasksArray = Array.isArray(userTasks) ? userTasks :
+                (userTasks && typeof userTasks === 'object' && 'data' in userTasks && Array.isArray((userTasks as any).data)) ? (userTasks as any).data : [];
+            setTasks(tasksArray.filter(t => t.status !== 'Done'));
+            const projectsArray = Array.isArray(userProjects) ? userProjects :
+                (userProjects && typeof userProjects === 'object' && 'data' in userProjects && Array.isArray((userProjects as any).data)) ? (userProjects as any).data : [];
+            setProjects(projectsArray);
+            const timeEntriesArray = Array.isArray(userTimeEntries) ? userTimeEntries :
+                (userTimeEntries && typeof userTimeEntries === 'object' && 'data' in userTimeEntries && Array.isArray((userTimeEntries as any).data)) ? (userTimeEntries as any).data : [];
+            setTimeEntries(timeEntriesArray);
             setIsLoading(false);
         };
         loadData();
@@ -73,14 +79,17 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
             return;
         }
         try {
-            const newEntry = await api.startTimeEntry(task.id, task.projectId, currentUser.id);
-            setTimeEntries(prev => [...prev, newEntry]);
+            const newEntry = await api.startTimeEntry(task.id, currentUser.id);
+            const entryData = Array.isArray(newEntry) ? null : (newEntry && typeof newEntry === 'object' && 'data' in newEntry ? (newEntry as any).data : newEntry);
+            if (entryData) {
+                setTimeEntries(prev => [...prev, entryData]);
+            }
         } catch (error) {
             console.error(error);
             alert('Failed to clock in.');
         }
     };
-    
+
     const handleClockOut = async () => {
         if (!activeEntry) return;
         try {
@@ -127,7 +136,7 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
                                                             <ClockIcon className="w-5 h-5" />
                                                             <TimeDuration startTime={activeEntry!.startTime} />
                                                         </div>
-                                                        <button 
+                                                        <button
                                                             onClick={handleClockOut}
                                                             className="px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 transition-colors"
                                                         >
@@ -135,7 +144,7 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleClockIn(task)}
                                                         disabled={!!activeEntry}
                                                         className="px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed w-full sm:w-auto"
@@ -151,9 +160,9 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
                         );
                     })
                 )}
-                 {Object.keys(tasksByProject).length === 0 && !isLoading && (
+                {Object.keys(tasksByProject).length === 0 && !isLoading && (
                     <div className="text-center text-gray-500 p-8 bg-white rounded-lg shadow-md border">You have no open tasks assigned to you.</div>
-                 )}
+                )}
             </main>
         </div>
     );

@@ -7,16 +7,20 @@ import React, { useState, useEffect } from 'react';
 import { CreateSubcontractorModal } from '../modals/CreateSubcontractorModal';
 
 interface Subcontractor {
-    id: number;
+    id: number | string;
     name: string;
     trade?: string;
     contact_name?: string;
+    contact?: string; // Legacy property
     email?: string;
     phone?: string;
     license_number?: string;
+    license?: string; // Legacy property
     status: string;
     rating?: number;
     projects?: number;
+    insuranceExpiring?: boolean;
+    onTimeRate?: number;
 }
 
 export const SubcontractorsPage: React.FC = () => {
@@ -24,8 +28,6 @@ export const SubcontractorsPage: React.FC = () => {
     const [tradeFilter, setTradeFilter] = useState('all');
     const [activeTab, setActiveTab] = useState<'directory' | 'assignments'>('directory');
     const [subcontractors, setSubcontractors] = useState<Subcontractor[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
@@ -34,7 +36,6 @@ export const SubcontractorsPage: React.FC = () => {
 
     const fetchSubcontractors = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (tradeFilter !== 'all') params.append('trade', tradeFilter);
@@ -45,13 +46,11 @@ export const SubcontractorsPage: React.FC = () => {
             if (data.success) {
                 setSubcontractors(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch subcontractors:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch subcontractors:', err);
             setSubcontractors(mockSubcontractors);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -299,4 +298,3 @@ export const SubcontractorsPage: React.FC = () => {
         </div>
     );
 };
-

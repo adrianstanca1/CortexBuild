@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Search, Filter, Calendar } from 'lucide-react';
+import { Activity, Search } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface ActivityLog {
   id: number;
@@ -13,7 +14,6 @@ interface ActivityLog {
 
 export const ActivityLogs: React.FC = () => {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAction, setFilterAction] = useState('');
   const [page, setPage] = useState(1);
@@ -31,7 +31,7 @@ export const ActivityLogs: React.FC = () => {
       params.append('limit', '20');
       if (filterAction) params.append('action', filterAction);
 
-      const response = await fetch(`http://localhost:3001/api/admin/activity-logs?${params}`, {
+      const response = await fetch(`${getAPIUrl('/admin/activity-logs')}?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -41,8 +41,6 @@ export const ActivityLogs: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch activity logs:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -171,4 +169,3 @@ export const ActivityLogs: React.FC = () => {
     </div>
   );
 };
-

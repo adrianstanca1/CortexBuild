@@ -1,45 +1,50 @@
 // CortexBuild - Widget & Dashboard API Routes
+// Version: 2.0.0 - Supabase Migration
 // Handles custom dashboards and widget management
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
+import * as auth from '../auth-supabase';
 
-export function createWidgetsRouter(db: Database.Database): Router {
+export function createWidgetsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // Middleware to get current user
-  const getCurrentUser = (req: any, res: Response, next: any) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  const getCurrentUser = async (req: any, res: Response, next: any) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
-    const session = db.prepare('SELECT user_id FROM sessions WHERE token = ?').get(token) as any;
-    if (!session) {
-      return res.status(401).json({ error: 'Invalid session' });
-    }
+      const user = await auth.getCurrentUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid session' });
+      }
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(session.user_id) as any;
-    if (!user) {
-      return res.status(401).json({ error: 'User not found' });
+      req.user = user;
+      next();
+    } catch (error: any) {
+      res.status(401).json({ error: error.message || 'Unauthorized' });
     }
-
-    req.user = user;
-    next();
   };
 
   // GET /api/widgets/dashboards - Get user's dashboards
-  router.get('/dashboards', getCurrentUser, (req: Request, res: Response) => {
+  router.get('/dashboards', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
 
-      const dashboards = db.prepare(`
-        SELECT * FROM user_dashboards
-        WHERE user_id = ?
-        ORDER BY is_default DESC, created_at DESC
-      `).all(user.id);
+      const { data: dashboards, error } = await supabase
+        .from('user_dashboards')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      res.json({ success: true, data: dashboards });
+      if (error) throw error;
+
+      res.json({ success: true, data: dashboards || [] });
     } catch (error: any) {
       console.error('Get dashboards error:', error);
       res.status(500).json({ error: error.message });
@@ -47,7 +52,7 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // POST /api/widgets/dashboards - Create new dashboard
-  router.post('/dashboards', getCurrentUser, (req: Request, res: Response) => {
+  router.post('/dashboards', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const { name, layout, is_default } = req.body;
       const user = (req as any).user;
@@ -58,15 +63,24 @@ export function createWidgetsRouter(db: Database.Database): Router {
 
       // If setting as default, unset other defaults
       if (is_default) {
-        db.prepare('UPDATE user_dashboards SET is_default = 0 WHERE user_id = ?').run(user.id);
+        await supabase
+          .from('user_dashboards')
+          .update({ is_default: false })
+          .eq('user_id', user.id);
       }
 
-      const result = db.prepare(`
-        INSERT INTO user_dashboards (user_id, name, layout, is_default)
-        VALUES (?, ?, ?, ?)
-      `).run(user.id, name, layout || '[]', is_default ? 1 : 0);
+      const { data: dashboard, error } = await supabase
+        .from('user_dashboards')
+        .insert({
+          user_id: user.id,
+          name,
+          layout: typeof layout === 'string' ? layout : JSON.stringify(layout || []),
+          is_default: is_default || false
+        })
+        .select()
+        .single();
 
-      const dashboard = db.prepare('SELECT * FROM user_dashboards WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       res.json({ success: true, data: dashboard });
     } catch (error: any) {
@@ -76,42 +90,47 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // PUT /api/widgets/dashboards/:id - Update dashboard
-  router.put('/dashboards/:id', getCurrentUser, (req: Request, res: Response) => {
+  router.put('/dashboards/:id', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { name, layout, is_default } = req.body;
       const user = (req as any).user;
 
-      const dashboard = db.prepare('SELECT * FROM user_dashboards WHERE id = ? AND user_id = ?').get(id, user.id);
+      const { data: dashboard } = await supabase
+        .from('user_dashboards')
+        .select('id')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+
       if (!dashboard) {
         return res.status(404).json({ error: 'Dashboard not found' });
       }
 
-      const updates: string[] = [];
-      const params: any[] = [];
-
-      if (name !== undefined) {
-        updates.push('name = ?');
-        params.push(name);
-      }
+      const updateData: any = {};
+      if (name !== undefined) updateData.name = name;
       if (layout !== undefined) {
-        updates.push('layout = ?');
-        params.push(layout);
+        updateData.layout = typeof layout === 'string' ? layout : JSON.stringify(layout);
       }
       if (is_default !== undefined) {
         if (is_default) {
-          db.prepare('UPDATE user_dashboards SET is_default = 0 WHERE user_id = ?').run(user.id);
+          await supabase
+            .from('user_dashboards')
+            .update({ is_default: false })
+            .eq('user_id', user.id);
         }
-        updates.push('is_default = ?');
-        params.push(is_default ? 1 : 0);
+        updateData.is_default = is_default;
       }
 
-      if (updates.length > 0) {
-        params.push(id);
-        db.prepare(`UPDATE user_dashboards SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(...params);
-      }
+      const { data: updated, error } = await supabase
+        .from('user_dashboards')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-      const updated = db.prepare('SELECT * FROM user_dashboards WHERE id = ?').get(id);
+      if (error) throw error;
+
       res.json({ success: true, data: updated });
     } catch (error: any) {
       console.error('Update dashboard error:', error);
@@ -120,17 +139,28 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/widgets/dashboards/:id - Delete dashboard
-  router.delete('/dashboards/:id', getCurrentUser, (req: Request, res: Response) => {
+  router.delete('/dashboards/:id', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const user = (req as any).user;
 
-      const dashboard = db.prepare('SELECT * FROM user_dashboards WHERE id = ? AND user_id = ?').get(id, user.id);
+      const { data: dashboard } = await supabase
+        .from('user_dashboards')
+        .select('id')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+
       if (!dashboard) {
         return res.status(404).json({ error: 'Dashboard not found' });
       }
 
-      db.prepare('DELETE FROM user_dashboards WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('user_dashboards')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({ success: true, message: 'Dashboard deleted' });
     } catch (error: any) {
@@ -140,26 +170,45 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // GET /api/widgets/dashboard/:id/widgets - Get widgets for a dashboard
-  router.get('/dashboard/:id/widgets', getCurrentUser, (req: Request, res: Response) => {
+  router.get('/dashboard/:id/widgets', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const user = (req as any).user;
 
       // Verify dashboard belongs to user
-      const dashboard = db.prepare('SELECT * FROM user_dashboards WHERE id = ? AND user_id = ?').get(id, user.id);
+      const { data: dashboard } = await supabase
+        .from('user_dashboards')
+        .select('id')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+
       if (!dashboard) {
         return res.status(404).json({ error: 'Dashboard not found' });
       }
 
-      const widgets = db.prepare(`
-        SELECT dw.*, m.name as module_name
-        FROM dashboard_widgets dw
-        LEFT JOIN modules m ON dw.module_id = m.id
-        WHERE dw.dashboard_id = ?
-        ORDER BY dw.position_y, dw.position_x
-      `).all(id);
+      const { data: widgets, error } = await supabase
+        .from('dashboard_widgets')
+        .select(`
+          *,
+          modules!dashboard_widgets_module_id_fkey(id, name)
+        `)
+        .eq('dashboard_id', id)
+        .order('position_y')
+        .order('position_x');
 
-      res.json({ success: true, data: widgets });
+      if (error) throw error;
+
+      // Transform data
+      const transformed = (widgets || []).map((w: any) => {
+        const modules = Array.isArray(w.modules) ? w.modules[0] : w.modules;
+        return {
+          ...w,
+          module_name: modules?.name || null
+        };
+      });
+
+      res.json({ success: true, data: transformed });
     } catch (error: any) {
       console.error('Get widgets error:', error);
       res.status(500).json({ error: error.message });
@@ -167,33 +216,40 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // POST /api/widgets/add - Add widget to dashboard
-  router.post('/add', getCurrentUser, (req: Request, res: Response) => {
+  router.post('/add', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const { dashboard_id, widget_type, module_id, title, config, position_x, position_y, width, height } = req.body;
       const user = (req as any).user;
 
       // Verify dashboard belongs to user
-      const dashboard = db.prepare('SELECT * FROM user_dashboards WHERE id = ? AND user_id = ?').get(dashboard_id, user.id);
+      const { data: dashboard } = await supabase
+        .from('user_dashboards')
+        .select('id')
+        .eq('id', dashboard_id)
+        .eq('user_id', user.id)
+        .single();
+
       if (!dashboard) {
         return res.status(404).json({ error: 'Dashboard not found' });
       }
 
-      const result = db.prepare(`
-        INSERT INTO dashboard_widgets (dashboard_id, widget_type, module_id, title, config, position_x, position_y, width, height)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        dashboard_id,
-        widget_type,
-        module_id || null,
-        title,
-        config || '{}',
-        position_x || 0,
-        position_y || 0,
-        width || 4,
-        height || 2
-      );
+      const { data: widget, error } = await supabase
+        .from('dashboard_widgets')
+        .insert({
+          dashboard_id,
+          widget_type,
+          module_id: module_id || null,
+          title,
+          config: typeof config === 'string' ? config : JSON.stringify(config || {}),
+          position_x: position_x || 0,
+          position_y: position_y || 0,
+          width: width || 4,
+          height: height || 2
+        })
+        .select()
+        .single();
 
-      const widget = db.prepare('SELECT * FROM dashboard_widgets WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       res.json({ success: true, data: widget });
     } catch (error: any) {
@@ -203,61 +259,54 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // PUT /api/widgets/:id - Update widget
-  router.put('/:id', getCurrentUser, (req: Request, res: Response) => {
+  router.put('/:id', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { title, config, position_x, position_y, width, height, is_visible } = req.body;
       const user = (req as any).user;
 
       // Verify widget belongs to user's dashboard
-      const widget = db.prepare(`
-        SELECT dw.* FROM dashboard_widgets dw
-        JOIN user_dashboards ud ON dw.dashboard_id = ud.id
-        WHERE dw.id = ? AND ud.user_id = ?
-      `).get(id, user.id);
+      const { data: widget } = await supabase
+        .from('dashboard_widgets')
+        .select(`
+          id,
+          user_dashboards!dashboard_widgets_dashboard_id_fkey(user_id)
+        `)
+        .eq('id', id)
+        .single();
 
       if (!widget) {
         return res.status(404).json({ error: 'Widget not found' });
       }
 
-      const updates: string[] = [];
-      const params: any[] = [];
+      // Check if dashboard belongs to user (via join)
+      const dashboards = Array.isArray(widget.user_dashboards) ? widget.user_dashboards : [widget.user_dashboards];
+      const belongsToUser = dashboards.some((d: any) => d?.user_id === user.id);
 
-      if (title !== undefined) {
-        updates.push('title = ?');
-        params.push(title);
+      if (!belongsToUser) {
+        return res.status(404).json({ error: 'Widget not found' });
       }
+
+      const updateData: any = {};
+      if (title !== undefined) updateData.title = title;
       if (config !== undefined) {
-        updates.push('config = ?');
-        params.push(config);
+        updateData.config = typeof config === 'string' ? config : JSON.stringify(config);
       }
-      if (position_x !== undefined) {
-        updates.push('position_x = ?');
-        params.push(position_x);
-      }
-      if (position_y !== undefined) {
-        updates.push('position_y = ?');
-        params.push(position_y);
-      }
-      if (width !== undefined) {
-        updates.push('width = ?');
-        params.push(width);
-      }
-      if (height !== undefined) {
-        updates.push('height = ?');
-        params.push(height);
-      }
-      if (is_visible !== undefined) {
-        updates.push('is_visible = ?');
-        params.push(is_visible ? 1 : 0);
-      }
+      if (position_x !== undefined) updateData.position_x = position_x;
+      if (position_y !== undefined) updateData.position_y = position_y;
+      if (width !== undefined) updateData.width = width;
+      if (height !== undefined) updateData.height = height;
+      if (is_visible !== undefined) updateData.is_visible = is_visible;
 
-      if (updates.length > 0) {
-        params.push(id);
-        db.prepare(`UPDATE dashboard_widgets SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(...params);
-      }
+      const { data: updated, error } = await supabase
+        .from('dashboard_widgets')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-      const updated = db.prepare('SELECT * FROM dashboard_widgets WHERE id = ?').get(id);
+      if (error) throw error;
+
       res.json({ success: true, data: updated });
     } catch (error: any) {
       console.error('Update widget error:', error);
@@ -266,23 +315,38 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/widgets/:id - Remove widget
-  router.delete('/:id', getCurrentUser, (req: Request, res: Response) => {
+  router.delete('/:id', getCurrentUser, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const user = (req as any).user;
 
       // Verify widget belongs to user's dashboard
-      const widget = db.prepare(`
-        SELECT dw.* FROM dashboard_widgets dw
-        JOIN user_dashboards ud ON dw.dashboard_id = ud.id
-        WHERE dw.id = ? AND ud.user_id = ?
-      `).get(id, user.id);
+      const { data: widget } = await supabase
+        .from('dashboard_widgets')
+        .select(`
+          id,
+          user_dashboards!dashboard_widgets_dashboard_id_fkey(user_id)
+        `)
+        .eq('id', id)
+        .single();
 
       if (!widget) {
         return res.status(404).json({ error: 'Widget not found' });
       }
 
-      db.prepare('DELETE FROM dashboard_widgets WHERE id = ?').run(id);
+      const dashboards = Array.isArray(widget.user_dashboards) ? widget.user_dashboards : [widget.user_dashboards];
+      const belongsToUser = dashboards.some((d: any) => d?.user_id === user.id);
+
+      if (!belongsToUser) {
+        return res.status(404).json({ error: 'Widget not found' });
+      }
+
+      const { error } = await supabase
+        .from('dashboard_widgets')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({ success: true, message: 'Widget removed' });
     } catch (error: any) {
@@ -292,15 +356,17 @@ export function createWidgetsRouter(db: Database.Database): Router {
   });
 
   // GET /api/widgets/templates - Get available widget templates
-  router.get('/templates', getCurrentUser, (req: Request, res: Response) => {
+  router.get('/templates', getCurrentUser, async (req: Request, res: Response) => {
     try {
-      const templates = db.prepare(`
-        SELECT * FROM widget_templates
-        WHERE is_public = 1
-        ORDER BY name
-      `).all();
+      const { data: templates, error } = await supabase
+        .from('widget_templates')
+        .select('*')
+        .eq('is_public', true)
+        .order('name');
 
-      res.json({ success: true, data: templates });
+      if (error) throw error;
+
+      res.json({ success: true, data: templates || [] });
     } catch (error: any) {
       console.error('Get templates error:', error);
       res.status(500).json({ error: error.message });
@@ -309,4 +375,3 @@ export function createWidgetsRouter(db: Database.Database): Router {
 
   return router;
 }
-

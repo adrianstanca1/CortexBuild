@@ -363,7 +363,7 @@ export const CustomDatabase: React.FC<{ isDarkMode?: boolean; onConfigChange: (c
     );
 };
 
-const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databaseType, config, onConfigChange, isDarkMode = true }) => {
+const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databaseType, config: _config, onConfigChange, isDarkMode = true }) => {
     switch (databaseType) {
         case 'free':
             return <FreeDatabase isDarkMode={isDarkMode} />;
@@ -377,4 +377,3 @@ const DatabaseConfig: React.FC<DatabaseConfigProps> = ({ databaseType, config, o
 };
 
 export default DatabaseConfig;
-

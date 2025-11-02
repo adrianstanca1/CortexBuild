@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Grid, Save, Eye, Edit, Trash2, Settings, BarChart3, Table, PieChart, Activity } from 'lucide-react';
+import { Plus, Grid, Save, Edit, Trash2, BarChart3, Table, PieChart, Activity } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface Widget {
   id: number;
@@ -25,7 +26,6 @@ export const DashboardBuilder: React.FC = () => {
   const [currentDashboard, setCurrentDashboard] = useState<Dashboard | null>(null);
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [editMode, setEditMode] = useState(false);
-  const [showAddWidget, setShowAddWidget] = useState(false);
   const [draggedWidget, setDraggedWidget] = useState<Widget | null>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const DashboardBuilder: React.FC = () => {
   const fetchDashboards = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/widgets/dashboards', {
+      const response = await fetch(getAPIUrl('/widgets/dashboards'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -59,7 +59,7 @@ export const DashboardBuilder: React.FC = () => {
   const fetchWidgets = async (dashboardId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/widgets/dashboard/${dashboardId}/widgets`, {
+      const response = await fetch(getAPIUrl(`/widgets/dashboard/${dashboardId}/widgets`), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -77,7 +77,7 @@ export const DashboardBuilder: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/widgets/dashboards', {
+      const response = await fetch(getAPIUrl('/widgets/dashboards'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -102,7 +102,7 @@ export const DashboardBuilder: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/widgets/add', {
+      const response = await fetch(getAPIUrl('/widgets/add'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -122,7 +122,6 @@ export const DashboardBuilder: React.FC = () => {
       const data = await response.json();
       if (data.success) {
         fetchWidgets(currentDashboard.id);
-        setShowAddWidget(false);
       }
     } catch (error) {
       console.error('Failed to add widget:', error);
@@ -132,7 +131,7 @@ export const DashboardBuilder: React.FC = () => {
   const updateWidgetPosition = async (widgetId: number, x: number, y: number) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/widgets/${widgetId}`, {
+      await fetch(getAPIUrl(`/widgets/${widgetId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,7 +149,7 @@ export const DashboardBuilder: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/widgets/${widgetId}`, {
+      await fetch(getAPIUrl(`/widgets/${widgetId}`), {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -316,4 +315,3 @@ export const DashboardBuilder: React.FC = () => {
     </div>
   );
 };
-

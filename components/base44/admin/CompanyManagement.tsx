@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Building2, Users, FolderOpen } from 'lucide-react';
+import { Search, Plus, Edit2, Building2, Users, FolderOpen } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface Company {
   id: string;
@@ -15,7 +16,6 @@ interface Company {
 
 export const CompanyManagement: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -29,24 +29,22 @@ export const CompanyManagement: React.FC = () => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
+      const response = await fetch(getAPIUrl('/admin/companies'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       if (data.success) {
         setCompanies(data.data);
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Failed to fetch companies:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleCreateCompany = async (companyData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
+      const response = await fetch(getAPIUrl('/admin/companies'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -63,6 +61,7 @@ export const CompanyManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to create company');
       }
     } catch (error) {
+      console.error('Failed to create company:', error);
       showNotification('error', 'Failed to create company');
     }
   };
@@ -70,7 +69,7 @@ export const CompanyManagement: React.FC = () => {
   const handleUpdateCompany = async (companyId: string, updates: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/companies/${companyId}`, {
+      const response = await fetch(getAPIUrl(`/admin/companies/${companyId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -87,6 +86,7 @@ export const CompanyManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to update company');
       }
     } catch (error) {
+      console.error('Failed to update company:', error);
       showNotification('error', 'Failed to update company');
     }
   };
@@ -364,4 +364,3 @@ const X: React.FC<{ className?: string }> = ({ className }) => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
-

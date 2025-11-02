@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, UserCheck, UserX, Key } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, UserCheck, UserX } from 'lucide-react';
 import { UserFormModal } from './UserFormModal';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface User {
   id: string;
@@ -21,7 +22,6 @@ interface Company {
 export const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [filterCompany, setFilterCompany] = useState('');
@@ -43,7 +43,7 @@ export const UserManagement: React.FC = () => {
       if (filterRole) params.append('role', filterRole);
       if (filterCompany) params.append('company_id', filterCompany);
 
-      const response = await fetch(`http://localhost:3001/api/admin/users?${params}`, {
+      const response = await fetch(`${getAPIUrl('/admin/users')}?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -52,15 +52,13 @@ export const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch users:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/companies', {
+      const response = await fetch(getAPIUrl('/admin/companies'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -75,7 +73,7 @@ export const UserManagement: React.FC = () => {
   const handleCreateUser = async (userData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/admin/users', {
+      const response = await fetch(getAPIUrl('/admin/users'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -92,6 +90,7 @@ export const UserManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to create user');
       }
     } catch (error) {
+      console.error('Failed to create user:', error);
       showNotification('error', 'Failed to create user');
     }
   };
@@ -99,7 +98,7 @@ export const UserManagement: React.FC = () => {
   const handleUpdateUser = async (userId: string, updates: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/users/${userId}`, {
+      const response = await fetch(getAPIUrl(`/admin/users/${userId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -116,6 +115,7 @@ export const UserManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to update user');
       }
     } catch (error) {
+      console.error('Failed to update user:', error);
       showNotification('error', 'Failed to update user');
     }
   };
@@ -127,7 +127,7 @@ export const UserManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/admin/users/${userId}`, {
+      const response = await fetch(getAPIUrl(`/admin/users/${userId}`), {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -139,6 +139,7 @@ export const UserManagement: React.FC = () => {
         showNotification('error', data.error || 'Failed to delete user');
       }
     } catch (error) {
+      console.error('Failed to delete user:', error);
       showNotification('error', 'Failed to delete user');
     }
   };
@@ -308,6 +309,3 @@ export const UserManagement: React.FC = () => {
     </div>
   );
 };
-
-
-

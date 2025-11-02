@@ -22,8 +22,11 @@ const DocumentsScreen: React.FC<DocumentsScreenProps> = ({ project, goBack, curr
     useEffect(() => {
         const loadDocs = async () => {
             setIsLoading(true);
-            const fetchedDocs = await api.fetchDocuments();
-            setDocuments(fetchedDocs.filter(d => d.projectId === project.id));
+            const fetchedDocs = await api.fetchDocuments(project?.id || '');
+            // Ensure array is extracted if needed
+            const docsArray = Array.isArray(fetchedDocs) ? fetchedDocs : 
+                (fetchedDocs?.data && Array.isArray(fetchedDocs.data)) ? fetchedDocs.data : [];
+            setDocuments(docsArray.filter(d => d.projectId === project.id));
             setIsLoading(false);
         };
         loadDocs();

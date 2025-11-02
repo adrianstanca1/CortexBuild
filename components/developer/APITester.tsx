@@ -11,8 +11,7 @@ import {
     Copy,
     Check,
     Globe,
-    Clock,
-    AlertCircle
+    Clock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -287,4 +286,3 @@ const APITester: React.FC<APITesterProps> = ({ isDarkMode }) => {
 };
 
 export default APITester;
-

@@ -1,23 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/Card';
 import {
-  Code,
   Users,
   Activity,
   DollarSign,
-  TrendingUp,
   Package,
-  Zap,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Database,
-  Server,
-  GitBranch,
-  Terminal,
-  FileCode,
-  BarChart3,
-  Settings
+  BarChart3
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -65,8 +53,9 @@ interface SdkApp {
   created_at: string;
 }
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { getAPIUrl } from '../../config/api.config';
 
+const API_URL = getAPIUrl();
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' }
@@ -374,4 +363,3 @@ export const DeveloperDashboard: React.FC = () => {
     </div>
   );
 };
-

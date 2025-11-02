@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { InvoiceBuilder } from '../components/InvoiceBuilder';
 
 interface Invoice {
-    id: number;
+    id: number | string;
     invoice_number?: string;
     client_name?: string;
     project_name?: string;
@@ -19,14 +19,20 @@ interface Invoice {
     due_date?: string;
     paid_amount?: number;
     paid_date?: string;
+    // Legacy properties for compatibility
+    client?: string;
+    project?: string;
+    amount?: number;
+    issueDate?: string;
+    dueDate?: string;
+    paidAmount?: number;
+    paidDate?: string | null;
 }
 
 export const InvoicesPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [invoices, setInvoices] = useState<Invoice[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showInvoiceBuilder, setShowInvoiceBuilder] = useState(false);
 
     useEffect(() => {
@@ -35,7 +41,6 @@ export const InvoicesPage: React.FC = () => {
 
     const fetchInvoices = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
@@ -46,19 +51,18 @@ export const InvoicesPage: React.FC = () => {
             if (data.success) {
                 setInvoices(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch invoices:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch invoices:', err);
             setInvoices(mockInvoices);
-        } finally {
-            setLoading(false);
         }
     };
 
     const mockInvoices: Invoice[] = [
         {
-            id: 'INV-2024-001',
+            id: 'INV-2024-001' as any,
+            client_name: 'Metro Construction Group',
             client: 'Metro Construction Group',
             project: 'Downtown Office Complex',
             description: 'Progress billing - Phase 1 completion',
@@ -216,10 +220,10 @@ export const InvoicesPage: React.FC = () => {
                                         <span>{getStatusIcon(invoice.status)}</span>
                                         <span>{invoice.status}</span>
                                     </span>
-                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency(invoice.amount)}</span>
+                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency((invoice as any).amount || invoice.total || 0)}</span>
                                 </div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Invoice #{invoice.id}</h3>
-                                <p className="text-sm text-gray-600">{invoice.client}</p>
+                                <p className="text-sm text-gray-600">{(invoice as any).client || invoice.client_name || 'N/A'}</p>
                             </div>
                         </div>
 
@@ -227,7 +231,7 @@ export const InvoicesPage: React.FC = () => {
                         <div className="space-y-2">
                             <div className="flex items-start">
                                 <span className="text-sm text-gray-600 mr-2">Project:</span>
-                                <p className="text-sm font-medium text-gray-900">{invoice.project}</p>
+                                <p className="text-sm font-medium text-gray-900">{(invoice as any).project || invoice.project_name || 'N/A'}</p>
                             </div>
                             <p className="text-sm text-gray-600">{invoice.description}</p>
 
@@ -298,4 +302,3 @@ export const InvoicesPage: React.FC = () => {
         </div>
     );
 };
-

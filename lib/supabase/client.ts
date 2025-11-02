@@ -51,6 +51,11 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   },
 });
 
+// Expose to global scope to prevent multiple instances
+if (typeof window !== 'undefined') {
+  (window as any).reactSupabaseClient = supabase;
+}
+
 // Helper function to check if Supabase is configured
 export const isSupabaseConfigured = () => {
   return Boolean(supabaseUrl && supabasePublishableKey);

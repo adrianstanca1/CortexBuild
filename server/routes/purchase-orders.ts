@@ -1,16 +1,16 @@
 // CortexBuild Platform - Purchase Orders API Routes
-// Version: 1.1.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { PurchaseOrder, PurchaseOrderItem, ApiResponse, PaginatedResponse } from '../types';
 
-export function createPurchaseOrdersRouter(db: Database.Database): Router {
+export function createPurchaseOrdersRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/purchase-orders - List all purchase orders
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -25,57 +25,63 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT po.*, 
-               p.name as project_name,
-               s.name as vendor_name
-        FROM purchase_orders po
-        LEFT JOIN projects p ON po.project_id = p.id
-        LEFT JOIN subcontractors s ON po.vendor_id = s.id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('purchase_orders')
+        .select(`
+          *,
+          projects!purchase_orders_project_id_fkey(id, name),
+          subcontractors!purchase_orders_vendor_id_fkey(id, name)
+        `, { count: 'exact' });
 
+      // Apply filters
       if (project_id) {
-        query += ' AND po.project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (vendor_id) {
-        query += ' AND po.vendor_id = ?';
-        params.push(parseInt(vendor_id));
+        query = query.eq('vendor_id', vendor_id);
       }
 
       if (status) {
-        query += ' AND po.status = ?';
-        params.push(status);
+        query = query.eq('status', status);
       }
 
       if (search) {
-        query += ' AND (po.po_number LIKE ? OR s.name LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm);
+        query = query.or(`po_number.ilike.%${search}%,subcontractors.name.ilike.%${search}%`);
       }
 
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      // Add pagination and ordering
+      query = query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      query += ' ORDER BY po.created_at DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      const { data: orders, error, count } = await query;
 
-      const orders = db.prepare(query).all(...params);
+      if (error) throw error;
+
+      // Transform data
+      const transformedOrders = (orders || []).map((o: any) => {
+        const projects = Array.isArray(o.projects) ? o.projects[0] : o.projects;
+        const subcontractors = Array.isArray(o.subcontractors) ? o.subcontractors[0] : o.subcontractors;
+        return {
+          ...o,
+          project_name: projects?.name || null,
+          vendor_name: subcontractors?.name || null
+        };
+      });
 
       res.json({
         success: true,
-        data: orders,
+        data: transformedOrders,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get purchase orders error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -84,41 +90,53 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
   });
 
   // GET /api/purchase-orders/:id - Get single PO with items
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const po = db.prepare(`
-        SELECT po.*, 
-               p.name as project_name,
-               s.name as vendor_name,
-               s.email as vendor_email,
-               s.phone as vendor_phone
-        FROM purchase_orders po
-        LEFT JOIN projects p ON po.project_id = p.id
-        LEFT JOIN subcontractors s ON po.vendor_id = s.id
-        WHERE po.id = ?
-      `).get(id);
+      const { data: po, error: poError } = await supabase
+        .from('purchase_orders')
+        .select(`
+          *,
+          projects!purchase_orders_project_id_fkey(id, name),
+          subcontractors!purchase_orders_vendor_id_fkey(id, name, email, phone)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!po) {
+      if (poError || !po) {
         return res.status(404).json({
           success: false,
           error: 'Purchase order not found'
         });
       }
 
-      const items = db.prepare(`
-        SELECT * FROM po_items WHERE po_id = ? ORDER BY id
-      `).all(id);
+      // Get line items
+      const { data: items } = await supabase
+        .from('purchase_order_items')
+        .select('*')
+        .eq('po_id', id)
+        .order('id');
+
+      // Transform data
+      const projects = Array.isArray(po.projects) ? po.projects[0] : po.projects;
+      const subcontractors = Array.isArray(po.subcontractors) ? po.subcontractors[0] : po.subcontractors;
+
+      const transformedPO = {
+        ...po,
+        project_name: projects?.name || null,
+        vendor_name: subcontractors?.name || null,
+        vendor_email: subcontractors?.email || null,
+        vendor_phone: subcontractors?.phone || null,
+        items: items || []
+      };
 
       res.json({
         success: true,
-        data: {
-          ...po,
-          items
-        }
+        data: transformedPO
       });
     } catch (error: any) {
+      console.error('Get purchase order error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -127,7 +145,7 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
   });
 
   // POST /api/purchase-orders - Create new PO
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -149,43 +167,60 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         });
       }
 
-      const result = db.prepare(`
-        INSERT INTO purchase_orders (
-          project_id, vendor_id, po_number, order_date, delivery_date,
-          subtotal, tax_amount, total, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        project_id, vendor_id, po_number, order_date, delivery_date,
-        subtotal, tax_amount, total, notes
-      );
+      // Create purchase order
+      const { data: po, error: poError } = await supabase
+        .from('purchase_orders')
+        .insert({
+          project_id,
+          vendor_id,
+          po_number,
+          order_date,
+          delivery_date: delivery_date || null,
+          subtotal,
+          tax_amount,
+          total,
+          notes: notes || null
+        })
+        .select()
+        .single();
 
-      const poId = result.lastInsertRowid;
+      if (poError) throw poError;
 
-      if (items.length > 0) {
-        const insertItem = db.prepare(`
-          INSERT INTO po_items (
-            po_id, description, quantity, unit_price, amount
-          ) VALUES (?, ?, ?, ?, ?)
-        `);
+      // Create line items if provided
+      if (items.length > 0 && po) {
+        const { error: itemsError } = await supabase
+          .from('purchase_order_items')
+          .insert(
+            items.map((item: PurchaseOrderItem) => ({
+              po_id: po.id,
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              amount: item.amount
+            }))
+          );
 
-        for (const item of items) {
-          insertItem.run(poId, item.description, item.quantity, item.unit_price, item.amount);
+        if (itemsError) {
+          console.warn('Failed to create PO items:', itemsError);
         }
       }
 
-      const po = db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(poId);
-
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        project_id,
-        'purchase_order',
-        poId,
-        'created',
-        `Created PO: ${po_number}`
-      );
+      // Log activity
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id,
+            entity_type: 'purchase_order',
+            entity_id: po.id,
+            action: 'created',
+            description: `Created PO: ${po_number}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -193,6 +228,7 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         message: 'Purchase order created successfully'
       });
     } catch (error: any) {
+      console.error('Create purchase order error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -201,12 +237,17 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
   });
 
   // PUT /api/purchase-orders/:id - Update PO
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('purchase_orders')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -214,39 +255,50 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         });
       }
 
-      const fields = Object.keys(updates).filter(key => key !== 'id' && key !== 'items');
-      if (fields.length === 0 && !updates.items) {
-        return res.status(400).json({
-          success: false,
-          error: 'No fields to update'
-        });
+      const { id: _, items, ...updateData } = updates;
+
+      // Update PO if there are fields to update
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateError } = await supabase
+          .from('purchase_orders')
+          .update(updateData)
+          .eq('id', id);
+
+        if (updateError) throw updateError;
       }
 
-      if (fields.length > 0) {
-        const setClause = fields.map(field => `${field} = ?`).join(', ');
-        const values = fields.map(field => updates[field]);
+      // Update line items if provided
+      if (items) {
+        // Delete existing items
+        await supabase
+          .from('purchase_order_items')
+          .delete()
+          .eq('po_id', id);
 
-        db.prepare(`
-          UPDATE purchase_orders 
-          SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-          WHERE id = ?
-        `).run(...values, id);
-      }
+        // Insert new items
+        if (items.length > 0) {
+          const { error: itemsError } = await supabase
+            .from('purchase_order_items')
+            .insert(
+              items.map((item: PurchaseOrderItem) => ({
+                po_id: id,
+                description: item.description,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                amount: item.amount
+              }))
+            );
 
-      if (updates.items) {
-        db.prepare('DELETE FROM po_items WHERE po_id = ?').run(id);
-
-        const insertItem = db.prepare(`
-          INSERT INTO po_items (po_id, description, quantity, unit_price, amount)
-          VALUES (?, ?, ?, ?, ?)
-        `);
-
-        for (const item of updates.items) {
-          insertItem.run(id, item.description, item.quantity, item.unit_price, item.amount);
+          if (itemsError) throw itemsError;
         }
       }
 
-      const po = db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id);
+      // Get updated PO
+      const { data: po } = await supabase
+        .from('purchase_orders')
+        .select('*')
+        .eq('id', id)
+        .single();
 
       res.json({
         success: true,
@@ -254,6 +306,7 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         message: 'Purchase order updated successfully'
       });
     } catch (error: any) {
+      console.error('Update purchase order error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -262,11 +315,16 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
   });
 
   // PUT /api/purchase-orders/:id/approve - Approve PO
-  router.put('/:id/approve', (req: Request, res: Response) => {
+  router.put('/:id/approve', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const existing = db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('purchase_orders')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -274,13 +332,16 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare(`
-        UPDATE purchase_orders 
-        SET status = 'approved', updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(id);
+      const { data: po, error } = await supabase
+        .from('purchase_orders')
+        .update({
+          status: 'approved'
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-      const po = db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id);
+      if (error) throw error;
 
       res.json({
         success: true,
@@ -288,6 +349,7 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         message: 'Purchase order approved'
       });
     } catch (error: any) {
+      console.error('Approve purchase order error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -296,11 +358,16 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/purchase-orders/:id - Delete PO
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const po = db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id);
+      const { data: po } = await supabase
+        .from('purchase_orders')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!po) {
         return res.status(404).json({
           success: false,
@@ -308,14 +375,26 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare('DELETE FROM po_items WHERE po_id = ?').run(id);
-      db.prepare('DELETE FROM purchase_orders WHERE id = ?').run(id);
+      // Delete line items first
+      await supabase
+        .from('purchase_order_items')
+        .delete()
+        .eq('po_id', id);
+
+      // Delete PO
+      const { error } = await supabase
+        .from('purchase_orders')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Purchase order deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete purchase order error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -325,4 +404,3 @@ export function createPurchaseOrdersRouter(db: Database.Database): Router {
 
   return router;
 }
-

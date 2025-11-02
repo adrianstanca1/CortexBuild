@@ -23,9 +23,9 @@ const OperativeDashboard: React.FC<OperativeDashboardProps> = ({ currentUser, na
             setIsLoading(true);
             const todayStr = new Date().toISOString().split('T')[0];
             const [userTasks, instructions, log] = await Promise.all([
-                api.fetchTasksForUser(currentUser),
+                api.fetchTasksForUser(currentUser.id),
                 api.fetchSiteInstructions(),
-                api.fetchDailyLogForUser(currentUser.id, todayStr)
+                api.fetchDailyLogForUser(currentUser.id)
             ]);
 
             const openTasks = userTasks

@@ -10,12 +10,7 @@ import {
     ChevronRight,
     ChevronDown,
     Search,
-    Plus,
-    Trash2,
-    Edit,
-    Download,
-    Upload,
-    RefreshCw
+    Plus
 } from 'lucide-react';
 
 interface FileNode {
@@ -93,7 +88,14 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
     const handleFileClick = (file: FileNode) => {
         if (file.type === 'file') {
             setSelectedFile(file.id);
-            onFileSelect?.(file);
+            // Only call onFileSelect if it exists, don't try to fetch the file
+            if (onFileSelect) {
+                onFileSelect(file);
+            }
+            // Show a toast message for demo files
+            if (file.name === 'api.ts' || file.name === 'mockApi.ts') {
+                console.log(`Demo file selected: ${file.name}`);
+            }
         } else {
             toggleFolder(file.id);
         }
@@ -217,4 +219,3 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ isDarkMode, onFileSelect })
 };
 
 export default FileExplorer;
-

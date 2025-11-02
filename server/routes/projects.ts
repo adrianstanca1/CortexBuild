@@ -1,17 +1,17 @@
 // CortexBuild Platform - Projects API Routes
-// Version: 1.0.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Project, ApiResponse, PaginatedResponse, ProjectFilters } from '../types';
 import { logProjectActivity } from '../utils/activity-logger';
 
-export function createProjectsRouter(db: Database.Database): Router {
+export function createProjectsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/projects - List all projects with filters
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         status,
@@ -29,74 +29,65 @@ export function createProjectsRouter(db: Database.Database): Router {
       const offset = (pageNum - 1) * limitNum;
 
       // Build query
-      let query = `
-        SELECT p.*, 
-               c.name as client_name,
-               u.name as manager_name
-        FROM projects p
-        LEFT JOIN clients c ON p.client_id = c.id
-        LEFT JOIN users u ON p.project_manager_id = u.id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('projects')
+        .select('*', { count: 'exact' });
 
+      // Apply filters
       if (status) {
-        query += ' AND p.status = ?';
-        params.push(status);
+        query = query.eq('status', status);
       }
 
       if (priority) {
-        query += ' AND p.priority = ?';
-        params.push(priority);
+        query = query.eq('priority', priority);
       }
 
       if (client_id) {
-        query += ' AND p.client_id = ?';
-        params.push(parseInt(client_id));
+        query = query.eq('client_id', client_id);
       }
 
       if (project_manager_id) {
-        query += ' AND p.project_manager_id = ?';
-        params.push(parseInt(project_manager_id));
+        query = query.eq('project_manager_id', project_manager_id);
       }
 
       if (company_id) {
-        const companyIdNum = parseInt(company_id, 10);
-        if (!Number.isNaN(companyIdNum)) {
-          query += ' AND p.company_id = ?';
-          params.push(companyIdNum);
-        }
+        query = query.eq('company_id', company_id);
       }
 
       if (search) {
-        query += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.project_number LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm, searchTerm);
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%,project_number.ilike.%${search}%`);
       }
 
-      // Get total count
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      // Add pagination and ordering
+      query = query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      // Add pagination
-      query += ' ORDER BY p.created_at DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      const { data: projects, error, count } = await query;
 
-      const projects = db.prepare(query).all(...params);
+      if (error) throw error;
+
+      // Transform data to match expected format
+      const transformedProjects = (projects || []).map((p: any) => ({
+        ...p,
+        client_name: p.clients?.name || null,
+        manager_name: p.users?.name || null
+      }));
 
       const response: PaginatedResponse<Project> = {
         success: true,
-        data: projects as Project[],
+        data: transformedProjects as Project[],
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       };
 
       res.json(response);
     } catch (error: any) {
+      console.error('Get projects error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -105,77 +96,95 @@ export function createProjectsRouter(db: Database.Database): Router {
   });
 
   // GET /api/projects/:id - Get single project
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const project = db.prepare(`
-        SELECT p.*, 
-               c.name as client_name,
-               c.email as client_email,
-               c.phone as client_phone,
-               u.name as manager_name,
-               u.email as manager_email
-        FROM projects p
-        LEFT JOIN clients c ON p.client_id = c.id
-        LEFT JOIN users u ON p.project_manager_id = u.id
-        WHERE p.id = ?
-      `).get(id);
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          clients!projects_client_id_fkey(id, name, email, phone),
+          users!projects_project_manager_id_fkey(id, name, email)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!project) {
+      if (projectError || !project) {
         return res.status(404).json({
           success: false,
           error: 'Project not found'
         });
       }
 
-      // Get project tasks
-      const tasks = db.prepare(`
-        SELECT t.*, u.name as assigned_to_name
-        FROM tasks t
-        LEFT JOIN users u ON t.assigned_to = u.id
-        WHERE t.project_id = ?
-        ORDER BY t.order_index, t.created_at
-      `).all(id);
+      // Get related data
+      const [tasksResult, milestonesResult, teamResult, activitiesResult] = await Promise.all([
+        supabase
+          .from('tasks')
+          .select(`
+            *,
+            users!tasks_assigned_to_fkey(id, name)
+          `)
+          .eq('project_id', id)
+          .order('order_index', { ascending: true })
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('milestones')
+          .select('*')
+          .eq('project_id', id)
+          .order('due_date', { ascending: true }),
+        supabase
+          .from('project_team')
+          .select(`
+            *,
+            users!project_team_user_id_fkey(id, name, email, avatar)
+          `)
+          .eq('project_id', id)
+          .is('left_at', null),
+        supabase
+          .from('activities')
+          .select(`
+            *,
+            users!activities_user_id_fkey(id, name)
+          `)
+          .eq('project_id', id)
+          .order('created_at', { ascending: false })
+          .limit(20)
+      ]);
 
-      // Get project milestones
-      const milestones = db.prepare(`
-        SELECT * FROM milestones
-        WHERE project_id = ?
-        ORDER BY due_date
-      `).all(id);
-
-      // Get project team
-      const team = db.prepare(`
-        SELECT pt.*, u.name as full_name, u.email, u.avatar as avatar_url
-        FROM project_team pt
-        JOIN users u ON pt.user_id = u.id
-        WHERE pt.project_id = ? AND pt.left_at IS NULL
-      `).all(id);
-
-      // Get recent activities
-      const activities = db.prepare(`
-        SELECT a.*, u.name as user_name
-        FROM activities a
-        JOIN users u ON a.user_id = u.id
-        WHERE a.project_id = ?
-        ORDER BY a.created_at DESC
-        LIMIT 20
-      `).all(id);
+      // Transform data
+      const transformedProject: any = {
+        ...project,
+        client_name: project.clients?.name || null,
+        client_email: project.clients?.email || null,
+        client_phone: project.clients?.phone || null,
+        manager_name: project.users?.name || null,
+        manager_email: project.users?.email || null,
+        tasks: (tasksResult.data || []).map((t: any) => ({
+          ...t,
+          assigned_to_name: t.users?.name || null
+        })),
+        milestones: milestonesResult.data || [],
+        team: (teamResult.data || []).map((t: any) => ({
+          ...t,
+          full_name: t.users?.name || null,
+          email: t.users?.email || null,
+          avatar_url: t.users?.avatar || null
+        })),
+        activities: (activitiesResult.data || []).map((a: any) => ({
+          ...a,
+          user_name: a.users?.name || null
+        }))
+      };
 
       const response: ApiResponse = {
         success: true,
-        data: {
-          ...project,
-          tasks,
-          milestones,
-          team,
-          activities
-        }
+        data: transformedProject
       };
 
       res.json(response);
     } catch (error: any) {
+      console.error('Get project error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -184,7 +193,7 @@ export function createProjectsRouter(db: Database.Database): Router {
   });
 
   // POST /api/projects - Create new project
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         company_id,
@@ -212,35 +221,52 @@ export function createProjectsRouter(db: Database.Database): Router {
         });
       }
 
-      // Debug logging
       console.log('Creating project with:', {
         company_id, name, description, project_number, status, priority,
         start_date, end_date, budget, address, city, state, zip_code,
         client_id, project_manager_id
       });
 
-      const result = db.prepare(`
-        INSERT INTO projects (
-          company_id, name, description, project_number, status, priority,
-          start_date, end_date, budget, address, city, state, zip_code,
-          client_id, project_manager_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        company_id, name, description, project_number, status, priority,
-        start_date || null, end_date || null, budget || null, address || null, city || null, state || null, zip_code || null,
-        client_id || null, project_manager_id || null
-      );
+      const { data: project, error } = await supabase
+        .from('projects')
+        .insert({
+          company_id,
+          name,
+          description,
+          project_number,
+          status,
+          priority,
+          start_date: start_date || null,
+          end_date: end_date || null,
+          budget: budget || null,
+          address: address || null,
+          city: city || null,
+          state: state || null,
+          zip_code: zip_code || null,
+          client_id: client_id || null,
+          project_manager_id: project_manager_id || null
+        })
+        .select()
+        .single();
 
-      const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
-      // Log activity
-      logProjectActivity(
-        db,
-        req.user?.id || 'user-1',
-        result.lastInsertRowid,
-        'created',
-        `Created project: ${name}`
-      );
+      // Log activity (if function exists)
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id: project.id,
+            entity_type: 'project',
+            entity_id: project.id,
+            action: 'created',
+            description: `Created project: ${name}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -248,6 +274,7 @@ export function createProjectsRouter(db: Database.Database): Router {
         message: 'Project created successfully'
       });
     } catch (error: any) {
+      console.error('Create project error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -256,13 +283,18 @@ export function createProjectsRouter(db: Database.Database): Router {
   });
 
   // PUT /api/projects/:id - Update project
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
       // Check if project exists
-      const existing = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('projects')
+        .select('id, name')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -270,38 +302,40 @@ export function createProjectsRouter(db: Database.Database): Router {
         });
       }
 
-      // Build update query
-      const fields = Object.keys(updates).filter(key => key !== 'id');
-      if (fields.length === 0) {
+      // Remove id from updates
+      const { id: _, ...updateData } = updates;
+      if (Object.keys(updateData).length === 0) {
         return res.status(400).json({
           success: false,
           error: 'No fields to update'
         });
       }
 
-      const setClause = fields.map(field => `${field} = ?`).join(', ');
-      const values = fields.map(field => updates[field]);
+      const { data: project, error } = await supabase
+        .from('projects')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-      db.prepare(`
-        UPDATE projects 
-        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(...values, id);
-
-      const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        id,
-        'project',
-        id,
-        'updated',
-        `Updated project: ${(existing as any).name}`
-      );
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id: id,
+            entity_type: 'project',
+            entity_id: id,
+            action: 'updated',
+            description: `Updated project: ${existing.name}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.json({
         success: true,
@@ -309,6 +343,7 @@ export function createProjectsRouter(db: Database.Database): Router {
         message: 'Project updated successfully'
       });
     } catch (error: any) {
+      console.error('Update project error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -317,11 +352,16 @@ export function createProjectsRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/projects/:id - Delete project
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+      const { data: project } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!project) {
         return res.status(404).json({
           success: false,
@@ -329,13 +369,19 @@ export function createProjectsRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Project deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete project error:', error);
       res.status(500).json({
         success: false,
         error: error.message

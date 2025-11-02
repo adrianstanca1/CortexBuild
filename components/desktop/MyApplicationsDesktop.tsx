@@ -3,13 +3,14 @@
  * Complete window management system with taskbar, multi-window support
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    Maximize2, Minimize2, X, Minus, Square, Monitor,
+    Maximize2, Minimize2, X, Minus, Monitor,
     Grid3x3, List, Search, Package, Building2, User,
-    Play, Pause, RefreshCw, Settings
+    Play, RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAPIUrl } from '../../config/api.config';
 
 interface App {
     id: string;
@@ -36,12 +37,10 @@ interface RunningApp {
 
 interface MyApplicationsDesktopProps {
     isDarkMode?: boolean;
-    currentUser?: any;
 }
 
 const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
-    isDarkMode = true,
-    currentUser
+    isDarkMode = true
 }) => {
     const [installedApps, setInstalledApps] = useState<App[]>([]);
     const [runningApps, setRunningApps] = useState<RunningApp[]>([]);
@@ -70,7 +69,7 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                 return;
             }
 
-            const response = await fetch('http://localhost:3001/api/global-marketplace/my-installed-apps', {
+            const response = await fetch(getAPIUrl('/global-marketplace/my-installed-apps'), {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -477,4 +476,3 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
 };
 
 export default MyApplicationsDesktop;
-

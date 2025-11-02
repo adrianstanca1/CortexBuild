@@ -52,6 +52,8 @@ export interface ProjectInsight {
     priority: 'high' | 'medium' | 'low';
     title: string;
     message: string;
+    description?: string;
+    action?: string;
     prediction?: PredictionResult;
     actionable: boolean;
     suggestedAction?: string;
@@ -65,6 +67,7 @@ export interface DashboardData {
         budgetTrend: 'improving' | 'stable' | 'declining';
         timelineTrend: 'improving' | 'stable' | 'declining';
         riskTrend: 'improving' | 'stable' | 'declining';
+        revenue?: number;
     };
 }
 

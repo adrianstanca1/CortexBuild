@@ -8,17 +8,18 @@ import { ProjectDetailPage } from './ProjectDetailPage';
 import { CreateProjectModal } from '../modals/CreateProjectModal';
 
 interface Project {
-    id: number;
+    id: number | string;
     name: string;
     client_name?: string;
+    client?: string;
     location?: string;
     budget?: number;
     spent?: number;
     progress?: number;
     status: string;
     priority?: string;
-    startDate?: string;
-    endDate?: string;
+    startDate?: string | null;
+    endDate?: string | null;
 }
 
 export const ProjectsPage: React.FC = () => {
@@ -27,10 +28,6 @@ export const ProjectsPage: React.FC = () => {
     const [typeFilter, setTypeFilter] = useState('all');
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Fetch projects from API
@@ -38,15 +35,12 @@ export const ProjectsPage: React.FC = () => {
         if (!selectedProjectId) {
             fetchProjects();
         }
-    }, [searchQuery, statusFilter, page, selectedProjectId]);
+    }, [searchQuery, statusFilter, selectedProjectId]);
 
     const fetchProjects = async () => {
         try {
-            setLoading(true);
-            setError(null);
-
             const params = new URLSearchParams({
-                page: page.toString(),
+                page: '1',
                 limit: '20'
             });
 
@@ -58,16 +52,13 @@ export const ProjectsPage: React.FC = () => {
 
             if (data.success) {
                 setProjects(data.data);
-                setTotalPages(data.pagination?.totalPages || 1);
             } else {
-                setError(data.error || 'Failed to fetch projects');
+                console.warn('Failed to fetch projects:', data.error);
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch projects');
+            console.error('Failed to fetch projects:', err);
             // Fallback to mock data
             setProjects(mockProjects);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -82,6 +73,7 @@ export const ProjectsPage: React.FC = () => {
             id: '1',
             name: 'ASasdad',
             client: 'Green Valley Homes',
+            client_name: 'Green Valley Homes',
             location: 'rm82ul',
             budget: 123333,
             spent: 0,
@@ -265,7 +257,7 @@ export const ProjectsPage: React.FC = () => {
                 {projects.map((project) => (
                     <div
                         key={project.id}
-                        onClick={() => setSelectedProjectId(project.id)}
+                        onClick={() => setSelectedProjectId(String(project.id))}
                         className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer hover:scale-105"
                     >
                         {/* Header */}
@@ -281,7 +273,7 @@ export const ProjectsPage: React.FC = () => {
                                 </div>
                             </div>
                             <h3 className="text-lg font-semibold text-gray-900 mb-1">{project.name}</h3>
-                            <p className="text-sm text-gray-600">{project.client}</p>
+                            <p className="text-sm text-gray-600">{project.client || project.client_name || 'N/A'}</p>
                         </div>
 
                         {/* Details */}
@@ -345,4 +337,3 @@ export const ProjectsPage: React.FC = () => {
         </div>
     );
 };
-

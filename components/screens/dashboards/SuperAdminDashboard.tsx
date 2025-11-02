@@ -32,13 +32,15 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
         const loadData = async () => {
             setIsLoading(true);
             const [fetchedCompanies, fetchedUsers, fetchedProjects] = await Promise.all([
-                api.fetchCompanies(currentUser),
+                api.getAllCompanies ? await api.getAllCompanies() : [],
                 api.fetchUsers(),
                 api.fetchAllProjects(currentUser)
             ]);
-            setCompanies(fetchedCompanies);
-            setUsers(fetchedUsers);
-            setProjects(fetchedProjects);
+            // Ensure that we use .data if AxiosResponse is returned, otherwise fall back to the value itself
+            const safeExtract = (res: any) => (Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []));
+            setCompanies(safeExtract(fetchedCompanies));
+            setUsers(safeExtract(fetchedUsers));
+            setProjects(safeExtract(fetchedProjects));
             setIsLoading(false);
         };
         loadData();
