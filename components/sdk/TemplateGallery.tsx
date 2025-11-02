@@ -126,11 +126,10 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ subscriptionTi
           <div>
             <button
               onClick={() => setShowAIOnly(!showAIOnly)}
-              className={`w-full px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
-                showAIOnly
+              className={`w-full px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${showAIOnly
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <Sparkles className="w-4 h-4" />
               <span>AI-Enhanced Only</span>
@@ -150,11 +149,10 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ subscriptionTi
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedCategory === cat.id
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === cat.id
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               {cat.label} ({cat.count})
             </button>
@@ -217,14 +215,14 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ subscriptionTi
                 {/* Features */}
                 <div className="mb-4">
                   <div className="flex flex-wrap gap-1">
-                    {JSON.parse(template.features).slice(0, 3).map((feature: string, index: number) => (
+                    {(JSON.parse(template.features) as string[]).slice(0, 3).map((feature: string, index: number) => (
                       <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
                         {feature}
                       </span>
                     ))}
-                    {JSON.parse(template.features).length > 3 && (
+                    {(JSON.parse(template.features) as string[]).length > 3 && (
                       <span className="text-xs text-gray-500">
-                        +{JSON.parse(template.features).length - 3} more
+                        +{(JSON.parse(template.features) as string[]).length - 3} more
                       </span>
                     )}
                   </div>

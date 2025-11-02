@@ -408,15 +408,26 @@ const startServer = async () => {
 
         console.log('✅ All 27 API routes registered successfully');
 
-        // Serve TypeScript files from public directory for developer console
+        // Serve JavaScript files from public directory for developer console
         app.get('/api.ts', (req, res) => {
             res.setHeader('Content-Type', 'application/javascript');
-            res.sendFile(join(process.cwd(), 'public', 'api.ts'));
+            res.sendFile(join(process.cwd(), 'public', 'api.js'));
         });
 
         app.get('/api/mockApi.ts', (req, res) => {
             res.setHeader('Content-Type', 'application/javascript');
-            res.sendFile(join(process.cwd(), 'public', 'api', 'mockApi.ts'));
+            res.sendFile(join(process.cwd(), 'public', 'api', 'mockApi.js'));
+        });
+
+        // Also serve with .js extension
+        app.get('/api.js', (req, res) => {
+            res.setHeader('Content-Type', 'application/javascript');
+            res.sendFile(join(process.cwd(), 'public', 'api.js'));
+        });
+
+        app.get('/api/mockApi.js', (req, res) => {
+            res.setHeader('Content-Type', 'application/javascript');
+            res.sendFile(join(process.cwd(), 'public', 'api', 'mockApi.js'));
         });
 
         // Register 404 handler AFTER all routes

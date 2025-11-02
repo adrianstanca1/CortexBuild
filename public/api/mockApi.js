@@ -1,54 +1,54 @@
 // CortexBuild Mock API for Development and Testing
 // This file provides mock data and API responses for the developer console
 
-export interface MockApiConfig {
-  delay?: number;
-  failureRate?: number;
-  enableLogging?: boolean;
-}
+/**
+ * @typedef {Object} MockApiConfig
+ * @property {number} [delay]
+ * @property {number} [failureRate]
+ * @property {boolean} [enableLogging]
+ */
 
-export interface MockResponse<T = any> {
-  success: boolean;
-  data: T;
-  message?: string;
-  timestamp: string;
-  requestId: string;
-}
+/**
+ * @typedef {Object} MockResponse
+ * @property {boolean} success
+ * @property {*} data
+ * @property {string} [message]
+ * @property {string} timestamp
+ * @property {string} requestId
+ */
 
 class MockApiService {
-  private config: MockApiConfig;
-  private requestCounter = 0;
-
-  constructor(config: MockApiConfig = {}) {
+  constructor(config = {}) {
     this.config = {
       delay: 500,
       failureRate: 0.1,
       enableLogging: true,
       ...config
     };
+    this.requestCounter = 0;
   }
 
-  private generateRequestId(): string {
+  generateRequestId() {
     return `mock_${++this.requestCounter}_${Date.now()}`;
   }
 
-  private async simulateDelay(): Promise<void> {
+  async simulateDelay() {
     if (this.config.delay && this.config.delay > 0) {
       await new Promise(resolve => setTimeout(resolve, this.config.delay));
     }
   }
 
-  private shouldSimulateFailure(): boolean {
+  shouldSimulateFailure() {
     return Math.random() < (this.config.failureRate || 0);
   }
 
-  private log(message: string, data?: any): void {
+  log(message, data) {
     if (this.config.enableLogging) {
       console.log(`[MockAPI] ${message}`, data || '');
     }
   }
 
-  async get<T>(endpoint: string, params?: Record<string, any>): Promise<MockResponse<T>> {
+  async get(endpoint, params) {
     const requestId = this.generateRequestId();
     this.log(`GET ${endpoint}`, params);
 
@@ -85,14 +85,14 @@ class MockApiService {
 
     return {
       success: true,
-      data: mockData as T,
+      data: mockData,
       message: 'Mock API response',
       timestamp: new Date().toISOString(),
       requestId
     };
   }
 
-  async post<T>(endpoint: string, data: any): Promise<MockResponse<T>> {
+  async post(endpoint, data) {
     const requestId = this.generateRequestId();
     this.log(`POST ${endpoint}`, data);
 
@@ -104,14 +104,14 @@ class MockApiService {
 
     return {
       success: true,
-      data: { ...data, id: Math.random().toString(36).substr(2, 9) } as T,
+      data: { ...data, id: Math.random().toString(36).substr(2, 9) },
       message: 'Resource created successfully',
       timestamp: new Date().toISOString(),
       requestId
     };
   }
 
-  async put<T>(endpoint: string, data: any): Promise<MockResponse<T>> {
+  async put(endpoint, data) {
     const requestId = this.generateRequestId();
     this.log(`PUT ${endpoint}`, data);
 
@@ -123,14 +123,14 @@ class MockApiService {
 
     return {
       success: true,
-      data: data as T,
+      data: data,
       message: 'Resource updated successfully',
       timestamp: new Date().toISOString(),
       requestId
     };
   }
 
-  async delete(endpoint: string): Promise<MockResponse<null>> {
+  async delete(endpoint) {
     const requestId = this.generateRequestId();
     this.log(`DELETE ${endpoint}`);
 
@@ -157,11 +157,11 @@ export const mockApi = new MockApiService();
 export { MockApiService };
 
 // Utility functions for testing
-export const createMockApiWithConfig = (config: MockApiConfig): MockApiService => {
+export const createMockApiWithConfig = (config) => {
   return new MockApiService(config);
 };
 
-export const resetMockApi = (): void => {
+export const resetMockApi = () => {
   // Reset any internal state if needed
   console.log('[MockAPI] Reset completed');
 };
