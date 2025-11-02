@@ -6,7 +6,7 @@
 
 ```
 Email:    adrian.stanca1@gmail.com
-Password: parola123
+Password: Cumparavinde1
 Role:     super_admin
 Company:  ConstructCo (company-1)
 ```
@@ -70,7 +70,7 @@ Company:  ConstructCo (company-1)
 
 ```
 Email:    casey@constructco.com
-Password: admin123
+Password: password123
 Role:     company_admin
 Company:  ConstructCo (company-1)
 ```
@@ -89,7 +89,7 @@ Company:  ConstructCo (company-1)
 
 ```
 Email:    mike@constructco.com
-Password: admin123
+Password: password123
 Role:     supervisor
 Company:  ConstructCo (company-1)
 ```
@@ -120,7 +120,8 @@ npm run dev
 ### 2. Access the Application
 
 ```
-URL: http://localhost:3000
+Backend: http://localhost:3000
+Frontend: http://localhost:3001
 ```
 
 ### 3. Login
@@ -133,7 +134,7 @@ Choose one of the accounts above based on what you want to test.
 
 ### Test Super Admin Features
 
-1. Login as: `adrian.stanca1@gmail.com` / `parola123`
+1. Login as: `adrian.stanca1@gmail.com` / `Cumparavinde1`
 2. You'll see: Super Admin Dashboard
 3. Access to: All system features
 
@@ -198,7 +199,7 @@ Size:     ~508KB
 
 ### Can't Login?
 
-1. Check server is running: `lsof -ti:5000`
+1. Check server is running: `lsof -ti:3000`
 2. Check database exists: `ls -lah cortexbuild.db`
 3. Verify user exists: `sqlite3 cortexbuild.db "SELECT email, role FROM users;"`
 4. Check password hash: Run `node server/update-passwords.js` again
@@ -254,10 +255,10 @@ This will reset all passwords to the values listed above.
 **Users:** ✅ 5 users configured
 **Passwords:** ✅ Updated and working
 **Dashboards:** ✅ Tables created
-**Server:** ✅ Running on port 5000
-**Frontend:** ✅ Running on port 3000
+**Server:** ✅ Running on port 3000
+**Frontend:** ✅ Running on port 3001
 
 ---
 
-**Last Updated:** 2025-10-10
+**Last Updated:** 2025-10-17
 **Database Version:** 1.0.0 GOLDEN

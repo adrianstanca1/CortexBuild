@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Project, User } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PlusIcon } from '../Icons';
 
 interface NewDayworkSheetScreenProps {
@@ -21,7 +21,7 @@ const NewDayworkSheetScreen: React.FC<NewDayworkSheetScreenProps> = ({ project, 
             return;
         }
 
-        await api.createDayworkSheet({
+        await apiClient.createDayworkSheet({
             projectId: project.id,
             date,
             contractor,

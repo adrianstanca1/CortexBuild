@@ -3,40 +3,97 @@
  * Version: 1.1.0 GOLDEN
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CreatePurchaseOrderModal } from '../modals/CreatePurchaseOrderModal';
 
 interface PurchaseOrder {
     id: number | string;
-    // Legacy properties
-    vendor?: string;
+    vendor: string;
     project?: string;
     items?: string;
-    amount?: number;
+    amount: number;
+    status: string;
     orderDate?: string;
     deliveryDate?: string;
     receivedDate?: string | null;
-    po_number?: string;
-    vendor_name?: string;
-    project_name?: string;
-    total?: number;
-    status: string;
-    order_date?: string;
-    delivery_date?: string;
 }
+
+const formatCurrency = (amount?: number | null) => {
+    if (amount === undefined || amount === null) return '£0.00';
+    return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
+const formatDate = (value?: string | null) => {
+    if (!value) return undefined;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value ?? undefined;
+    return parsed.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const parseAmount = (value: unknown): number => {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? numeric : 0;
+    }
+    return 0;
+};
+
+const normalizePurchaseOrder = (raw: any): PurchaseOrder => {
+    return {
+        id: raw.id ?? raw.po_number ?? raw.reference ?? `po-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        vendor: raw.vendor ?? raw.vendor_name ?? raw.supplier ?? 'Unknown vendor',
+        project: raw.project ?? raw.project_name ?? raw.projectName,
+        items: raw.items ?? raw.description,
+        amount: parseAmount(raw.amount ?? raw.total ?? raw.order_total),
+        status: (raw.status ?? 'pending').toLowerCase(),
+        orderDate: formatDate(raw.order_date ?? raw.orderDate),
+        deliveryDate: formatDate(raw.delivery_date ?? raw.deliveryDate),
+        receivedDate: formatDate(raw.received_date ?? raw.receivedDate) ?? null
+    };
+};
+
+const MOCK_PURCHASE_ORDERS: PurchaseOrder[] = [
+    {
+        id: 'PO-2024-001',
+        vendor: 'ABC Supplies Inc',
+        project: 'Downtown Office Complex',
+        items: 'Steel beams, concrete mix',
+        amount: 45000,
+        status: 'approved',
+        orderDate: '01 Dec 2024',
+        deliveryDate: '15 Dec 2024',
+        receivedDate: null
+    },
+    {
+        id: 'PO-2024-002',
+        vendor: 'BuildMart Wholesale',
+        project: 'Riverside Luxury Apartments',
+        items: 'Lumber, drywall, insulation',
+        amount: 32500,
+        status: 'pending',
+        orderDate: '05 Dec 2024',
+        deliveryDate: '20 Dec 2024',
+        receivedDate: null
+    }
+];
 
 export const PurchaseOrdersPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+    const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(MOCK_PURCHASE_ORDERS);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    useEffect(() => {
-        fetchPurchaseOrders();
-    }, [searchQuery, statusFilter]);
-
-    const fetchPurchaseOrders = async () => {
+    const fetchPurchaseOrders = useCallback(async () => {
         try {
+            setLoading(true);
+            setError(null);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
@@ -45,55 +102,26 @@ export const PurchaseOrdersPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success) {
-                setPurchaseOrders(data.data);
+                const normalized = Array.isArray(data.data) ? data.data.map(normalizePurchaseOrder) : [];
+                setPurchaseOrders(normalized.length > 0 ? normalized : MOCK_PURCHASE_ORDERS);
+                if (!normalized.length) {
+                    setError('No purchase orders found for the selected filters.');
+                }
             } else {
-                console.warn('Failed to fetch purchase orders:', data.error);
+                setError(data.error ?? 'Unable to load purchase orders.');
+                setPurchaseOrders(MOCK_PURCHASE_ORDERS);
             }
         } catch (err: any) {
-            console.error('Failed to fetch purchase orders:', err);
-            setPurchaseOrders(mockPurchaseOrders);
+            setError(err.message ?? 'Failed to communicate with the purchase orders API.');
+            setPurchaseOrders(MOCK_PURCHASE_ORDERS);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [searchQuery, statusFilter]);
 
-    const mockPurchaseOrders: PurchaseOrder[] = [
-        {
-            id: 'PO-2024-001' as any,
-            vendor: 'ABC Supplies Inc',
-            vendor_name: 'ABC Supplies Inc',
-            project: 'Downtown Office Complex',
-            project_name: 'Downtown Office Complex',
-            items: 'Steel beams, concrete mix',
-            amount: 45000,
-            total: 45000,
-            status: 'approved',
-            orderDate: 'Dec 1, 2024',
-            order_date: 'Dec 1, 2024',
-            deliveryDate: 'Dec 15, 2024',
-            delivery_date: 'Dec 15, 2024',
-            receivedDate: null
-        },
-        {
-            id: 'PO-2024-002' as any,
-            vendor: 'BuildMart Wholesale',
-            vendor_name: 'BuildMart Wholesale',
-            project: 'Riverside Luxury Apartments',
-            project_name: 'Riverside Luxury Apartments',
-            items: 'Lumber, drywall, insulation',
-            amount: 32500,
-            total: 32500,
-            status: 'pending',
-            orderDate: 'Dec 5, 2024',
-            order_date: 'Dec 5, 2024',
-            deliveryDate: 'Dec 20, 2024',
-            delivery_date: 'Dec 20, 2024',
-            receivedDate: null
-        }
-    ];
-
-    const formatCurrency = (amount?: number) => {
-        if (amount === undefined || amount === null) return '£0.00';
-        return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    };
+    useEffect(() => {
+        fetchPurchaseOrders();
+    }, [fetchPurchaseOrders]);
 
     const getStatusColor = (status: string) => {
         const colors: Record<string, string> = {
@@ -158,6 +186,33 @@ export const PurchaseOrdersPage: React.FC = () => {
             </div>
 
             {/* Purchase Orders List */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error}
+                </div>
+            )}
+
+            {loading && (
+                <div className="space-y-4 mb-6">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <div key={`po-skeleton-${index}`} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                            <div className="h-5 bg-gray-200 rounded w-1/3 mb-3" />
+                            <div className="space-y-2">
+                                <div className="h-3 bg-gray-100 rounded w-full" />
+                                <div className="h-3 bg-gray-100 rounded w-2/3" />
+                                <div className="h-3 bg-gray-100 rounded w-1/2" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {!loading && purchaseOrders.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+                    <p>No purchase orders found. Try adjusting your filters or create a new purchase order.</p>
+                </div>
+            )}
+
             <div className="space-y-4">
                 {purchaseOrders.map((po) => (
                     <div key={po.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">

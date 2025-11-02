@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 // Fix: Added .ts extension to import
 import { Project, User, UserRole, Task } from '../../types';
 // Fix: Added .ts extension to import
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 // Fix: Added .tsx extension to import
 // Change: Swapped XMarkIcon for TrashIcon for photo removal UI.
 import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, CameraIcon, TrashIcon, SparklesIcon, ArrowPathIcon, AlertTriangleIcon } from '../Icons';
@@ -40,7 +40,7 @@ const NewTaskScreen: React.FC<NewTaskScreenProps> = ({ project, goBack, currentU
 
     useEffect(() => {
         const loadUsers = async () => {
-            const users = await api.fetchUsersByCompany(currentUser.companyId);
+            const users = await apiClient.fetchUsersByCompany(currentUser.companyId);
             setAllUsers(users);
         };
         loadUsers();
@@ -76,7 +76,7 @@ const NewTaskScreen: React.FC<NewTaskScreenProps> = ({ project, goBack, currentU
             return;
         }
 
-        await api.createTask(taskData);
+        await apiClient.createTask(taskData, currentUser);
         alert('Task created successfully!');
         goBack();
     };
@@ -90,7 +90,7 @@ const NewTaskScreen: React.FC<NewTaskScreenProps> = ({ project, goBack, currentU
         setIsSuggesting(true);
         setAiSuggestion(null);
         try {
-            const suggestions = await api.getAITaskSuggestions(description);
+            const suggestions = await apiClient.getAITaskSuggestions(description, allUsers);
             if (suggestions) {
                 setAiSuggestion(suggestions);
             } else {

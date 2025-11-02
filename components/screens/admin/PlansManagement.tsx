@@ -8,11 +8,11 @@ interface PlansManagementProps {
 }
 
 const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
-    const [plans, setPlans] = useState<CompanyPlan[]>([]);
+    const [plans, setPlans] = useState<apiClient.CompanyPlan[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [editingPlan, setEditingPlan] = useState<CompanyPlan | null>(null);
+    const [editingPlan, setEditingPlan] = useState<apiClient.CompanyPlan | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -37,11 +37,8 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
         setIsLoading(true);
         setError(null);
         try {
-            const plansData = await api.getAllCompanyPlans();
-            // Ensure array is extracted from response if needed
-            const plansArray: CompanyPlan[] = Array.isArray(plansData) ? plansData : 
-                (plansData && typeof plansData === 'object' && 'data' in plansData && Array.isArray((plansData as any).data)) ? (plansData as any).data : [];
-            setPlans(plansArray);
+            const plansData = await apiClient.getAllCompanyPlans();
+            setPlans(plansData);
         } catch (err: any) {
             console.error('Error loading plans:', err);
             setError(err.message || 'Failed to load plans');
@@ -75,7 +72,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
         setError(null);
 
         try {
-            await api.createCompanyPlan(formData);
+            await apiClient.createCompanyPlan(currentUser, formData);
             resetForm();
             loadPlans();
         } catch (err: any) {
@@ -83,7 +80,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
         }
     };
 
-    const handleEditPlan = (plan: CompanyPlan) => {
+    const handleEditPlan = (plan: apiClient.CompanyPlan) => {
         setEditingPlan(plan);
         setFormData({
             name: plan.name,
@@ -108,7 +105,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
         setError(null);
 
         try {
-            await api.updateCompanyPlanDetails(editingPlan!.id, formData);
+            await apiClient.updateCompanyPlanDetails(currentUser, editingPlan!.id, formData);
             resetForm();
             loadPlans();
         } catch (err: any) {
@@ -118,7 +115,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
 
     const handleTogglePlanStatus = async (planId: string, isActive: boolean) => {
         try {
-            await api.toggleCompanyPlanStatus(planId, isActive);
+            await apiClient.toggleCompanyPlanStatus(currentUser, planId, isActive);
             loadPlans();
         } catch (err: any) {
             setError(err.message || 'Failed to update plan status');

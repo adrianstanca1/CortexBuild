@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Task, User, Screen } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon } from '../Icons';
 import TaskList from '../shared/TaskList';
 
@@ -17,7 +17,7 @@ const MyTasksScreen: React.FC<MyTasksScreenProps> = ({ currentUser, navigateTo, 
     useEffect(() => {
         const loadData = async () => {
             setIsLoading(true);
-            const tasks = await api.fetchTasksForUser(currentUser.id);
+            const tasks = await apiClient.fetchTasksForUser(currentUser);
             setAllTasks(tasks);
             setIsLoading(false);
         };

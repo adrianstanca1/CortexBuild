@@ -1,40 +1,93 @@
 /**
  * Time Tracking Page - Connected to CortexBuild API
- * Version: 1.1.0 GOLDEN
+ * Version: 1.1.0 GOLDEN (normalized data)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CreateTimeEntryModal } from '../modals/CreateTimeEntryModal';
 
 interface TimeEntry {
     id: number | string;
-    project_name?: string;
-    project?: string; // Legacy property
+    project: string;
     description?: string;
     date?: string;
-    hours?: number;
+    hours: number;
     rate?: number;
-    amount?: number;
-    billable?: boolean;
+    amount: number;
+    billable: boolean;
     category?: string;
-    user_name?: string;
-    employee?: string; // Legacy property
+    employee?: string;
 }
+
+const formatDate = (value?: string | null) => {
+    if (!value) return undefined;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value ?? undefined;
+    return parsed.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const parseNumber = (value: unknown, fallback = 0): number => {
+    if (typeof value === 'number') return Number.isFinite(value) ? value : fallback;
+    if (typeof value === 'string') {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? numeric : fallback;
+    }
+    return fallback;
+};
+
+const normalizeEntry = (raw: any): TimeEntry => {
+    const hours = parseNumber(raw.hours ?? raw.duration_hours ?? raw.total_hours);
+    const rate = raw.hourly_rate !== undefined ? parseNumber(raw.hourly_rate, undefined as any) : undefined;
+    const amount = raw.amount !== undefined ? parseNumber(raw.amount) : (rate ? hours * rate : parseNumber(raw.total_amount));
+
+    return {
+        id: raw.id ?? raw.entry_id ?? `time-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        project: raw.project ?? raw.project_name ?? raw.projectName ?? 'Unassigned project',
+        description: raw.description ?? raw.notes,
+        date: formatDate(raw.date ?? raw.start_time ?? raw.started_at),
+        hours,
+        rate,
+        amount,
+        billable: Boolean(raw.billable ?? raw.is_billable ?? true),
+        category: raw.category ?? raw.work_type,
+        employee: raw.employee ?? raw.user_name ?? raw.user
+    };
+};
+
+const MOCK_ENTRIES: TimeEntry[] = [
+    {
+        id: '1',
+        project: 'Manufacturing Facility Expansion',
+        description: 'Site survey and coordination',
+        date: '07 Oct 2025',
+        hours: 16,
+        rate: 85,
+        amount: 1360,
+        billable: true,
+        category: 'labor',
+        employee: 'Adrian Stanca'
+    }
+];
 
 export const TimeTrackingPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [periodFilter, setPeriodFilter] = useState('this-week');
     const [projectFilter, setProjectFilter] = useState('all');
-    const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+    const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(MOCK_ENTRIES);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [stats, setStats] = useState({ totalHours: 0, revenue: 0, entries: 0 });
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    useEffect(() => {
-        fetchTimeEntries();
-    }, [searchQuery, periodFilter, projectFilter]);
-
-    const fetchTimeEntries = async () => {
+    const fetchTimeEntries = useCallback(async () => {
         try {
+            setLoading(true);
+            setError(null);
+
             const params = new URLSearchParams({ page: '1', limit: '100' });
             if (projectFilter !== 'all') params.append('project_id', projectFilter);
 
@@ -42,33 +95,44 @@ export const TimeTrackingPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success) {
-                setTimeEntries(data.data);
-                const total = data.data.reduce((sum: number, e: TimeEntry) => sum + (e.hours || 0), 0);
-                const rev = data.data.reduce((sum: number, e: TimeEntry) => sum + (e.amount || 0), 0);
-                setStats({ totalHours: total, revenue: rev, entries: data.data.length });
+                const normalized = Array.isArray(data.data) ? data.data.map(normalizeEntry) : [];
+                const entries = normalized.length > 0 ? normalized : MOCK_ENTRIES;
+                setTimeEntries(entries);
+
+                const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0);
+                const revenue = entries.reduce((sum, entry) => sum + entry.amount, 0);
+                setStats({ totalHours, revenue, entries: entries.length });
+
+                if (!normalized.length) {
+                    setError('No time entries found for the current filters.');
+                }
             } else {
-                console.warn('Failed to fetch time entries:', data.error);
+                setError(data.error ?? 'Unable to load time entries.');
+                setTimeEntries(MOCK_ENTRIES);
+                setStats({ totalHours: 16, revenue: 1360, entries: MOCK_ENTRIES.length });
             }
         } catch (err: any) {
-            console.error('Failed to fetch time entries:', err);
-            setTimeEntries(mockTimeEntries);
+            setError(err.message ?? 'Failed to communicate with the time tracking API.');
+            setTimeEntries(MOCK_ENTRIES);
+            setStats({ totalHours: 16, revenue: 1360, entries: MOCK_ENTRIES.length });
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [projectFilter]);
 
-    const mockTimeEntries: TimeEntry[] = [
-        {
-            id: '1',
-            project: 'Manufacturing Facility Expansion',
-            description: '',
-            date: 'Oct 7, 2025',
-            hours: 16,
-            rate: 0,
-            amount: 0,
-            billable: true,
-            category: 'labor',
-            employee: 'Adrian Stanca'
-        }
-    ];
+    useEffect(() => {
+        fetchTimeEntries();
+    }, [fetchTimeEntries]);
+
+    const filteredEntries = timeEntries.filter(entry => {
+        const matchesSearch = !searchQuery ||
+            entry.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (entry.description && entry.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (entry.employee && entry.employee.toLowerCase().includes(searchQuery.toLowerCase()));
+        return matchesSearch;
+    });
+
+    const formatCurrency = (amount: number) => `£${amount.toFixed(2)}`;
 
     return (
         <div className="p-8">
@@ -112,7 +176,7 @@ export const TimeTrackingPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-600 mb-1">Total Hours</p>
-                            <p className="text-3xl font-bold text-gray-900">{stats.totalHours}h</p>
+                            <p className="text-3xl font-bold text-gray-900">{stats.totalHours.toFixed(1)}h</p>
                         </div>
                         <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-2xl">
                             ⏱️
@@ -124,7 +188,7 @@ export const TimeTrackingPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-600 mb-1">Revenue</p>
-                            <p className="text-3xl font-bold text-gray-900">£{stats.revenue.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-gray-900">{formatCurrency(stats.revenue)}</p>
                         </div>
                         <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center text-2xl">
                             💰
@@ -168,15 +232,44 @@ export const TimeTrackingPage: React.FC = () => {
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                     <option value="all">All Projects</option>
-                    <option value="downtown">Downtown Office Complex</option>
-                    <option value="riverside">Riverside Luxury Apartments</option>
-                    <option value="manufacturing">Manufacturing Facility Expansion</option>
+                    {Array.from(new Set(timeEntries.map(entry => entry.project))).map(project => (
+                        <option key={project} value={project}>
+                            {project}
+                        </option>
+                    ))}
                 </select>
             </div>
 
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error}
+                </div>
+            )}
+
+            {loading && (
+                <div className="space-y-4 mb-6">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <div key={`time-skeleton-${index}`} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                            <div className="h-5 bg-gray-200 rounded w-1/2 mb-3" />
+                            <div className="space-y-2">
+                                <div className="h-3 bg-gray-100 rounded w-full" />
+                                <div className="h-3 bg-gray-100 rounded w-3/4" />
+                                <div className="h-3 bg-gray-100 rounded w-2/3" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {!loading && filteredEntries.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+                    <p>No time entries found. Try adjusting your filters or log a new time entry.</p>
+                </div>
+            )}
+
             {/* Time Entries List */}
             <div className="space-y-4">
-                {timeEntries.map((entry) => (
+                {filteredEntries.map((entry) => (
                     <div key={entry.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -192,23 +285,31 @@ export const TimeTrackingPage: React.FC = () => {
                                     <p className="text-sm text-gray-600 mb-2">{entry.description}</p>
                                 )}
                                 <div className="flex items-center text-sm text-gray-600 space-x-2">
-                                    <span>{entry.date}</span>
+                                    <span>{entry.employee ?? 'Unknown employee'}</span>
                                     <span>•</span>
-                                    <span className="font-semibold">{entry.hours}h</span>
+                                    <span>{entry.date ?? 'Unknown date'}</span>
+                                    <span>•</span>
+                                    <span>{entry.hours.toFixed(1)} hours</span>
                                 </div>
                             </div>
+
                             <div className="text-right">
-                                <p className="text-lg font-bold text-gray-900">£{entry.amount.toFixed(2)}</p>
-                                <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                    {entry.category}
-                                </span>
+                                <p className="text-xl font-bold text-gray-900">{formatCurrency(entry.amount)}</p>
+                                {entry.rate && (
+                                    <p className="text-sm text-gray-500">£{entry.rate.toFixed(2)}/hr</p>
+                                )}
                             </div>
                         </div>
+
+                        {entry.category && (
+                            <div className="mt-4 inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                {entry.category}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
 
-            {/* Create Time Entry Modal */}
             <CreateTimeEntryModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}

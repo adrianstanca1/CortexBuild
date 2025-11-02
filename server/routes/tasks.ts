@@ -5,12 +5,21 @@
 import { Router, Request, Response } from 'express';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Task, ApiResponse, PaginatedResponse } from '../types';
+import {
+  validateBody,
+  validateQuery,
+  validateParams,
+  createTaskSchema,
+  updateTaskSchema,
+  taskFiltersSchema,
+  idParamSchema
+} from '../utils/validation';
 
 export function createTasksRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/tasks - List all tasks
-  router.get('/', async (req: Request, res: Response) => {
+  router.get('/', validateQuery(taskFiltersSchema), (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -19,12 +28,12 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
         status,
         priority,
         search,
-        page = '1',
-        limit = '50'
+        page = 1,
+        limit = 50
       } = req.query as any;
 
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      const pageNum = page;
+      const limitNum = limit;
       const offset = (pageNum - 1) * limitNum;
 
       let query = supabase
@@ -94,7 +103,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // GET /api/tasks/:id - Get single task
-  router.get('/:id', async (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -139,7 +148,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // POST /api/tasks - Create new task
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', validateBody(createTaskSchema), (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -153,28 +162,15 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
         estimated_hours
       } = req.body;
 
-      if (!project_id || !title) {
-        return res.status(400).json({
-          success: false,
-          error: 'Project ID and title are required'
-        });
-      }
-
-      const { data: task, error } = await supabase
-        .from('tasks')
-        .insert({
-          project_id,
-          milestone_id: milestone_id || null,
-          title,
-          description: description || null,
-          assigned_to: assigned_to || null,
-          status,
-          priority,
-          due_date: due_date || null,
-          estimated_hours: estimated_hours || null
-        })
-        .select()
-        .single();
+      const result = db.prepare(`
+        INSERT INTO tasks (
+          project_id, milestone_id, title, description, assigned_to,
+          status, priority, due_date, estimated_hours
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        project_id, milestone_id, title, description, assigned_to,
+        status, priority, due_date, estimated_hours
+      );
 
       if (error) throw error;
 
@@ -210,7 +206,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // PUT /api/tasks/:id - Update task
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateTaskSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -228,20 +224,8 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
         });
       }
 
-      const { id: _, ...updateData } = updates;
-      if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'No fields to update'
-        });
-      }
-
-      const { data: task, error } = await supabase
-        .from('tasks')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
+      const setClause = fields.map(field => `${field} = ?`).join(', ');
+      const values = fields.map(field => updates[field]);
 
       if (error) throw error;
 
@@ -260,7 +244,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // PUT /api/tasks/:id/complete - Mark task as complete
-  router.put('/:id/complete', async (req: Request, res: Response) => {
+  router.put('/:id/complete', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -321,7 +305,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // DELETE /api/tasks/:id - Delete task
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 

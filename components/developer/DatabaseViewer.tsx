@@ -14,6 +14,7 @@ import {
     Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
 
 interface TableInfo {
     name: string;
@@ -90,9 +91,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                     </div>
                     <button
                         type="button"
-                        className={`p-2 rounded-lg transition-colors ${
-                            isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                            }`}
                         title="Refresh"
                     >
                         <RefreshCw className="h-4 w-4" />
@@ -132,13 +132,12 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                             <div
                                 key={table.name}
                                 onClick={() => handleTableClick(table.name)}
-                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 ${
-                                    selectedTable === table.name
-                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
-                                        : isDarkMode
+                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all mb-1 ${selectedTable === table.name
+                                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                                    : isDarkMode
                                         ? 'hover:bg-gray-700 text-gray-300'
                                         : 'hover:bg-gray-100 text-gray-700'
-                                }`}
+                                    }`}
                             >
                                 <Table className="h-4 w-4 flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
@@ -195,9 +194,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                                     <button
                                         type="button"
                                         onClick={exportResults}
-                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                                            isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                                        }`}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+                                            }`}
                                     >
                                         <Download className="h-4 w-4" />
                                         Export CSV
@@ -210,9 +208,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                                                 {Object.keys(queryResults[0]).map((key) => (
                                                     <th
                                                         key={key}
-                                                        className={`px-4 py-2 text-left font-semibold ${
-                                                            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                                                        }`}
+                                                        className={`px-4 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                                                            }`}
                                                     >
                                                         {key}
                                                     </th>
@@ -223,9 +220,8 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
                                             {queryResults.map((row, idx) => (
                                                 <tr
                                                     key={idx}
-                                                    className={`border-b ${
-                                                        isDarkMode ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-200 hover:bg-gray-50'
-                                                    }`}
+                                                    className={`border-b ${isDarkMode ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-200 hover:bg-gray-50'
+                                                        }`}
                                                 >
                                                     {Object.values(row).map((value: any, i) => (
                                                         <td
@@ -256,4 +252,14 @@ const DatabaseViewer: React.FC<DatabaseViewerProps> = ({ isDarkMode }) => {
     );
 };
 
-export default DatabaseViewer;
+// Wrap with LightErrorBoundary
+const WrappedDatabaseViewer: React.FC<DatabaseViewerProps> = (props) => {
+    return (
+        <LightErrorBoundary>
+            <DatabaseViewer {...props} />
+        </LightErrorBoundary>
+    );
+};
+
+export default WrappedDatabaseViewer;
+

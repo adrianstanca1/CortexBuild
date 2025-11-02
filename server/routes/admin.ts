@@ -680,6 +680,63 @@ export function createAdminRouter(supabase: SupabaseClient): Router {
     }
   });
 
+  // GET /api/admin/stats - System statistics (Super Admin) - Alias for dashboard
+  router.get('/stats', requireSuperAdmin, (req: Request, res: Response) => {
+    try {
+      const now = new Date();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const weekAgoIso = weekAgo.toISOString();
+      const startOfMonthIso = startOfMonth.toISOString();
+
+      const getCount = (query: string, ...params: any[]) => {
+        try {
+          const row = db.prepare(query).get(...params) as any;
+          return row?.count ?? 0;
+        } catch (error) {
+          console.warn('[Admin stats] count query failed', query, error);
+          return 0;
+        }
+      };
+
+      const totalUsers = getCount('SELECT COUNT(*) as count FROM users');
+      const activeUsers = getCount('SELECT COUNT(*) as count FROM users WHERE is_active = 1');
+      const totalCompanies = getCount('SELECT COUNT(*) as count FROM companies');
+      const totalProjects = getCount('SELECT COUNT(*) as count FROM projects');
+
+      // Get API usage for last 24 hours
+      const apiCalls24h = getCount('SELECT COUNT(*) as count FROM api_usage_logs WHERE created_at > datetime("now", "-1 day")');
+
+      // Determine system health based on recent activity and errors
+      let systemHealth = 'healthy';
+      const recentErrors = getCount('SELECT COUNT(*) as count FROM activities WHERE action = "error" AND created_at > datetime("now", "-1 hour")');
+      if (recentErrors > 5) {
+        systemHealth = 'critical';
+      } else if (recentErrors > 2) {
+        systemHealth = 'warning';
+      }
+
+      const stats = {
+        totalUsers: { count: totalUsers },
+        activeUsers: { count: activeUsers },
+        totalCompanies: { count: totalCompanies },
+        totalProjects: { count: totalProjects },
+        apiCalls24h: apiCalls24h,
+        systemHealth: systemHealth
+      };
+
+      res.json({
+        success: true,
+        ...stats
+      });
+    } catch (error: any) {
+      console.error('Stats error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // GET /api/admin/system-stats - System statistics (Super Admin)
   router.get('/system-stats', requireSuperAdmin, async (req: Request, res: Response) => {
     try {

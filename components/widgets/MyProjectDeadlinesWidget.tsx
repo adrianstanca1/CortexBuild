@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Task, Screen, User, Project } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { CalendarDaysIcon } from '../Icons';
 
 interface MyProjectDeadlinesWidgetProps {
@@ -20,19 +20,17 @@ const MyProjectDeadlinesWidget: React.FC<MyProjectDeadlinesWidgetProps> = ({ cur
                 return;
             }
             setIsLoading(true);
-            const projectTasks = await api.fetchTasksForProject(project.id);
-            const tasksArray = Array.isArray(projectTasks) ? projectTasks :
-                (projectTasks && typeof projectTasks === 'object' && 'data' in projectTasks && Array.isArray((projectTasks as any).data)) ? (projectTasks as any).data : [];
-            
-            const userTasks = tasksArray.filter(task => 
-                task.assignee === currentUser.name || 
+            const projectTasks = await apiClient.fetchTasksForProject(project.id);
+
+            const userTasks = projectTasks.filter(task =>
+                task.assignee === currentUser.name ||
                 (task.targetRoles && task.targetRoles.includes(currentUser.role))
             );
 
             const upcoming = userTasks
                 .filter(t => t.status !== 'Done' && new Date(t.dueDate) >= new Date())
                 .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
-                
+
             setTasks(upcoming);
             setIsLoading(false);
         };
@@ -51,7 +49,7 @@ const MyProjectDeadlinesWidget: React.FC<MyProjectDeadlinesWidgetProps> = ({ cur
             ) : (
                 <ul className="divide-y divide-gray-200">
                     {tasks.slice(0, 5).map(task => (
-                        <li 
+                        <li
                             key={task.id}
                             onClick={() => navigateTo('task-detail', { taskId: task.id })}
                             className="py-3 flex items-center justify-between hover:bg-gray-50 cursor-pointer -mx-3 px-3 rounded-lg"
@@ -60,7 +58,7 @@ const MyProjectDeadlinesWidget: React.FC<MyProjectDeadlinesWidgetProps> = ({ cur
                                 <p className="font-semibold text-sm text-gray-800">{task.title}</p>
                                 <p className="text-xs text-gray-500 mt-1">Status: <span className="font-medium">{task.status}</span></p>
                             </div>
-                             <div className="text-right">
+                            <div className="text-right">
                                 <p className="text-sm font-semibold text-red-600">
                                     {new Date(task.dueDate).toLocaleDateString()}
                                 </p>

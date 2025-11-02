@@ -1,41 +1,119 @@
 /**
  * Subcontractors Page - Connected to CortexBuild API
- * Version: 1.1.0 GOLDEN
+ * Version: 1.1.0 GOLDEN (normalized)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CreateSubcontractorModal } from '../modals/CreateSubcontractorModal';
 
 interface Subcontractor {
     id: number | string;
     name: string;
     trade?: string;
-    contact_name?: string;
-    contact?: string; // Legacy property
+    company?: string;
+    contactName?: string;
     email?: string;
     phone?: string;
-    license_number?: string;
-    license?: string; // Legacy property
+    license?: string;
     status: string;
     rating?: number;
     projects?: number;
-    insuranceExpiring?: boolean;
     onTimeRate?: number;
+    insuranceExpires?: string | null;
 }
+
+const formatDate = (value?: string | null) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const normalizeSubcontractor = (raw: any): Subcontractor => {
+    const rating = raw.rating ?? raw.performance_rating;
+    const onTime = raw.on_time_rate ?? raw.onTimeRate;
+    const projects = raw.projects_assigned ?? raw.projects ?? raw.active_projects;
+
+    return {
+        id: raw.id ?? raw.subcontractor_id ?? `sub-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: raw.name ?? raw.company_name ?? 'Unnamed subcontractor',
+        trade: raw.trade ?? raw.specialty,
+        company: raw.company_name ?? raw.company,
+        contactName: raw.contact_name ?? raw.contact ?? raw.primary_contact,
+        email: raw.email,
+        phone: raw.phone,
+        license: raw.license_number ?? raw.license,
+        status: (raw.status ?? 'active').toLowerCase(),
+        rating: typeof rating === 'number' ? rating : rating ? Number(rating) : undefined,
+        projects: typeof projects === 'number' ? projects : projects ? Number(projects) : undefined,
+        onTimeRate: typeof onTime === 'number' ? onTime : onTime ? Number(onTime) : undefined,
+        insuranceExpires: formatDate(raw.insurance_expiry ?? raw.insuranceExpires ?? raw.insurance_expiration)
+    };
+};
+
+const MOCK_SUBCONTRACTORS: Subcontractor[] = [
+    {
+        id: '1',
+        name: 'Elite Electrical Services',
+        trade: 'electrical',
+        contactName: 'Mike Johnson',
+        email: 'mike@eliteelectrical.com',
+        phone: '555-0101',
+        license: 'EC-12345',
+        status: 'active',
+        rating: 5,
+        projects: 0,
+        onTimeRate: 92,
+        insuranceExpires: '01 Mar 2025'
+    },
+    {
+        id: '2',
+        name: 'Premier HVAC Inc',
+        trade: 'hvac',
+        contactName: 'David Chen',
+        email: 'david@premierhvac.com',
+        phone: '555-0103',
+        license: 'HV-24680',
+        status: 'active',
+        rating: 5,
+        projects: 0,
+        onTimeRate: 88,
+        insuranceExpires: '17 Feb 2025'
+    },
+    {
+        id: '3',
+        name: 'ProPlumb Solutions',
+        trade: 'plumbing',
+        contactName: 'Sarah Martinez',
+        email: 'sarah@proplumb.com',
+        phone: '555-0102',
+        license: 'PL-67890',
+        status: 'active',
+        rating: 5,
+        projects: 0,
+        onTimeRate: 95,
+        insuranceExpires: '09 Jan 2025'
+    }
+];
 
 export const SubcontractorsPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [tradeFilter, setTradeFilter] = useState('all');
     const [activeTab, setActiveTab] = useState<'directory' | 'assignments'>('directory');
-    const [subcontractors, setSubcontractors] = useState<Subcontractor[]>([]);
+    const [subcontractors, setSubcontractors] = useState<Subcontractor[]>(MOCK_SUBCONTRACTORS);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    useEffect(() => {
-        fetchSubcontractors();
-    }, [searchQuery, tradeFilter]);
-
-    const fetchSubcontractors = async () => {
+    const fetchSubcontractors = useCallback(async () => {
         try {
+            setLoading(true);
+            setError(null);
+
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (tradeFilter !== 'all') params.append('trade', tradeFilter);
@@ -44,68 +122,54 @@ export const SubcontractorsPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success) {
-                setSubcontractors(data.data);
+                const normalized = Array.isArray(data.data) ? data.data.map(normalizeSubcontractor) : [];
+                setSubcontractors(normalized.length > 0 ? normalized : MOCK_SUBCONTRACTORS);
+                if (!normalized.length) {
+                    setError('No subcontractors match the current filters.');
+                }
             } else {
-                console.warn('Failed to fetch subcontractors:', data.error);
+                setError(data.error ?? 'Unable to load subcontractors.');
+                setSubcontractors(MOCK_SUBCONTRACTORS);
             }
         } catch (err: any) {
-            console.error('Failed to fetch subcontractors:', err);
-            setSubcontractors(mockSubcontractors);
+            setError(err.message ?? 'Failed to communicate with the subcontractors API.');
+            setSubcontractors(MOCK_SUBCONTRACTORS);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [searchQuery, tradeFilter]);
 
-    const mockSubcontractors: Subcontractor[] = [
-        {
-            id: '1',
-            name: 'Elite Electrical Services',
-            trade: 'electrical',
-            contact: 'Mike Johnson',
-            email: 'mike@eliteelectrical.com',
-            phone: '555-0101',
-            license: 'EC-12345',
-            status: 'active',
-            rating: 5,
-            projects: 0,
-            onTimeRate: 92,
-            insuranceExpiring: true
-        },
-        {
-            id: '2',
-            name: 'Premier HVAC Inc',
-            trade: 'hvac',
-            contact: 'David Chen',
-            email: 'david@premierhvac.com',
-            phone: '555-0103',
-            license: 'HV-24680',
-            status: 'active',
-            rating: 5,
-            projects: 0,
-            onTimeRate: 88,
-            insuranceExpiring: true
-        },
-        {
-            id: '3',
-            name: 'ProPlumb Solutions',
-            trade: 'plumbing',
-            contact: 'Sarah Martinez',
-            email: 'sarah@proplumb.com',
-            phone: '555-0102',
-            license: 'PL-67890',
-            status: 'active',
-            rating: 5,
-            projects: 0,
-            onTimeRate: 95,
-            insuranceExpiring: true
-        }
-    ];
+    useEffect(() => {
+        fetchSubcontractors();
+    }, [fetchSubcontractors]);
 
-    const renderStars = (rating: number) => {
+    const renderStars = (rating: number | undefined) => {
+        const value = Math.max(0, Math.min(5, rating ?? 0));
         return Array.from({ length: 5 }, (_, i) => (
-            <span key={i} className={i < rating ? 'text-yellow-400' : 'text-gray-300'}>
+            <span key={i} className={i < value ? 'text-yellow-400' : 'text-gray-300'}>
                 ★
             </span>
         ));
     };
+
+    const getStatusBadge = (status: string) => {
+        const map: Record<string, string> = {
+            'active': 'bg-green-100 text-green-800',
+            'inactive': 'bg-gray-100 text-gray-800',
+            'pending': 'bg-yellow-100 text-yellow-800',
+            'suspended': 'bg-red-100 text-red-800'
+        };
+        return map[status] || 'bg-gray-100 text-gray-800';
+    };
+
+    const filteredSubcontractors = subcontractors.filter(sub => {
+        const matchesSearch = !searchQuery ||
+            sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (sub.company && sub.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (sub.trade && sub.trade.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesTrade = tradeFilter === 'all' || (sub.trade ?? '').toLowerCase() === tradeFilter;
+        return matchesSearch && matchesTrade;
+    });
 
     return (
         <div className="p-8">
@@ -142,6 +206,7 @@ export const SubcontractorsPage: React.FC = () => {
                             <option value="hvac">HVAC</option>
                             <option value="plumbing">Plumbing</option>
                             <option value="carpentry">Carpentry</option>
+                            <option value="concrete">Concrete</option>
                         </select>
 
                         {/* Add Button */}
@@ -187,112 +252,120 @@ export const SubcontractorsPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Directory Tab */}
-            {activeTab === 'directory' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {subcontractors.map((sub) => (
-                        <div key={sub.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                            {/* Header */}
-                            <div className="flex items-start space-x-3 mb-4">
-                                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
-                                    🔧
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center space-x-2 mb-1">
-                                        <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                                            {sub.status}
-                                        </span>
-                                        {sub.insuranceExpiring && (
-                                            <span className="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 flex items-center space-x-1">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
-                                                <span>Insurance Expiring</span>
-                                            </span>
-                                        )}
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900">{sub.name}</h3>
-                                    <p className="text-sm text-gray-600">{sub.trade}</p>
-                                </div>
-                            </div>
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error}
+                </div>
+            )}
 
-                            {/* Contact Info */}
-                            <div className="space-y-2 mb-4">
-                                <div className="flex items-center text-sm text-gray-600">
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                    <span>{sub.contact}</span>
-                                </div>
-                                <div className="flex items-center text-sm text-gray-600">
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                    <span>{sub.email}</span>
-                                </div>
-                                <div className="flex items-center text-sm text-gray-600">
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
-                                    <span>{sub.phone}</span>
-                                </div>
-                                <div className="flex items-center text-sm text-gray-600">
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    <span>License: {sub.license}</span>
-                                </div>
+            {loading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                        <div key={`sub-skeleton-${index}`} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                            <div className="h-5 bg-gray-200 rounded w-2/3 mb-4" />
+                            <div className="space-y-2">
+                                <div className="h-3 bg-gray-100 rounded w-full" />
+                                <div className="h-3 bg-gray-100 rounded w-3/4" />
+                                <div className="h-3 bg-gray-100 rounded w-1/2" />
                             </div>
-
-                            {/* Rating */}
-                            <div className="mb-4">
-                                <div className="flex items-center space-x-2 text-sm">
-                                    <span className="text-gray-600">Rating:</span>
-                                    <div className="flex">{renderStars(sub.rating)}</div>
-                                </div>
-                            </div>
-
-                            {/* Stats */}
-                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 mb-4">
-                                <div>
-                                    <span className="text-xs text-gray-500">Projects:</span>
-                                    <p className="text-lg font-semibold text-gray-900">{sub.projects}</p>
-                                </div>
-                                <div>
-                                    <span className="text-xs text-gray-500">On-time Rate:</span>
-                                    <p className="text-lg font-semibold text-gray-900">{sub.onTimeRate}%</p>
-                                </div>
-                            </div>
-
-                            {/* Action Button */}
-                            <button
-                                type="button"
-                                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                                <span>Assign to Project</span>
-                            </button>
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Assignments Tab */}
-            {activeTab === 'assignments' && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                    <p className="text-gray-600">No assignments yet. Assign subcontractors to projects from the Directory tab.</p>
+            {!loading && filteredSubcontractors.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+                    <p>No subcontractors found. Try adjusting your filters or add a new subcontractor.</p>
                 </div>
             )}
 
-            {/* Create Subcontractor Modal */}
+            {activeTab === 'directory' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredSubcontractors.map((sub) => (
+                        <div key={sub.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                            <div className="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">{sub.name}</h3>
+                                    <p className="text-sm text-gray-600 capitalize">{sub.trade ?? 'General'}</p>
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(sub.status)}`}>
+                                    {sub.status}
+                                </span>
+                            </div>
+
+                            <div className="space-y-2 text-sm text-gray-600">
+                                {sub.contactName && (
+                                    <div>
+                                        <span className="text-gray-500">Contact: </span>
+                                        <span className="font-medium text-gray-900">{sub.contactName}</span>
+                                    </div>
+                                )}
+                                {sub.email && (
+                                    <div>
+                                        <span className="text-gray-500">Email: </span>
+                                        <span className="font-medium text-gray-900">{sub.email}</span>
+                                    </div>
+                                )}
+                                {sub.phone && (
+                                    <div>
+                                        <span className="text-gray-500">Phone: </span>
+                                        <span className="font-medium text-gray-900">{sub.phone}</span>
+                                    </div>
+                                )}
+                                {sub.license && (
+                                    <div>
+                                        <span className="text-gray-500">License: </span>
+                                        <span className="font-medium text-gray-900">{sub.license}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mt-4 flex items-center justify-between text-sm">
+                                <div className="flex items-center space-x-2">
+                                    {renderStars(sub.rating)}
+                                    <span className="text-gray-500">{sub.rating ?? 0}/5</span>
+                                </div>
+                                <div className="text-gray-500">
+                                    {sub.onTimeRate ? `${sub.onTimeRate}% on-time` : 'On-time rate N/A'}
+                                </div>
+                            </div>
+
+                            <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
+                                <span>{sub.projects ? `${sub.projects} active projects` : 'No active projects'}</span>
+                                <span>{sub.insuranceExpires ? `Insurance exp. ${sub.insuranceExpires}` : 'Insurance up to date'}</span>
+                            </div>
+
+                            <div className="mt-6 flex items-center space-x-2">
+                                <button
+                                    type="button"
+                                    className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                                >
+                                    View Profile
+                                </button>
+                                <button
+                                    type="button"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Assign
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {activeTab === 'assignments' && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+                    <p>Assignments view is coming soon. Use the directory to select a subcontractor and assign them to projects.</p>
+                </div>
+            )}
+
             <CreateSubcontractorModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 onSuccess={() => {
-                    fetchSubcontractors();
                     setShowCreateModal(false);
+                    fetchSubcontractors();
                 }}
             />
         </div>

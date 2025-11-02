@@ -65,13 +65,18 @@ export const EnhancedDashboard: React.FC = () => {
       const user = authService.getCurrentUser();
       setCurrentUser(user);
 
-      // Mock health status for now
+      // Set mock health status (API endpoint not implemented yet)
       setHealthStatus({
         api: 'healthy',
         database: 'healthy',
         timestamp: new Date().toISOString(),
-        uptime: 99.9,
-        version: '1.0.0'
+        uptime: 0,
+        version: '2.0.0',
+        stats: {
+          users: 7,
+          sessions: 1,
+          companies: 2
+        }
       });
 
       setLoading(false);

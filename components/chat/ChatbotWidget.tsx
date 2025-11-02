@@ -1,12 +1,18 @@
 /**
  * Chatbot Widget Component
  * Global AI assistant present on all pages
+ *
+ * OPTIMIZATIONS (Copilot + Augment):
+ * - React.memo for performance
+ * - useCallback for event handlers
+ * - Memoized auth headers
+ * - Optimized re-renders
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChatMessage, ToolResultMessage } from './ChatMessage';
 import { v4 as uuidv4 } from 'uuid';
-import { mockApi } from '../../api/mockApi';
+import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';
 
 interface Message {
     id: string;
@@ -16,7 +22,7 @@ interface Message {
     toolResults?: any[];
 }
 
-export const ChatbotWidget: React.FC = () => {
+export const ChatbotWidget: React.FC = React.memo(() => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -25,18 +31,19 @@ export const ChatbotWidget: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Auto-scroll to bottom when new messages arrive
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    // Check if user is authenticated (checked after hooks to avoid hook rules violation)
+    const isAuthenticated = useMemo(() => !!localStorage.getItem('constructai_token'), []);
 
-    // Focus input when chat opens
-    useEffect(() => {
-        if (isOpen) {
-            inputRef.current?.focus();
-        }
-    }, [isOpen]);
+    // Memoize auth headers
+    const getAuthHeaders = useCallback(() => {
+        const token = localStorage.getItem('constructai_token');
+        return {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+        };
+    }, []);
 
+    // Memoize load chat history function
     const loadChatHistory = useCallback(async () => {
         try {
             const data = await mockApi.getChatMessages(sessionId);
@@ -54,14 +61,26 @@ export const ChatbotWidget: React.FC = () => {
         } catch (error) {
             console.error('Failed to load chat history:', error);
         }
-    }, [sessionId]);
+    }, [sessionId, getAuthHeaders]);
+
+    // Auto-scroll to bottom when new messages arrive
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    // Focus input when chat opens
+    useEffect(() => {
+        if (isOpen) {
+            inputRef.current?.focus();
+        }
+    }, [isOpen]);
 
     // Load chat history on mount
     useEffect(() => {
         loadChatHistory();
     }, [loadChatHistory]);
 
-    const sendMessage = async () => {
+    const sendMessage = useCallback(async () => {
         if (!inputValue.trim() || isLoading) return;
 
         const userMessage: Message = {
@@ -99,17 +118,17 @@ export const ChatbotWidget: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [inputValue, isLoading, getAuthHeaders, sessionId]);
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
+    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
-    };
+    }, [sendMessage]);
 
-    const clearChat = async () => {
-        if (confirm('Are you sure you want to clear the conversation?')) {
+    const clearChat = useCallback(async () => {
+        if (confirm('Ești sigur că vrei să ștergi conversația?')) {
             try {
                 // Clear local messages (mock API doesn't need server call)
                 setMessages([]);
@@ -117,7 +136,12 @@ export const ChatbotWidget: React.FC = () => {
                 console.error('Failed to clear chat:', error);
             }
         }
-    };
+    }, [sessionId]);
+
+    // Don't render if user is not authenticated
+    if (!isAuthenticated) {
+        return null;
+    }
 
     return (
         <>
@@ -251,4 +275,27 @@ export const ChatbotWidget: React.FC = () => {
             )}
         </>
     );
+});
+
+// Display name for debugging
+ChatbotWidget.displayName = 'ChatbotWidget';
+
+// Wrap with LightErrorBoundary
+const WrappedChatbotWidget: React.FC = () => {
+    return (
+        <LightErrorBoundary
+            fallback={
+                <div className="fixed bottom-6 right-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg shadow-lg max-w-sm">
+                    <p className="text-red-800 dark:text-red-300 text-sm">
+                        ⚠️ Chat temporarily unavailable. Please refresh the page.
+                    </p>
+                </div>
+            }
+        >
+            <ChatbotWidget />
+        </LightErrorBoundary>
+    );
 };
+
+export default WrappedChatbotWidget;
+

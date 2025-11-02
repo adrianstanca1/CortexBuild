@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { MapPinIcon } from '../Icons';
 
 interface ProjectsListScreenProps {
@@ -20,10 +20,8 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ selectProject, 
     useEffect(() => {
         const loadProjects = async () => {
             setIsLoading(true);
-            const fetchedProjects = await api.fetchAllProjects(currentUser);
-            const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
-                (fetchedProjects && typeof fetchedProjects === 'object' && 'data' in fetchedProjects && Array.isArray((fetchedProjects as any).data)) ? (fetchedProjects as any).data : [];
-            setProjects(projectsArray);
+            const fetchedProjects = await apiClient.fetchAllProjects(currentUser);
+            setProjects(fetchedProjects);
             setIsLoading(false);
         };
         loadProjects();

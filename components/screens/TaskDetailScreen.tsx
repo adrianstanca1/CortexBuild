@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 // Fix: Added .ts extension to import
 import { Project, Task, User, Comment, Attachment, PermissionAction, PermissionSubject } from '../../types';
 // Fix: Added .ts extension to import
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 // Fix: Added .tsx extension to import
 import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, CheckBadgeIcon, PencilIcon, ListBulletIcon, AlertTriangleIcon, TrashIcon, ClockIcon } from '../Icons';
 import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
@@ -60,7 +60,7 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
     useEffect(() => {
         const loadTask = async () => {
             setIsLoading(true);
-            const fetchedTask = await api.fetchTaskById(taskId);
+            const fetchedTask = await apiClient.fetchTaskById(taskId);
             setTask(fetchedTask || null);
             setIsLoading(false);
         };
@@ -73,12 +73,12 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
         const updatedTask = { ...task, status: newStatus };
         setTask(updatedTask); // Optimistic update
         try {
-            const savedTask = await api.updateTask(updatedTask, currentUser);
+            const savedTask = await apiClient.updateTask(updatedTask, currentUser);
             setTask(savedTask); // Update with response from API to get history
         } catch (error: any) {
             alert(error.message);
             // Revert on error by re-fetching
-            const fetchedTask = await api.fetchTaskById(taskId);
+            const fetchedTask = await apiClient.fetchTaskById(taskId);
             setTask(fetchedTask || null);
         }
     };
@@ -97,7 +97,7 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
             }))
         );
 
-        const comment = await api.addCommentToTask(task.id, newComment, attachments, currentUser);
+        const comment = await apiClient.addCommentToTask(task.id, newComment, attachments, currentUser);
         setTask(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
         setNewComment('');
         setCommentFiles([]);

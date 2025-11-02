@@ -1,342 +1,148 @@
-/**
- * Real Authentication Service
- * Connects to Express backend with JWT authentication
- */
-
 import axios from 'axios';
 import { User } from '../types';
 
-// Use environment variable or fallback to localhost
-const API_URL = import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : 'http://localhost:3001/api';
+// Use empty string to make requests relative to current origin
+// This allows Vite's proxy to handle the request properly
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-const TOKEN_KEY = 'constructai_token';
-
-// Create axios instance with default config
-const api = axios.create({
-    baseURL: API_URL,
+class AuthService {
+  private api = axios.create({
+    baseURL: API_BASE_URL,
     headers: {
-        'Content-Type': 'application/json'
-    }
-});
+      'Content-Type': 'application/json',
+    },
+  });
 
-// Add token to requests automatically
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
+  constructor() {
+    // Add request interceptor to include auth token
+    this.api.interceptors.request.use((config) => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+      }
+      return config;
+    });
 
-// Mock users for development when backend is not available
-const MOCK_USERS = [
-    {
-        id: 'user-1',
-        email: 'adrian.stanca1@gmail.com',
-        password: 'parola123',
-        name: 'Adrian Stanca',
-        role: 'super_admin' as const,
-        companyId: 'company-1',
-        permissions: ['*']
-    },
-    {
-        id: 'user-2',
-        email: 'adrian@ascladdingltd.co.uk',
-        password: 'lolozania1',
-        name: 'Adrian ASC',
-        role: 'company_admin' as const,
-        companyId: 'company-2',
-        permissions: ['company:*']
-    },
-    {
-        id: 'user-3',
-        email: 'adrian.stanca1@icloud.com',
-        password: 'password123',
-        name: 'Adrian Developer',
-        role: 'developer' as const,
-        companyId: 'company-2',
-        permissions: ['project:read', 'task:*']
-    }
-];
-
-/**
- * Login with email and password
- */
-export const login = async (email: string, password: string): Promise<User> => {
-    console.log('🔐 [AuthService] Login attempt:', email);
-
-    try {
-        const response = await api.post('/auth/login', { email, password });
-
-        if (response.data.success) {
-            // Save token
-            localStorage.setItem(TOKEN_KEY, response.data.token);
-
-            console.log('✅ [AuthService] Login successful:', response.data.user.name);
-
-            return response.data.user;
-        } else {
-            throw new Error(response.data.error || 'Login failed');
+    // Add response interceptor to handle token refresh
+    this.api.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('authToken');
+          window.location.href = '/login';
         }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  async login(email: string, password: string): Promise<User> {
+    console.log("🔐 [AuthService] Login attempt:", email);
+    try {
+      const response = await this.api.post('/auth/login', {
+        email,
+        password,
+      });
+
+      if (response.data.success) {
+        localStorage.setItem('authToken', response.data.token);
+        console.log("✅ [AuthService] Login successful:", response.data.user.name);
+        return response.data.user;
+      }
+      throw new Error(response.data.error || "Login failed");
     } catch (error: any) {
-        console.error('❌ [AuthService] Login failed:', error.response?.data?.error || error.message);
-
-        // Fallback to mock authentication if backend is not available
-        console.log('🔄 [AuthService] Trying mock authentication...');
-        const mockUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-
-        if (mockUser) {
-            const user: User = {
-                id: mockUser.id,
-                email: mockUser.email,
-                name: mockUser.name,
-                role: mockUser.role,
-                companyId: mockUser.companyId,
-                avatar: (mockUser as any).avatar || ''
-            };
-
-            // Save mock token
-            localStorage.setItem(TOKEN_KEY, 'mock-token-' + mockUser.id);
-
-            console.log('✅ [AuthService] Mock login successful:', user.name);
-            return user;
-        }
-
-        throw new Error('Invalid email or password');
+      console.error("❌ [AuthService] Login failed:", error.response?.data?.error || error.message);
+      throw new Error(error.response?.data?.error || "Login failed");
     }
-};
+  }
 
-/**
- * Register new user
- */
-export const register = async (
-    email: string,
-    password: string,
-    name: string,
-    companyName: string
-): Promise<User> => {
-    console.log('📝 [AuthService] Register attempt:', email);
-
+  async logout(): Promise<void> {
     try {
-        const response = await api.post('/auth/register', {
-            email,
-            password,
-            name,
-            companyName
-        });
-
-        if (response.data.success) {
-            // Save token
-            localStorage.setItem(TOKEN_KEY, response.data.token);
-
-            console.log('✅ [AuthService] Registration successful:', response.data.user.name);
-
-            return response.data.user;
-        } else {
-            throw new Error(response.data.error || 'Registration failed');
-        }
-    } catch (error: any) {
-        console.error('❌ [AuthService] Registration failed:', error.response?.data?.error || error.message);
-        throw new Error(error.response?.data?.error || 'Registration failed');
-    }
-};
-
-/**
- * Clear all cookies
- */
-const clearAllCookies = (): void => {
-    const cookies = document.cookie.split(';');
-
-    for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i];
-        const eqPos = cookie.indexOf('=');
-        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-
-        // Clear cookie for all paths and domains
-        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + window.location.hostname;
-        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.' + window.location.hostname;
-    }
-
-    console.log('🍪 [AuthService] All cookies cleared');
-};
-
-/**
- * Logout current user
- */
-export const logout = async (): Promise<void> => {
-    console.log('👋 [AuthService] Logout - Clearing all session data');
-
-    const tokenBefore = localStorage.getItem(TOKEN_KEY);
-    console.log('🔍 [AuthService] Token before logout:', tokenBefore ? 'EXISTS' : 'NULL');
-
-    try {
-        // Call server logout endpoint
-        await api.post('/auth/logout');
-        console.log('✅ [AuthService] Server logout successful');
+      await this.api.post('/auth/logout');
     } catch (error) {
-        console.error('❌ [AuthService] Server logout error:', error);
+      console.error("Logout error:", error);
     } finally {
-        // Clear ALL localStorage data
-        console.log('🗑️ [AuthService] Clearing localStorage...');
-        localStorage.clear();
-
-        const tokenAfterClear = localStorage.getItem(TOKEN_KEY);
-        console.log('🔍 [AuthService] Token after clear:', tokenAfterClear ? 'STILL EXISTS!' : 'NULL ✅');
-
-        // Clear ALL sessionStorage data
-        console.log('🗑️ [AuthService] Clearing sessionStorage...');
-        sessionStorage.clear();
-
-        // Clear ALL cookies
-        console.log('🗑️ [AuthService] Clearing cookies...');
-        clearAllCookies();
-
-        // Dispatch logout event for landing page
-        window.dispatchEvent(new CustomEvent('userLoggedOut'));
-
-        console.log('✅ [AuthService] All session data cleared (localStorage, sessionStorage, cookies)');
+      localStorage.removeItem('authToken');
     }
-};
+  }
 
-/**
- * Get current user profile
- * DISABLED: Always returns null to prevent auto-login
- * User must explicitly click Login button
- */
-export const getCurrentUser = async (): Promise<User | null> => {
-    console.log('🔍 [AuthService] getCurrentUser - AUTO-LOGIN DISABLED');
-    console.log('ℹ️ [AuthService] User must click Login button to authenticate');
-
-    // Always return null - no auto-login from localStorage
-    return null;
-};
-
-/**
- * Check if user is authenticated
- */
-export const isAuthenticated = (): boolean => {
-    return localStorage.getItem(TOKEN_KEY) !== null;
-};
-
-/**
- * Refresh session token
- */
-export const refreshSession = async (): Promise<void> => {
+  async verifyToken(token: string): Promise<User> {
     try {
-        const response = await api.post('/auth/refresh');
-
-        if (response.data.success) {
-            localStorage.setItem(TOKEN_KEY, response.data.token);
-            console.log('🔄 [AuthService] Session refreshed');
-        }
+      const response = await this.api.post('/auth/verify', { token });
+      return response.data.user;
     } catch (error) {
-        console.error('Refresh session error:', error);
-        localStorage.removeItem(TOKEN_KEY);
+      throw new Error("Token verification failed");
     }
-};
+  }
 
-/**
- * OAuth login (for future implementation)
- */
-export const loginWithOAuth = async (provider: 'google' | 'github'): Promise<User> => {
-    console.log(`🔐 [AuthService] OAuth login with ${provider}`);
-
-    // For now, redirect to demo login
-    throw new Error('OAuth not implemented yet. Please use email/password login.');
-};
-
-/**
- * Refresh authentication token
- */
-export const refreshToken = async (): Promise<string> => {
-    console.log('🔄 [AuthService] Refreshing token');
+  async getCurrentUser(): Promise<User | null> {
+    const token = localStorage.getItem('authToken');
+    if (!token) return null;
 
     try {
-        const response = await api.post('/auth/refresh');
-
-        if (response.data.success) {
-            const newToken = response.data.token;
-            localStorage.setItem(TOKEN_KEY, newToken);
-            console.log('✅ [AuthService] Token refreshed successfully');
-            return newToken;
-        } else {
-            throw new Error(response.data.error || 'Token refresh failed');
-        }
-    } catch (error: any) {
-        console.error('❌ [AuthService] Token refresh failed:', error.message);
-        localStorage.removeItem(TOKEN_KEY);
-        throw error;
+      return await this.verifyToken(token);
+    } catch (error) {
+      localStorage.removeItem('authToken');
+      return null;
     }
-};
+  }
 
-/**
- * Get developer modules
- */
-export const getDeveloperModules = async (): Promise<any> => {
-    console.log('📦 [AuthService] Fetching developer modules');
-
+  async register(userData: {
+    email: string;
+    password: string;
+    name: string;
+    role?: string;
+  }): Promise<User> {
     try {
-        const response = await api.get('/developer/modules');
-        console.log('✅ [AuthService] Developer modules fetched successfully');
-        return response.data;
+      const response = await this.api.post('/auth/register', userData);
+      if (response.data.success) {
+        localStorage.setItem('authToken', response.data.token);
+        return response.data.user;
+      }
+      throw new Error(response.data.error || "Registration failed");
     } catch (error: any) {
-        console.error('❌ [AuthService] Failed to fetch developer modules:', error.message);
-        throw error;
+      throw new Error(error.response?.data?.error || "Registration failed");
     }
-};
+  }
 
-/**
- * Get API keys
- */
-export const getApiKeys = async (): Promise<any> => {
-    console.log('🔑 [AuthService] Fetching API keys');
-
+  async updateProfile(userData: Partial<User>): Promise<User> {
     try {
-        const response = await api.get('/developer/api-keys');
-        console.log('✅ [AuthService] API keys fetched successfully');
-        return response.data;
+      const response = await this.api.put('/auth/profile', userData);
+      return response.data.user;
     } catch (error: any) {
-        console.error('❌ [AuthService] Failed to fetch API keys:', error.message);
-        throw error;
+      throw new Error(error.response?.data?.error || "Profile update failed");
     }
-};
+  }
 
-/**
- * Get webhooks
- */
-export const getWebhooks = async (): Promise<any> => {
-    console.log('훅 [AuthService] Fetching webhooks');
-
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
-        const response = await api.get('/developer/webhooks');
-        console.log('✅ [AuthService] Webhooks fetched successfully');
-        return response.data;
+      await this.api.post('/auth/change-password', {
+        currentPassword,
+        newPassword,
+      });
     } catch (error: any) {
-        console.error('❌ [AuthService] Failed to fetch webhooks:', error.message);
-        throw error;
+      throw new Error(error.response?.data?.error || "Password change failed");
     }
-};
+  }
 
-/**
- * Get health status
- */
-export const getHealthStatus = async (): Promise<any> => {
-    console.log('🏥 [AuthService] Fetching health status');
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('authToken');
+  }
 
-    try {
-        const response = await api.get('/health');
-        console.log('✅ [AuthService] Health status fetched successfully');
-        return response.data;
-    } catch (error: any) {
-        console.error('❌ [AuthService] Failed to fetch health status:', error.message);
-        return {
-            status: 'error',
-            message: error.message,
-            timestamp: new Date().toISOString()
-        };
-    }
-};
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  }
+}
 
+export const authService = new AuthService();
+
+// Export individual methods for easier imports
+export const login = authService.login.bind(authService);
+export const logout = authService.logout.bind(authService);
+export const register = authService.register.bind(authService);
+export const getCurrentUser = authService.getCurrentUser.bind(authService);
+export const verifyToken = authService.verifyToken.bind(authService);
+export const updateProfile = authService.updateProfile.bind(authService);
+export const changePassword = authService.changePassword.bind(authService);
+export const isAuthenticated = authService.isAuthenticated.bind(authService);
+export const getToken = authService.getToken.bind(authService);

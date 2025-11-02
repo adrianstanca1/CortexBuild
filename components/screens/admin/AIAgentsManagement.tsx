@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { User, AIAgent } from '../../../types';
-import * as api from '../../../api';
+import { User } from '../../../types';
+import apiClient from '../../../src/services/apiClient';
 
 interface AIAgentsManagementProps {
     currentUser: User;
 }
 
 const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) => {
-    const [agents, setAgents] = useState<AIAgent[]>([]);
+    const [agents, setAgents] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null);
+    const [editingAgent, setEditingAgent] = useState<any | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        category: 'safety' as AIAgent['category'],
+        category: 'safety',
         priceMonthly: 0,
         priceYearly: 0,
         features: [] as string[],
@@ -24,7 +24,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         bannerUrl: '',
         isActive: true,
         isFeatured: false,
-        minPlan: 'basic' as AIAgent['minPlan']
+        minPlan: 'basic'
     });
 
     useEffect(() => {
@@ -35,7 +35,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         setIsLoading(true);
         setError(null);
         try {
-            const agentsData = await api.fetchAvailableAIAgents();
+            const agentsData = await apiClient.fetchAvailableAIAgents();
             setAgents(agentsData);
         } catch (err: any) {
             console.error('Error loading AI agents:', err);
@@ -69,7 +69,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         setError(null);
 
         try {
-            await api.createAIAgent(formData);
+            await apiClient.createAIAgent(currentUser, formData);
             resetForm();
             loadAgents();
         } catch (err: any) {
@@ -77,7 +77,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         }
     };
 
-    const handleEditAgent = (agent: AIAgent) => {
+    const handleEditAgent = (agent: any) => {
         setEditingAgent(agent);
         setFormData({
             name: agent.name,
@@ -101,7 +101,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
         setError(null);
 
         try {
-            await api.updateAIAgent(editingAgent!.id, formData);
+            await apiClient.updateAIAgent(currentUser, editingAgent!.id, formData);
             resetForm();
             loadAgents();
         } catch (err: any) {
@@ -111,7 +111,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
 
     const handleToggleAgentStatus = async (agentId: string, isActive: boolean) => {
         try {
-            await api.toggleAIAgentStatus(agentId, isActive);
+            await apiClient.toggleAIAgentStatus(currentUser, agentId, isActive);
             loadAgents();
         } catch (err: any) {
             setError(err.message || 'Failed to update agent status');
@@ -202,7 +202,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 </label>
                                 <select
                                     value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value as AIAgent['category'] })}
+                                    onChange={(e) => setFormData({...formData, category: e.target.value})}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     title="Category"
                                 >
@@ -301,7 +301,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                             </label>
                             <select
                                 value={formData.minPlan}
-                                onChange={(e) => setFormData({ ...formData, minPlan: e.target.value as AIAgent['minPlan'] })}
+                                onChange={(e) => setFormData({...formData, minPlan: e.target.value})}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 title="Minimum Plan"
                             >

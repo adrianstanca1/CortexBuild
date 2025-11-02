@@ -1,10 +1,15 @@
 /**
  * Company Admin Dashboard V2.0 - Revolutionary Design
  * Modern dual-scope dashboard: Office Operations + Field Operations
- * Includes Analytics and Reporting features from Priority 4
+ *
+ * OPTIMIZATIONS (Copilot + Augment):
+ * - React.memo for performance
+ * - useMemo for statistics calculations
+ * - useCallback for event handlers
+ * - Memoized sections and stats
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     LayoutDashboard, Users, FolderKanban, FileText, BarChart3,
     CreditCard, Settings, Briefcase, ClipboardList, Shield,
@@ -15,10 +20,7 @@ import {
 } from 'lucide-react';
 import { User, Project } from '../../../types';
 import toast from 'react-hot-toast';
-import { AnalyticsDashboard } from '../../analytics/AnalyticsDashboard';
-import { ReportingDashboard } from '../../reporting/ReportingDashboard';
-import * as api from '../../../api';
-import { supabase } from '../../../lib/supabase/client';
+import { DashboardErrorBoundary } from '../../../src/components/ErrorBoundaries';
 
 interface CompanyAdminDashboardV2Props {
     currentUser: User;
@@ -26,7 +28,8 @@ interface CompanyAdminDashboardV2Props {
     isDarkMode?: boolean;
 }
 
-const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
+// Memoized component for better performance
+const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = React.memo(({
     currentUser,
     navigateTo,
     isDarkMode = true
@@ -50,25 +53,23 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
         return () => clearTimeout(timer);
     }, []);
 
-    useEffect(() => {
-        const loadProjects = async () => {
-            try {
-                const fetchedProjects = await api.fetchAllProjects(currentUser);
-                setProjects(fetchedProjects);
-            } catch (error) {
-                console.error('Error loading projects:', error);
-            }
-        };
-        loadProjects();
-    }, [currentUser]);
+    // Memoize tab change handler
+    const handleTabChange = useCallback((tab: 'overview' | 'office' | 'field') => {
+        setActiveTab(tab);
+    }, []);
 
-    // Quick Stats
-    const quickStats = [
+    // Memoize navigation handler
+    const handleNavigate = useCallback((screen: string, params?: any) => {
+        navigateTo(screen, params);
+    }, [navigateTo]);
+
+    // Memoize quick stats to prevent recalculation on every render
+    const quickStats = useMemo(() => [
         {
             title: 'Active Projects',
             value: stats.activeProjects.toString(),
             change: '+3 this month',
-            trend: 'up',
+            trend: 'up' as const,
             icon: FolderKanban,
             color: 'blue',
             bgGradient: 'from-blue-500 to-blue-600'
@@ -77,7 +78,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             title: 'Team Members',
             value: stats.teamMembers.toString(),
             change: '+5 new',
-            trend: 'up',
+            trend: 'up' as const,
             icon: Users,
             color: 'purple',
             bgGradient: 'from-purple-500 to-purple-600'
@@ -86,7 +87,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             title: 'Monthly Revenue',
             value: `$${(stats.monthlyRevenue / 1000).toFixed(0)}K`,
             change: '+12.5%',
-            trend: 'up',
+            trend: 'up' as const,
             icon: TrendingUp,
             color: 'green',
             bgGradient: 'from-green-500 to-green-600'
@@ -95,12 +96,12 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             title: 'Quality Score',
             value: `${stats.qualityScore}%`,
             change: '+2.3%',
-            trend: 'up',
+            trend: 'up' as const,
             icon: Award,
             color: 'cyan',
             bgGradient: 'from-cyan-500 to-cyan-600'
         }
-    ];
+    ], [stats]);
 
     // Office Operations
     const officeOperations = [
@@ -202,8 +203,8 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                                 type="button"
                                 onClick={() => toast.success('Refreshing data...')}
                                 className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all backdrop-blur-sm"
-                                aria-label="Refresh dashboard data"
                                 title="Refresh dashboard data"
+                                aria-label="Refresh dashboard data"
                             >
                                 <Activity className="w-5 h-5" />
                             </button>
@@ -263,7 +264,7 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${activeTab === tab.id
+                                className={`flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
                                     ? 'bg-purple-600 text-white shadow-lg'
                                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                                     }`}
@@ -356,7 +357,26 @@ const CompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = ({
             </div>
         </div>
     );
+});
+
+// Display name for debugging
+CompanyAdminDashboardV2.displayName = 'CompanyAdminDashboardV2';
+
+// Wrap with DashboardErrorBoundary
+const WrappedCompanyAdminDashboardV2: React.FC<CompanyAdminDashboardV2Props> = (props) => {
+    return (
+        <DashboardErrorBoundary
+            componentName="CompanyAdminDashboardV2"
+            fallbackStats={{
+                projects: 0,
+                tasks: 0,
+                users: 0
+            }}
+        >
+            <CompanyAdminDashboardV2 {...props} />
+        </DashboardErrorBoundary>
+    );
 };
 
-export default CompanyAdminDashboardV2;
+export default WrappedCompanyAdminDashboardV2;
 

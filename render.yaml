@@ -1,6 +1,7 @@
 services:
+  # Backend API Service
   - type: web
-    name: cortexbuild-backend
+    name: cortexbuild-api
     env: node
     region: oregon
     plan: free
@@ -10,13 +11,12 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 5000
-      - key: JWT_SECRET
-        generateValue: true
-      - key: FRONTEND_URL
-        value: https://cortex-build-mcnrk7yba-adrian-b7e84541.vercel.app
+        value: 3001
       - key: VITE_SUPABASE_URL
-        value: https://qglvhxkgbzujglehewsa.supabase.co
-      - key: SUPABASE_SERVICE_KEY
-        sync: false # Must be set manually in Render dashboard
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /api/auth/me
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Project, RFI, Screen, User } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { usePermissions } from '../../hooks/usePermissions';
 import { ChevronLeftIcon, PlusIcon, QuestionMarkCircleIcon, ChevronDownIcon } from '../Icons';
 
@@ -50,7 +50,7 @@ const RFIsScreen: React.FC<RFIsScreenProps> = ({ project, navigateTo, goBack, cu
     useEffect(() => {
         const loadRFIs = async () => {
             setIsLoading(true);
-            const projectRFIs = await api.fetchRFIsForProject(project.id);
+            const projectRFIs = await apiClient.fetchRFIsForProject(project.id);
             setRfis(projectRFIs);
             setIsLoading(false);
         };

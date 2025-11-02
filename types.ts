@@ -1,14 +1,18 @@
 
 // Fix: Broke circular dependency by defining UserRole, PermissionSubject, and PermissionAction types directly in this file.
-export type UserRole = 
+export type UserRole =
     | 'super_admin'
     | 'developer'
     | 'company_admin'
+    | 'developer'
     | 'Project Manager'
+    | 'project_manager'
     | 'Foreman'
+    | 'supervisor'
     | 'Safety Officer'
     | 'Accounting Clerk'
-    | 'operative';
+    | 'operative'
+    | 'field_worker';
 
 export type PermissionSubject = 
     | 'task'
@@ -142,14 +146,18 @@ export type Screen =
     | 'automation-studio'
     | 'developer-workspace'
     | 'developer-console'
+    | 'developer-workspace'
     | 'company-admin-dashboard'
     | 'company-admin-legacy'
     | 'super-admin-dashboard'
     | 'sdk-developer'
     | 'my-apps-desktop'
-    // Global Marketplace
-    | 'marketplace'
+    // Workflow Builders
+    | 'n8n-procore-builder'
+    | 'construction-oracle'
     | 'my-applications'
+    // Marketplace screens
+    | 'marketplace'
     | 'admin-review'
     | 'developer-submissions'
     // Admin screens
@@ -261,10 +269,16 @@ export interface Drawing {
 
 export interface Document {
     id: string;
-    projectId: string;
+    projectId?: string;
     name: string;
-    url: string;
-    uploadedAt: string;
+    url?: string;
+    uploadedAt?: string;
+    type?: string;
+    size?: string;
+    project?: string;
+    uploadedBy?: string;
+    uploadDate?: string;
+    category?: string;
 }
 
 export interface SiteInstruction {

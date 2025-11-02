@@ -20,6 +20,7 @@ import {
     Scan
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import './SmartProcurementAssistant.css';
 
 interface SmartProcurementAssistantProps {
     isDarkMode?: boolean;
@@ -193,9 +194,8 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Materials List */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className={`p-6 rounded-2xl border ${
-                            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                        }`}>
+                        <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                            }`}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                     Materials Inventory
@@ -213,17 +213,17 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                             <div className="space-y-3">
                                 {materials.map(material => {
                                     const isLowStock = material.currentStock < material.minStock;
-                                    const stockPercentage = (material.currentStock / material.minStock) * 100;
+                                    const progressMax = Math.max(material.minStock, 1);
+                                    const progressValue = Math.min(material.currentStock, progressMax);
 
                                     return (
                                         <div
                                             key={material.id}
                                             onClick={() => setSelectedMaterial(material)}
-                                            className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                                                selectedMaterial?.id === material.id
+                                            className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedMaterial?.id === material.id
                                                     ? 'border-purple-500 bg-purple-500/10'
                                                     : isDarkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-start justify-between mb-3">
                                                 <div>
@@ -268,14 +268,11 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                                                 </div>
                                             </div>
 
-                                            <div className={`h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                                                <div 
-                                                    className={`h-full transition-all ${
-                                                        isLowStock ? 'bg-red-500' : 'bg-green-500'
-                                                    }`}
-                                                    style={{ width: `${Math.min(stockPercentage, 100)}%` }}
-                                                />
-                                            </div>
+                                            <progress
+                                                className={`stock-progress ${isDarkMode ? 'stock-progress--dark' : 'stock-progress--light'} ${isLowStock ? 'stock-progress--low' : 'stock-progress--ok'}`}
+                                                value={progressValue}
+                                                max={progressMax}
+                                            />
                                         </div>
                                     );
                                 })}
@@ -286,9 +283,8 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                     {/* Vendor Comparison */}
                     <div className="space-y-6">
                         {selectedMaterial ? (
-                            <div className={`p-6 rounded-2xl border ${
-                                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                            }`}>
+                            <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                                }`}>
                                 <h3 className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                     Vendor Comparison
                                 </h3>
@@ -305,11 +301,10 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                                         value={orderQuantity}
                                         onChange={(e) => setOrderQuantity(e.target.value)}
                                         placeholder="Enter quantity"
-                                        className={`w-full px-4 py-3 rounded-xl border ${
-                                            isDarkMode 
-                                                ? 'bg-gray-700 text-white border-gray-600' 
+                                        className={`w-full px-4 py-3 rounded-xl border ${isDarkMode
+                                                ? 'bg-gray-700 text-white border-gray-600'
                                                 : 'bg-white text-gray-900 border-gray-300'
-                                        } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                            } focus:outline-none focus:ring-2 focus:ring-purple-500`}
                                     />
                                 </div>
 
@@ -317,9 +312,8 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                                     {selectedMaterial.vendors.map(vendor => (
                                         <div
                                             key={vendor.id}
-                                            className={`p-4 rounded-xl border ${
-                                                isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
-                                            }`}
+                                            className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+                                                }`}
                                         >
                                             <div className="flex items-center justify-between mb-2">
                                                 <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -329,9 +323,8 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                                                     {[...Array(5)].map((_, i) => (
                                                         <div
                                                             key={i}
-                                                            className={`w-3 h-3 rounded-full ${
-                                                                i < Math.floor(vendor.rating) ? 'bg-yellow-500' : 'bg-gray-600'
-                                                            }`}
+                                                            className={`w-3 h-3 rounded-full ${i < Math.floor(vendor.rating) ? 'bg-yellow-500' : 'bg-gray-600'
+                                                                }`}
                                                         />
                                                     ))}
                                                 </div>
@@ -371,9 +364,8 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
                                 </div>
                             </div>
                         ) : (
-                            <div className={`p-6 rounded-2xl border ${
-                                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                            }`}>
+                            <div className={`p-6 rounded-2xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                                }`}>
                                 <div className="text-center py-12">
                                     <Search className={`h-16 w-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
                                     <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>

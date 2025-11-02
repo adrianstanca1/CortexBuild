@@ -36,18 +36,17 @@ import {
     Folder,
     GitBranch,
     BarChart3,
-    Shield,
-    Users,
-    Share2,
-    CreditCard
+    Users
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { EditorErrorBoundary } from '../../../src/components/ErrorBoundaries';
 import FileExplorer from '../../developer/FileExplorer';
 import GitPanel from '../../developer/GitPanel';
 import DatabaseViewer from '../../developer/DatabaseViewer';
 import APITester from '../../developer/APITester';
 import Marketplace from '../../apps/Marketplace';
 import AppContainer, { MiniApp } from '../../apps/AppContainer';
+import MagicSDK from '../../developer/MagicSDK';
 import { APP_REGISTRY, installApp as installAppInRegistry } from '../../apps/appRegistry';
 
 // Advanced Development Platform Components
@@ -56,12 +55,6 @@ import GitIntegration from '../../development/GitIntegration';
 import APIBuilder from '../../development/APIBuilder';
 import TestingFramework from '../../development/TestingFramework';
 import AnalyticsDashboard from '../../development/AnalyticsDashboard';
-
-// User Management Components
-import UserRolesPermissions from '../../user-management/UserRolesPermissions';
-import TeamCollaboration from '../../user-management/TeamCollaboration';
-import AppSharingReviews from '../../user-management/AppSharingReviews';
-import BillingPayments from '../../user-management/BillingPayments';
 
 interface ConsoleLog {
     id: string;
@@ -212,7 +205,7 @@ console.log(user);`
 
 const EnhancedDeveloperConsole: React.FC<EnhancedDeveloperConsoleProps> = ({ onLogout, navigateTo }) => {
     // State
-    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps' | 'code-editor' | 'git-integration' | 'api-builder' | 'testing' | 'analytics' | 'user-roles' | 'teams' | 'app-sharing' | 'billing'>('console');
+    const [activeTab, setActiveTab] = useState<'console' | 'ai' | 'snippets' | 'terminal' | 'files' | 'git' | 'database' | 'api' | 'apps' | 'code-editor' | 'git-integration' | 'api-builder' | 'testing' | 'analytics' | 'magic-sdk'>('console');
     const [apps, setApps] = useState<MiniApp[]>(APP_REGISTRY);
     const [runningApp, setRunningApp] = useState<MiniApp | null>(null);
     const [code, setCode] = useState<string>('// Write your code here\nconsole.log("Hello, Developer!");');
@@ -597,6 +590,22 @@ Could you be more specific about what you need?`;
                         </button>
                         <button
                             type="button"
+                            onClick={() => setActiveTab('magic-sdk')}
+                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'magic-sdk'
+                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transform scale-105'
+                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Sparkles className={`h-4 w-4 ${activeTab === 'magic-sdk' ? 'animate-pulse' : ''}`} />
+                                Magic SDK
+                            </div>
+                            {activeTab === 'magic-sdk' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
+                            )}
+                        </button>
+                        <button
+                            type="button"
                             onClick={() => setActiveTab('snippets')}
                             className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'snippets'
                                 ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg transform scale-105'
@@ -796,76 +805,7 @@ Could you be more specific about what you need?`;
                         </button>
                     </div>
 
-                    {/* User Management Tabs */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                        <div className={`px-4 py-2 rounded-lg ${isDarkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'} text-xs font-semibold`}>
-                            USER MANAGEMENT
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('user-roles')}
-                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'user-roles'
-                                ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg transform scale-105'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Shield className={`h-4 w-4 ${activeTab === 'user-roles' ? 'animate-pulse' : ''}`} />
-                                User Roles
-                            </div>
-                            {activeTab === 'user-roles' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-400 to-red-500 rounded-full"></div>
-                            )}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('teams')}
-                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'teams'
-                                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg transform scale-105'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Users className={`h-4 w-4 ${activeTab === 'teams' ? 'animate-pulse' : ''}`} />
-                                Teams
-                            </div>
-                            {activeTab === 'teams' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"></div>
-                            )}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('app-sharing')}
-                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'app-sharing'
-                                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg transform scale-105'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Share2 className={`h-4 w-4 ${activeTab === 'app-sharing' ? 'animate-pulse' : ''}`} />
-                                App Sharing
-                            </div>
-                            {activeTab === 'app-sharing' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full"></div>
-                            )}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('billing')}
-                            className={`relative px-6 py-3 font-semibold text-sm transition-all duration-300 rounded-t-lg ${activeTab === 'billing'
-                                ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white shadow-lg transform scale-105'
-                                : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <CreditCard className={`h-4 w-4 ${activeTab === 'billing' ? 'animate-pulse' : ''}`} />
-                                Billing
-                            </div>
-                            {activeTab === 'billing' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 to-yellow-500 rounded-full"></div>
-                            )}
-                        </button>
-                    </div>
+
                 </div>
             </div>
 
@@ -1175,7 +1115,9 @@ Could you be more specific about what you need?`;
                 {/* Advanced Code Editor Tab */}
                 {activeTab === 'code-editor' && (
                     <div className="h-[700px]">
-                        <AdvancedCodeEditor isDarkMode={isDarkMode} />
+                        <EditorErrorBoundary componentName="Enhanced Developer Console - Code Editor">
+                            <AdvancedCodeEditor isDarkMode={isDarkMode} />
+                        </EditorErrorBoundary>
                     </div>
                 )}
 
@@ -1207,31 +1149,12 @@ Could you be more specific about what you need?`;
                     </div>
                 )}
 
-                {/* User Roles & Permissions Tab */}
-                {activeTab === 'user-roles' && (
-                    <div className="h-[700px]">
-                        <UserRolesPermissions isDarkMode={isDarkMode} />
-                    </div>
-                )}
 
-                {/* Team Collaboration Tab */}
-                {activeTab === 'teams' && (
-                    <div className="h-[700px]">
-                        <TeamCollaboration isDarkMode={isDarkMode} />
-                    </div>
-                )}
 
-                {/* App Sharing & Reviews Tab */}
-                {activeTab === 'app-sharing' && (
+                {/* Magic SDK Tab */}
+                {activeTab === 'magic-sdk' && (
                     <div className="h-[700px]">
-                        <AppSharingReviews isDarkMode={isDarkMode} />
-                    </div>
-                )}
-
-                {/* Billing & Payments Tab */}
-                {activeTab === 'billing' && (
-                    <div className="h-[700px]">
-                        <BillingPayments isDarkMode={isDarkMode} />
+                        <MagicSDK isDarkMode={isDarkMode} />
                     </div>
                 )}
 
@@ -1281,6 +1204,18 @@ Could you be more specific about what you need?`;
                                             <Sparkles className="h-4 w-4 text-purple-500" />
                                             <div>
                                                 <div className={textClass}>Open AI Assistant</div>
+                                                <div className="text-xs text-gray-500">Get AI help and suggestions</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={() => { setActiveTab('magic-sdk'); setShowCommandPalette(false); }}
+                                        className={`w-full text-left px-4 py-2 rounded ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Sparkles className="h-4 w-4 text-pink-500" />
+                                            <div>
+                                                <div className={textClass}>Open Magic SDK</div>
                                                 <div className="text-xs text-gray-500">Get coding help from AI</div>
                                             </div>
                                         </div>

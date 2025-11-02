@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 // Fix: Added .ts extension to import
 import { Project, User, Attachment } from '../../types';
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 // Fix: Added .tsx extension to import
 import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, PaperClipIcon, SparklesIcon, ArrowPathIcon, TrashIcon } from '../Icons';
 
@@ -60,8 +60,8 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
             dueDate,
             attachments: attachmentsForApi,
         };
-
-        await api.createRFI(newRFI);
+        
+        await apiClient.createRFI(newRFI, currentUser);
         alert('RFI created successfully!');
         goBack();
     };
@@ -75,7 +75,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
         setIsSuggesting(true);
         setAiSuggestion(null);
         try {
-            const suggestions = await api.getAIRFISuggestions(subject);
+            const suggestions = await apiClient.getAIRFISuggestions(subject, question, possibleAssignees);
             if (suggestions) {
                 setAiSuggestion(suggestions);
             } else {

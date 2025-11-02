@@ -1,11 +1,10 @@
 import React from 'react';
 import { User, Screen, PermissionAction, PermissionSubject } from '../../types';
-import SupervisorDashboard from './dashboards/SupervisorDashboard';
-import OperativeDashboard from './dashboards/OperativeDashboard';
-import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard';
-import DeveloperWorkspaceScreen from './developer/DeveloperWorkspaceScreen';
+import PlatformAdminScreen from './admin/PlatformAdminScreen';
+import SuperAdminDashboardScreen from './admin/SuperAdminDashboardScreen';
 import CompanyAdminDashboardV2 from './company/CompanyAdminDashboardV2';
-import UnifiedAdminDashboard from './admin/UnifiedAdminDashboard';
+import DeveloperWorkspaceScreen from './developer/DeveloperWorkspaceScreen';
+import DeveloperDashboardV2 from './developer/DeveloperDashboardV2';
 
 
 interface UnifiedDashboardScreenProps {
@@ -19,34 +18,56 @@ interface UnifiedDashboardScreenProps {
     goBack: () => void;
 }
 
-const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) => {
-    const { currentUser } = props;
+// Separate component for super_admin to handle useState properly
+const SuperAdminDashboardWrapper: React.FC<UnifiedDashboardScreenProps> = (props) => {
     const [showEnhancedDashboard, setShowEnhancedDashboard] = React.useState(true);
 
-    // Route to the correct dashboard based on the user's role
-    switch (currentUser.role) {
-        case 'super_admin':
-            return <UnifiedAdminDashboard currentUser={currentUser} />;
-
-        case 'developer':
-            return <DeveloperWorkspaceScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
-
-        case 'company_admin':
-            return <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={props.navigateTo} />;
-        case 'Project Manager':
-        case 'Accounting Clerk':
-            return <EnhancedDashboard />;
-
-        case 'Foreman':
-        case 'Safety Officer':
-            return <SupervisorDashboard {...props} />;
-
-        case 'operative':
-            return <OperativeDashboard {...props} />;
-
-        default:
-            return <EnhancedDashboard />;
+    if (showEnhancedDashboard) {
+        return (
+            <div>
+                <div className="mb-4 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={() => setShowEnhancedDashboard(false)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Switch to Platform Admin
+                    </button>
+                </div>
+                <SuperAdminDashboardScreen />
+            </div>
+        );
     }
+    return (
+        <div>
+            <div className="mb-4 flex justify-end">
+                <button
+                    type="button"
+                    onClick={() => setShowEnhancedDashboard(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Back to Super Admin Dashboard
+                </button>
+            </div>
+            <PlatformAdminScreen {...props} />
+        </div>
+    );
+};
+
+const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) => {
+    const { currentUser } = props;
+
+    // Route to the correct dashboard based on the user's role
+    if (currentUser.role === 'super_admin') {
+        return <SuperAdminDashboardWrapper {...props} />;
+    }
+
+    if (currentUser.role === 'developer') {
+        return <DeveloperDashboardV2 currentUser={currentUser} navigateTo={props.navigateTo} isDarkMode={true} />;
+    }
+
+    // Default for all other roles
+    return <CompanyAdminDashboardV2 currentUser={currentUser} navigateTo={props.navigateTo} isDarkMode={true} />;
 };
 
 export default UnifiedDashboardScreen;

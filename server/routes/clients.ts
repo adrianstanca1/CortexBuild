@@ -5,22 +5,31 @@
 import { Router, Request, Response } from 'express';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Client, ApiResponse, PaginatedResponse } from '../types';
+import {
+  validateBody,
+  validateQuery,
+  validateParams,
+  createClientSchema,
+  updateClientSchema,
+  clientFiltersSchema,
+  idParamSchema
+} from '../utils/validation';
 
 export function createClientsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/clients - List all clients
-  router.get('/', async (req: Request, res: Response) => {
+  router.get('/', validateQuery(clientFiltersSchema), (req: Request, res: Response) => {
     try {
       const {
         search,
         is_active,
-        page = '1',
-        limit = '20'
+        page = 1,
+        limit = 20
       } = req.query as any;
 
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      const pageNum = page;
+      const limitNum = limit;
       const offset = (pageNum - 1) * limitNum;
 
       let query = supabase
@@ -64,7 +73,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   });
 
   // GET /api/clients/:id - Get single client
-  router.get('/:id', async (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -114,7 +123,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   });
 
   // POST /api/clients - Create new client
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', validateBody(createClientSchema), (req: Request, res: Response) => {
     try {
       const {
         company_id,
@@ -134,34 +143,15 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
         notes
       } = req.body;
 
-      if (!company_id || !name) {
-        return res.status(400).json({
-          success: false,
-          error: 'Company ID and name are required'
-        });
-      }
-
-      const { data: client, error } = await supabase
-        .from('clients')
-        .insert({
-          company_id,
-          name,
-          contact_name,
-          email,
-          phone,
-          address,
-          city,
-          state,
-          zip_code,
-          country,
-          website,
-          tax_id,
-          payment_terms,
-          credit_limit,
-          notes
-        })
-        .select()
-        .single();
+      const result = db.prepare(`
+        INSERT INTO clients (
+          company_id, name, contact_name, email, phone, address, city, state,
+          zip_code, country, website, tax_id, payment_terms, credit_limit, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        company_id, name, contact_name, email, phone, address, city, state,
+        zip_code, country, website, tax_id, payment_terms, credit_limit, notes
+      );
 
       if (error) throw error;
 
@@ -180,7 +170,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   });
 
   // PUT /api/clients/:id - Update client
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateClientSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -199,20 +189,8 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
         });
       }
 
-      const { id: _, ...updateData } = updates;
-      if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'No fields to update'
-        });
-      }
-
-      const { data: client, error } = await supabase
-        .from('clients')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
+      const setClause = fields.map(field => `${field} = ?`).join(', ');
+      const values = fields.map(field => updates[field]);
 
       if (error) throw error;
 
@@ -231,7 +209,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   });
 
   // DELETE /api/clients/:id - Delete client
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 

@@ -96,7 +96,7 @@ const AIAgentsMarketplaceScreen: React.FC<AIAgentsMarketplaceScreenProps> = ({
                     <div className="mb-4">
                         <h4 className="text-sm font-semibold text-gray-900 mb-2">Key Features:</h4>
                         <ul className="text-sm text-gray-600 space-y-1">
-                            {agent.features.slice(0, 3).map((feature, index) => (
+                            {(agent.features || []).slice(0, 3).map((feature, index) => (
                                 <li key={index} className="flex items-center space-x-2">
                                     <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
                                     <span>{feature}</span>

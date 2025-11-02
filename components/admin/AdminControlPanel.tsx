@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 // Import all admin components
-import EnhancedSuperAdminDashboard from './EnhancedSuperAdminDashboard';
+import SuperAdminDashboardV2 from './SuperAdminDashboardV2';
 import UserRolesPermissions from '../user-management/UserRolesPermissions';
 import TeamCollaboration from '../user-management/TeamCollaboration';
 import AppSharingReviews from '../user-management/AppSharingReviews';
@@ -134,7 +134,7 @@ const AdminControlPanel: React.FC<AdminControlPanelProps> = ({ isDarkMode = true
             {/* Content Area */}
             <div className="max-w-7xl mx-auto">
                 {activeTab === 'dashboard' && (
-                    <EnhancedSuperAdminDashboard
+                    <SuperAdminDashboardV2
                         isDarkMode={isDarkMode}
                         onNavigate={(section) => {
                             // Map sections to tabs

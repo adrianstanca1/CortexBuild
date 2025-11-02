@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { Project, Document, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+// Fix: Replaced old api.ts import with modern API client
+import { apiClient } from '../../lib/api/client';
 // Fix: Added .tsx extension to icon import
 import { ChevronLeftIcon, PlusIcon, FileIcon } from '../Icons';
 
@@ -16,17 +16,14 @@ interface DocumentsScreenProps {
 const DocumentsScreen: React.FC<DocumentsScreenProps> = ({ project, goBack, currentUser }) => {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    
+
     const canCreate = ['company_admin', 'supervisor', 'super_admin'].includes(currentUser.role);
 
     useEffect(() => {
         const loadDocs = async () => {
             setIsLoading(true);
-            const fetchedDocs = await api.fetchDocuments(project?.id || '');
-            // Ensure array is extracted if needed
-            const docsArray = Array.isArray(fetchedDocs) ? fetchedDocs : 
-                (fetchedDocs?.data && Array.isArray(fetchedDocs.data)) ? fetchedDocs.data : [];
-            setDocuments(docsArray.filter(d => d.projectId === project.id));
+            const fetchedDocs = await apiClient.fetchDocuments(project.id);
+            setDocuments(fetchedDocs);
             setIsLoading(false);
         };
         loadDocs();
@@ -45,11 +42,11 @@ const DocumentsScreen: React.FC<DocumentsScreenProps> = ({ project, goBack, curr
                         <p className="text-sm text-gray-500">{project.name}</p>
                     </div>
                 </div>
-                 {canCreate && (
+                {canCreate && (
                     <button className="bg-blue-600 text-white p-2.5 rounded-full shadow hover:bg-blue-700">
-                        <PlusIcon className="w-6 h-6"/>
+                        <PlusIcon className="w-6 h-6" />
                     </button>
-                 )}
+                )}
             </header>
 
             <main className="flex-grow bg-white rounded-lg shadow-md border border-gray-100">

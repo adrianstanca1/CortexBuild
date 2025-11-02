@@ -1,424 +1,1126 @@
-# 📚 ConstructAI API Documentation
+# 🚀 CortexBuild API Documentation
 
-**Version**: 2.0.0  
-**Base URL**: `https://constructai-5-5ngg87gpl-adrian-b7e84541.vercel.app/api`  
-**Authentication**: Bearer Token (JWT)
+**Version:** 1.0.0
+**Last Updated:** 11 October 2025
+**Base URL:** `http://localhost:3001/api`
 
 ---
 
-## 🔐 **Authentication Endpoints**
+## 📋 Table of Contents
 
-### **POST /api/auth/login**
-Authenticate a user and receive a JWT token.
+1. [Authentication](#authentication)
+2. [Projects](#projects)
+3. [Marketplace](#marketplace)
+4. [Admin](#admin)
+5. [AI & Chat](#ai--chat)
+6. [Error Handling](#error-handling)
+7. [Best Practices](#best-practices)
 
-**Request**:
+---
+
+## 🔐 Authentication
+
+All API endpoints (except login/register) require authentication via Bearer token in the Authorization header.
+
+### Login
+
+**POST** `/auth/login`
+
+Authenticate user and receive JWT token.
+
+**Request Body:**
 ```json
 {
-  "email": "adrian.stanca1@gmail.com",
-  "password": "Cumparavinde1"
+  "email": "user@example.com",
+  "password": "password123"
 }
 ```
 
-**Response** (200 OK):
+**Response:**
 ```json
 {
   "success": true,
-  "user": {
-    "id": "user-1",
-    "email": "adrian.stanca1@gmail.com",
-    "name": "Adrian Stanca",
-    "role": "super_admin",
-    "avatar": null,
-    "companyId": "company-1"
-  },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expiresAt": "2025-10-09T01:35:00.000Z"
+  "user": {
+    "id": "123",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "company_admin",
+    "company_id": "company-456"
+  }
 }
 ```
 
-**Rate Limit**: 5 attempts per 15 minutes  
-**Headers**:
-- `X-RateLimit-Limit: 5`
-- `X-RateLimit-Remaining: 4`
-- `X-RateLimit-Reset: 2025-10-08T01:50:00.000Z`
-
-**Errors**:
-- `400` - Validation failed
+**Status Codes:**
+- `200` - Success
 - `401` - Invalid credentials
-- `429` - Too many attempts
-- `500` - Server error
 
 ---
 
-### **POST /api/auth/register**
-Register a new user and company.
+### Register
 
-**Request**:
+**POST** `/auth/register`
+
+Create new user account.
+
+**Request Body:**
 ```json
 {
   "email": "newuser@example.com",
-  "password": "SecurePass123",
-  "name": "John Doe",
+  "password": "securePassword123",
+  "name": "New User",
   "companyName": "Acme Corp"
 }
 ```
 
-**Response** (200 OK):
+**Response:**
 ```json
 {
   "success": true,
-  "user": {
-    "id": "user-xyz",
-    "email": "newuser@example.com",
-    "name": "John Doe",
-    "role": "company_admin",
-    "avatar": null,
-    "companyId": "company-xyz"
-  },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expiresAt": "2025-10-09T01:35:00.000Z"
+  "user": {
+    "id": "124",
+    "email": "newuser@example.com",
+    "name": "New User",
+    "role": "user",
+    "company_id": "company-789"
+  }
 }
 ```
 
-**Rate Limit**: 3 registrations per hour  
-**Validation**:
-- Email: Valid format, max 255 chars
-- Password: Min 8 chars, max 100 chars
-- Name: Min 2 chars, max 100 chars
-- Company Name: Min 2 chars, max 100 chars
-
-**Errors**:
-- `400` - Validation failed or email exists
-- `429` - Too many registrations
+**Status Codes:**
+- `201` - Created successfully
+- `400` - User already exists
 - `500` - Server error
 
 ---
 
-### **GET /api/auth/me**
+### Logout
+
+**POST** `/auth/logout`
+
+Invalidate user session.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true
+}
+```
+
+---
+
+### Get Current User
+
+**GET** `/auth/me`
+
 Get current authenticated user information.
 
-**Headers**:
+**Headers:**
 ```
 Authorization: Bearer <token>
 ```
 
-**Response** (200 OK):
+**Response:**
 ```json
 {
   "success": true,
   "user": {
-    "id": "user-1",
-    "email": "adrian.stanca1@gmail.com",
-    "name": "Adrian Stanca",
-    "role": "super_admin",
-    "avatar": null,
-    "companyId": "company-1",
-    "companyName": "ConstructCo"
-  },
-  "session": {
-    "expiresAt": "2025-10-09T01:35:00.000Z"
+    "id": "123",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "company_admin",
+    "company_id": "company-456"
   }
 }
 ```
 
-**Rate Limit**: 60 requests per minute
-
-**Errors**:
-- `401` - Invalid or expired token
-- `429` - Too many requests
-- `500` - Server error
-
 ---
 
-### **POST /api/auth/logout**
-Logout and invalidate current session.
+## 📁 Projects
 
-**Headers**:
+### List Projects
+
+**GET** `/projects`
+
+Get paginated list of projects with optional filtering.
+
+**Query Parameters:**
+- `status` (optional) - Project status: `planning`, `active`, `completed`, `on_hold`
+- `priority` (optional) - Project priority: `low`, `medium`, `high`
+- `client_id` (optional) - Filter by client ID
+- `project_manager_id` (optional) - Filter by project manager ID
+- `company_id` (optional) - Filter by company ID
+- `search` (optional) - Search in name, description, or project number (min 2 chars)
+- `page` (optional) - Page number (default: 1)
+- `limit` (optional) - Items per page (default: 20, max: 100)
+
+**Headers:**
 ```
 Authorization: Bearer <token>
 ```
 
-**Response** (200 OK):
+**Example Request:**
+```
+GET /api/projects?status=active&priority=high&page=1&limit=10
+```
+
+**Response:**
 ```json
 {
   "success": true,
-  "message": "Logged out successfully"
-}
-```
-
-**Rate Limit**: 60 requests per minute
-
-**Errors**:
-- `401` - Invalid token
-- `429` - Too many requests
-- `500` - Server error
-
----
-
-### **POST /api/auth/refresh** ✨ NEW
-Refresh an expired or expiring token.
-
-**Headers**:
-```
-Authorization: Bearer <old_token>
-```
-
-**Response** (200 OK):
-```json
-{
-  "success": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expiresAt": "2025-10-09T01:35:00.000Z",
-  "user": {
-    "id": "user-1",
-    "email": "adrian.stanca1@gmail.com",
-    "name": "Adrian Stanca",
-    "role": "super_admin",
-    "avatar": null,
-    "companyId": "company-1"
-  }
-}
-```
-
-**Rate Limit**: 60 requests per minute
-
-**Errors**:
-- `401` - Invalid token or session not found
-- `429` - Too many requests
-- `500` - Server error
-
----
-
-## 🏥 **System Endpoints**
-
-### **GET /api/health** ✨ NEW
-Check API and database health status.
-
-**Response** (200 OK):
-```json
-{
-  "success": true,
-  "api": "healthy",
-  "database": "healthy",
-  "timestamp": "2025-10-08T01:35:00.000Z",
-  "uptime": 3600,
-  "version": "2.0.0",
-  "stats": {
-    "users": 3,
-    "sessions": 5,
-    "companies": 1
-  }
-}
-```
-
-**Response** (503 Service Unavailable):
-```json
-{
-  "success": false,
-  "api": "healthy",
-  "database": "unhealthy",
-  "timestamp": "2025-10-08T01:35:00.000Z",
-  "uptime": 3600,
-  "version": "2.0.0",
-  "error": "Connection timeout"
-}
-```
-
----
-
-## 🔒 **Security Features**
-
-### **Rate Limiting**
-All endpoints have rate limiting to prevent abuse:
-
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `/auth/login` | 5 requests | 15 minutes |
-| `/auth/register` | 3 requests | 1 hour |
-| `/auth/me` | 60 requests | 1 minute |
-| `/auth/logout` | 60 requests | 1 minute |
-| `/auth/refresh` | 60 requests | 1 minute |
-| `/health` | No limit | - |
-
-### **Security Headers**
-All responses include:
-- `X-Frame-Options: DENY`
-- `X-Content-Type-Options: nosniff`
-- `X-XSS-Protection: 1; mode=block`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- `Content-Security-Policy: ...`
-- `Strict-Transport-Security: ...` (production only)
-
-### **Input Validation**
-All inputs are validated for:
-- Type correctness
-- Length constraints
-- Format requirements (email, etc.)
-- SQL injection prevention
-- XSS prevention
-
----
-
-## 📊 **Response Format**
-
-### **Success Response**
-```json
-{
-  "success": true,
-  "data": { ... }
-}
-```
-
-### **Error Response**
-```json
-{
-  "success": false,
-  "error": "Error message",
-  "errors": [
+  "data": [
     {
-      "field": "email",
-      "message": "email must be a valid email"
+      "id": 1,
+      "name": "Downtown Office Complex",
+      "description": "Modern office building construction",
+      "project_number": "PROJ-2025-001",
+      "status": "active",
+      "priority": "high",
+      "start_date": "2025-01-15",
+      "end_date": "2025-12-31",
+      "budget": 2500000,
+      "spent": 450000,
+      "address": "123 Main St",
+      "city": "Springfield",
+      "state": "IL",
+      "zip_code": "62701",
+      "client_id": 1,
+      "project_manager_id": 5,
+      "company_id": 1,
+      "created_at": "2025-01-01T10:00:00Z",
+      "updated_at": "2025-01-15T14:30:00Z",
+      "client_name": "Acme Corporation",
+      "manager_name": "Jane Smith"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 25,
+    "totalPages": 3
+  }
+}
+```
+
+---
+
+### Get Project Details
+
+**GET** `/projects/{id}`
+
+Get detailed project information including tasks, milestones, team, and activities.
+
+**Path Parameters:**
+- `id` (required) - Project ID
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Downtown Office Complex",
+    "description": "Modern office building construction",
+    "project_number": "PROJ-2025-001",
+    "status": "active",
+    "priority": "high",
+    "start_date": "2025-01-15",
+    "end_date": "2025-12-31",
+    "budget": 2500000,
+    "spent": 450000,
+    "address": "123 Main St",
+    "city": "Springfield",
+    "state": "IL",
+    "zip_code": "62701",
+    "client_id": 1,
+    "project_manager_id": 5,
+    "company_id": 1,
+    "created_at": "2025-01-01T10:00:00Z",
+    "updated_at": "2025-01-15T14:30:00Z",
+    "client_name": "Acme Corporation",
+    "client_email": "contact@acme.com",
+    "client_phone": "+1-555-0123",
+    "manager_name": "Jane Smith",
+    "manager_email": "jane@constructionco.com",
+    "tasks": [...],
+    "milestones": [...],
+    "team": [...],
+    "activities": [...]
+  }
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `404` - Project not found
+
+---
+
+### Create Project
+
+**POST** `/projects`
+
+Create a new project.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "company_id": 1,
+  "name": "New Construction Project",
+  "description": "Project description",
+  "project_number": "PROJ-2025-002",
+  "status": "planning",
+  "priority": "medium",
+  "start_date": "2025-03-01",
+  "end_date": "2025-08-31",
+  "budget": 1500000,
+  "address": "456 Oak Ave",
+  "city": "Riverside",
+  "state": "CA",
+  "zip_code": "92501",
+  "client_id": 2,
+  "project_manager_id": 6
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 2,
+    "name": "New Construction Project",
+    "description": "Project description",
+    "project_number": "PROJ-2025-002",
+    "status": "planning",
+    "priority": "medium",
+    "start_date": "2025-03-01",
+    "end_date": "2025-08-31",
+    "budget": 1500000,
+    "spent": 0,
+    "address": "456 Oak Ave",
+    "city": "Riverside",
+    "state": "CA",
+    "zip_code": "92501",
+    "client_id": 2,
+    "project_manager_id": 6,
+    "company_id": 1,
+    "created_at": "2025-01-15T16:00:00Z",
+    "updated_at": "2025-01-15T16:00:00Z"
+  },
+  "message": "Project created successfully"
+}
+```
+
+**Status Codes:**
+- `201` - Created successfully
+- `400` - Validation error (missing fields, duplicate project number)
+- `404` - Referenced company/client/manager not found
+
+---
+
+### Update Project
+
+**PUT** `/projects/{id}`
+
+Update project information.
+
+**Path Parameters:**
+- `id` (required) - Project ID
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:** (partial update supported)
+```json
+{
+  "name": "Updated Project Name",
+  "status": "active",
+  "budget": 1750000,
+  "description": "Updated project description"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 2,
+    "name": "Updated Project Name",
+    "description": "Updated project description",
+    "status": "active",
+    "budget": 1750000,
+    "updated_at": "2025-01-15T16:30:00Z"
+  },
+  "message": "Project updated successfully"
+}
+```
+
+**Status Codes:**
+- `200` - Updated successfully
+- `400` - Validation error
+- `404` - Project not found
+
+---
+
+### Delete Project
+
+**DELETE** `/projects/{id}`
+
+Delete a project (only if no dependencies exist).
+
+**Path Parameters:**
+- `id` (required) - Project ID
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Project deleted successfully"
+}
+```
+
+**Status Codes:**
+- `200` - Deleted successfully
+- `400` - Cannot delete project with existing dependencies
+- `404` - Project not found
+
+---
+
+## 🛒 Marketplace
+
+### Browse Modules
+
+**GET** `/marketplace/modules`
+
+Browse available modules with optional filtering.
+
+**Query Parameters:**
+- `category` (optional) - Filter by category slug
+- `search` (optional) - Search in name or description
+- `sort` (optional) - Sort by: `downloads`, `rating`, `newest`, `name` (default: downloads)
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Project Timeline",
+      "description": "Advanced project timeline and Gantt chart visualization",
+      "version": "1.2.0",
+      "category": "project-management",
+      "category_name": "Project Management",
+      "category_icon": "calendar",
+      "status": "published",
+      "rating": 4.8,
+      "downloads": 1250,
+      "install_count": 89,
+      "author": "CortexBuild Team",
+      "published_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-10T00:00:00Z"
     }
   ]
 }
 ```
 
-### **Rate Limit Response**
+---
+
+### Get Module Details
+
+**GET** `/marketplace/modules/{id}`
+
+Get detailed module information including reviews and dependencies.
+
+**Path Parameters:**
+- `id` (required) - Module ID
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
 ```json
 {
-  "success": false,
-  "error": "Too many requests. Please try again later.",
-  "retryAfter": "2025-10-08T01:50:00.000Z"
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Project Timeline",
+    "description": "Advanced project timeline and Gantt chart visualization",
+    "version": "1.2.0",
+    "category": "project-management",
+    "category_name": "Project Management",
+    "status": "published",
+    "rating": 4.8,
+    "downloads": 1250,
+    "install_count": 89,
+    "author": "CortexBuild Team",
+    "published_at": "2025-01-01T00:00:00Z",
+    "reviews": [...],
+    "dependencies": [...]
+  }
 }
 ```
 
 ---
 
-## 🔑 **Authentication Flow**
+### Install Module
 
-### **1. Login**
-```bash
-curl -X POST https://api.example.com/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"password123"}'
+**POST** `/marketplace/install`
+
+Install a module for the current company.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
 
-### **2. Use Token**
-```bash
-curl -X GET https://api.example.com/api/auth/me \
-  -H "Authorization: Bearer <token>"
+**Request Body:**
+```json
+{
+  "module_id": 1
+}
 ```
 
-### **3. Refresh Token** (when expiring)
-```bash
-curl -X POST https://api.example.com/api/auth/refresh \
-  -H "Authorization: Bearer <old_token>"
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Module installed successfully"
+}
 ```
 
-### **4. Logout**
-```bash
-curl -X POST https://api.example.com/api/auth/logout \
-  -H "Authorization: Bearer <token>"
+**Status Codes:**
+- `200` - Installed successfully
+- `400` - Module already installed or missing module_id
+- `403` - Installation limit reached (upgrade plan)
+- `404` - Module not found
+
+---
+
+### Get Installed Modules
+
+**GET** `/marketplace/installed`
+
+Get list of modules installed for the current company.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "module_id": 1,
+      "company_id": 1,
+      "config": "{}",
+      "installed_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z",
+      "name": "Project Timeline",
+      "description": "Advanced project timeline and Gantt chart visualization",
+      "version": "1.2.0",
+      "category": "project-management",
+      "category_name": "Project Management"
+    }
+  ]
+}
 ```
 
 ---
 
-## 🧪 **Testing**
+### Configure Module
 
-### **Test Credentials**
-```
-Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
-Role: super_admin
-```
+**PUT** `/marketplace/configure/{module_id}`
 
-```
-Email: casey@constructco.com
-Password: password123
-Role: company_admin
-```
+Update module configuration for the current company.
 
+**Path Parameters:**
+- `module_id` (required) - Module ID
+
+**Headers:**
 ```
-Email: mike@constructco.com
-Password: password123
-Role: supervisor
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
 
-### **Example: Complete Flow**
-```bash
-# 1. Login
-TOKEN=$(curl -X POST https://api.example.com/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"adrian.stanca1@gmail.com","password":"Cumparavinde1"}' \
-  | jq -r '.token')
+**Request Body:**
+```json
+{
+  "config": {
+    "theme": "dark",
+    "autoRefresh": true,
+    "notifications": false
+  }
+}
+```
 
-# 2. Get current user
-curl -X GET https://api.example.com/api/auth/me \
-  -H "Authorization: Bearer $TOKEN"
-
-# 3. Logout
-curl -X POST https://api.example.com/api/auth/logout \
-  -H "Authorization: Bearer $TOKEN"
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Module configuration updated"
+}
 ```
 
 ---
 
-## 📈 **Monitoring**
+### Uninstall Module
 
-### **Logs**
-All requests are logged with:
-- Timestamp
-- Method and path
-- Client IP
-- User ID (if authenticated)
-- Response status
-- Duration
+**DELETE** `/marketplace/uninstall/{module_id}`
 
-### **Metrics**
-Track these metrics:
-- Request count per endpoint
-- Average response time
-- Error rate
-- Rate limit hits
-- Active sessions
+Uninstall a module from the current company.
 
----
+**Path Parameters:**
+- `module_id` (required) - Module ID
 
-## 🚀 **Best Practices**
+**Headers:**
+```
+Authorization: Bearer <token>
+```
 
-### **Token Management**
-1. Store tokens securely (localStorage or httpOnly cookies)
-2. Refresh tokens before expiry
-3. Clear tokens on logout
-4. Handle 401 errors by redirecting to login
-
-### **Error Handling**
-1. Always check `success` field
-2. Display user-friendly error messages
-3. Log errors for debugging
-4. Retry on 429 (rate limit) errors
-
-### **Performance**
-1. Cache user data locally
-2. Use token refresh instead of re-login
-3. Implement request debouncing
-4. Monitor API response times
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Module uninstalled successfully"
+}
+```
 
 ---
 
-## 📞 **Support**
+## 👑 Admin
 
-### **Issues**
-- Check logs in Vercel dashboard
-- Verify environment variables
-- Test with health endpoint
-- Review rate limit headers
+All admin endpoints require super_admin role.
 
-### **Contact**
-- GitHub: https://github.com/adrianstanca1/constructai--5-
-- Documentation: See project README.md
+### Get Dashboard Analytics
+
+**GET** `/admin/analytics/overview`
+
+Get comprehensive dashboard analytics.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "users": {
+      "total": 1250,
+      "active": 890,
+      "new_this_week": 45
+    },
+    "companies": {
+      "total": 156,
+      "active": 142
+    },
+    "projects": {
+      "total": 789,
+      "active": 567
+    },
+    "sdk": {
+      "developers": 234,
+      "total_requests": 45678,
+      "total_tokens": 1234567,
+      "total_cost": 234.56
+    },
+    "revenue": {
+      "total": 125000,
+      "monthly": 15000,
+      "growth": 12.5
+    },
+    "system": {
+      "uptime": 99.9,
+      "cpu": 45,
+      "memory": 67,
+      "storage": 34
+    }
+  }
+}
+```
 
 ---
 
-**🎉 API v2.0.0 - Production Ready!** 🚀
+### Get Detailed Users
 
+**GET** `/admin/users/detailed`
+
+Get detailed user list with statistics.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "email": "admin@cortexbuild.com",
+      "name": "System Administrator",
+      "role": "super_admin",
+      "company_id": 1,
+      "company_name": "CortexBuild Platform",
+      "created_at": "2025-01-01T00:00:00Z",
+      "last_login": "2025-01-15T09:30:00Z",
+      "project_count": 5,
+      "api_requests": 1234,
+      "total_cost": 45.67
+    }
+  ]
+}
+```
+
+---
+
+### Create User
+
+**POST** `/admin/users/create`
+
+Create new user account (super admin only).
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "email": "newuser@example.com",
+  "name": "New User",
+  "password": "securePassword123",
+  "role": "company_admin",
+  "company_id": 1
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 125,
+    "email": "newuser@example.com",
+    "name": "New User",
+    "role": "company_admin"
+  }
+}
+```
+
+---
+
+### Update User
+
+**PATCH** `/admin/users/{id}`
+
+Update user information (super admin only).
+
+**Path Parameters:**
+- `id` (required) - User ID
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "role": "developer",
+  "company_id": 2
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User updated successfully"
+}
+```
+
+---
+
+### Delete User
+
+**DELETE** `/admin/users/{id}`
+
+Delete user account (super admin only).
+
+**Path Parameters:**
+- `id` (required) - User ID
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User deleted successfully"
+}
+```
+
+---
+
+## ❌ Error Handling
+
+### Error Response Format
+
+All errors follow a consistent format:
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "code": "ERROR_CODE",
+  "details": {
+    "field": "Additional error details"
+  }
+}
+```
+
+### Common Error Codes
+
+| Code | Description | HTTP Status |
+|------|-------------|-------------|
+| `VALIDATION_ERROR` | Invalid request data | 400 |
+| `NOT_FOUND` | Resource not found | 404 |
+| `UNAUTHORIZED` | Authentication required | 401 |
+| `FORBIDDEN` | Access denied | 403 |
+| `CONFLICT` | Resource conflict | 409 |
+| `RATE_LIMITED` | Too many requests | 429 |
+| `INTERNAL_ERROR` | Server error | 500 |
+
+### Authentication Errors
+
+```json
+{
+  "success": false,
+  "error": "Invalid email or password",
+  "code": "AUTH_INVALID_CREDENTIALS"
+}
+```
+
+### Validation Errors
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "email": "Email is required",
+    "password": "Password must be at least 8 characters"
+  }
+}
+```
+
+### Not Found Errors
+
+```json
+{
+  "success": false,
+  "error": "Project not found",
+  "code": "NOT_FOUND"
+}
+```
+
+---
+
+## 🤖 AI & Chat
+
+### AI Chat
+
+**POST** `/ai/chat`
+
+Send message to AI assistant and receive intelligent response with project context.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "message": "What are the current project risks?",
+  "mode": "analyze",
+  "conversationId": "optional-conversation-id",
+  "history": [
+    {
+      "role": "user",
+      "content": "Previous message"
+    },
+    {
+      "role": "assistant",
+      "content": "Previous response"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "response": "Based on your current projects, I can identify several key risk areas...",
+  "context": {
+    "mode": "analyze",
+    "projectsCount": 3,
+    "tasksCount": 15,
+    "tokensUsed": 245
+  }
+}
+```
+
+**Chat Modes:**
+- `chat` (default) - General conversation and Q&A
+- `analyze` - Detailed data analysis and insights
+- `predict` - Project outcome predictions and forecasting
+
+**Status Codes:**
+- `200` - Success
+- `400` - Missing message
+- `401` - Unauthorized
+- `500` - AI service error
+
+---
+
+### Get Conversation History
+
+**GET** `/ai/conversations`
+
+Get user's AI conversation history.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "conversations": [
+    {
+      "id": 1,
+      "model": "gpt-4-turbo-preview",
+      "prompt": "What are the current project risks?",
+      "response": "Based on your current projects...",
+      "tokens_used": 245,
+      "cost": 0.007,
+      "created_at": "2025-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Get AI Usage Statistics
+
+**GET** `/ai/usage`
+
+Get user's AI usage statistics and recent requests.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "stats": {
+    "totalRequests": 45,
+    "totalTokens": 12500,
+    "totalCost": 0.375,
+    "avgTokensPerRequest": 278
+  },
+  "recentRequests": [
+    {
+      "model": "gpt-4-turbo-preview",
+      "tokens_used": 245,
+      "cost": 0.007,
+      "created_at": "2025-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Smart Suggestions
+
+**POST** `/ai/suggest`
+
+Get AI-powered suggestions for project planning and management.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "context": {
+    "projectType": "office building",
+    "budget": 2000000,
+    "timeline": "6 months"
+  },
+  "type": "project_name"
+}
+```
+
+**Suggestion Types:**
+- `project_name` - Generate project name suggestions
+- `task_breakdown` - Break down project into tasks
+- `budget_estimate` - Provide budget estimates by category
+- `risk_analysis` - Identify potential risks and mitigation
+
+**Response:**
+```json
+{
+  "success": true,
+  "suggestions": [
+    "Modern Downtown Office Complex",
+    "Riverside Corporate Center",
+    "Metropolitan Business Hub",
+    "Urban Professional Building",
+    "Contemporary Office Tower"
+  ]
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `400` - Invalid suggestion type or missing context
+- `401` - Unauthorized
+- `500` - AI service error
+
+---
+
+## 📚 Best Practices
+
+### Authentication
+
+1. **Always include Authorization header** for protected endpoints
+2. **Store tokens securely** - never expose in client-side code
+3. **Handle token expiration** - implement refresh logic
+4. **Use HTTPS only** in production
+
+### Request Format
+
+1. **Use appropriate HTTP methods** - GET for retrieval, POST for creation, etc.
+2. **Include Content-Type** header for POST/PUT requests
+3. **Validate data** on both client and server
+4. **Use pagination** for large datasets
+
+### Error Handling
+
+1. **Check response success field** - don't rely only on HTTP status
+2. **Handle common errors** - 401, 403, 404, 500
+3. **Display user-friendly messages** - use the `userMessage` field when available
+4. **Implement retry logic** for retryable errors
+
+### Performance
+
+1. **Use appropriate page sizes** - typically 10-50 items per page
+2. **Cache responses** when appropriate
+3. **Avoid unnecessary requests** - use conditional requests when possible
+4. **Monitor API usage** - track rate limits
+
+### Security
+
+1. **Validate all inputs** - never trust client data
+2. **Use parameterized queries** - prevent SQL injection
+3. **Implement rate limiting** - prevent abuse
+4. **Log security events** - monitor for suspicious activity
+
+---
+
+## 🔄 Rate Limiting
+
+- **Authentication endpoints:** 5 requests per 15 minutes per IP
+- **General API endpoints:** 100 requests per minute per user
+- **File upload endpoints:** 10 uploads per hour per user
+- **Admin endpoints:** 1000 requests per hour per admin user
+
+Rate limit headers are included in responses:
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640995200
+```
+
+---
+
+## 📞 Support
+
+For API support or questions:
+- **Documentation Issues:** Update this file
+- **Technical Support:** Check server logs
+- **Feature Requests:** Create GitHub issue
+
+---
+
+**API Version:** 1.0.0
+**Generated:** 11 October 2025
+**Status:** ✅ Production Ready

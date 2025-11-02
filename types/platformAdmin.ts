@@ -4,19 +4,7 @@
  * Type definitions for platform-wide administration features
  */
 
-import { Company } from '../types';
-
-// Subscription interface for platform admin (if not exported from types)
-export interface Subscription {
-  id: string;
-  company_id: string;
-  plan_id: string;
-  status: 'active' | 'suspended' | 'cancelled';
-  start_date: string;
-  end_date?: string;
-  created_at: string;
-  updated_at: string;
-}
+import { Company, AIAgent, CompanySubscription } from '../types';
 
 // ============================================================================
 // PLATFORM STATISTICS

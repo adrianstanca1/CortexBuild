@@ -4,7 +4,7 @@ import { Project, User, LogItem } from '../../types';
 // Fix: Added .tsx extension to import
 import { ChevronLeftIcon, SunIcon, UsersIcon, CameraIcon, PlusIcon, TrashIcon, ClipboardDocumentListIcon } from '../Icons';
 // Fix: Added .ts extension to import
-import * as api from '../../api';
+import apiClient from '../../src/services/apiClient';
 
 
 interface DailyLogScreenProps {
@@ -58,7 +58,7 @@ const DailyLogScreen: React.FC<DailyLogScreenProps> = ({ project, goBack, curren
             equipment,
             materials
         };
-        await api.createDailyLog(dailyLogData);
+        await apiClient.createDailyLog(dailyLogData, currentUser);
         alert('Daily log submitted successfully!');
         goBack();
     };

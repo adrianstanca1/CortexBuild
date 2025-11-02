@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, Screen, Task, SiteInstruction, User, AIInsight } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 // Use WandSparklesIcon for AI suggestions and move it to the main content area for prominence.
 import { ChevronLeftIcon, CheckBadgeIcon, AlertTriangleIcon, SunIcon, ClipboardDocumentListIcon, WandSparklesIcon, ArrowPathIcon } from '../Icons';
 import TaskList from '../shared/TaskList';
@@ -31,8 +31,8 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
             setIsLoading(true);
             setIsInsightsLoading(true);
             const [allTasks, siteInstructions] = await Promise.all([
-                api.fetchTasksForUser(currentUser.id),
-                api.fetchSiteInstructions()
+                apiClient.fetchTasksForUser(currentUser),
+                apiClient.fetchSiteInstructions()
             ]);
             
             const filteredTasks = allTasks.filter(task => task.projectId === project.id && (task.assignee === currentUser.name || task.targetRoles?.includes(currentUser.role)));
@@ -40,7 +40,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
             setInstructions(siteInstructions);
             setIsLoading(false);
 
-            const aiInsights = await api.getAIInsightsForMyDay();
+            const aiInsights = await apiClient.getAIInsightsForMyDay(filteredTasks, project, weatherData);
             setInsights(aiInsights);
             setIsInsightsLoading(false);
         };
@@ -49,7 +49,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
     
     const handleRefreshInsights = async () => {
         setIsInsightsRefreshing(true);
-        const aiInsights = await api.getAIInsightsForMyDay();
+        const aiInsights = await apiClient.getAIInsightsForMyDay(myTasks, project, weatherData);
         setInsights(aiInsights);
         setIsInsightsRefreshing(false);
     };

@@ -3,37 +3,108 @@
  * Version: 1.1.0 GOLDEN
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CreateDocumentModal } from '../modals/CreateDocumentModal';
 
 interface Document {
-    id: string | number;
+    id: number | string;
     name: string;
-    file_type?: string;
-    file_size?: number;
-    project_name?: string;
-    uploaded_by_name?: string;
-    created_at?: string;
-    category?: string;
-    type?: string;
-    size?: string;
-    project?: string;
-    uploadedBy?: string;
+    type: string;
+    sizeLabel: string;
+    project: string;
+    category: string;
+    uploadedBy: string;
     uploadDate?: string;
 }
+
+const formatDate = (value?: string | null) => {
+    if (!value) return undefined;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value ?? undefined;
+    return parsed.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const formatFileSize = (size?: number | string | null): string => {
+    if (size === undefined || size === null) return 'Unknown size';
+    if (typeof size === 'string') {
+        const numeric = Number(size);
+        if (Number.isFinite(numeric)) {
+            return formatFileSize(numeric);
+        }
+        return size;
+    }
+
+    if (size === 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const exponent = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+    const value = size / 1024 ** exponent;
+    return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[exponent]}`;
+};
+
+const normalizeDocument = (raw: any): Document => {
+    const type = (raw.type ?? raw.file_type ?? 'file').toString().toLowerCase();
+
+    return {
+        id: raw.id ?? raw.document_id ?? `doc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: raw.name ?? raw.title ?? 'Untitled document',
+        type,
+        sizeLabel: formatFileSize(raw.size ?? raw.file_size),
+        project: raw.project ?? raw.project_name ?? raw.projectName ?? 'General',
+        category: raw.category ?? raw.folder ?? 'uncategorized',
+        uploadedBy: raw.uploadedBy ?? raw.uploaded_by_name ?? raw.uploaded_by ?? 'Unknown user',
+        uploadDate: formatDate(raw.uploadDate ?? raw.upload_date ?? raw.created_at)
+    };
+};
+
+const MOCK_DOCUMENTS: Document[] = [
+    {
+        id: 1,
+        name: 'Project Blueprint - Phase 1.pdf',
+        type: 'pdf',
+        sizeLabel: '2.4 MB',
+        project: 'Downtown Office Complex',
+        uploadedBy: 'Adrian Stanca',
+        uploadDate: '01 Nov 2024',
+        category: 'blueprints'
+    },
+    {
+        id: 2,
+        name: 'Safety Inspection Report.docx',
+        type: 'docx',
+        sizeLabel: '156 KB',
+        project: 'Riverside Luxury Apartments',
+        uploadedBy: 'John Smith',
+        uploadDate: '05 Dec 2024',
+        category: 'reports'
+    },
+    {
+        id: 3,
+        name: 'Material Specifications.xlsx',
+        type: 'xlsx',
+        sizeLabel: '89 KB',
+        project: 'Manufacturing Facility Expansion',
+        uploadedBy: 'Sarah Johnson',
+        uploadDate: '10 Dec 2024',
+        category: 'specifications'
+    }
+];
 
 export const DocumentsPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState('all');
-    const [documents, setDocuments] = useState<Document[]>([]);
+    const [documents, setDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
 
-    useEffect(() => {
-        fetchDocuments();
-    }, [searchQuery, typeFilter]);
-
-    const fetchDocuments = async () => {
+    const fetchDocuments = useCallback(async () => {
         try {
+            setLoading(true);
+            setError(null);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (typeFilter !== 'all') params.append('category', typeFilter);
@@ -42,57 +113,26 @@ export const DocumentsPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success) {
-                setDocuments(data.data);
+                const normalized = Array.isArray(data.data) ? data.data.map(normalizeDocument) : [];
+                setDocuments(normalized.length > 0 ? normalized : MOCK_DOCUMENTS);
+                if (!normalized.length) {
+                    setError('No documents found for the selected filters.');
+                }
             } else {
-                console.warn('Failed to fetch documents:', data.error);
+                setError(data.error ?? 'Unable to load documents.');
+                setDocuments(MOCK_DOCUMENTS);
             }
         } catch (err: any) {
-            console.error('Failed to fetch documents:', err);
-            setDocuments(mockDocuments);
+            setError(err.message ?? 'Failed to communicate with the documents API.');
+            setDocuments(MOCK_DOCUMENTS);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [searchQuery, typeFilter]);
 
-    const mockDocuments: Document[] = [
-        {
-            id: '1',
-            name: 'Project Blueprint - Phase 1.pdf',
-            file_type: 'pdf',
-            type: 'pdf',
-            size: '2.4 MB',
-            project: 'Downtown Office Complex',
-            project_name: 'Downtown Office Complex',
-            uploadedBy: 'Adrian Stanca',
-            uploaded_by_name: 'Adrian Stanca',
-            uploadDate: 'Dec 1, 2024',
-            created_at: 'Dec 1, 2024',
-            category: 'blueprints'
-        },
-        {
-            id: '2',
-            name: 'Safety Inspection Report.docx',
-            file_type: 'docx',
-            type: 'docx',
-            size: '156 KB',
-            project: 'Riverside Luxury Apartments',
-            project_name: 'Riverside Luxury Apartments',
-            uploadedBy: 'John Smith',
-            uploaded_by_name: 'John Smith',
-            uploadDate: 'Dec 5, 2024',
-            created_at: 'Dec 5, 2024',
-            category: 'reports'
-        },
-        {
-            id: '3',
-            name: 'Material Specifications.xlsx',
-            file_type: 'xlsx',
-            type: 'xlsx',
-            size: '89 KB',
-            project: 'Manufacturing Facility Expansion',
-            uploadedBy: 'Sarah Johnson',
-            uploadDate: 'Dec 10, 2024',
-            category: 'specifications'
-        }
-    ];
+    useEffect(() => {
+        fetchDocuments();
+    }, [fetchDocuments]);
 
     const getFileIcon = (type: string) => {
         const icons: Record<string, string> = {
@@ -159,6 +199,33 @@ export const DocumentsPage: React.FC = () => {
             </div>
 
             {/* Documents Grid */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error}
+                </div>
+            )}
+
+            {loading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                        <div key={`document-skeleton-${index}`} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                            <div className="flex items-start space-x-3 mb-4">
+                                <div className="w-12 h-12 rounded bg-gray-200" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                                    <div className="h-3 bg-gray-100 rounded w-1/2" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="h-3 bg-gray-100 rounded w-2/3" />
+                                <div className="h-3 bg-gray-100 rounded w-1/2" />
+                                <div className="h-3 bg-gray-100 rounded w-1/3" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {documents.map((doc) => (
                     <div key={doc.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -166,7 +233,7 @@ export const DocumentsPage: React.FC = () => {
                             <div className="text-4xl">{getFileIcon(doc.type)}</div>
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">{doc.name}</h3>
-                                <p className="text-xs text-gray-500">{doc.size}</p>
+                                <p className="text-xs text-gray-500">{doc.sizeLabel}</p>
                             </div>
                         </div>
 
@@ -182,7 +249,7 @@ export const DocumentsPage: React.FC = () => {
                                 </span>
                             </div>
                             <div className="text-xs text-gray-500">
-                                Uploaded by {doc.uploadedBy} on {doc.uploadDate}
+                                Uploaded by {doc.uploadedBy} {doc.uploadDate ? `on ${doc.uploadDate}` : ''}
                             </div>
                         </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, PunchListItem, User, Comment } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PaperClipIcon, UsersIcon, MapPinIcon, ClockIcon } from '../Icons';
 import PhotoLightbox, { LightboxPhoto } from '../modals/PhotoLightbox';
 
@@ -32,9 +32,8 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
     useEffect(() => {
         const loadItem = async () => {
             setIsLoading(true);
-            const fetchedItem = await api.fetchPunchListItemById(itemId);
-            const item = Array.isArray(fetchedItem) ? null : (fetchedItem && typeof fetchedItem === 'object' && 'data' in fetchedItem ? (fetchedItem as any).data : fetchedItem);
-            setItem(item || null);
+            const fetchedItem = await apiClient.fetchPunchListItemById(itemId);
+            setItem(fetchedItem || null);
             setIsLoading(false);
         };
         loadItem();
@@ -47,9 +46,8 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
         const updatedItemData = { ...item, status: newStatus };
         setItem(updatedItemData); // Optimistic update
         try {
-            const savedItem = await api.updatePunchListItem(updatedItemData.id, updatedItemData);
-            const itemData = Array.isArray(savedItem) ? null : (savedItem && typeof savedItem === 'object' && 'data' in savedItem ? (savedItem as any).data : savedItem);
-            setItem(itemData || null); // Update with response from API to get history
+            const savedItem = await apiClient.updatePunchListItem(updatedItemData, currentUser);
+            setItem(savedItem); // Update with response from API to get history
         } catch (error: any) {
             alert(error.message);
             setItem(originalItem); // Revert on error
@@ -58,7 +56,7 @@ const PunchListItemDetailScreen: React.FC<PunchListItemDetailScreenProps> = ({ i
 
     const handleAddComment = async () => {
         if (!item || !newComment.trim()) return;
-        const comment = await api.addCommentToPunchListItem(item.id, newComment);
+        const comment = await apiClient.addCommentToPunchListItem(item.id, newComment, currentUser);
         setItem(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
         setNewComment('');
     };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Project, Drawing, Screen, User } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PlusIcon, DocumentDuplicateIcon, MagnifyingGlassIcon, SparklesIcon, ChevronDownIcon } from '../Icons';
 import NewDrawingModal from '../modals/NewDrawingModal';
 // Fix: Imported the 'usePermissions' hook.
@@ -35,11 +35,8 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
     useEffect(() => {
         const loadDrawings = async () => {
             setIsLoading(true);
-            const fetchedDrawings = await api.fetchDrawings(project?.id || '');
-            // Ensure array is extracted if needed
-            const drawingsArray = Array.isArray(fetchedDrawings) ? fetchedDrawings :
-                (fetchedDrawings?.data && Array.isArray(fetchedDrawings.data)) ? fetchedDrawings.data : [];
-            setAllDrawings(drawingsArray.filter(d => d.projectId === project.id));
+            const fetchedDrawings = await apiClient.fetchDrawings();
+            setAllDrawings(fetchedDrawings.filter(d => d.projectId === project.id));
             setIsLoading(false);
         };
         loadDrawings();
@@ -84,7 +81,7 @@ const DrawingsScreen: React.FC<DrawingsScreenProps> = ({ project, goBack, naviga
 
     const handleUploadSubmit = async (drawingData: { drawingNumber: string; title: string; date: string; file: File }) => {
         try {
-            const newDrawing = await api.createDrawing({ ...drawingData, projectId: project.id });
+            const newDrawing = await apiClient.createDrawing(project.id, drawingData, currentUser);
             // Instead of just adding, we should refetch or cleverly update the state
             // For simplicity in mock environment, let's just add it. The grouping will handle it.
             setAllDrawings(prevDrawings => [newDrawing, ...prevDrawings]);

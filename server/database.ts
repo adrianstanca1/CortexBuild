@@ -1,6 +1,64 @@
 /**
- * SQLite Database Setup
- * Real database with tables for users, sessions, etc.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CortexBuild Platform - Unified Database Schema
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Complete SQLite database schema for the CortexBuild construction platform.
+ * This file contains ALL tables, indexes, and seed data in one consolidated location.
+ *
+ * Version: 2.0.0 UNIFIED
+ * Last Updated: 2025-10-11
+ * Database: cortexbuild.db (SQLite with WAL mode)
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TABLE OF CONTENTS
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * 1. CORE SYSTEM (Lines ~50-150)
+ *    - users, companies, sessions
+ *
+ * 2. PROJECT MANAGEMENT (Lines ~150-350)
+ *    - clients, projects, project_team, tasks, milestones, rfis, documents
+ *
+ * 3. FINANCIAL MANAGEMENT (Lines ~350-550)
+ *    - invoices, invoice_items, time_entries, subcontractors
+ *    - purchase_orders, purchase_order_items
+ *
+ * 4. AUTOMATION & WORKFLOWS (Lines ~550-750)
+ *    - smart_tools, smart_tool_executions, workflow_templates
+ *    - workflows, workflow_runs, workflow_run_steps, automation_rules
+ *    - automation_events
+ *
+ * 5. AI & AGENTS (Lines ~750-950)
+ *    - ai_agents, agent_subscriptions, agent_executions, ai_requests
+ *
+ * 6. SDK & DEVELOPMENT (Lines ~950-1150)
+ *    - sdk_developers, sdk_profiles, sdk_workflows, api_keys
+ *    - api_usage_logs, developer_console_events
+ *
+ * 7. GLOBAL MARKETPLACE (Lines ~1150-1350)
+ *    - sdk_apps, user_app_installations, company_app_installations
+ *    - app_review_history, app_analytics, app_versions
+ *
+ * 8. INTEGRATIONS (Lines ~1350-1450)
+ *    - integrations, oauth_tokens, webhooks, webhook_logs
+ *
+ * 9. MCP - MODEL CONTEXT PROTOCOL (Lines ~1450-1550)
+ *    - mcp_sessions, mcp_messages, mcp_contexts
+ *
+ * 10. DEPLOYMENT & SANDBOX (Lines ~1550-1650)
+ *     - deployments, sandbox_environments
+ *
+ * 11. MODULE SYSTEM (Lines ~1650-1700)
+ *     - module_reviews
+ *
+ * 12. INDEXES (Lines ~1700-1800)
+ *     - All database indexes for performance optimization
+ *
+ * 13. SEED DATA (Lines ~1800-END)
+ *     - Initial data for companies, users, projects, marketplace apps, etc.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 import Database from 'better-sqlite3';
@@ -9,12 +67,61 @@ import bcrypt from 'bcryptjs';
 const db = new Database('./cortexbuild.db');
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+db.pragma('synchronous = NORMAL');
+db.pragma('cache_size = 10000'); // 10MB cache
 
 /**
- * Initialize database tables
+ * ═══════════════════════════════════════════════════════════════════════════
+ * GRACEFUL SHUTDOWN HANDLERS
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Ensures WAL checkpoint before exit to prevent data loss
+ */
+
+const gracefulShutdown = (signal: string) => {
+    console.log(`\n🔄 Received ${signal}, shutting down gracefully...`);
+    try {
+        console.log('💾 Performing WAL checkpoint...');
+        db.pragma('wal_checkpoint(TRUNCATE)');
+        console.log('✅ WAL checkpoint completed');
+        
+        console.log('🔒 Closing database connection...');
+        db.close();
+        console.log('✅ Database closed successfully');
+        
+        console.log('👋 Shutdown complete');
+        process.exit(0);
+    } catch (error) {
+        console.error('❌ Error during shutdown:', error);
+        process.exit(1);
+    }
+};
+
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGHUP', () => gracefulShutdown('SIGHUP'));
+
+// Periodic WAL checkpoint (every 30 minutes)
+setInterval(() => {
+    try {
+        const result = db.pragma('wal_checkpoint(PASSIVE)');
+        console.log('🔄 Periodic WAL checkpoint:', result);
+    } catch (error) {
+        console.error('❌ Periodic checkpoint failed:', error);
+    }
+}, 30 * 60 * 1000); // 30 minutes
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * INITIALIZE DATABASE
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 export const initDatabase = () => {
     console.log('📊 Initializing database...');
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 1. CORE SYSTEM TABLES
+    // ═══════════════════════════════════════════════════════════════════════
 
     // Users table
     db.exec(`
@@ -52,6 +159,10 @@ export const initDatabase = () => {
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     `);
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 2. PROJECT MANAGEMENT TABLES
+    // ═══════════════════════════════════════════════════════════════════════
 
     // Clients table
     db.exec(`
@@ -161,6 +272,10 @@ export const initDatabase = () => {
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
         )
     `);
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 3. FINANCIAL MANAGEMENT TABLES
+    // ═══════════════════════════════════════════════════════════════════════
 
     // Invoices table
     db.exec(`
@@ -331,6 +446,10 @@ export const initDatabase = () => {
         )
     `);
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // 4. AUTOMATION & WORKFLOWS TABLES
+    // ═══════════════════════════════════════════════════════════════════════
+
     // Smart tools (automation helpers)
     db.exec(`
         CREATE TABLE IF NOT EXISTS smart_tools (
@@ -467,6 +586,10 @@ export const initDatabase = () => {
         )
     `);
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // 5. AI & AGENTS TABLES
+    // ═══════════════════════════════════════════════════════════════════════
+
     // Agent catalog & subscriptions
     db.exec(`
         CREATE TABLE IF NOT EXISTS ai_agents (
@@ -555,6 +678,10 @@ export const initDatabase = () => {
         )
     `);
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // 6. SDK & DEVELOPMENT TABLES
+    // ═══════════════════════════════════════════════════════════════════════
+
     // SDK developers table
     db.exec(`
         CREATE TABLE IF NOT EXISTS sdk_developers (
@@ -610,6 +737,10 @@ export const initDatabase = () => {
         )
     `);
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // 8. INTEGRATIONS TABLES
+    // ═══════════════════════════════════════════════════════════════════════
+
     // Third-party integrations table
     db.exec(`
         CREATE TABLE IF NOT EXISTS integrations (
@@ -661,6 +792,18 @@ export const initDatabase = () => {
         )
     `);
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // 9. MCP - MODEL CONTEXT PROTOCOL TABLES
+    // ═══════════════════════════════════════════════════════════════════════
+    // NOTE: MCP tables are created in server/services/mcp.ts via initializeMCPTables()
+    // Tables: mcp_sessions, mcp_messages, mcp_contexts
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 10. DEPLOYMENT & SANDBOX TABLES
+    // ═══════════════════════════════════════════════════════════════════════
+    // NOTE: Deployment tables are created in server/services/deployment.ts via initializeDeploymentTables()
+    // Tables: deployments
+
     // Sandbox environments table
     db.exec(`
         CREATE TABLE IF NOT EXISTS sandbox_environments (
@@ -676,6 +819,10 @@ export const initDatabase = () => {
         )
     `);
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // 11. MODULE SYSTEM TABLES
+    // ═══════════════════════════════════════════════════════════════════════
+
     // Module marketplace ratings/reviews
     db.exec(`
         CREATE TABLE IF NOT EXISTS module_reviews (
@@ -689,6 +836,10 @@ export const initDatabase = () => {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     `);
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 12. DATABASE INDEXES (Performance Optimization)
+    // ═══════════════════════════════════════════════════════════════════════
 
     // Create indexes
     db.exec('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
@@ -725,6 +876,10 @@ export const initDatabase = () => {
     db.exec('CREATE INDEX IF NOT EXISTS idx_agent_subscriptions_company ON agent_subscriptions(company_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_agent_executions_agent ON agent_executions(agent_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_developer_events_user ON developer_console_events(user_id)');
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 7. GLOBAL MARKETPLACE TABLES
+    // ═══════════════════════════════════════════════════════════════════════
 
     // Global Marketplace Tables
     db.exec(`
@@ -819,7 +974,17 @@ export const initDatabase = () => {
 };
 
 /**
- * Seed initial data
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 13. SEED INITIAL DATA
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * This function seeds the database with initial data including:
+ * - Demo companies (ASC Cladding Ltd, BuildRight Construction)
+ * - Demo users (Super Admin, Company Admins, Developers)
+ * - Sample projects, clients, tasks, milestones
+ * - 6 pre-approved Global Marketplace apps
+ * - AI Agents, Smart Tools, Workflow Templates
+ * - Sample integrations and automations
  */
 const seedInitialData = () => {
     // Check if company exists
@@ -868,6 +1033,14 @@ const seedInitialData = () => {
             },
             {
                 id: 'user-5',
+                email: 'adrian.stanca1@icloud.com',
+                password: 'password123',
+                name: 'Adrian Stanca',
+                role: 'developer',
+                companyId: 'company-1'
+            },
+            {
+                id: 'user-6',
                 email: 'dev@constructco.com',
                 password: 'password123',
                 name: 'Dev User',
@@ -1730,6 +1903,19 @@ export const findCompanyByName = (name: string) => {
 export const createCompany = (company: { id: string; name: string }) => {
     db.prepare('INSERT INTO companies (id, name) VALUES (?, ?)').run(company.id, company.name);
     return findCompanyByName(company.name);
+};
+
+/**
+ * Statistics for monitoring
+ */
+export const getUsersCount = (): number => {
+    const result = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+    return result.count;
+};
+
+export const getProjectsCount = (): number => {
+    const result = db.prepare('SELECT COUNT(*) as count FROM projects').get() as { count: number };
+    return result.count;
 };
 
 export { db };

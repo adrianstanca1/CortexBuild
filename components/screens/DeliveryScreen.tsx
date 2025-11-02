@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, DeliveryItem } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, QRCodeIcon, CheckIcon } from '../Icons';
 
 interface DeliveryScreenProps {
@@ -20,7 +20,7 @@ const DeliveryScreen: React.FC<DeliveryScreenProps> = ({ project, goBack }) => {
     useEffect(() => {
         const loadItems = async () => {
             setIsLoading(true);
-            const fetchedItems = await api.fetchDeliveryItems(project?.id || '');
+            const fetchedItems = await apiClient.fetchDeliveryItems();
             setItems(fetchedItems);
             setIsLoading(false);
         };

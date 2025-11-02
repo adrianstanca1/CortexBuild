@@ -1,70 +1,48 @@
 {
   "compilerOptions": {
-    // TypeScript 5.9.3 - Latest stable configuration
-    "target": "ES2023",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-
-    // React 19.2.0 - Automatic JSX runtime
-    "jsx": "react-jsx",
-
-    // Next.js 16.0.1 with Turbopack
-    "moduleResolution": "bundler",
-    "moduleDetection": "force",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
+    "strict": true,
     "noEmit": true,
-    "incremental": true,
-    "isolatedModules": true,
-
-    // Path aliases
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./*"]
-    },
-
-    // Type checking
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // Module resolution
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false,
-
-    // Decorators
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "useDefineForClassFields": false,
-
-    // Types
-    "types": ["node", "vite/client", "jest"],
-
-    // Next.js plugin
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/app/*": [
+        "./app/*"
+      ]
+    },
+    "target": "ES2017"
   },
   "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.mts",
-    "**/*.cts"
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    "./.next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    ".next",
-    "dist",
-    "build",
-    "coverage"
+    "node_modules"
   ]
 }

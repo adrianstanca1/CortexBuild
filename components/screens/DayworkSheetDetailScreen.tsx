@@ -1,7 +1,7 @@
 // Fix: Created the DayworkSheetDetailScreen component to resolve "not a module" error.
 import React, { useState, useEffect } from 'react';
 import { Project, DayworkSheet, User, PermissionAction, PermissionSubject } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, CalendarDaysIcon, UsersIcon, CheckCircleIcon, XMarkIcon } from '../Icons';
 
 interface DayworkSheetDetailScreenProps {
@@ -30,8 +30,8 @@ const DayworkSheetDetailScreen: React.FC<DayworkSheetDetailScreenProps> = ({ she
         const loadSheet = async () => {
             setIsLoading(true);
             const [fetchedSheet, allUsers] = await Promise.all([
-                api.fetchDayworkSheetById(sheetId),
-                api.fetchUsers() // Fetch all users to resolve the approver's name
+                apiClient.fetchDayworkSheetById(sheetId),
+                apiClient.fetchUsers() // Fetch all users to resolve the approver's name
             ]);
             
             setSheet(fetchedSheet || null);
@@ -52,7 +52,7 @@ const DayworkSheetDetailScreen: React.FC<DayworkSheetDetailScreenProps> = ({ she
 
     const handleUpdateStatus = async (status: 'Approved' | 'Rejected') => {
         if (!sheet) return;
-        const updatedSheet = await api.updateDayworkSheetStatus(sheet.id, status);
+        const updatedSheet = await apiClient.updateDayworkSheetStatus(sheet.id, status, currentUser);
         if (updatedSheet) {
             setSheet(updatedSheet);
             if (updatedSheet.status === 'Approved') {

@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 // Fix: Corrected import paths to include file extensions.
 import { Task, Project, Screen, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
-// Fix: Corrected the import path for the 'api' module.
-import * as api from '../../api';
+// Fix: Replaced old api.ts import with modern API client
+import { apiClient } from '../../lib/api/client';
 // Fix: Added .tsx extension to icon import
 import { ListBulletIcon, ChevronRightIcon, AlertTriangleIcon, CheckBadgeIcon, PencilIcon, PaperClipIcon } from '../Icons';
 
@@ -60,11 +60,9 @@ const ProjectTasksWidget: React.FC<ProjectTasksWidgetProps> = ({ project, naviga
                 return;
             }
             setIsLoading(true);
-            // Fix: Pass currentUser to fetchTasksForProject.
-            const projectTasks = await api.fetchTasksForProject(project.id);
-            const tasksArray = Array.isArray(projectTasks) ? projectTasks :
-                (projectTasks && typeof projectTasks === 'object' && 'data' in projectTasks && Array.isArray((projectTasks as any).data)) ? (projectTasks as any).data : [];
-            const openTasks = tasksArray
+            // Using modern API client
+            const projectTasks = await apiClient.fetchTasksForProject(project.id);
+            const openTasks = projectTasks
                 .filter(task => task.status !== 'Done')
                 .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
             setTasks(openTasks);
@@ -91,10 +89,10 @@ const ProjectTasksWidget: React.FC<ProjectTasksWidgetProps> = ({ project, naviga
             ) : (
                 <ul className="divide-y divide-gray-200">
                     {tasks.slice(0, 5).map(task => {
-                         const overdue = isOverdue(task);
+                        const overdue = isOverdue(task);
                         return (
-                            <li 
-                                key={task.id} 
+                            <li
+                                key={task.id}
                                 onClick={() => navigateTo('task-detail', { taskId: task.id })}
                                 className={`p-3 flex items-center justify-between hover:bg-gray-50 cursor-pointer ${overdue ? 'bg-red-50' : ''}`}
                             >

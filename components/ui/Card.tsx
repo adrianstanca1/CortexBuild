@@ -1,38 +1,48 @@
 import React from 'react';
 
-interface CardProps {
+export interface CardProps {
   children: React.ReactNode;
   className?: string;
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-  hover?: boolean;
   onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({
-  children,
-  className = '',
-  padding = 'md',
-  hover = false,
-  onClick,
-}) => {
-  const paddingClasses = {
-    none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
-  };
+export const Card: React.FC<CardProps> = ({ children, className = '', onClick }) => (
+  <div
+    className={`rounded-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm ${className}`}
+    onClick={onClick}
+  >
+    {children}
+  </div>
+);
 
-  const baseClasses = 'bg-white rounded-lg border border-gray-200';
-  const hoverClasses = hover ? 'hover:shadow-md transition-shadow duration-200 cursor-pointer' : 'shadow-sm';
-  const clickClasses = onClick ? 'cursor-pointer' : '';
+export const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>
+    {children}
+  </div>
+);
 
-  return (
-    <div
-      className={`${baseClasses} ${hoverClasses} ${paddingClasses[padding]} ${clickClasses} ${className}`}
-      onClick={onClick}
-    >
-      {children}
-    </div>
-  );
-};
+export const CardTitle: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>
+    {children}
+  </h3>
+);
 
+export const CardDescription: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <p className={`text-sm text-gray-500 dark:text-gray-400 ${className}`}>
+    {children}
+  </p>
+);
+
+export const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`p-6 pt-0 ${className}`}>
+    {children}
+  </div>
+);
+
+export const CardFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`flex items-center p-6 pt-0 ${className}`}>
+    {children}
+  </div>
+);
+
+export default Card;

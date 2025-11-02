@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, RFI, User, Comment, Attachment } from '../../types';
-import * as api from '../../api';
+import { apiClient } from '../../lib/api/client';
 import { ChevronLeftIcon, PaperClipIcon, CalendarDaysIcon, UsersIcon, ClockIcon, TrashIcon } from '../Icons';
 import DiffViewer from '../shared/DiffViewer';
 
@@ -52,10 +52,9 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
     useEffect(() => {
         const loadRfiData = async () => {
             setIsLoading(true);
-            const initialRfi = await api.fetchRFIById(rfiId);
-            const rfi = Array.isArray(initialRfi) ? null : (initialRfi && typeof initialRfi === 'object' && 'data' in initialRfi ? (initialRfi as any).data : initialRfi);
-            if (rfi && (rfi as any).rfiNumber) {
-                const versions = await api.fetchRFIVersions((rfi as any).rfiNumber);
+            const initialRfi = await apiClient.fetchRFIById(rfiId);
+            if (initialRfi) {
+                const versions = await apiClient.fetchRFIVersions(initialRfi.rfiNumber);
                 setAllVersions(versions);
                 const latest = versions[versions.length - 1];
                 setLatestRfi(latest);
@@ -74,9 +73,8 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
 
     const handleAddComment = async () => {
         if (!latestRfi || !newComment.trim()) return;
-        const comment = await api.addCommentToRFI(latestRfi.id, { content: newComment });
-        const commentData = Array.isArray(comment) ? null : (comment && typeof comment === 'object' && 'data' in comment ? (comment as any).data : comment);
-        setLatestRfi(prev => prev && commentData ? { ...prev, comments: [...prev.comments, commentData] } : null);
+        const comment = await apiClient.addCommentToRFI(latestRfi.id, newComment, currentUser);
+        setLatestRfi(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
         setNewComment('');
     };
 
@@ -96,10 +94,9 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
             }))
         );
 
-        const updatedRfi = await api.addAnswerToRFI(latestRfi.id, { answer, attachments: attachmentsForApi });
-        const rfiData = Array.isArray(updatedRfi) ? null : (updatedRfi && typeof updatedRfi === 'object' && 'data' in updatedRfi ? (updatedRfi as any).data : updatedRfi);
-        if (rfiData) {
-            setLatestRfi(rfiData);
+        const updatedRfi = await apiClient.addAnswerToRFI(latestRfi.id, answer, attachmentsForApi, currentUser);
+        if (updatedRfi) {
+            setLatestRfi(updatedRfi);
         }
         setAnswer('');
         setResponseFiles([]);

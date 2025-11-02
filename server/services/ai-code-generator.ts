@@ -66,9 +66,18 @@ export class AICodeGenerator {
 
       const systemPrompt = `You are an expert TypeScript developer specializing in construction management applications.
 Generate clean, production-ready TypeScript code with proper types, error handling, and comments.
-Focus on construction industry use cases like RFIs, safety inspections, project management, etc.`;
+Focus on construction industry use cases like RFIs, safety inspections, project management, subcontractor management, etc.
 
-      const fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}\n\nGenerate TypeScript code that fulfills this requirement. Include comments explaining key parts.`;
+Always include:
+- Proper TypeScript interfaces/types
+- Error handling with try-catch blocks
+- JSDoc comments for functions
+- Meaningful variable names
+- Industry-specific logic for construction workflows
+- Input validation
+- Return types and error types`;
+
+      const fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}\n\nGenerate complete, functional TypeScript code that fulfills this requirement. Include all necessary imports, interfaces, and error handling.`;
 
       const result = await generativeModel.generateContent(fullPrompt);
       const response = await result.response;
@@ -114,21 +123,37 @@ Focus on construction industry use cases like RFIs, safety inspections, project 
       const systemPrompt = `You are an expert TypeScript developer specializing in construction management applications.
 Generate clean, production-ready TypeScript code with proper types, error handling, and comments.
 Focus on construction industry use cases like RFIs, safety inspections, project management, subcontractor management, etc.
-Always include:
-- Proper TypeScript interfaces/types
-- Error handling with try-catch
-- JSDoc comments for functions
-- Meaningful variable names
-- Industry-specific logic`;
+
+Requirements:
+- Use proper TypeScript interfaces and types
+- Include comprehensive error handling with try-catch blocks
+- Add JSDoc comments for all functions and classes
+- Use meaningful, descriptive variable and function names
+- Include input validation and sanitization
+- Follow construction industry best practices
+- Return appropriate error types and success responses
+- Include proper async/await patterns for API calls
+- Add logging for debugging and monitoring`;
+
+      const userPrompt = `Generate complete, functional TypeScript code for the following requirement:
+
+${prompt}
+
+Please provide:
+1. All necessary import statements
+2. TypeScript interfaces for data structures
+3. Complete function implementations with error handling
+4. Example usage if applicable
+5. Comments explaining the construction management logic`;
 
       const completion = await this.openaiClient.chat.completions.create({
         model,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate TypeScript code for: ${prompt}` }
+          { role: 'user', content: userPrompt }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 3000
       });
 
       const generatedText = completion.choices[0]?.message?.content || '';

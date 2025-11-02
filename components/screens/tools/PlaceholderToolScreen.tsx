@@ -42,9 +42,9 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
         const loadData = async () => {
             setIsLoading(true);
             const [userTasks, userProjects, userTimeEntries] = await Promise.all([
-                api.fetchTasksForUser(currentUser.id),
-                api.fetchAllProjects(currentUser),
-                api.fetchTimeEntriesForUser(currentUser.id)
+                apiClient.fetchTasksForUser(currentUser),
+                apiClient.fetchAllProjects(currentUser),
+                apiClient.fetchTimeEntriesForUser(currentUser.id)
             ]);
             const tasksArray = Array.isArray(userTasks) ? userTasks :
                 (userTasks && typeof userTasks === 'object' && 'data' in userTasks && Array.isArray((userTasks as any).data)) ? (userTasks as any).data : [];
@@ -79,11 +79,8 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
             return;
         }
         try {
-            const newEntry = await api.startTimeEntry(task.id, currentUser.id);
-            const entryData = Array.isArray(newEntry) ? null : (newEntry && typeof newEntry === 'object' && 'data' in newEntry ? (newEntry as any).data : newEntry);
-            if (entryData) {
-                setTimeEntries(prev => [...prev, entryData]);
-            }
+            const newEntry = await apiClient.startTimeEntry(task.id, task.projectId, currentUser.id);
+            setTimeEntries(prev => [...prev, newEntry]);
         } catch (error) {
             console.error(error);
             alert('Failed to clock in.');
@@ -93,7 +90,7 @@ const LiveTimeEntryUI: React.FC<Omit<PlaceholderToolScreenProps, 'title'>> = ({ 
     const handleClockOut = async () => {
         if (!activeEntry) return;
         try {
-            const updatedEntry = await api.stopTimeEntry(activeEntry.id);
+            const updatedEntry = await apiClient.stopTimeEntry(activeEntry.id);
             setTimeEntries(prev => prev.map(e => e.id === updatedEntry.id ? updatedEntry : e));
         } catch (error) {
             console.error(error);
