@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Coffee } from 'lucide-react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface PomodoroTimerAppProps {
@@ -167,4 +167,3 @@ const PomodoroTimerApp: React.FC<PomodoroTimerAppProps> = ({ isDarkMode = true }
 };
 
 export default PomodoroTimerApp;
-

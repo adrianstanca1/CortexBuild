@@ -13,29 +13,15 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    LayoutDashboard,
     Users,
     Package,
-    Database,
-    BarChart3,
-    Settings,
     Activity,
-    AlertCircle,
     TrendingUp,
-    Download,
-    Upload,
     RefreshCw,
-    Shield,
-    Zap,
     Server,
     HardDrive,
     Cpu,
-    Globe,
-    Lock,
-    Unlock,
     CheckCircle,
-    XCircle,
-    Clock,
     DollarSign
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -133,12 +119,12 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
         loadActivity();
 
         // Setup real-time subscriptions
-        const metricsChannel = subscribeToMetrics('', (payload) => {
+        subscribeToMetrics('', (payload) => {
             console.log('Metrics updated:', payload);
             loadMetrics();
         });
 
-        const activityChannel = subscribeToActivityLog('', (payload) => {
+        subscribeToActivityLog('', (payload) => {
             console.log('New activity:', payload);
             loadActivity();
         });
@@ -408,4 +394,3 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ isDarkMode = 
 };
 
 export default SuperAdminDashboard;
-

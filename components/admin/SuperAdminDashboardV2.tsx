@@ -21,7 +21,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
     isDarkMode = true,
     onNavigate
 }) => {
-    const [stats, setStats] = useState({
+    const [stats] = useState({
         totalUsers: 1247,
         activeUsers: 892,
         totalCompanies: 156,
@@ -261,4 +261,3 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = ({
 };
 
 export default SuperAdminDashboardV2;
-

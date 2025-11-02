@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Sparkles, Brain, Zap, History, Trash2, Download } from 'lucide-react';
+import { Bot, Send, Sparkles, Brain, Zap, Trash2, Download } from 'lucide-react';
 import { getAPIUrl } from '../../config/api.config';
 
 interface Message {
@@ -367,4 +367,3 @@ export const AdvancedAIAssistant: React.FC = () => {
     </div>
   );
 };
-

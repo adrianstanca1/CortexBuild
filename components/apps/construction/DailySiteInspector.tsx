@@ -15,14 +15,9 @@ import {
     Camera,
     MapPin,
     Cloud,
-    CheckSquare,
-    Download,
-    Upload,
     Calendar,
     Clock,
     Image as ImageIcon,
-    Plus,
-    Trash2,
     FileText,
     Sun,
     CloudRain,
@@ -78,7 +73,6 @@ const DailySiteInspector: React.FC<DailySiteInspectorProps> = ({ isDarkMode = tr
         }
     ]);
     const [activeInspection, setActiveInspection] = useState<Inspection>(inspections[0]);
-    const [newPhoto, setNewPhoto] = useState<string>('');
 
     const weatherOptions = [
         { icon: Sun, label: 'Sunny', color: 'text-yellow-500' },
@@ -368,4 +362,3 @@ const DailySiteInspector: React.FC<DailySiteInspectorProps> = ({ isDarkMode = tr
 };
 
 export default DailySiteInspector;
-

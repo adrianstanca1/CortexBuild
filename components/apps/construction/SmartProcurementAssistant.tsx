@@ -14,15 +14,9 @@ import React, { useState } from 'react';
 import {
     Package,
     DollarSign,
-    TrendingUp,
-    TrendingDown,
     ShoppingCart,
     AlertCircle,
-    CheckCircle,
     Search,
-    Plus,
-    Download,
-    BarChart3,
     Scan
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -61,7 +55,7 @@ interface PurchaseOrder {
 }
 
 const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ isDarkMode = true }) => {
-    const [materials, setMaterials] = useState<Material[]>([
+    const [materials] = useState<Material[]>([
         {
             id: '1',
             name: 'Concrete Mix',
@@ -396,4 +390,3 @@ const SmartProcurementAssistant: React.FC<SmartProcurementAssistantProps> = ({ i
 };
 
 export default SmartProcurementAssistant;
-

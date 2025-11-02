@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, Unlock, Users, Search, Filter, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, Unlock, Users, Search, Filter, CheckCircle, XCircle } from 'lucide-react';
 import { getAPIUrl } from '../../config/api.config';
 
 interface User {
@@ -390,4 +390,3 @@ export const UserAccessControl: React.FC = () => {
     </div>
   );
 };
-
