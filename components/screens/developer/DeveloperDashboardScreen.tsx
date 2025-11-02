@@ -525,12 +525,12 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
         ]);
 
         if (profileRes.data?.success) setProfile(profileRes.data.profile);
-        if (appsRes.data?.success) setMyApps(appsRes.data.apps || []);
+        if (appsRes.data?.success) setApps(appsRes.data.apps || []);
         if (workflowsRes.data?.success) setWorkflows(workflowsRes.data.workflows || []);
         if (usageRes.data?.success) setUsage(usageRes.data);
         if (webhooksRes.data?.success) setWebhooks(webhooksRes.data.webhooks || []);
         if (agentsRes.data?.success) setAgents(agentsRes.data.agents || []);
-        if (runsRes.data?.success) setRuns(runsRes.data.runs || []);
+        if (runsRes.data?.success) setBuilderRuns(runsRes.data.runs || []);
 
         setLoading(false);
       } catch (error) {
@@ -608,7 +608,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     }
   }, []);
 
-  // canPublishModules must be declared before handlePublishApp (moved to after sandboxLimitReached)
+  // canPublishModules declaration moved to after sandboxLimitReached (line 763)
 
   useEffect(() => {
     loadDashboardData(true);
