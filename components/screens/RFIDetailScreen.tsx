@@ -97,8 +97,9 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
         );
 
         const updatedRfi = await api.addAnswerToRFI(latestRfi.id, { answer, attachments: attachmentsForApi });
-        if (updatedRfi) {
-            setLatestRfi(updatedRfi);
+        const rfiData = Array.isArray(updatedRfi) ? null : (updatedRfi && typeof updatedRfi === 'object' && 'data' in updatedRfi ? (updatedRfi as any).data : updatedRfi);
+        if (rfiData) {
+            setLatestRfi(rfiData);
         }
         setAnswer('');
         setResponseFiles([]);
