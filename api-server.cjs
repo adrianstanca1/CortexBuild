@@ -161,28 +161,28 @@ const mockResponses = [
 // Generate AI response based on user input
 function generateAIResponse(userMessage, conversationHistory) {
   const lowerMessage = userMessage.toLowerCase();
-  
+
   // Context-aware responses based on keywords
   if (lowerMessage.includes('project') && lowerMessage.includes('status')) {
     return "I can see you have 3 active projects. Project Alpha is 75% complete and on schedule, Project Beta is 60% complete but 2 days behind, and Project Gamma just started this week. Would you like detailed information about any specific project?";
   }
-  
+
   if (lowerMessage.includes('task') && (lowerMessage.includes('create') || lowerMessage.includes('add'))) {
     return "I can help you create a new task. What's the task title, and which project should it be assigned to? I'll also need to know the priority level and estimated duration.";
   }
-  
+
   if (lowerMessage.includes('team') && lowerMessage.includes('performance')) {
     return "Your team's performance metrics show: Average task completion time has improved by 18% this month. John is your top performer with 95% on-time completion. Sarah might need additional support as she's currently at 78% completion rate. Would you like me to suggest some optimization strategies?";
   }
-  
+
   if (lowerMessage.includes('help') || lowerMessage.includes('what can you do')) {
     return "I'm your AI construction assistant! I can help with: 📊 Project status updates, 📋 Task management, 👥 Team performance analysis, 💰 Budget tracking, 🛡️ Safety compliance, 📅 Schedule optimization, 🌤️ Weather-based recommendations, and 📈 Generate reports. What would you like to explore?";
   }
-  
+
   if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
     return "Hello! I'm your AI construction management assistant. I'm here to help you manage projects, track progress, analyze performance, and optimize your construction operations. How can I assist you today?";
   }
-  
+
   // Default responses with some variety
   const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
   return randomResponse;
@@ -294,8 +294,8 @@ app.post('/api/chat/message', auth.requireUser(), async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
+  res.json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'CortexBuild API Server'
   });
