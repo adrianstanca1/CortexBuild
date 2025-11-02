@@ -47,15 +47,19 @@ const TimeTrackingScreen: React.FC<TimeTrackingScreenProps> = ({ currentUser, na
         const loadData = async () => {
             setIsLoading(true);
             const [userTasks, userProjects, userTimeEntries] = await Promise.all([
-                api.fetchTasksForUser(currentUser),
+                api.fetchTasksForUser(currentUser.id),
                 api.fetchAllProjects(currentUser),
                 api.fetchTimeEntriesForUser(currentUser.id)
             ]);
-            setTasks(userTasks.filter(t => t.status !== 'Done'));
+            const tasksArray = Array.isArray(userTasks) ? userTasks :
+                (userTasks && typeof userTasks === 'object' && 'data' in userTasks && Array.isArray((userTasks as any).data)) ? (userTasks as any).data : [];
+            setTasks(tasksArray.filter(t => t.status !== 'Done'));
             const projectsArray = Array.isArray(userProjects) ? userProjects :
                 (userProjects && typeof userProjects === 'object' && 'data' in userProjects && Array.isArray((userProjects as any).data)) ? (userProjects as any).data : [];
             setProjects(projectsArray);
-            setTimeEntries(userTimeEntries);
+            const timeEntriesArray = Array.isArray(userTimeEntries) ? userTimeEntries :
+                (userTimeEntries && typeof userTimeEntries === 'object' && 'data' in userTimeEntries && Array.isArray((userTimeEntries as any).data)) ? (userTimeEntries as any).data : [];
+            setTimeEntries(timeEntriesArray);
             setIsLoading(false);
         };
         loadData();

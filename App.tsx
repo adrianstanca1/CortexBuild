@@ -372,32 +372,30 @@ const App: React.FC = () => {
             <main className="flex-1 overflow-auto">
               <Suspense fallback={<ScreenLoader />}>
                 <ScreenComponent
-                  {...useMemo(() => ({
-                    currentUser,
-                    navigateTo,
-                    goBack,
-                    ...(project && { project }),
-                    ...(params && { params }),
-                    ...(screen !== 'placeholder-tool' && { allProjects, hasPermission }),
-                    ...(isModuleScreen && {
-                      openProjectSelector: (title: string, onSelect: (projectId: string) => void) => {
-                        setProjectSelectorTitle(title);
-                        setProjectSelectorCallback(() => onSelect);
-                        setIsProjectSelectorOpen(true);
-                      },
-                      onDeepLink: (projectId: string | null, screenName: Screen, linkParams: any) => {
-                        if (projectId) {
-                          const selectedProject = allProjects.find(p => p.id === projectId);
-                          if (selectedProject) {
-                            navigateTo(screenName, linkParams, selectedProject);
-                          }
-                        } else {
-                          navigateTo(screenName, linkParams);
+                  currentUser={currentUser}
+                  navigateTo={navigateTo}
+                  goBack={goBack}
+                  {...(project && { project })}
+                  {...(params && { params })}
+                  {...(screen !== 'placeholder-tool' && { allProjects, hasPermission })}
+                  {...(isModuleScreen && {
+                    openProjectSelector: (title: string, onSelect: (projectId: string) => void) => {
+                      setProjectSelectorTitle(title);
+                      setProjectSelectorCallback(() => onSelect);
+                      setIsProjectSelectorOpen(true);
+                    },
+                    onDeepLink: (projectId: string | null, screenName: Screen, linkParams: any) => {
+                      if (projectId) {
+                        const selectedProject = allProjects.find(p => p.id === projectId);
+                        if (selectedProject) {
+                          navigateTo(screenName, linkParams, selectedProject);
                         }
-                      },
-                      can: hasPermission
-                    })
-                  }), [currentUser, navigateTo, goBack, project, params, screen, allProjects, hasPermission, isModuleScreen])}
+                      } else {
+                        navigateTo(screenName, linkParams);
+                      }
+                    },
+                    can: hasPermission
+                  })}
                 />
               </Suspense>
             </main>

@@ -24,6 +24,7 @@ import * as auth from './auth-supabase';
 import * as mcp from './services/mcp';
 import * as deploymentService from './services/deployment';
 import { setupWebSocket } from './websocket';
+import { errorHandler, requestLogger, getErrorStats, errorMonitor } from './middleware/errorMonitoring.js';
 
 // Import API route creators
 import { createClientsRouter } from './routes/clients';
@@ -67,7 +68,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Request logging
+// Error monitoring and request logging
+app.use(requestLogger);
+
+// Enhanced request logging
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
@@ -111,6 +115,9 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+
+// Error monitoring endpoint
+app.get('/api/errors', getErrorStats);
 
 /**
  * Chat Routes (AI Chatbot)
@@ -401,6 +408,17 @@ const startServer = async () => {
 
         console.log('✅ All 27 API routes registered successfully');
 
+        // Serve TypeScript files from public directory for developer console
+        app.get('/api.ts', (req, res) => {
+            res.setHeader('Content-Type', 'text/typescript');
+            res.sendFile(join(process.cwd(), 'public', 'api.ts'));
+        });
+
+        app.get('/api/mockApi.ts', (req, res) => {
+            res.setHeader('Content-Type', 'text/typescript');
+            res.sendFile(join(process.cwd(), 'public', 'api', 'mockApi.ts'));
+        });
+
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
             console.log(`❌ 404 Not Found: ${req.method} ${req.path}`);
@@ -408,13 +426,7 @@ const startServer = async () => {
         });
 
         // Register error handler LAST
-        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-            console.error('Server error:', err);
-            res.status(500).json({
-                error: 'Internal server error',
-                message: err.message
-            });
-        });
+        app.use(errorHandler);
 
         // Clean up expired sessions every hour
         setInterval(() => {

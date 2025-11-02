@@ -100,7 +100,8 @@ const TaskDetailScreen: React.FC<TaskDetailScreenProps> = ({ taskId, project, go
         );
 
         const comment = await api.addCommentToTask(task.id, { content: newComment, attachments });
-        setTask(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
+        const commentData = Array.isArray(comment) ? null : (comment && typeof comment === 'object' && 'data' in comment ? (comment as any).data : comment);
+        setTask(prev => prev && commentData ? { ...prev, comments: [...prev.comments, commentData] } : null);
         setNewComment('');
         setCommentFiles([]);
     };

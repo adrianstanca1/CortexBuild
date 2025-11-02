@@ -75,7 +75,8 @@ const RFIDetailScreen: React.FC<RFIDetailScreenProps> = ({ rfiId, project, goBac
     const handleAddComment = async () => {
         if (!latestRfi || !newComment.trim()) return;
         const comment = await api.addCommentToRFI(latestRfi.id, { content: newComment });
-        setLatestRfi(prev => prev ? { ...prev, comments: [...prev.comments, comment] } : null);
+        const commentData = Array.isArray(comment) ? null : (comment && typeof comment === 'object' && 'data' in comment ? (comment as any).data : comment);
+        setLatestRfi(prev => prev && commentData ? { ...prev, comments: [...prev.comments, commentData] } : null);
         setNewComment('');
     };
 
