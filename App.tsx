@@ -65,6 +65,7 @@ const BusinessIntelligenceScreen = lazy(() => import('./components/screens/Busin
 
 // Advanced Enterprise screens
 const SystemAdminScreen = lazy(() => import('./components/screens/SystemAdminScreen'));
+const UnifiedAdminDashboard = lazy(() => import('./components/screens/admin/UnifiedAdminDashboard'));
 
 // Additional project screens
 const TaskDetailScreen = lazy(() => import('./components/screens/TaskDetailScreen'));
@@ -137,6 +138,7 @@ const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   'company-admin-dashboard': CompanyAdminDashboardV2,
   'developer-dashboard': DeveloperDashboardScreen,
   'super-admin-dashboard': SuperAdminDashboard,
+  'platform-admin': UnifiedAdminDashboard,
   'placeholder-tool': PlaceholderToolScreen,
 
   // Core feature screens
