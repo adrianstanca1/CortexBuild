@@ -16,7 +16,7 @@ import { useToast } from './hooks/useToast';
 import { useNavigation } from './hooks/useNavigation';
 import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
-import { fetchAllProjects, getAISuggestedAction } from './api';
+import { fetchAllProjects, getAISuggestedAction } from './api.ts';
 import PerformanceMonitor from './components/performance/PerformanceMonitor';
 import SmartConstructionAssistant from './components/features/SmartConstructionAssistant';
 

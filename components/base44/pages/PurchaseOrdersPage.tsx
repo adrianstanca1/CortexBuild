@@ -29,8 +29,6 @@ export const PurchaseOrdersPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
@@ -39,7 +37,6 @@ export const PurchaseOrdersPage: React.FC = () => {
 
     const fetchPurchaseOrders = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
@@ -50,13 +47,11 @@ export const PurchaseOrdersPage: React.FC = () => {
             if (data.success) {
                 setPurchaseOrders(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch purchase orders:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch purchase orders:', err);
             setPurchaseOrders(mockPurchaseOrders);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -222,4 +217,3 @@ export const PurchaseOrdersPage: React.FC = () => {
         </div>
     );
 };
-

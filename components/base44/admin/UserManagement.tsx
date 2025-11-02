@@ -52,6 +52,7 @@ export const UserManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch users:', error);
+    }
   };
 
   const fetchCompanies = async () => {

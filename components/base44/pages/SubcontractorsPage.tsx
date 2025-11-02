@@ -28,8 +28,6 @@ export const SubcontractorsPage: React.FC = () => {
     const [tradeFilter, setTradeFilter] = useState('all');
     const [activeTab, setActiveTab] = useState<'directory' | 'assignments'>('directory');
     const [subcontractors, setSubcontractors] = useState<Subcontractor[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
@@ -38,7 +36,6 @@ export const SubcontractorsPage: React.FC = () => {
 
     const fetchSubcontractors = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (tradeFilter !== 'all') params.append('trade', tradeFilter);
@@ -49,13 +46,11 @@ export const SubcontractorsPage: React.FC = () => {
             if (data.success) {
                 setSubcontractors(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch subcontractors:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch subcontractors:', err);
             setSubcontractors(mockSubcontractors);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -303,4 +298,3 @@ export const SubcontractorsPage: React.FC = () => {
         </div>
     );
 };
-

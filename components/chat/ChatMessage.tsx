@@ -20,7 +20,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     isLoading = false,
 }) => {
     const isUser = role === 'user';
-    const isAssistant = role === 'assistant';
 
     return (
         <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -128,4 +127,3 @@ export const ToolResultMessage: React.FC<{
         </div>
     );
 };
-

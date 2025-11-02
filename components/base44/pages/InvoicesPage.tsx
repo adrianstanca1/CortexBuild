@@ -33,8 +33,6 @@ export const InvoicesPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [invoices, setInvoices] = useState<Invoice[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showInvoiceBuilder, setShowInvoiceBuilder] = useState(false);
 
     useEffect(() => {
@@ -43,7 +41,6 @@ export const InvoicesPage: React.FC = () => {
 
     const fetchInvoices = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
@@ -54,13 +51,11 @@ export const InvoicesPage: React.FC = () => {
             if (data.success) {
                 setInvoices(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch invoices:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch invoices:', err);
             setInvoices(mockInvoices);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -307,4 +302,3 @@ export const InvoicesPage: React.FC = () => {
         </div>
     );
 };
-

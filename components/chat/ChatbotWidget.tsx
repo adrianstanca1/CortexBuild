@@ -37,14 +37,6 @@ export const ChatbotWidget: React.FC = () => {
         }
     }, [isOpen]);
 
-    const getAuthHeaders = () => {
-        const token = localStorage.getItem('constructai_token');
-        return {
-            'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` }),
-        };
-    };
-
     const loadChatHistory = useCallback(async () => {
         try {
             const data = await mockApi.getChatMessages(sessionId);
@@ -260,4 +252,3 @@ export const ChatbotWidget: React.FC = () => {
         </>
     );
 };
-

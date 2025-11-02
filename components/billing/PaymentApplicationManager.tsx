@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Calendar, FileText, CheckCircle, Clock, AlertCircle, TrendingUp } from 'lucide-react';
+import { DollarSign, FileText, CheckCircle, Clock, AlertCircle, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { financialAPI } from '../../lib/api-client';
 
@@ -245,4 +245,3 @@ const PaymentApplicationManager: React.FC<PaymentApplicationManagerProps> = ({ p
 };
 
 export default PaymentApplicationManager;
-

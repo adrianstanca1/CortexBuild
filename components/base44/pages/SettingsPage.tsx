@@ -3,14 +3,8 @@
  */
 
 import React, { useState } from 'react';
-import { User } from '../../../types';
 
-interface SettingsPageProps {
-    user?: User;
-    onLogout?: () => void;
-}
-
-export const SettingsPage: React.FC<SettingsPageProps> = ({ user, onLogout }) => {
+export const SettingsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'profile' | 'company' | 'notifications' | 'security'>('profile');
 
     return (
@@ -233,4 +227,3 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ user, onLogout }) =>
         </div>
     );
 };
-

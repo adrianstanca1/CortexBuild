@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, FolderOpen, FileText, TrendingUp, DollarSign, Calendar } from 'lucide-react';
+import { Users, FolderOpen, FileText, TrendingUp, DollarSign } from 'lucide-react';
 import { getAPIUrl } from '../../../config/api.config';
 
 interface CompanyStats {
@@ -246,4 +246,3 @@ const QuickActionButton: React.FC<{
     </button>
   );
 };
-

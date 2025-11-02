@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Grid, Save, Eye, Edit, Trash2, Settings, BarChart3, Table, PieChart, Activity } from 'lucide-react';
+import { Plus, Grid, Save, Edit, Trash2, BarChart3, Table, PieChart, Activity } from 'lucide-react';
 import { getAPIUrl } from '../../../config/api.config';
 
 interface Widget {
@@ -26,7 +26,6 @@ export const DashboardBuilder: React.FC = () => {
   const [currentDashboard, setCurrentDashboard] = useState<Dashboard | null>(null);
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [editMode, setEditMode] = useState(false);
-  const [showAddWidget, setShowAddWidget] = useState(false);
   const [draggedWidget, setDraggedWidget] = useState<Widget | null>(null);
 
   useEffect(() => {
@@ -123,7 +122,6 @@ export const DashboardBuilder: React.FC = () => {
       const data = await response.json();
       if (data.success) {
         fetchWidgets(currentDashboard.id);
-        setShowAddWidget(false);
       }
     } catch (error) {
       console.error('Failed to add widget:', error);
@@ -317,4 +315,3 @@ export const DashboardBuilder: React.FC = () => {
     </div>
   );
 };
-

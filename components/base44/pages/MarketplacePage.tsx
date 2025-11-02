@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Star, Download, TrendingUp, Package, Check, X } from 'lucide-react';
+import { Search, Filter, Star, Download, Package, Check, X } from 'lucide-react';
 import { getAPIUrl } from '../../../config/api.config';
 
 interface Module {
@@ -291,4 +291,3 @@ export const MarketplacePage: React.FC = () => {
     </div>
   );
 };
-

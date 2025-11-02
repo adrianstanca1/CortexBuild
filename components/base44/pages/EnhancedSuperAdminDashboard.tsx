@@ -11,7 +11,6 @@ import {
   Database,
   DollarSign,
   Download,
-  Globe,
   HardDrive,
   Layers,
   Lock,

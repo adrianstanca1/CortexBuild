@@ -34,8 +34,6 @@ export const RFIsPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [rfis, setRfis] = useState<RFI[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
@@ -44,7 +42,6 @@ export const RFIsPage: React.FC = () => {
 
     const fetchRFIs = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (statusFilter !== 'all') params.append('status', statusFilter);
@@ -55,13 +52,11 @@ export const RFIsPage: React.FC = () => {
             if (data.success) {
                 setRfis(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch RFIs:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch RFIs:', err);
             setRfis(mockRfis);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -343,4 +338,3 @@ export const RFIsPage: React.FC = () => {
         </div>
     );
 };
-

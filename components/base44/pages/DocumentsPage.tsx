@@ -26,8 +26,6 @@ export const DocumentsPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState('all');
     const [documents, setDocuments] = useState<Document[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
 
     useEffect(() => {
@@ -36,7 +34,6 @@ export const DocumentsPage: React.FC = () => {
 
     const fetchDocuments = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '50' });
             if (searchQuery) params.append('search', searchQuery);
             if (typeFilter !== 'all') params.append('category', typeFilter);
@@ -47,13 +44,11 @@ export const DocumentsPage: React.FC = () => {
             if (data.success) {
                 setDocuments(data.data);
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch documents:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch documents:', err);
             setDocuments(mockDocuments);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -224,4 +219,3 @@ export const DocumentsPage: React.FC = () => {
         </div>
     );
 };
-

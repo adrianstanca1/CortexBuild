@@ -28,10 +28,6 @@ export const ProjectsPage: React.FC = () => {
     const [typeFilter, setTypeFilter] = useState('all');
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Fetch projects from API
@@ -39,15 +35,12 @@ export const ProjectsPage: React.FC = () => {
         if (!selectedProjectId) {
             fetchProjects();
         }
-    }, [searchQuery, statusFilter, page, selectedProjectId]);
+    }, [searchQuery, statusFilter, selectedProjectId]);
 
     const fetchProjects = async () => {
         try {
-            setLoading(true);
-            setError(null);
-
             const params = new URLSearchParams({
-                page: page.toString(),
+                page: '1',
                 limit: '20'
             });
 
@@ -59,16 +52,13 @@ export const ProjectsPage: React.FC = () => {
 
             if (data.success) {
                 setProjects(data.data);
-                setTotalPages(data.pagination?.totalPages || 1);
             } else {
-                setError(data.error || 'Failed to fetch projects');
+                console.warn('Failed to fetch projects:', data.error);
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch projects');
+            console.error('Failed to fetch projects:', err);
             // Fallback to mock data
             setProjects(mockProjects);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -347,4 +337,3 @@ export const ProjectsPage: React.FC = () => {
         </div>
     );
 };
-

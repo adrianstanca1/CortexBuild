@@ -26,8 +26,6 @@ export const TimeTrackingPage: React.FC = () => {
     const [periodFilter, setPeriodFilter] = useState('this-week');
     const [projectFilter, setProjectFilter] = useState('all');
     const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [stats, setStats] = useState({ totalHours: 0, revenue: 0, entries: 0 });
     const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -37,7 +35,6 @@ export const TimeTrackingPage: React.FC = () => {
 
     const fetchTimeEntries = async () => {
         try {
-            setLoading(true);
             const params = new URLSearchParams({ page: '1', limit: '100' });
             if (projectFilter !== 'all') params.append('project_id', projectFilter);
 
@@ -50,13 +47,11 @@ export const TimeTrackingPage: React.FC = () => {
                 const rev = data.data.reduce((sum: number, e: TimeEntry) => sum + (e.amount || 0), 0);
                 setStats({ totalHours: total, revenue: rev, entries: data.data.length });
             } else {
-                setError(data.error);
+                console.warn('Failed to fetch time entries:', data.error);
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Failed to fetch time entries:', err);
             setTimeEntries(mockTimeEntries);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -225,4 +220,3 @@ export const TimeTrackingPage: React.FC = () => {
         </div>
     );
 };
-
