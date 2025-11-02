@@ -6,8 +6,8 @@
 import React from 'react';
 import {
     Sparkles, Building2, Code, BarChart3, Shield, Zap,
-    CheckCircle, ArrowRight, Users, Globe, TrendingUp, Award,
-    Rocket, Star, Play, Github
+    CheckCircle, ArrowRight, Users, Globe, Award,
+    Rocket, Star, Play
 } from 'lucide-react';
 
 interface MainLandingPageProps {
@@ -376,4 +376,3 @@ export const MainLandingPage: React.FC<MainLandingPageProps> = ({ onGetStarted }
 };
 
 export default MainLandingPage;
-

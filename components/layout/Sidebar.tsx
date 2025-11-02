@@ -4,9 +4,9 @@ import { Project, Screen, User, PermissionAction, PermissionSubject } from '../.
 import { usePermissions } from '../../hooks/usePermissions';
 // Fix: Added .tsx extension to import
 import {
-    ChevronLeftIcon, BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
+    BuildingOfficeIcon, ListBulletIcon, DocumentIcon,
     CheckBadgeIcon, DocumentDuplicateIcon, CameraIcon, ClipboardDocumentListIcon,
-    BellIcon, TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
+    TicketIcon, SunIcon, QuestionMarkCircleIcon, ArrowLeftOnRectangleIcon,
     WandSparklesIcon, ArrowPathIcon, ShieldCheckIcon
 } from '../Icons';
 

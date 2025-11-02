@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    CreditCard, DollarSign, FileText, Download, Eye, Search, Filter,
-    Plus, X, CheckCircle, AlertCircle, Clock, TrendingUp, Calendar,
-    Users, Building2, Receipt, Wallet, ArrowUpRight, ArrowDownRight
+    CreditCard, DollarSign, FileText, Eye, Search, Filter,
+    Plus, X, CheckCircle, Clock, Users, Building2, Receipt, Wallet
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 import toast from 'react-hot-toast';
@@ -54,7 +53,7 @@ interface BillingPaymentsManagementProps {
     currentUser?: any;
 }
 
-const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ currentUser }) => {
+const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ currentUser: _currentUser }) => {
     const [activeTab, setActiveTab] = useState<'subscriptions' | 'invoices' | 'payments'>('subscriptions');
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -391,6 +390,8 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
         }
     }, [activeTab, subscriptions, invoices, payments]);
 
+    const modalTitle = activeTab === 'subscriptions' ? 'Subscription' : activeTab === 'invoices' ? 'Invoice' : 'Payment';
+
     const filteredData = useMemo(() => {
         let data: any[] = [];
         if (activeTab === 'subscriptions') data = subscriptions;
@@ -410,6 +411,7 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
     }, [activeTab, subscriptions, invoices, payments, searchQuery, filterStatus]);
 
     return (
+        <>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
             {/* Header */}
             <div className="mb-8">
@@ -424,7 +426,7 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg flex items-center gap-2"
                     >
                         <Plus className="w-5 h-5" />
-                        Create {activeTab === 'subscriptions' ? 'Subscription' : activeTab === 'invoices' ? 'Invoice' : 'Payment'}
+                        Create {modalTitle}
                     </button>
                 </div>
 
@@ -606,38 +608,41 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                         </div>
                     </div>
 
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        aria-label="Filter by status"
-                    >
-                        <option value="all">All Status</option>
-                        {activeTab === 'subscriptions' && (
-                            <>
-                                <option value="active">Active</option>
-                                <option value="trial">Trial</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="expired">Expired</option>
-                            </>
-                        )}
-                        {activeTab === 'invoices' && (
-                            <>
-                                <option value="paid">Paid</option>
-                                <option value="pending">Pending</option>
-                                <option value="overdue">Overdue</option>
-                                <option value="cancelled">Cancelled</option>
-                            </>
-                        )}
-                        {activeTab === 'payments' && (
-                            <>
-                                <option value="completed">Completed</option>
-                                <option value="pending">Pending</option>
-                                <option value="failed">Failed</option>
-                                <option value="refunded">Refunded</option>
-                            </>
-                        )}
-                    </select>
+                    <div className="relative">
+                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            aria-label="Filter by status"
+                        >
+                            <option value="all">All Status</option>
+                            {activeTab === 'subscriptions' && (
+                                <>
+                                    <option value="active">Active</option>
+                                    <option value="trial">Trial</option>
+                                    <option value="cancelled">Cancelled</option>
+                                    <option value="expired">Expired</option>
+                                </>
+                            )}
+                            {activeTab === 'invoices' && (
+                                <>
+                                    <option value="paid">Paid</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="overdue">Overdue</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </>
+                            )}
+                            {activeTab === 'payments' && (
+                                <>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="failed">Failed</option>
+                                    <option value="refunded">Refunded</option>
+                                </>
+                            )}
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -658,7 +663,7 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                         onClick={() => setShowCreateModal(true)}
                         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
                     >
-                        Create {activeTab === 'subscriptions' ? 'Subscription' : activeTab === 'invoices' ? 'Invoice' : 'Payment'}
+                        Create {modalTitle}
                     </button>
                 </div>
             ) : (
@@ -770,8 +775,292 @@ const BillingPaymentsManagement: React.FC<BillingPaymentsManagementProps> = ({ c
                 </div>
             )}
         </div>
+
+        {showCreateModal && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-semibold text-gray-900">
+                            Create {modalTitle}
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={() => setShowCreateModal(false)}
+                            className="p-2 rounded-full hover:bg-gray-100"
+                            aria-label="Close create modal"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {activeTab === 'subscriptions' && (
+                        <form onSubmit={handleCreateSubscription} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                <select
+                                    value={subscriptionForm.company_id}
+                                    onChange={(e) => setSubscriptionForm({ ...subscriptionForm, company_id: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                >
+                                    <option value="">Select company</option>
+                                    {companies.map((company) => (
+                                        <option key={company.id} value={company.id}>{company.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Plan Type</label>
+                                    <select
+                                        value={subscriptionForm.plan_type}
+                                        onChange={(e) => setSubscriptionForm({ ...subscriptionForm, plan_type: e.target.value as Subscription['plan_type'] })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="basic">Basic</option>
+                                        <option value="professional">Professional</option>
+                                        <option value="enterprise">Enterprise</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Billing Cycle</label>
+                                    <select
+                                        value={subscriptionForm.billing_cycle}
+                                        onChange={(e) => setSubscriptionForm({ ...subscriptionForm, billing_cycle: e.target.value as Subscription['billing_cycle'] })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="monthly">Monthly</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={subscriptionForm.amount}
+                                        onChange={(e) => setSubscriptionForm({ ...subscriptionForm, amount: Number(e.target.value) })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                    <input
+                                        type="date"
+                                        value={subscriptionForm.start_date}
+                                        onChange={(e) => setSubscriptionForm({ ...subscriptionForm, start_date: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    id="auto-renew"
+                                    type="checkbox"
+                                    checked={subscriptionForm.auto_renew}
+                                    onChange={(e) => setSubscriptionForm({ ...subscriptionForm, auto_renew: e.target.checked })}
+                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                />
+                                <label htmlFor="auto-renew" className="text-sm text-gray-700">Enable auto renew</label>
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Subscription</button>
+                            </div>
+                        </form>
+                    )}
+
+                    {activeTab === 'invoices' && (
+                        <form onSubmit={handleCreateInvoice} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                <select
+                                    value={invoiceForm.company_id}
+                                    onChange={(e) => setInvoiceForm({ ...invoiceForm, company_id: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                >
+                                    <option value="">Select company</option>
+                                    {companies.map((company) => (
+                                        <option key={company.id} value={company.id}>{company.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={invoiceForm.amount}
+                                        onChange={(e) => setInvoiceForm({ ...invoiceForm, amount: Number(e.target.value) })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                                    <input
+                                        type="date"
+                                        value={invoiceForm.due_date}
+                                        onChange={(e) => setInvoiceForm({ ...invoiceForm, due_date: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    value={invoiceForm.description}
+                                    onChange={(e) => setInvoiceForm({ ...invoiceForm, description: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    rows={4}
+                                />
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Invoice</button>
+                            </div>
+                        </form>
+                    )}
+
+                    {activeTab === 'payments' && (
+                        <form onSubmit={handleCreatePayment} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                <select
+                                    value={paymentForm.company_id}
+                                    onChange={(e) => setPaymentForm({ ...paymentForm, company_id: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                >
+                                    <option value="">Select company</option>
+                                    {companies.map((company) => (
+                                        <option key={company.id} value={company.id}>{company.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={paymentForm.amount}
+                                        onChange={(e) => setPaymentForm({ ...paymentForm, amount: Number(e.target.value) })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                                    <select
+                                        value={paymentForm.payment_method}
+                                        onChange={(e) => setPaymentForm({ ...paymentForm, payment_method: e.target.value as Payment['payment_method'] })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="credit_card">Credit Card</option>
+                                        <option value="bank_transfer">Bank Transfer</option>
+                                        <option value="paypal">PayPal</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+                                    <input
+                                        type="date"
+                                        value={paymentForm.payment_date}
+                                        onChange={(e) => setPaymentForm({ ...paymentForm, payment_date: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Invoice</label>
+                                    <input
+                                        type="text"
+                                        value={paymentForm.invoice_id}
+                                        onChange={(e) => setPaymentForm({ ...paymentForm, invoice_id: e.target.value })}
+                                        placeholder="Linked invoice ID (optional)"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Transaction ID</label>
+                                <input
+                                    type="text"
+                                    value={paymentForm.transaction_id}
+                                    onChange={(e) => setPaymentForm({ ...paymentForm, transaction_id: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Record Payment</button>
+                            </div>
+                        </form>
+                    )}
+                </div>
+            </div>
+        )}
+
+        {showViewModal && selectedItem && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-semibold text-gray-900">{modalTitle} Details</h3>
+                        <button
+                            type="button"
+                            onClick={() => setShowViewModal(false)}
+                            className="p-2 rounded-full hover:bg-gray-100"
+                            aria-label="Close detail modal"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-sm text-gray-500">Company</p>
+                            <p className="text-base font-semibold text-gray-900">{selectedItem.company_name || 'N/A'}</p>
+                        </div>
+                        {('invoice_number' in selectedItem) && (
+                            <div>
+                                <p className="text-sm text-gray-500">Invoice #</p>
+                                <p className="text-base font-semibold text-gray-900">{selectedItem.invoice_number}</p>
+                            </div>
+                        )}
+                        <div>
+                            <p className="text-sm text-gray-500">Status</p>
+                            <p className="text-base font-semibold text-gray-900 uppercase">{selectedItem.status}</p>
+                        </div>
+                        {('amount' in selectedItem) && (
+                            <div>
+                                <p className="text-sm text-gray-500">Amount</p>
+                                <p className="text-base font-semibold text-gray-900">{formatCurrency(selectedItem.amount)}</p>
+                            </div>
+                        )}
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Full record</p>
+                        <pre className="text-xs text-gray-600 overflow-x-auto whitespace-pre-wrap">
+{JSON.stringify(selectedItem, null, 2)}
+                        </pre>
+                    </div>
+                    <div className="flex justify-end">
+                        <button
+                            type="button"
+                            onClick={() => setShowViewModal(false)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 
 export default BillingPaymentsManagement;
-

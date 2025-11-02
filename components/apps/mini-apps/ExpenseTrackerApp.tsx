@@ -229,10 +229,14 @@ const ExpenseTrackerApp: React.FC<ExpenseTrackerAppProps> = ({ isDarkMode = true
                     <button
                         type="button"
                         onClick={addTransaction}
-                        className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
+                        disabled={saving}
+                        className={`w-full px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${saving
+                            ? 'bg-indigo-300 text-white cursor-not-allowed'
+                            : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
+                        }`}
                     >
-                        <Plus className="h-5 w-5" />
-                        Add Transaction
+                        {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
+                        {saving ? 'Saving...' : 'Add Transaction'}
                     </button>
                 </div>
 
@@ -295,4 +299,3 @@ const ExpenseTrackerApp: React.FC<ExpenseTrackerAppProps> = ({ isDarkMode = true
 };
 
 export default ExpenseTrackerApp;
-

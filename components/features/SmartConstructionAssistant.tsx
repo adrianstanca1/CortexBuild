@@ -19,7 +19,7 @@ interface SmartConstructionAssistantProps {
 }
 
 const SmartConstructionAssistant: React.FC<SmartConstructionAssistantProps> = ({
-  currentUser,
+  currentUser: _currentUser,
   isOpen,
   onClose,
   onAction

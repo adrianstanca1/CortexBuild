@@ -117,7 +117,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isDarkMode = tr
                                 App Usage
                             </h2>
                             <div className="space-y-4">
-                                {appUsage.map((app, index) => (
+                                {appUsage.map((app) => (
                                     <div
                                         key={app.name}
                                         className={`p-4 rounded-xl ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}
@@ -218,4 +218,3 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ isDarkMode = tr
 };
 
 export default AnalyticsDashboard;
-

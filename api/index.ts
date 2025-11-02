@@ -15,5 +15,9 @@ export { toggleCompanyPlanStatus } from './platformAdmin';
 // Re-export types from types.ts for API usage
 export type { AIAgent } from '../types';
 
-// Re-export types from platformAdmin.ts
-export type { AuditLogEntry, CompanyPlan, PlatformInvitation } from './platformAdmin';
+// Re-export types from platformAdmin.ts (types are defined there, not duplicated here)
+export type { 
+  AuditLogEntry, 
+  CompanyPlan, 
+  PlatformInvitation 
+} from './platformAdmin';

@@ -5,9 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    Users, Plus, Search, Edit2, Trash2, Mail, Shield,
-    Building2, Calendar, CheckCircle, XCircle, Filter,
-    Download, Upload, MoreVertical, Eye, Lock
+    Users, Plus, Search, Edit2, Trash2, Shield,
+    CheckCircle, XCircle, Filter, Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase/client';
@@ -28,7 +27,7 @@ interface UserManagementProps {
     currentUser: any;
 }
 
-const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
+const UserManagement: React.FC<UserManagementProps> = ({ currentUser: _currentUser }) => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +80,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-            const { data: newUser, error } = await supabase
+            const { error } = await supabase
                 .from('users')
                 .insert({
                     id: crypto.randomUUID(),
@@ -312,11 +311,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                             />
                         </div>
                     </div>
-                    <div>
+                    <div className="relative">
+                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <select
                             value={filterRole}
                             onChange={(e) => setFilterRole(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             aria-label="Filter by role"
                             title="Filter users by role"
                         >
@@ -327,11 +327,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
                             <option value="user">User</option>
                         </select>
                     </div>
-                    <div>
+                    <div className="relative">
+                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <select
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             aria-label="Filter by status"
                             title="Filter users by status"
                         >
@@ -616,4 +617,3 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) => {
 };
 
 export default UserManagement;
-

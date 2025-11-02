@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle, Filter, Download, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { financialAPI, costCodesAPI } from '../../lib/api-client';
+import { financialAPI } from '../../lib/api-client';
 
 interface Budget {
   id: string;
@@ -27,13 +27,11 @@ interface BudgetManagerProps {
 
 const BudgetManager: React.FC<BudgetManagerProps> = ({ projectId }) => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [costCodes, setCostCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'labor' | 'material' | 'equipment' | 'subcontract'>('all');
 
   useEffect(() => {
     loadBudgets();
-    loadCostCodes();
   }, [projectId]);
 
   const loadBudgets = async () => {
@@ -46,15 +44,6 @@ const BudgetManager: React.FC<BudgetManagerProps> = ({ projectId }) => {
       toast.error('Failed to load budget information');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadCostCodes = async () => {
-    try {
-      const response = await costCodesAPI.getAll();
-      setCostCodes(response.data.data || []);
-    } catch (error: any) {
-      console.error('Failed to load cost codes:', error);
     }
   };
 
@@ -264,4 +253,3 @@ const BudgetManager: React.FC<BudgetManagerProps> = ({ projectId }) => {
 };
 
 export default BudgetManager;
-

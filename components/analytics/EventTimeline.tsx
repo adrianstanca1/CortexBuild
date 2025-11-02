@@ -112,7 +112,7 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {events.map((event, index) => (
+          {events.map((event) => (
             <div
               key={event.id}
               className={`

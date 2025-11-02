@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    BarChart3, TrendingUp, TrendingDown, Users, Building2, DollarSign,
-    Calendar, Download, Filter, RefreshCw, Activity, Target, Zap,
-    FileText, CheckCircle, Clock, AlertCircle, ArrowUpRight, ArrowDownRight
+    BarChart3, TrendingUp, Users, Building2, DollarSign,
+    Download, RefreshCw, Activity, Target,
+    CheckCircle, Clock, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 import toast from 'react-hot-toast';
@@ -20,7 +20,7 @@ interface MetricCard {
     color: string;
 }
 
-const AnalyticsReports: React.FC<AnalyticsReportsProps> = ({ currentUser }) => {
+const AnalyticsReports: React.FC<AnalyticsReportsProps> = ({ currentUser: _currentUser }) => {
     const [loading, setLoading] = useState(true);
     const [dateRange, setDateRange] = useState('30'); // days
     const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'projects' | 'users'>('overview');

@@ -12,19 +12,16 @@
  * - Find & Replace
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import {
     Play,
     Save,
     Download,
-    Upload,
     Settings,
     FileCode,
     Plus,
     X,
-    Search,
-    GitBranch,
     Terminal,
     Bug
 } from 'lucide-react';
@@ -406,4 +403,3 @@ h1 {
 };
 
 export default AdvancedCodeEditor;
-
