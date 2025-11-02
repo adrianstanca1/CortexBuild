@@ -22,7 +22,6 @@ import {
     ArrowRight,
     ArrowLeft
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import DatabaseConfig from './DatabaseConfig';
 import UIBuilder from './UIBuilder';
 import LogicEditor from './LogicEditor';
@@ -35,18 +34,6 @@ interface MobileAppBuilderProps {
 
 type DatabaseOption = 'free' | 'company' | 'custom';
 type BuilderStep = 'info' | 'database' | 'ui' | 'logic' | 'preview' | 'publish';
-
-interface AppProject {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-    databaseType: DatabaseOption;
-    databaseConfig: any;
-    screens: any[];
-    logic: string;
-    createdAt: Date;
-}
 
 const MobileAppBuilder: React.FC<MobileAppBuilderProps> = ({ isDarkMode = true }) => {
     const [currentStep, setCurrentStep] = useState<BuilderStep>('info');

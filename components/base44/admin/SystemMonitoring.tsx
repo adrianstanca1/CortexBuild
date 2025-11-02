@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Server, Database, Activity, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Server, Database, Activity, CheckCircle } from 'lucide-react';
 import { getAPIUrl } from '../../../config/api.config';
 
 interface SystemStats {
@@ -232,4 +232,3 @@ export const SystemMonitoring: React.FC = () => {
     </div>
   );
 };
-

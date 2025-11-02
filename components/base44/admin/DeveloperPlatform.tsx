@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Code, Package, Zap, Book, Settings, Play, CheckCircle, XCircle } from 'lucide-react';
+import { Code, Package, Zap, Book, Settings } from 'lucide-react';
 import { getAPIUrl } from '../../../config/api.config';
 
 interface InstalledModule {
@@ -262,4 +262,3 @@ export const DeveloperPlatform: React.FC = () => {
     </div>
   );
 };
-

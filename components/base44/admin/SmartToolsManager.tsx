@@ -27,7 +27,6 @@ export const SmartToolsManager: React.FC = () => {
   const [tools, setTools] = useState<SmartTool[]>([]);
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedTool, setSelectedTool] = useState<SmartTool | null>(null);
 
   useEffect(() => {
     fetchTools();
@@ -402,4 +401,3 @@ const CreateToolModal: React.FC<{ onClose: () => void; onCreate: (data: any) => 
     </div>
   );
 };
-
