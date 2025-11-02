@@ -42,7 +42,7 @@ export const RealtimeCollaboration: React.FC = () => {
 
   useEffect(() => {
     const wsCleanup = connectWebSocket();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     return () => {
       if (wsRef.current) {
         wsRef.current.close();

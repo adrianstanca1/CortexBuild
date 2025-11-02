@@ -116,6 +116,7 @@
     "file-saver": "2.0.5",
     "framer-motion": "12.23.24",
     "ftp": "0.3.10",
+    "globals": "16.5.0",
     "helmet": "8.1.0",
     "http-proxy-middleware": "3.0.5",
     "immer": "10.1.3",
