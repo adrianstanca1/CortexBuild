@@ -607,11 +607,12 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
       console.error('Failed to load community modules', error);
     }
   }, []);
-    if (withLoader) {
-      setLoading(true);
-    }
 
-    const loadFallback = async () => {
+  // canPublishModules must be declared before handlePublishApp
+  const canPublishModules = useMemo(() => {
+    if (!capabilities) return true;
+    return capabilities.canPublishModules !== false;
+  }, [capabilities]);
       try {
         const [profileRes, appsRes, workflowsRes, usageRes, webhooksRes, agentsRes, runsRes] = await Promise.all([
           api.get('/sdk/profile'),
