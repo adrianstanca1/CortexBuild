@@ -17,15 +17,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true
-  },
-  optimizeDeps: {
-    exclude: [
-      'react-markdown', 
-      'react-hot-toast', 
-      '@monaco-editor/react', 
-      'jspdf', 
-      'jspdf-autotable', 
-      'web-vitals'
-    ]
   }
 })
