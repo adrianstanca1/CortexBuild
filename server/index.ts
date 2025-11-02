@@ -410,12 +410,12 @@ const startServer = async () => {
 
         // Serve TypeScript files from public directory for developer console
         app.get('/api.ts', (req, res) => {
-            res.setHeader('Content-Type', 'text/typescript');
+            res.setHeader('Content-Type', 'application/javascript');
             res.sendFile(join(process.cwd(), 'public', 'api.ts'));
         });
 
         app.get('/api/mockApi.ts', (req, res) => {
-            res.setHeader('Content-Type', 'text/typescript');
+            res.setHeader('Content-Type', 'application/javascript');
             res.sendFile(join(process.cwd(), 'public', 'api', 'mockApi.ts'));
         });
 

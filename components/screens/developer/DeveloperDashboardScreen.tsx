@@ -506,6 +506,42 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     }
   }, [buildManifestFromEditor, builderEditor]);
 
+  // loadDashboardData must be declared before handleSandboxRun
+  const loadDashboardData = useCallback(async (withLoader: boolean) => {
+    if (withLoader) {
+      setLoading(true);
+    }
+
+    const loadFallback = async () => {
+      try {
+        const [profileRes, appsRes, workflowsRes, usageRes, webhooksRes, agentsRes, runsRes] = await Promise.all([
+          api.get('/sdk/profile'),
+          api.get('/sdk/apps'),
+          api.get('/sdk/workflows'),
+          api.get('/sdk/usage'),
+          api.get('/sdk/webhooks'),
+          api.get('/sdk/agents'),
+          api.get('/sdk/runs')
+        ]);
+
+        if (profileRes.data?.success) setProfile(profileRes.data.profile);
+        if (appsRes.data?.success) setMyApps(appsRes.data.apps || []);
+        if (workflowsRes.data?.success) setWorkflows(workflowsRes.data.workflows || []);
+        if (usageRes.data?.success) setUsage(usageRes.data);
+        if (webhooksRes.data?.success) setWebhooks(webhooksRes.data.webhooks || []);
+        if (agentsRes.data?.success) setAgents(agentsRes.data.agents || []);
+        if (runsRes.data?.success) setRuns(runsRes.data.runs || []);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to load dashboard data', error);
+        setLoading(false);
+      }
+    };
+
+    await loadFallback();
+  }, []);
+
   // Sandbox run function - moved here to fix initialization order
   const handleSandboxRun = useCallback(async (options: { appId?: string; workflowId?: string; definition?: any; name?: string; payload?: any } = {}) => {
     if (sandboxRunning) return;
@@ -571,8 +607,6 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
       console.error('Failed to load community modules', error);
     }
   }, []);
-
-  const loadDashboardData = useCallback(async (withLoader: boolean) => {
     if (withLoader) {
       setLoading(true);
     }

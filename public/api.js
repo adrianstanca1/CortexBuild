@@ -1,36 +1,40 @@
 // CortexBuild Demo API File
 // This is a placeholder file for the developer console demo
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data: T;
-  message?: string;
-}
+// API Response interface (converted to JSDoc for JavaScript)
+/**
+ * @typedef {Object} ApiResponse
+ * @property {boolean} success
+ * @property {*} data
+ * @property {string} [message]
+ */
 
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
-  status: 'active' | 'planning' | 'completed';
-  created_at: string;
-}
+/**
+ * @typedef {Object} Project
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {'active'|'planning'|'completed'} status
+ * @property {string} created_at
+ */
 
-export interface Task {
-  id: string;
-  project_id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  priority: 'low' | 'medium' | 'high';
-  assigned_to?: string;
-  due_date?: string;
-  created_at: string;
-}
+/**
+ * @typedef {Object} Task
+ * @property {string} id
+ * @property {string} project_id
+ * @property {string} title
+ * @property {string} description
+ * @property {'pending'|'in_progress'|'completed'} status
+ * @property {'low'|'medium'|'high'} priority
+ * @property {string} [assigned_to]
+ * @property {string} [due_date]
+ * @property {string} created_at
+ */
 
 // Demo API functions for the developer console
 export const api = {
   // Projects
-  async getProjects(): Promise<ApiResponse<Project[]>> {
+  async getProjects() {
     return {
       success: true,
       data: [
@@ -52,7 +56,7 @@ export const api = {
     };
   },
 
-  async getProject(id: string): Promise<ApiResponse<Project>> {
+  async getProject(id) {
     return {
       success: true,
       data: {
@@ -66,7 +70,7 @@ export const api = {
   },
 
   // Tasks
-  async getTasks(projectId?: string): Promise<ApiResponse<Task[]>> {
+  async getTasks(projectId) {
     return {
       success: true,
       data: [
@@ -92,7 +96,7 @@ export const api = {
     };
   },
 
-  async createTask(task: Omit<Task, 'id' | 'created_at'>): Promise<ApiResponse<Task>> {
+  async createTask(task) {
     return {
       success: true,
       data: {
@@ -105,11 +109,11 @@ export const api = {
 };
 
 // Utility functions
-export const formatDate = (date: string): string => {
+export const formatDate = (date) => {
   return new Date(date).toLocaleDateString();
 };
 
-export const getStatusColor = (status: string): string => {
+export const getStatusColor = (status) => {
   switch (status) {
     case 'active':
     case 'in_progress':
