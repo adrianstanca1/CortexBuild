@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Screen, Task, ActivityEvent, Project } from '../../../types';
 // Fix: Added .ts extension to import
 import * as api from '../../../api';
+import { usePermissions } from '../../../hooks/usePermissions';
 // Fix: Added .tsx extension to widget imports
 import QuickActionsWidget from '../../widgets/QuickActionsWidget';
 import MyTasksWidget from '../../widgets/MyTasksWidget';
@@ -23,6 +24,8 @@ interface SupervisorDashboardProps {
 
 const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
     const { currentUser, navigateTo, onDeepLink, onQuickAction, onSuggestAction } = props;
+    const { can } = usePermissions(currentUser);
+    const hasPermission = can;
     const [tasks, setTasks] = useState<Task[]>([]);
     const [activities, setActivities] = useState<ActivityEvent[]>([]);
     const [projects, setProjects] = useState<Project[]>([]);
@@ -34,16 +37,24 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
             setIsLoading(true);
             try {
                 const [fetchedTasks, fetchedActivities, fetchedProjects] = await Promise.all([
-                    api.fetchTasksForUser(currentUser),
-                    api.fetchRecentActivity(currentUser),
+                    api.fetchTasksForUser(currentUser.id),
+                    api.fetchRecentActivity(),
                     api.fetchAllProjects(currentUser)
                 ]);
-                setTasks(fetchedTasks);
-                setActivities(fetchedActivities);
-                setProjects(fetchedProjects);
+                // Ensure arrays are extracted from responses
+                const tasksArray = Array.isArray(fetchedTasks) ? fetchedTasks :
+                    (fetchedTasks && typeof fetchedTasks === 'object' && 'data' in fetchedTasks && Array.isArray((fetchedTasks as any).data)) ? (fetchedTasks as any).data : [];
+                const activitiesArray = Array.isArray(fetchedActivities) ? fetchedActivities :
+                    (fetchedActivities && typeof fetchedActivities === 'object' && 'data' in fetchedActivities && Array.isArray((fetchedActivities as any).data)) ? (fetchedActivities as any).data : [];
+                const projectsArray = Array.isArray(fetchedProjects) ? fetchedProjects :
+                    (fetchedProjects && typeof fetchedProjects === 'object' && 'data' in fetchedProjects && Array.isArray((fetchedProjects as any).data)) ? (fetchedProjects as any).data : [];
+
+                setTasks(tasksArray);
+                setActivities(activitiesArray);
+                setProjects(projectsArray);
 
                 // Process dashboard data with ML integration
-                const processedData = await processDashboardData(fetchedProjects, fetchedTasks, currentUser);
+                const processedData = await processDashboardData(projectsArray, tasksArray, currentUser);
                 setDashboardData(processedData);
             } catch (error) {
                 console.error('Error loading supervisor dashboard:', error);
@@ -53,7 +64,7 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
         };
 
         loadDashboardData();
-        api.checkAndCreateDueDateNotifications(currentUser);
+        api.checkAndCreateDueDateNotifications();
     }, [currentUser]);
 
     const handleNavigateToProject = (projectId: string) => {
@@ -120,12 +131,12 @@ const SupervisorDashboard: React.FC<SupervisorDashboardProps> = (props) => {
                         />
                     )}
 
-                    <MyTasksWidget tasks={tasks} onDeepLink={onDeepLink} />
+                    <MyTasksWidget tasks={tasks} onNavigate={navigateTo} />
                     <RecentActivityWidget activities={activities} onDeepLink={onDeepLink} />
                 </div>
                 <div className="lg:col-span-1 space-y-8">
                     <NotificationsWidget currentUser={currentUser} onDeepLink={onDeepLink} />
-                    <ProjectsOverviewWidget projects={projects} navigateTo={navigateTo} onDeepLink={onDeepLink} />
+                    <ProjectsOverviewWidget projects={projects} onNavigate={navigateTo} hasPermission={hasPermission} />
                 </div>
             </main>
         </div>

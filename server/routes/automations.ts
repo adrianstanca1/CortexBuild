@@ -1,34 +1,42 @@
+// CortexBuild - Automations API Routes
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
+
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
-import { authenticateToken } from '../auth';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { authenticateToken } from '../auth-supabase';
 import { v4 as uuidv4 } from 'uuid';
 
-export const createAutomationsRouter = (db: Database.Database) => {
+export const createAutomationsRouter = (supabase: SupabaseClient) => {
   const router = Router();
 
   router.use(authenticateToken);
 
-  router.get('/', (req: Request, res: Response) => {
+  // GET /api/automations - List all automation rules
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
-      const rules = db.prepare(`
-        SELECT * FROM automation_rules
-        WHERE company_id = ?
-        ORDER BY created_at DESC
-      `).all(user.companyId);
+      
+      const { data: rules, error } = await supabase
+        .from('automation_rules')
+        .select('*')
+        .eq('company_id', user.company_id || user.companyId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
 
       res.json({
         success: true,
-        rules: rules.map((rule: any) => ({
+        rules: (rules || []).map((rule: any) => ({
           id: rule.id,
           name: rule.name,
-          description: rule.description ?? '',
+          description: rule.description || '',
           triggerType: rule.trigger_type,
-          triggerConfig: rule.trigger_config ? JSON.parse(rule.trigger_config) : {},
+          triggerConfig: rule.trigger_config ? (typeof rule.trigger_config === 'string' ? JSON.parse(rule.trigger_config) : rule.trigger_config) : {},
           actionType: rule.action_type,
-          actionConfig: rule.action_config ? JSON.parse(rule.action_config) : {},
-          isActive: rule.is_active === 1,
-          lastTriggeredAt: rule.last_triggered_at ?? undefined,
+          actionConfig: rule.action_config ? (typeof rule.action_config === 'string' ? JSON.parse(rule.action_config) : rule.action_config) : {},
+          isActive: rule.is_active === true || rule.is_active === 1,
+          lastTriggeredAt: rule.last_triggered_at || undefined,
           createdAt: rule.created_at,
           updatedAt: rule.updated_at
         }))
@@ -39,7 +47,8 @@ export const createAutomationsRouter = (db: Database.Database) => {
     }
   });
 
-  router.post('/', (req: Request, res: Response) => {
+  // POST /api/automations - Create new automation rule
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
       const { name, description, triggerType, triggerConfig, actionType, actionConfig } = req.body;
@@ -49,32 +58,32 @@ export const createAutomationsRouter = (db: Database.Database) => {
       }
 
       const id = `rule-${uuidv4()}`;
-      db.prepare(`
-        INSERT INTO automation_rules (
-          id, company_id, name, description, trigger_type, trigger_config,
-          action_type, action_config, is_active, created_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        id,
-        user.companyId,
-        name,
-        description ?? '',
-        triggerType,
-        JSON.stringify(triggerConfig ?? {}),
-        actionType,
-        JSON.stringify(actionConfig ?? {}),
-        1,
-        user.id
-      );
+      const { data: rule, error } = await supabase
+        .from('automation_rules')
+        .insert({
+          id,
+          company_id: user.company_id || user.companyId,
+          name,
+          description: description || '',
+          trigger_type: triggerType,
+          trigger_config: typeof triggerConfig === 'string' ? triggerConfig : JSON.stringify(triggerConfig || {}),
+          action_type: actionType,
+          action_config: typeof actionConfig === 'string' ? actionConfig : JSON.stringify(actionConfig || {}),
+          is_active: true,
+          created_by: user.id
+        })
+        .select()
+        .single();
 
-      const rule = db.prepare('SELECT * FROM automation_rules WHERE id = ?').get(id);
+      if (error) throw error;
+
       res.json({
         success: true,
         rule: {
           ...rule,
-          trigger_config: JSON.parse(rule.trigger_config),
-          action_config: JSON.parse(rule.action_config),
-          is_active: rule.is_active === 1
+          trigger_config: typeof rule.trigger_config === 'string' ? JSON.parse(rule.trigger_config) : rule.trigger_config,
+          action_config: typeof rule.action_config === 'string' ? JSON.parse(rule.action_config) : rule.action_config,
+          is_active: rule.is_active === true || rule.is_active === 1
         }
       });
     } catch (error: any) {
@@ -83,170 +92,169 @@ export const createAutomationsRouter = (db: Database.Database) => {
     }
   });
 
-  router.patch('/:id', (req: Request, res: Response) => {
+  // PATCH /api/automations/:id - Update automation rule
+  router.patch('/:id', async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
       const { id } = req.params;
 
-      const existing = db.prepare('SELECT * FROM automation_rules WHERE id = ? AND company_id = ?')
-        .get(id, user.companyId);
+      const { data: existing } = await supabase
+        .from('automation_rules')
+        .select('id')
+        .eq('id', id)
+        .eq('company_id', user.company_id || user.companyId)
+        .single();
 
       if (!existing) {
         return res.status(404).json({ success: false, error: 'Automation rule not found' });
       }
 
-      const updates: string[] = [];
-      const values: any[] = [];
-
-      if (req.body.name !== undefined) {
-        updates.push('name = ?');
-        values.push(req.body.name);
-      }
-      if (req.body.description !== undefined) {
-        updates.push('description = ?');
-        values.push(req.body.description);
-      }
-      if (req.body.triggerType !== undefined) {
-        updates.push('trigger_type = ?');
-        values.push(req.body.triggerType);
-      }
+      const updates: any = {};
+      if (req.body.name !== undefined) updates.name = req.body.name;
+      if (req.body.description !== undefined) updates.description = req.body.description;
+      if (req.body.triggerType !== undefined) updates.trigger_type = req.body.triggerType;
       if (req.body.triggerConfig !== undefined) {
-        updates.push('trigger_config = ?');
-        values.push(JSON.stringify(req.body.triggerConfig ?? {}));
+        updates.trigger_config = typeof req.body.triggerConfig === 'string' 
+          ? req.body.triggerConfig 
+          : JSON.stringify(req.body.triggerConfig);
       }
-      if (req.body.actionType !== undefined) {
-        updates.push('action_type = ?');
-        values.push(req.body.actionType);
-      }
+      if (req.body.actionType !== undefined) updates.action_type = req.body.actionType;
       if (req.body.actionConfig !== undefined) {
-        updates.push('action_config = ?');
-        values.push(JSON.stringify(req.body.actionConfig ?? {}));
+        updates.action_config = typeof req.body.actionConfig === 'string'
+          ? req.body.actionConfig
+          : JSON.stringify(req.body.actionConfig);
       }
-      if (req.body.isActive !== undefined) {
-        updates.push('is_active = ?');
-        values.push(req.body.isActive ? 1 : 0);
-      }
+      if (req.body.isActive !== undefined) updates.is_active = req.body.isActive;
 
-      if (updates.length === 0) {
-        const rule = db.prepare('SELECT * FROM automation_rules WHERE id = ?').get(id);
-        return res.json({ success: true, rule });
-      }
+      const { data: rule, error } = await supabase
+        .from('automation_rules')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
 
-      updates.push('updated_at = CURRENT_TIMESTAMP');
-      values.push(id, user.companyId);
+      if (error) throw error;
 
-      db.prepare(`
-        UPDATE automation_rules
-        SET ${updates.join(', ')}
-        WHERE id = ? AND company_id = ?
-      `).run(...values);
-
-      const rule = db.prepare('SELECT * FROM automation_rules WHERE id = ?').get(id);
       res.json({
         success: true,
         rule: {
           ...rule,
-          trigger_config: JSON.parse(rule.trigger_config),
-          action_config: JSON.parse(rule.action_config),
-          is_active: rule.is_active === 1
+          trigger_config: typeof rule.trigger_config === 'string' ? JSON.parse(rule.trigger_config) : rule.trigger_config,
+          action_config: typeof rule.action_config === 'string' ? JSON.parse(rule.action_config) : rule.action_config,
+          is_active: rule.is_active === true || rule.is_active === 1
         }
       });
     } catch (error: any) {
       console.error('[Automations] update error', error);
-      res.status(400).json({ success: false, error: error.message || 'Failed to update rule' });
+      res.status(400).json({ success: false, error: error.message || 'Failed to update automation rule' });
     }
   });
 
-  router.delete('/:id', (req: Request, res: Response) => {
+  // DELETE /api/automations/:id - Delete automation rule
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
       const { id } = req.params;
 
-      db.prepare('DELETE FROM automation_rules WHERE id = ? AND company_id = ?').run(id, user.companyId);
-      db.prepare('DELETE FROM automation_events WHERE rule_id = ?').run(id);
+      const { data: existing } = await supabase
+        .from('automation_rules')
+        .select('id')
+        .eq('id', id)
+        .eq('company_id', user.company_id || user.companyId)
+        .single();
 
-      res.json({ success: true });
-    } catch (error: any) {
-      console.error('[Automations] delete error', error);
-      res.status(400).json({ success: false, error: error.message || 'Failed to delete rule' });
-    }
-  });
-
-  router.post('/:id/test', (req: Request, res: Response) => {
-    try {
-      const user = (req as any).user;
-      const { id } = req.params;
-      const rule = db.prepare('SELECT * FROM automation_rules WHERE id = ? AND company_id = ?')
-        .get(id, user.companyId);
-
-      if (!rule) {
-        return res.status(404).json({ success: false, error: 'Rule not found' });
+      if (!existing) {
+        return res.status(404).json({ success: false, error: 'Automation rule not found' });
       }
 
-      const eventId = `event-${uuidv4()}`;
-      db.prepare(`
-        INSERT INTO automation_events (id, rule_id, status, payload)
-        VALUES (?, ?, ?, ?)
-      `).run(
-        eventId,
-        id,
-        'success',
-        JSON.stringify({
-          simulated: true,
-          executedAt: new Date().toISOString(),
-          input: req.body?.payload ?? {}
-        })
-      );
+      const { error } = await supabase
+        .from('automation_rules')
+        .delete()
+        .eq('id', id);
 
-      db.prepare(`
-        UPDATE automation_rules
-        SET last_triggered_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(id);
+      if (error) throw error;
+
+      res.json({ success: true, message: 'Automation rule deleted' });
+    } catch (error: any) {
+      console.error('[Automations] delete error', error);
+      res.status(400).json({ success: false, error: error.message || 'Failed to delete automation rule' });
+    }
+  });
+
+  // POST /api/automations/:id/toggle - Toggle automation rule
+  router.post('/:id/toggle', async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { id } = req.params;
+
+      const { data: existing } = await supabase
+        .from('automation_rules')
+        .select('id, is_active')
+        .eq('id', id)
+        .eq('company_id', user.company_id || user.companyId)
+        .single();
+
+      if (!existing) {
+        return res.status(404).json({ success: false, error: 'Automation rule not found' });
+      }
+
+      const newStatus = !(existing.is_active === true || existing.is_active === 1);
+      const { data: rule, error } = await supabase
+        .from('automation_rules')
+        .update({ is_active: newStatus })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
 
       res.json({
         success: true,
-        result: {
-          eventId,
-          ruleId: id,
-          status: 'success'
+        rule: {
+          ...rule,
+          trigger_config: typeof rule.trigger_config === 'string' ? JSON.parse(rule.trigger_config) : rule.trigger_config,
+          action_config: typeof rule.action_config === 'string' ? JSON.parse(rule.action_config) : rule.action_config,
+          is_active: rule.is_active === true || rule.is_active === 1
         }
       });
     } catch (error: any) {
-      console.error('[Automations] test error', error);
-      res.status(500).json({ success: false, error: error.message || 'Failed to test automation' });
+      console.error('[Automations] toggle error', error);
+      res.status(400).json({ success: false, error: error.message || 'Failed to toggle automation rule' });
     }
   });
 
-  router.get('/:id/events', (req: Request, res: Response) => {
+  // POST /api/automations/:id/test - Test automation rule
+  router.post('/:id/test', async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
       const { id } = req.params;
-      const events = db.prepare(`
-        SELECT * FROM automation_events
-        WHERE rule_id = ?
-        ORDER BY created_at DESC
-        LIMIT 50
-      `).all(id);
 
-      const rule = db.prepare('SELECT * FROM automation_rules WHERE id = ?').get(id);
-      if (!rule || rule.company_id !== user.companyId) {
-        return res.status(404).json({ success: false, error: 'Rule not found' });
+      const { data: rule } = await supabase
+        .from('automation_rules')
+        .select('*')
+        .eq('id', id)
+        .eq('company_id', user.company_id || user.companyId)
+        .single();
+
+      if (!rule) {
+        return res.status(404).json({ success: false, error: 'Automation rule not found' });
       }
 
+      // Update last triggered time
+      await supabase
+        .from('automation_rules')
+        .update({ last_triggered_at: new Date().toISOString() })
+        .eq('id', id);
+
+      // In a real implementation, this would execute the automation
       res.json({
         success: true,
-        events: events.map((event: any) => ({
-          id: event.id,
-          status: event.status,
-          payload: event.payload ? JSON.parse(event.payload) : {},
-          error: event.error_message ?? undefined,
-          createdAt: event.created_at
-        }))
+        message: 'Automation rule test executed successfully',
+        triggeredAt: new Date().toISOString()
       });
     } catch (error: any) {
-      console.error('[Automations] events error', error);
-      res.status(500).json({ success: false, error: 'Failed to load automation events' });
+      console.error('[Automations] test error', error);
+      res.status(400).json({ success: false, error: error.message || 'Failed to test automation rule' });
     }
   });
 

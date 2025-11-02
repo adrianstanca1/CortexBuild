@@ -222,21 +222,21 @@ export const PurchaseOrdersPage: React.FC = () => {
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(po.status)}`}>
                                         {po.status}
                                     </span>
-                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency(po.amount)}</span>
+                                    <span className="text-2xl font-bold text-gray-900">{formatCurrency((po as any).amount || po.total || 0)}</span>
                                 </div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">PO #{po.id}</h3>
-                                <p className="text-sm text-gray-600">{po.vendor}</p>
+                                <p className="text-sm text-gray-600">{(po as any).vendor || po.vendor_name || 'N/A'}</p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-start">
                                 <span className="text-sm text-gray-600 mr-2">Project:</span>
-                                <p className="text-sm font-medium text-gray-900">{po.project}</p>
+                                <p className="text-sm font-medium text-gray-900">{(po as any).project || po.project_name || 'N/A'}</p>
                             </div>
                             <div className="flex items-start">
                                 <span className="text-sm text-gray-600 mr-2">Items:</span>
-                                <p className="text-sm text-gray-600">{po.items}</p>
+                                <p className="text-sm text-gray-600">{(po as any).items || 'N/A'}</p>
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 pt-4">

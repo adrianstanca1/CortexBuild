@@ -11,6 +11,7 @@ import {
     Shield, FileText, DollarSign, Calendar, Target, Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAPIUrl } from '../../config/api.config';
 
 interface App {
     id: string;
@@ -63,7 +64,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/global-marketplace/categories');
+            const response = await fetch(getAPIUrl('/global-marketplace/categories'));
             const data = await response.json();
             if (data.success) {
                 setCategories(data.categories);
@@ -112,7 +113,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                 return;
             }
 
-            const response = await fetch(`http://localhost:3001/api/global-marketplace/install/individual/${appId}`, {
+            const response = await fetch(getAPIUrl(`/global-marketplace/install/individual/${appId}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -142,7 +143,7 @@ const GlobalMarketplace: React.FC<GlobalMarketplaceProps> = ({
                 return;
             }
 
-            const response = await fetch(`http://localhost:3001/api/global-marketplace/install/company/${appId}`, {
+            const response = await fetch(getAPIUrl(`/global-marketplace/install/company/${appId}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

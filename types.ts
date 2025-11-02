@@ -78,12 +78,29 @@ export interface Project {
     projectManagerId?: string;
     createdAt?: string;
     updatedAt?: string;
+    progress?: number;
+    client?: string;
+    client_name?: string;
 }
 
 export type Screen =
     | 'global-dashboard'
     | 'projects'
+    | 'projects-management'
+    | 'tasks-management'
+    | 'daily-logs-management'
+    | 'rfi-management'
+    | 'documents-management'
+    | 'billing-payments-management'
+    | 'analytics-reports'
+    | 'marketplace-management'
+    | 'developer-dashboard'
+    | 'app-discovery'
+    | 'team-management'
+    | 'project-dashboard'
+    | 'notifications-center'
     | 'project-home'
+    | 'project-detail'
     | 'my-day'
     | 'tasks'
     | 'my-tasks'
@@ -105,6 +122,17 @@ export type Screen =
     | 'documents'
     | 'delivery'
     | 'drawing-comparison'
+    // Advanced Features
+    | 'analytics'
+    | 'reports'
+    | 'notifications'
+    | 'team-management'
+    | 'project-planning'
+    | 'ai-insights'
+    | 'quality-safety'
+    | 'business-intelligence'
+    | 'system-admin'
+    | 'tm-ticket'
     // Module Screens
     | 'accounting'
     | 'ai-tools'
@@ -116,9 +144,11 @@ export type Screen =
     | 'ai-agents-marketplace'
     | 'developer-dashboard'
     | 'automation-studio'
+    | 'developer-workspace'
     | 'developer-console'
     | 'developer-workspace'
     | 'company-admin-dashboard'
+    | 'company-admin-legacy'
     | 'super-admin-dashboard'
     | 'sdk-developer'
     | 'my-apps-desktop'
@@ -132,9 +162,13 @@ export type Screen =
     | 'developer-submissions'
     // Admin screens
     | 'platform-admin'
+    | 'unified-admin'
     | 'admin-control-panel'
     // ML & Advanced Analytics
     | 'ml-analytics'
+    // Marketing & Landing
+    | 'landing'
+    | 'developer-landing'
     // Tool screens
     | 'placeholder-tool';
 
@@ -156,6 +190,7 @@ export interface TaskHistoryEvent {
 export interface Task {
     id: string;
     projectId: string;
+    projectName?: string;
     title: string;
     description: string;
     status: 'To Do' | 'In Progress' | 'Done';
@@ -432,6 +467,7 @@ export interface AgentCatalogItem {
     config: Record<string, unknown>;
     metadata: Record<string, unknown>;
     developerId?: string;
+    companyId?: string;  // Optional for catalog items, required for instances
     createdAt: string;
     updatedAt: string;
 }

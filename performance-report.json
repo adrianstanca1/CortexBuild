@@ -1,0 +1,188 @@
+{
+  "timestamp": "2025-10-17T03:57:50.199Z",
+  "performance": {
+    "frontend": {
+      "name": "frontend",
+      "status": "GOOD",
+      "metrics": {
+        "average": 61.18,
+        "min": 38.59,
+        "max": 120.78,
+        "p95": 109.19,
+        "p99": 118.46,
+        "successRate": 100,
+        "totalRequests": 5
+      },
+      "measurements": [
+        {
+          "responseTime": 120.77543,
+          "statusCode": 200,
+          "size": 105315,
+          "timestamp": "2025-10-17T03:57:50.323Z"
+        },
+        {
+          "responseTime": 62.834317,
+          "statusCode": 200,
+          "size": 105315,
+          "timestamp": "2025-10-17T03:57:50.488Z"
+        },
+        {
+          "responseTime": 38.591265,
+          "statusCode": 200,
+          "size": 105315,
+          "timestamp": "2025-10-17T03:57:50.628Z"
+        },
+        {
+          "responseTime": 44.229045,
+          "statusCode": 200,
+          "size": 105315,
+          "timestamp": "2025-10-17T03:57:50.773Z"
+        },
+        {
+          "responseTime": 39.451174,
+          "statusCode": 200,
+          "size": 105315,
+          "timestamp": "2025-10-17T03:57:50.914Z"
+        }
+      ]
+    },
+    "api": {
+      "name": "api",
+      "status": "GOOD",
+      "metrics": {
+        "average": 3.6,
+        "min": 2.31,
+        "max": 6.43,
+        "p95": 5.85,
+        "p99": 6.31,
+        "successRate": 100,
+        "totalRequests": 5
+      },
+      "measurements": [
+        {
+          "responseTime": 6.425488,
+          "statusCode": 200,
+          "size": 54,
+          "timestamp": "2025-10-17T03:57:51.021Z"
+        },
+        {
+          "responseTime": 2.434071,
+          "statusCode": 200,
+          "size": 54,
+          "timestamp": "2025-10-17T03:57:51.125Z"
+        },
+        {
+          "responseTime": 2.308269,
+          "statusCode": 200,
+          "size": 54,
+          "timestamp": "2025-10-17T03:57:51.228Z"
+        },
+        {
+          "responseTime": 3.567661,
+          "statusCode": 200,
+          "size": 54,
+          "timestamp": "2025-10-17T03:57:51.331Z"
+        },
+        {
+          "responseTime": 3.24539,
+          "statusCode": 200,
+          "size": 54,
+          "timestamp": "2025-10-17T03:57:51.435Z"
+        }
+      ]
+    },
+    "dashboard": {
+      "name": "dashboard",
+      "status": "GOOD",
+      "metrics": {
+        "average": 1.82,
+        "min": 1.33,
+        "max": 3.11,
+        "p95": 2.82,
+        "p99": 3.05,
+        "successRate": 100,
+        "totalRequests": 5
+      },
+      "measurements": [
+        {
+          "responseTime": 3.10787,
+          "statusCode": 200,
+          "size": 13122,
+          "timestamp": "2025-10-17T03:57:51.539Z"
+        },
+        {
+          "responseTime": 1.629085,
+          "statusCode": 200,
+          "size": 13122,
+          "timestamp": "2025-10-17T03:57:51.641Z"
+        },
+        {
+          "responseTime": 1.376834,
+          "statusCode": 200,
+          "size": 13122,
+          "timestamp": "2025-10-17T03:57:51.743Z"
+        },
+        {
+          "responseTime": 1.68002,
+          "statusCode": 200,
+          "size": 13122,
+          "timestamp": "2025-10-17T03:57:51.846Z"
+        },
+        {
+          "responseTime": 1.330343,
+          "statusCode": 200,
+          "size": 13122,
+          "timestamp": "2025-10-17T03:57:51.948Z"
+        }
+      ]
+    },
+    "report-api": {
+      "name": "report-api",
+      "status": "GOOD",
+      "metrics": {
+        "average": 1.76,
+        "min": 1.31,
+        "max": 2.56,
+        "p95": 2.44,
+        "p99": 2.53,
+        "successRate": 100,
+        "totalRequests": 5
+      },
+      "measurements": [
+        {
+          "responseTime": 1.314494,
+          "statusCode": 200,
+          "size": 875,
+          "timestamp": "2025-10-17T03:57:52.050Z"
+        },
+        {
+          "responseTime": 1.558569,
+          "statusCode": 200,
+          "size": 875,
+          "timestamp": "2025-10-17T03:57:52.152Z"
+        },
+        {
+          "responseTime": 1.395294,
+          "statusCode": 200,
+          "size": 875,
+          "timestamp": "2025-10-17T03:57:52.254Z"
+        },
+        {
+          "responseTime": 2.555443,
+          "statusCode": 200,
+          "size": 875,
+          "timestamp": "2025-10-17T03:57:52.357Z"
+        },
+        {
+          "responseTime": 1.988905,
+          "statusCode": 200,
+          "size": 875,
+          "timestamp": "2025-10-17T03:57:52.460Z"
+        }
+      ]
+    }
+  },
+  "trends": {},
+  "alerts": [],
+  "recommendations": []
+}

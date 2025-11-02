@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal React Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Minimal React Test</h1>
+        <p>Testing if React can load from the main application...</p>
+        
+        <div id="status">
+            <div class="status info">Starting test...</div>
+        </div>
+        
+        <div id="react-root">
+            <div class="status info">React will render here if successful...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        const statusDiv = document.getElementById('status');
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        async function testMainApp() {
+            try {
+                updateStatus('🔄 Testing main.tsx import...', 'info');
+                
+                // Try to import the main application entry point
+                const mainModule = await import('/main.tsx');
+                updateStatus('✅ main.tsx imported successfully!', 'success');
+                
+                // Try to import React
+                updateStatus('🔄 Testing React import...', 'info');
+                const React = await import('react');
+                updateStatus('✅ React imported successfully!', 'success');
+                
+                // Try to import ReactDOM
+                updateStatus('🔄 Testing ReactDOM import...', 'info');
+                const ReactDOM = await import('react-dom/client');
+                updateStatus('✅ ReactDOM imported successfully!', 'success');
+                
+                // Try to import the App component
+                updateStatus('🔄 Testing App.tsx import...', 'info');
+                const AppModule = await import('/App.tsx');
+                updateStatus('✅ App.tsx imported successfully!', 'success');
+                
+                // Try to create a simple React element
+                updateStatus('🔄 Testing React element creation...', 'info');
+                const { createElement } = React;
+                const { createRoot } = ReactDOM;
+                
+                const testElement = createElement('div', {
+                    style: { 
+                        padding: '20px', 
+                        background: '#e8f5e8', 
+                        borderRadius: '8px',
+                        margin: '10px 0'
+                    }
+                }, [
+                    createElement('h3', { key: 'title' }, '🎉 React is working!'),
+                    createElement('p', { key: 'desc' }, 'React modules loaded successfully from the main application.'),
+                    createElement('p', { key: 'info' }, `React version: ${React.version || 'Unknown'}`)
+                ]);
+                
+                const root = createRoot(document.getElementById('react-root'));
+                root.render(testElement);
+                
+                updateStatus('✅ All tests passed! React is working correctly.', 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ Test failed: ${error.message}`, 'error');
+                console.error('Test error:', error);
+                
+                // Try to get more details about the error
+                if (error.stack) {
+                    console.error('Error stack:', error.stack);
+                }
+            }
+        }
+        
+        // Run the test
+        testMainApp();
+    </script>
+</body>
+</html>

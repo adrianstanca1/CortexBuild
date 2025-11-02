@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { X, Minimize2, Maximize2, Settings } from 'lucide-react';
+import { X, Minimize2, Maximize2 } from 'lucide-react';
 
 export interface MiniApp {
     id: string;
@@ -23,9 +23,10 @@ interface AppContainerProps {
     app: MiniApp;
     onClose: () => void;
     isDarkMode?: boolean;
+    currentUser?: any;
 }
 
-const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = true }) => {
+const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = true, currentUser }) => {
     const [isMinimized, setIsMinimized] = useState(false);
     const [isMaximized, setIsMaximized] = useState(false);
 
@@ -33,16 +34,14 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
 
     return (
         <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm ${isMinimized ? 'hidden' : ''}`}>
-            <div className={`${
-                isMaximized 
-                    ? 'w-full h-full rounded-none' 
-                    : 'w-11/12 h-5/6 rounded-2xl'
-            } ${isDarkMode ? 'bg-gray-900' : 'bg-white'} shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}>
-                
+            <div className={`${isMaximized
+                ? 'w-full h-full rounded-none'
+                : 'w-11/12 h-5/6 rounded-2xl'
+                } ${isDarkMode ? 'bg-gray-900' : 'bg-white'} shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}>
+
                 {/* App Window Header */}
-                <div className={`flex items-center justify-between px-6 py-4 border-b ${
-                    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
-                }`}>
+                <div className={`flex items-center justify-between px-6 py-4 border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
+                    }`}>
                     <div className="flex items-center gap-3">
                         <span className="text-3xl">{app.icon}</span>
                         <div>
@@ -60,11 +59,10 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
                         <button
                             type="button"
                             onClick={() => setIsMinimized(true)}
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode 
-                                    ? 'hover:bg-gray-700 text-gray-400' 
-                                    : 'hover:bg-gray-200 text-gray-600'
-                            }`}
+                            className={`p-2 rounded-lg transition-colors ${isDarkMode
+                                ? 'hover:bg-gray-700 text-gray-400'
+                                : 'hover:bg-gray-200 text-gray-600'
+                                }`}
                             title="Minimize"
                         >
                             <Minimize2 className="h-4 w-4" />
@@ -72,11 +70,10 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
                         <button
                             type="button"
                             onClick={() => setIsMaximized(!isMaximized)}
-                            className={`p-2 rounded-lg transition-colors ${
-                                isDarkMode 
-                                    ? 'hover:bg-gray-700 text-gray-400' 
-                                    : 'hover:bg-gray-200 text-gray-600'
-                            }`}
+                            className={`p-2 rounded-lg transition-colors ${isDarkMode
+                                ? 'hover:bg-gray-700 text-gray-400'
+                                : 'hover:bg-gray-200 text-gray-600'
+                                }`}
                             title={isMaximized ? "Restore" : "Maximize"}
                         >
                             <Maximize2 className="h-4 w-4" />
@@ -94,7 +91,7 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
 
                 {/* App Content */}
                 <div className="flex-1 overflow-auto">
-                    <AppComponent isDarkMode={isDarkMode} />
+                    <AppComponent isDarkMode={isDarkMode} currentUser={currentUser} />
                 </div>
             </div>
         </div>
@@ -102,4 +99,3 @@ const AppContainer: React.FC<AppContainerProps> = ({ app, onClose, isDarkMode = 
 };
 
 export default AppContainer;
-

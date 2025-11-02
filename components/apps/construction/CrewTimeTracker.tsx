@@ -20,17 +20,6 @@ interface CrewMember {
     overtimeHours: number;
 }
 
-interface TimeEntry {
-    id: string;
-    worker: string;
-    date: Date;
-    clockIn: Date;
-    clockOut?: Date;
-    breakTime: number;
-    totalHours: number;
-    location: string;
-}
-
 const CrewTimeTracker: React.FC<CrewTimeTrackerProps> = ({ isDarkMode = true }) => {
     const [crew, setCrew] = useState<CrewMember[]>([
         { id: '1', name: 'John Smith', role: 'Foreman', status: 'clocked-in', clockInTime: new Date(Date.now() - 4 * 60 * 60 * 1000), totalHours: 38.5, overtimeHours: 2.5 },
@@ -38,8 +27,6 @@ const CrewTimeTracker: React.FC<CrewTimeTrackerProps> = ({ isDarkMode = true }) 
         { id: '3', name: 'Sarah Williams', role: 'Electrician', status: 'on-break', totalHours: 35, overtimeHours: 0 },
         { id: '4', name: 'Tom Brown', role: 'Laborer', status: 'clocked-out', totalHours: 42, overtimeHours: 2 }
     ]);
-
-    const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
 
     const clockIn = (member: CrewMember) => {
         setCrew(crew.map(m => m.id === member.id ? { ...m, status: 'clocked-in', clockInTime: new Date() } : m));
@@ -205,4 +192,3 @@ const CrewTimeTracker: React.FC<CrewTimeTrackerProps> = ({ isDarkMode = true }) 
 };
 
 export default CrewTimeTracker;
-

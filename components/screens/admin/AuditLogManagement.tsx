@@ -65,7 +65,7 @@ const AuditLogManagement: React.FC<AuditLogManagementProps> = ({ currentUser }) 
     };
 
     const handleFilterChange = (key: string, value: string) => {
-        setFilters({...filters, [key]: value});
+        setFilters({ ...filters, [key]: value });
         setCurrentPage(1); // Reset to first page when filters change
     };
 

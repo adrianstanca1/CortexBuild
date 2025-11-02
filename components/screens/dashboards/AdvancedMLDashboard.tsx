@@ -77,12 +77,14 @@ const AdvancedMLDashboard: React.FC<AdvancedMLDashboardProps> = ({
                     </div>
                     <div className="flex space-x-3">
                         <button
+                            type="button"
                             onClick={loadPredictions}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
                         >
                             🔄 Refresh
                         </button>
                         <button
+                            type="button"
                             onClick={goBack}
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
                         >
@@ -207,13 +209,12 @@ const AdvancedMLDashboard: React.FC<AdvancedMLDashboardProps> = ({
                                                         Confidence: {projectPred.prediction.confidence}%
                                                     </p>
                                                 </div>
-                                                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                                    riskScore > 70
+                                                <div className={`px-3 py-1 rounded-full text-sm font-medium ${riskScore > 70
                                                         ? 'bg-red-100 text-red-800'
                                                         : riskScore > 40
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : 'bg-green-100 text-green-800'
-                                                }`}>
+                                                            ? 'bg-yellow-100 text-yellow-800'
+                                                            : 'bg-green-100 text-green-800'
+                                                    }`}>
                                                     {formatted.riskLevel}
                                                 </div>
                                             </div>

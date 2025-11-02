@@ -14,13 +14,9 @@ import React, { useState } from 'react';
 import {
     GitBranch,
     GitCommit,
-    GitMerge,
-    GitPullRequest,
     Upload,
     Download,
     Plus,
-    Check,
-    X,
     Clock,
     User,
     FileText
@@ -366,4 +362,3 @@ const GitIntegration: React.FC<GitIntegrationProps> = ({ isDarkMode = true }) =>
 };
 
 export default GitIntegration;
-

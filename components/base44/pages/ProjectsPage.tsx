@@ -114,11 +114,8 @@ export const ProjectsPage: React.FC = () => {
     // Fetch projects from API
     const fetchProjects = useCallback(async () => {
         try {
-            setLoading(true);
-            setError(null);
-
             const params = new URLSearchParams({
-                page: page.toString(),
+                page: '1',
                 limit: '20'
             });
 
@@ -140,7 +137,7 @@ export const ProjectsPage: React.FC = () => {
                 setProjects(MOCK_PROJECTS);
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch projects');
+            console.error('Failed to fetch projects:', err);
             // Fallback to mock data
             setProjects(MOCK_PROJECTS);
         } finally {
@@ -277,7 +274,7 @@ export const ProjectsPage: React.FC = () => {
                 {projects.map((project) => (
                     <div
                         key={project.id}
-                        onClick={() => setSelectedProjectId(project.id)}
+                        onClick={() => setSelectedProjectId(String(project.id))}
                         className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer hover:scale-105"
                     >
                         {/* Header */}
@@ -293,7 +290,7 @@ export const ProjectsPage: React.FC = () => {
                                 </div>
                             </div>
                             <h3 className="text-lg font-semibold text-gray-900 mb-1">{project.name}</h3>
-                            <p className="text-sm text-gray-600">{project.client}</p>
+                            <p className="text-sm text-gray-600">{project.client || project.client_name || 'N/A'}</p>
                         </div>
 
                         {/* Details */}

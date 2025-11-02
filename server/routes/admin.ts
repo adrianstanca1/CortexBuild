@@ -1,38 +1,39 @@
 // CortexBuild Platform - Super Admin API Routes
-// Version: 2.0.0 MULTI-TENANT + ADVANCED FEATURES
+// Version: 2.0.0 - Supabase Migration
 // Super Admin: adrian.stanca1@gmail.com
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import * as auth from '../auth-supabase';
 
-export function createAdminRouter(db: Database.Database): Router {
+export function createAdminRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // Middleware to check super_admin role
-  const requireSuperAdmin = (req: any, res: Response, next: any) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  const requireSuperAdmin = async (req: any, res: Response, next: any) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
-    const session = db.prepare('SELECT user_id FROM sessions WHERE token = ?').get(token) as any;
-    if (!session) {
-      return res.status(401).json({ error: 'Invalid session' });
-    }
+      const user = await auth.getCurrentUserByToken(token);
+      if (!user || user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Forbidden - Super Admin only' });
+      }
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(session.user_id) as any;
-    if (!user || user.role !== 'super_admin') {
-      return res.status(403).json({ error: 'Forbidden - Super Admin only' });
+      req.user = user;
+      next();
+    } catch (error: any) {
+      res.status(401).json({ error: error.message || 'Unauthorized' });
     }
-
-    req.user = user;
-    next();
   };
 
   // GET /api/admin/dashboard - Super Admin Dashboard Stats
-  router.get('/dashboard', requireSuperAdmin, (req: Request, res: Response) => {
+  router.get('/dashboard', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
       const now = new Date();
       const weekAgo = new Date(now);
@@ -42,71 +43,95 @@ export function createAdminRouter(db: Database.Database): Router {
       const weekAgoIso = weekAgo.toISOString();
       const startOfMonthIso = startOfMonth.toISOString();
 
-      const getCount = (query: string, ...params: any[]) => {
-        try {
-          const row = db.prepare(query).get(...params) as any;
-          return row?.count ?? 0;
-        } catch (error) {
-          console.warn('[Admin dashboard] count query failed', query, error);
-          return 0;
-        }
-      };
+      // Get totals
+      const [usersResult, companiesResult, projectsResult, clientsResult] = await Promise.all([
+        supabase.from('users').select('id', { count: 'exact', head: true }),
+        supabase.from('companies').select('id', { count: 'exact', head: true }),
+        supabase.from('projects').select('id', { count: 'exact', head: true }),
+        supabase.from('clients').select('id', { count: 'exact', head: true })
+      ]);
 
       const totals = {
-        users: getCount('SELECT COUNT(*) as count FROM users'),
-        companies: getCount('SELECT COUNT(*) as count FROM companies'),
-        projects: getCount('SELECT COUNT(*) as count FROM projects'),
-        clients: getCount('SELECT COUNT(*) as count FROM clients')
+        users: usersResult.count || 0,
+        companies: companiesResult.count || 0,
+        projects: projectsResult.count || 0,
+        clients: clientsResult.count || 0
       };
+
+      // Get user stats
+      const [newUsersWeek, superAdminsResult, developersResult] = await Promise.all([
+        supabase.from('users').select('id', { count: 'exact', head: true }).gte('created_at', weekAgoIso),
+        supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'super_admin'),
+        supabase.from('users').select('id', { count: 'exact', head: true }).eq('role', 'developer')
+      ]);
 
       const userStats = {
         total: totals.users,
-        active: totals.users, // All users are considered active
-        newThisWeek: getCount('SELECT COUNT(*) as count FROM users WHERE created_at >= ?', weekAgoIso),
-        superAdmins: getCount('SELECT COUNT(*) as count FROM users WHERE role = ?', 'super_admin'),
-        developers: getCount('SELECT COUNT(*) as count FROM users WHERE role = ?', 'developer')
+        active: totals.users,
+        newThisWeek: newUsersWeek.count || 0,
+        superAdmins: superAdminsResult.count || 0,
+        developers: developersResult.count || 0
       };
+
+      // Get company stats
+      const [activeCompaniesResult, newCompaniesMonth] = await Promise.all([
+        supabase.from('projects').select('company_id', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('companies').select('id', { count: 'exact', head: true }).gte('created_at', startOfMonthIso)
+      ]);
 
       const companyStats = {
         total: totals.companies,
-        active: getCount(
-          `SELECT COUNT(DISTINCT projects.company_id) as count
-           FROM projects
-           WHERE status = 'active'`
-        ) || totals.companies,
-        newThisMonth: getCount('SELECT COUNT(*) as count FROM companies WHERE created_at >= ?', startOfMonthIso)
+        active: activeCompaniesResult.count || totals.companies,
+        newThisMonth: newCompaniesMonth.count || 0
       };
 
-      const projectStatusRows = db
-        .prepare('SELECT status, COUNT(*) as count FROM projects GROUP BY status')
-        .all() as Array<{ status: string; count: number }>;
+      // Get project stats
+      const { data: projectsStatus } = await supabase
+        .from('projects')
+        .select('status');
+
+      const projectStatusRows = (projectsStatus || []).reduce((acc: any, p: any) => {
+        const status = p.status || 'unknown';
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {});
 
       const projectStats = {
         total: totals.projects,
-        active: projectStatusRows.find((row) => row.status === 'active')?.count ?? 0,
-        byStatus: projectStatusRows
+        active: projectStatusRows['active'] || 0,
+        byStatus: Object.entries(projectStatusRows).map(([status, count]) => ({ status, count }))
       };
 
       const sdkDevelopers = userStats.developers;
 
-      const usageSummaryRows = db
-        .prepare(`
-          SELECT provider,
-                 COUNT(*) as requests_this_month,
-                 SUM(cost) as month_to_date_cost,
-                 SUM(total_tokens) as total_tokens
-          FROM api_usage_logs
-          WHERE created_at >= ?
-          GROUP BY provider
-        `)
-        .all(startOfMonthIso) as Array<{ provider: string; requests_this_month: number; month_to_date_cost: number; total_tokens: number }>;
+      // Get usage summary
+      const { data: usageLogs } = await supabase
+        .from('api_usage_logs')
+        .select('provider, cost, total_tokens')
+        .gte('created_at', startOfMonthIso);
+
+      const usageSummaryRows = (usageLogs || []).reduce((acc: any, log: any) => {
+        const provider = log.provider || 'unknown';
+        if (!acc[provider]) {
+          acc[provider] = {
+            provider,
+            requests_this_month: 0,
+            month_to_date_cost: 0,
+            total_tokens: 0
+          };
+        }
+        acc[provider].requests_this_month += 1;
+        acc[provider].month_to_date_cost += log.cost || 0;
+        acc[provider].total_tokens += log.total_tokens || 0;
+        return acc;
+      }, {});
 
       const sdkStats = {
         developers: sdkDevelopers,
-        requestsThisMonth: usageSummaryRows.reduce((sum, row) => sum + (row.requests_this_month || 0), 0),
-        costThisMonth: usageSummaryRows.reduce((sum, row) => sum + (row.month_to_date_cost || 0), 0),
-        tokensThisMonth: usageSummaryRows.reduce((sum, row) => sum + (row.total_tokens || 0), 0),
-        topProviders: usageSummaryRows.map((row) => ({
+        requestsThisMonth: Object.values(usageSummaryRows).reduce((sum: number, row: any) => sum + (row.requests_this_month || 0), 0),
+        costThisMonth: Object.values(usageSummaryRows).reduce((sum: number, row: any) => sum + (row.month_to_date_cost || 0), 0),
+        tokensThisMonth: Object.values(usageSummaryRows).reduce((sum: number, row: any) => sum + (row.total_tokens || 0), 0),
+        topProviders: Object.values(usageSummaryRows).map((row: any) => ({
           provider: row.provider,
           requests: row.requests_this_month || 0,
           cost: row.month_to_date_cost || 0,
@@ -114,118 +139,131 @@ export function createAdminRouter(db: Database.Database): Router {
         }))
       };
 
-      const tenantUsage = db
-        .prepare(
-          `
-          SELECT
-            c.id as company_id,
-            c.name as company_name,
-            COUNT(DISTINCT p.id) as projects,
-            COUNT(DISTINCT u.id) as users,
-            COALESCE(SUM(logs.cost), 0) as api_cost,
-            COALESCE(SUM(logs.total_tokens), 0) as tokens
-          FROM companies c
-          LEFT JOIN projects p ON p.company_id = c.id
-          LEFT JOIN users u ON u.company_id = c.id
-          LEFT JOIN api_usage_logs logs ON logs.user_id = u.id AND logs.created_at >= ?
-          GROUP BY c.id
-          ORDER BY api_cost DESC, projects DESC
-          LIMIT 8
-        `
-        )
-        .all(startOfMonthIso)
-        .map((row: any) => ({
-          companyId: String(row.company_id),
-          companyName: row.company_name,
-          projects: row.projects ?? 0,
-          users: row.users ?? 0,
-          apiCost: row.api_cost ?? 0,
-          tokens: row.tokens ?? 0
-        }));
+      // Get tenant usage
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('id, name')
+        .order('created_at', { ascending: false })
+        .limit(8);
 
+      const tenantUsage = await Promise.all(
+        (companies || []).map(async (company: any) => {
+          const [projectsResult, usersResult, logsResult] = await Promise.all([
+            supabase.from('projects').select('id', { count: 'exact', head: true }).eq('company_id', company.id),
+            supabase.from('users').select('id', { count: 'exact', head: true }).eq('company_id', company.id),
+            supabase
+              .from('api_usage_logs')
+              .select('cost, total_tokens')
+              .gte('created_at', startOfMonthIso)
+              .in('user_id', 
+                (await supabase.from('users').select('id').eq('company_id', company.id)).data?.map((u: any) => u.id) || []
+              )
+          ]);
+
+          const logs = logsResult.data || [];
+          const apiCost = logs.reduce((sum: number, log: any) => sum + (log.cost || 0), 0);
+          const tokens = logs.reduce((sum: number, log: any) => sum + (log.total_tokens || 0), 0);
+
+          return {
+            companyId: String(company.id),
+            companyName: company.name,
+            projects: projectsResult.count || 0,
+            users: usersResult.count || 0,
+            apiCost,
+            tokens
+          };
+        })
+      );
+
+      tenantUsage.sort((a: any, b: any) => b.apiCost - a.apiCost || b.projects - a.projects);
+
+      // Get recent activity
       let recentActivity: any[] = [];
       try {
-        recentActivity = db
-          .prepare(
-            `
-            SELECT a.id,
-                   a.action,
-                   a.description,
-                   a.created_at,
-                   u.name as user_name,
-                   c.name as company_name
-            FROM activities a
-            LEFT JOIN users u ON u.id = a.user_id
-            LEFT JOIN companies c ON c.id = u.company_id
-            ORDER BY a.created_at DESC
-            LIMIT 10
-          `
-          )
-          .all()
-          .map((row: any) => ({
-            id: String(row.id),
-            action: row.action,
-            description: row.description,
-            createdAt: row.created_at,
-            userName: row.user_name ?? undefined,
-            companyName: row.company_name ?? undefined
-          }));
+        const { data: activities } = await supabase
+          .from('activities')
+          .select(`
+            id,
+            action,
+            description,
+            created_at,
+            users!activities_user_id_fkey(id, name),
+            users!activities_user_id_fkey(company_id),
+            companies!users_company_id_fkey(id, name)
+          `)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        recentActivity = (activities || []).map((a: any) => {
+          const users = Array.isArray(a.users) ? a.users[0] : a.users;
+          const companies = Array.isArray(a.companies) ? a.companies[0] : a.companies;
+          return {
+            id: String(a.id),
+            action: a.action,
+            description: a.description,
+            createdAt: a.created_at,
+            userName: users?.name,
+            companyName: companies?.name
+          };
+        });
       } catch (activityError) {
         console.warn('[Admin dashboard] recent activity unavailable', activityError);
       }
 
-      const pendingApprovals = db
-        .prepare(
-          `
-          SELECT sa.id,
-                 sa.name,
-                 sa.status,
-                 sa.updated_at,
-                 u.name as developer_name,
-                 c.name as company_name
-          FROM sdk_apps sa
-          LEFT JOIN users u ON u.id = sa.developer_id
-          LEFT JOIN companies c ON c.id = sa.company_id
-          WHERE sa.status IN ('pending_review', 'draft')
-          ORDER BY sa.updated_at DESC
-          LIMIT 10
-        `
-        )
-        .all()
-        .map((row: any) => ({
-          id: row.id,
-          name: row.name,
-          status: row.status,
-          updatedAt: row.updated_at,
-          developerName: row.developer_name ?? undefined,
-          companyName: row.company_name ?? undefined
-        }));
+      // Get pending approvals
+      const { data: pendingApps } = await supabase
+        .from('sdk_apps')
+        .select(`
+          id,
+          name,
+          status,
+          updated_at,
+          users!sdk_apps_developer_id_fkey(id, name),
+          companies!sdk_apps_company_id_fkey(id, name)
+        `)
+        .in('status', ['pending_review', 'draft'])
+        .order('updated_at', { ascending: false })
+        .limit(10);
 
-      const recentApps = db
-        .prepare(
-          `
-          SELECT sa.id,
-                 sa.name,
-                 sa.status,
-                 sa.updated_at,
-                 u.name as developer_name,
-                 c.name as company_name
-          FROM sdk_apps sa
-          LEFT JOIN users u ON u.id = sa.developer_id
-          LEFT JOIN companies c ON c.id = sa.company_id
-          ORDER BY sa.updated_at DESC
-          LIMIT 12
-        `
-        )
-        .all()
-        .map((row: any) => ({
-          id: row.id,
-          name: row.name,
-          status: row.status,
-          updatedAt: row.updated_at,
-          developerName: row.developer_name ?? undefined,
-          companyName: row.company_name ?? undefined
-        }));
+      const pendingApprovals = (pendingApps || []).map((app: any) => {
+        const users = Array.isArray(app.users) ? app.users[0] : app.users;
+        const companies = Array.isArray(app.companies) ? app.companies[0] : app.companies;
+        return {
+          id: app.id,
+          name: app.name,
+          status: app.status,
+          updatedAt: app.updated_at,
+          developerName: users?.name,
+          companyName: companies?.name
+        };
+      });
+
+      // Get recent apps
+      const { data: recentApps } = await supabase
+        .from('sdk_apps')
+        .select(`
+          id,
+          name,
+          status,
+          updated_at,
+          users!sdk_apps_developer_id_fkey(id, name),
+          companies!sdk_apps_company_id_fkey(id, name)
+        `)
+        .order('updated_at', { ascending: false })
+        .limit(12);
+
+      const recentAppsList = (recentApps || []).map((app: any) => {
+        const users = Array.isArray(app.users) ? app.users[0] : app.users;
+        const companies = Array.isArray(app.companies) ? app.companies[0] : app.companies;
+        return {
+          id: app.id,
+          name: app.name,
+          status: app.status,
+          updatedAt: app.updated_at,
+          developerName: users?.name,
+          companyName: companies?.name
+        };
+      });
 
       const systemStats = {
         uptime: 99.92,
@@ -246,7 +284,7 @@ export function createAdminRouter(db: Database.Database): Router {
           tenantUsage,
           recentActivity,
           pendingApprovals,
-          recentApps
+          recentApps: recentAppsList
         }
       });
     } catch (error: any) {
@@ -256,44 +294,56 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // GET /api/admin/users - List all users (Super Admin)
-  router.get('/users', requireSuperAdmin, (req: Request, res: Response) => {
+  router.get('/users', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const { page = '1', limit = '50', search, company_id, role } = req.query;
+      const { page = '1', limit = '50', search, company_id, role } = req.query as any;
       
-      let query = 'SELECT u.*, c.name as company_name FROM users u LEFT JOIN companies c ON u.company_id = c.id WHERE 1=1';
-      const params: any[] = [];
+      let query = supabase
+        .from('users')
+        .select(`
+          *,
+          companies!users_company_id_fkey(id, name)
+        `, { count: 'exact' });
 
       if (search) {
-        query += ' AND (u.name LIKE ? OR u.email LIKE ?)';
-        params.push(`%${search}%`, `%${search}%`);
+        query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
       }
 
       if (company_id) {
-        query += ' AND u.company_id = ?';
-        params.push(company_id);
+        query = query.eq('company_id', company_id);
       }
 
       if (role) {
-        query += ' AND u.role = ?';
-        params.push(role);
+        query = query.eq('role', role);
       }
 
-      query += ' ORDER BY u.created_at DESC LIMIT ? OFFSET ?';
-      const pageNum = parseInt(page as string);
-      const limitNum = parseInt(limit as string);
-      params.push(limitNum, (pageNum - 1) * limitNum);
+      const pageNum = parseInt(page);
+      const limitNum = parseInt(limit);
+      const from = (pageNum - 1) * limitNum;
+      const to = from + limitNum - 1;
 
-      const users = db.prepare(query).all(...params);
-      const total = db.prepare('SELECT COUNT(*) as count FROM users').get() as any;
+      query = query.order('created_at', { ascending: false }).range(from, to);
+
+      const { data: users, error, count } = await query;
+
+      if (error) throw error;
+
+      const transformedUsers = (users || []).map((u: any) => {
+        const companies = Array.isArray(u.companies) ? u.companies[0] : u.companies;
+        return {
+          ...u,
+          company_name: companies?.name || null
+        };
+      });
 
       res.json({
         success: true,
-        data: users,
+        data: transformedUsers,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total: total.count,
-          totalPages: Math.ceil(total.count / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
@@ -303,7 +353,7 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // POST /api/admin/users - Create new user (Super Admin)
-  router.post('/users', requireSuperAdmin, (req: Request, res: Response) => {
+  router.post('/users', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
       const { email, password, name, role, company_id } = req.body;
 
@@ -311,26 +361,46 @@ export function createAdminRouter(db: Database.Database): Router {
         return res.status(400).json({ error: 'All fields are required' });
       }
 
-      const existingUser = db.prepare('SELECT id FROM users WHERE LOWER(email) = LOWER(?)').get(email);
-      if (existingUser) {
+      // Check if user exists
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id')
+        .ilike('email', email)
+        .single();
+
+      if (existing) {
         return res.status(400).json({ error: 'User already exists' });
       }
 
       const userId = uuidv4();
-      const passwordHash = bcrypt.hashSync(password, 10);
+      const passwordHash = await bcrypt.hash(password, 10);
 
-      db.prepare('INSERT INTO users (id, email, password_hash, name, role, company_id, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)').run(
-        userId, email, passwordHash, name, role, company_id
-      );
+      const { data: user, error } = await supabase
+        .from('users')
+        .insert({
+          id: userId,
+          email,
+          password_hash: passwordHash,
+          name,
+          role,
+          company_id,
+          is_active: true
+        })
+        .select()
+        .single();
 
-      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+      if (error) throw error;
 
       // Log activity
-      db.prepare('INSERT INTO activities (user_id, action, description, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)').run(
-        (req as any).user.id,
-        'create',
-        `Created user: ${email}`
-      );
+      try {
+        await supabase.from('activities').insert({
+          user_id: (req as any).user.id,
+          action: 'create',
+          description: `Created user: ${email}`
+        });
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+      }
 
       res.json({ success: true, data: user });
     } catch (error: any) {
@@ -340,50 +410,48 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // PUT /api/admin/users/:id - Update user (Super Admin)
-  router.put('/users/:id', requireSuperAdmin, (req: Request, res: Response) => {
+  router.put('/users/:id', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { name, role, company_id, is_active, password } = req.body;
 
-      const updates: string[] = [];
-      const params: any[] = [];
+      const updates: any = {};
 
-      if (name !== undefined) {
-        updates.push('name = ?');
-        params.push(name);
-      }
-      if (role !== undefined) {
-        updates.push('role = ?');
-        params.push(role);
-      }
-      if (company_id !== undefined) {
-        updates.push('company_id = ?');
-        params.push(company_id);
-      }
-      if (is_active !== undefined) {
-        updates.push('is_active = ?');
-        params.push(is_active ? 1 : 0);
-      }
+      if (name !== undefined) updates.name = name;
+      if (role !== undefined) updates.role = role;
+      if (company_id !== undefined) updates.company_id = company_id;
+      if (is_active !== undefined) updates.is_active = is_active === true || is_active === 1;
       if (password) {
-        updates.push('password_hash = ?');
-        params.push(bcrypt.hashSync(password, 10));
+        updates.password_hash = await bcrypt.hash(password, 10);
       }
 
-      if (updates.length === 0) {
+      if (Object.keys(updates).length === 0) {
         return res.status(400).json({ error: 'No fields to update' });
       }
 
-      params.push(id);
-      db.prepare(`UPDATE users SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(...params);
+      const { data: user, error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
 
-      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+      if (error) throw error;
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
 
       // Log activity
-      db.prepare('INSERT INTO activities (user_id, action, description, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)').run(
-        (req as any).user.id,
-        'update',
-        `Updated user: ${id}`
-      );
+      try {
+        await supabase.from('activities').insert({
+          user_id: (req as any).user.id,
+          action: 'update',
+          description: `Updated user: ${id}`
+        });
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+      }
 
       res.json({ success: true, data: user });
     } catch (error: any) {
@@ -393,23 +461,37 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/admin/users/:id - Delete user (Super Admin)
-  router.delete('/users/:id', requireSuperAdmin, (req: Request, res: Response) => {
+  router.delete('/users/:id', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const user = db.prepare('SELECT role FROM users WHERE id = ?').get(id) as any;
+      const { data: user } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', id)
+        .single();
+
       if (user && user.role === 'super_admin') {
         return res.status(403).json({ error: 'Cannot delete super admin' });
       }
 
-      db.prepare('DELETE FROM users WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       // Log activity
-      db.prepare('INSERT INTO activities (user_id, action, description, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)').run(
-        (req as any).user.id,
-        'delete',
-        `Deleted user: ${id}`
-      );
+      try {
+        await supabase.from('activities').insert({
+          user_id: (req as any).user.id,
+          action: 'delete',
+          description: `Deleted user: ${id}`
+        });
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+      }
 
       res.json({ success: true });
     } catch (error: any) {
@@ -419,17 +501,30 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // GET /api/admin/companies - List all companies (Super Admin)
-  router.get('/companies', requireSuperAdmin, (req: Request, res: Response) => {
+  router.get('/companies', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const companies = db.prepare(`
-        SELECT c.*, 
-          (SELECT COUNT(*) FROM users WHERE company_id = c.id) as user_count,
-          (SELECT COUNT(*) FROM projects WHERE company_id = c.id) as project_count
-        FROM companies c
-        ORDER BY c.created_at DESC
-      `).all();
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      res.json({ success: true, data: companies });
+      // Get counts for each company
+      const companiesWithCounts = await Promise.all(
+        (companies || []).map(async (company: any) => {
+          const [usersResult, projectsResult] = await Promise.all([
+            supabase.from('users').select('id', { count: 'exact', head: true }).eq('company_id', company.id),
+            supabase.from('projects').select('id', { count: 'exact', head: true }).eq('company_id', company.id)
+          ]);
+
+          return {
+            ...company,
+            user_count: usersResult.count || 0,
+            project_count: projectsResult.count || 0
+          };
+        })
+      );
+
+      res.json({ success: true, data: companiesWithCounts });
     } catch (error: any) {
       console.error('List companies error:', error);
       res.status(500).json({ error: error.message });
@@ -437,7 +532,7 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // POST /api/admin/companies - Create new company (Super Admin)
-  router.post('/companies', requireSuperAdmin, (req: Request, res: Response) => {
+  router.post('/companies', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
       const {
         name,
@@ -455,32 +550,37 @@ export function createAdminRouter(db: Database.Database): Router {
         return res.status(400).json({ error: 'Company name and email are required' });
       }
 
-      const companyId = `company-${uuidv4()}`;
+      const companyId = uuidv4();
 
-      // Check if companies table has the new columns, if not, use basic insert
-      try {
-        db.prepare(`INSERT INTO companies (
-          id, name, email, phone, address, website, industry,
-          subscription_plan, max_users, max_projects
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
-          companyId, name, email, phone || null, address || null,
-          website || null, industry, subscription_plan, max_users, max_projects
-        );
-      } catch (err) {
-        // Fallback to basic insert if columns don't exist
-        db.prepare('INSERT INTO companies (id, name, subscription_plan, max_users, max_projects) VALUES (?, ?, ?, ?, ?)').run(
-          companyId, name, subscription_plan, max_users, max_projects
-        );
-      }
+      const { data: company, error } = await supabase
+        .from('companies')
+        .insert({
+          id: companyId,
+          name,
+          email,
+          phone: phone || null,
+          address: address || null,
+          website: website || null,
+          industry,
+          subscription_plan,
+          max_users,
+          max_projects
+        })
+        .select()
+        .single();
 
-      const company = db.prepare('SELECT * FROM companies WHERE id = ?').get(companyId);
+      if (error) throw error;
 
       // Log activity
-      db.prepare('INSERT INTO activities (user_id, action, description, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)').run(
-        (req as any).user.id,
-        'create',
-        `Created company: ${name}`
-      );
+      try {
+        await supabase.from('activities').insert({
+          user_id: (req as any).user.id,
+          action: 'create',
+          description: `Created company: ${name}`
+        });
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+      }
 
       res.json({ success: true, data: company });
     } catch (error: any) {
@@ -490,50 +590,46 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // PUT /api/admin/companies/:id - Update company (Super Admin)
-  router.put('/companies/:id', requireSuperAdmin, (req: Request, res: Response) => {
+  router.put('/companies/:id', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { name, subscription_plan, max_users, max_projects, is_active } = req.body;
 
-      const updates: string[] = [];
-      const params: any[] = [];
+      const updates: any = {};
 
-      if (name !== undefined) {
-        updates.push('name = ?');
-        params.push(name);
-      }
-      if (subscription_plan !== undefined) {
-        updates.push('subscription_plan = ?');
-        params.push(subscription_plan);
-      }
-      if (max_users !== undefined) {
-        updates.push('max_users = ?');
-        params.push(max_users);
-      }
-      if (max_projects !== undefined) {
-        updates.push('max_projects = ?');
-        params.push(max_projects);
-      }
-      if (is_active !== undefined) {
-        updates.push('is_active = ?');
-        params.push(is_active ? 1 : 0);
-      }
+      if (name !== undefined) updates.name = name;
+      if (subscription_plan !== undefined) updates.subscription_plan = subscription_plan;
+      if (max_users !== undefined) updates.max_users = max_users;
+      if (max_projects !== undefined) updates.max_projects = max_projects;
+      if (is_active !== undefined) updates.is_active = is_active === true || is_active === 1;
 
-      if (updates.length === 0) {
+      if (Object.keys(updates).length === 0) {
         return res.status(400).json({ error: 'No fields to update' });
       }
 
-      params.push(id);
-      db.prepare(`UPDATE companies SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(...params);
+      const { data: company, error } = await supabase
+        .from('companies')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
 
-      const company = db.prepare('SELECT * FROM companies WHERE id = ?').get(id);
+      if (error) throw error;
+
+      if (!company) {
+        return res.status(404).json({ error: 'Company not found' });
+      }
 
       // Log activity
-      db.prepare('INSERT INTO activities (user_id, action, description, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)').run(
-        (req as any).user.id,
-        'update',
-        `Updated company: ${id}`
-      );
+      try {
+        await supabase.from('activities').insert({
+          user_id: (req as any).user.id,
+          action: 'update',
+          description: `Updated company: ${id}`
+        });
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+      }
 
       res.json({ success: true, data: company });
     } catch (error: any) {
@@ -543,26 +639,39 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/admin/companies/:id - Delete company (Super Admin)
-  router.delete('/companies/:id', requireSuperAdmin, (req: Request, res: Response) => {
+  router.delete('/companies/:id', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
       // Check if company has users
-      const userCount = db.prepare('SELECT COUNT(*) as count FROM users WHERE company_id = ?').get(id) as any;
-      if (userCount && userCount.count > 0) {
+      const { count } = await supabase
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('company_id', id);
+
+      if (count && count > 0) {
         return res.status(400).json({
-          error: `Cannot delete company with ${userCount.count} users. Please reassign or delete users first.`
+          error: `Cannot delete company with ${count} users. Please reassign or delete users first.`
         });
       }
 
-      db.prepare('DELETE FROM companies WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('companies')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       // Log activity
-      db.prepare('INSERT INTO activities (user_id, action, description, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)').run(
-        (req as any).user.id,
-        'delete',
-        `Deleted company: ${id}`
-      );
+      try {
+        await supabase.from('activities').insert({
+          user_id: (req as any).user.id,
+          action: 'delete',
+          description: `Deleted company: ${id}`
+        });
+      } catch (logError) {
+        console.warn('Failed to log activity:', logError);
+      }
 
       res.json({ success: true, message: 'Company deleted successfully' });
     } catch (error: any) {
@@ -629,13 +738,34 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // GET /api/admin/system-stats - System statistics (Super Admin)
-  router.get('/system-stats', requireSuperAdmin, (req: Request, res: Response) => {
+  router.get('/system-stats', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
+      // Get record counts
+      const [usersCount, companiesCount, projectsCount, clientsCount] = await Promise.all([
+        supabase.from('users').select('id', { count: 'exact', head: true }),
+        supabase.from('companies').select('id', { count: 'exact', head: true }),
+        supabase.from('projects').select('id', { count: 'exact', head: true }),
+        supabase.from('clients').select('id', { count: 'exact', head: true })
+      ]);
+
+      const totalRecords = (usersCount.count || 0) + (companiesCount.count || 0) + (projectsCount.count || 0) + (clientsCount.count || 0);
+
+      // Get activity counts
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      const [last24hResult, last7dResult] = await Promise.all([
+        supabase.from('activities').select('id', { count: 'exact', head: true }).gte('created_at', yesterday.toISOString()),
+        supabase.from('activities').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo.toISOString())
+      ]);
+
       const stats = {
         database: {
-          size: '2.5 MB',
-          tables: 20,
-          records: db.prepare('SELECT SUM(count) as total FROM (SELECT COUNT(*) as count FROM users UNION ALL SELECT COUNT(*) FROM companies UNION ALL SELECT COUNT(*) FROM projects UNION ALL SELECT COUNT(*) FROM clients)').get() as any
+          size: 'N/A (Supabase managed)',
+          tables: 25, // Approximate
+          records: totalRecords
         },
         performance: {
           uptime: process.uptime(),
@@ -643,8 +773,8 @@ export function createAdminRouter(db: Database.Database): Router {
           cpu: process.cpuUsage()
         },
         activity: {
-          last24h: db.prepare('SELECT COUNT(*) as count FROM activities WHERE created_at > datetime("now", "-1 day")').get() as any,
-          last7d: db.prepare('SELECT COUNT(*) as count FROM activities WHERE created_at > datetime("now", "-7 days")').get() as any
+          last24h: last24hResult.count || 0,
+          last7d: last7dResult.count || 0
         }
       };
 
@@ -656,39 +786,53 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // GET /api/admin/activity-logs - Get activity logs (Super Admin)
-  router.get('/activity-logs', requireSuperAdmin, (req: Request, res: Response) => {
+  router.get('/activity-logs', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const { page = '1', limit = '20', user_id, action } = req.query;
+      const { page = '1', limit = '20', user_id, action } = req.query as any;
       
-      let query = 'SELECT a.*, u.name as user_name, u.email as user_email FROM activities a LEFT JOIN users u ON a.user_id = u.id WHERE 1=1';
-      const params: any[] = [];
+      let query = supabase
+        .from('activities')
+        .select(`
+          *,
+          users!activities_user_id_fkey(id, name, email)
+        `, { count: 'exact' });
 
       if (user_id) {
-        query += ' AND a.user_id = ?';
-        params.push(user_id);
+        query = query.eq('user_id', user_id);
       }
 
       if (action) {
-        query += ' AND a.action = ?';
-        params.push(action);
+        query = query.eq('action', action);
       }
 
-      query += ' ORDER BY a.created_at DESC LIMIT ? OFFSET ?';
-      const pageNum = parseInt(page as string);
-      const limitNum = parseInt(limit as string);
-      params.push(limitNum, (pageNum - 1) * limitNum);
+      const pageNum = parseInt(page);
+      const limitNum = parseInt(limit);
+      const from = (pageNum - 1) * limitNum;
+      const to = from + limitNum - 1;
 
-      const logs = db.prepare(query).all(...params);
-      const total = db.prepare('SELECT COUNT(*) as count FROM activities').get() as any;
+      query = query.order('created_at', { ascending: false }).range(from, to);
+
+      const { data: logs, error, count } = await query;
+
+      if (error) throw error;
+
+      const transformedLogs = (logs || []).map((log: any) => {
+        const users = Array.isArray(log.users) ? log.users[0] : log.users;
+        return {
+          ...log,
+          user_name: users?.name || null,
+          user_email: users?.email || null
+        };
+      });
 
       res.json({
         success: true,
-        data: logs,
+        data: transformedLogs,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total: total.count,
-          totalPages: Math.ceil(total.count / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
@@ -698,59 +842,97 @@ export function createAdminRouter(db: Database.Database): Router {
   });
 
   // GET /api/admin/analytics - Platform analytics (Super Admin)
-  router.get('/analytics', requireSuperAdmin, (req: Request, res: Response) => {
+  router.get('/analytics', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const { period = '30d' } = req.query;
+      const { period = '30d' } = req.query as any;
       
       let daysBack = 30;
       if (period === '7d') daysBack = 7;
       if (period === '90d') daysBack = 90;
 
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+      const startDateIso = startDate.toISOString();
+
+      // Get growth data
+      const [usersData, companiesData, projectsData] = await Promise.all([
+        supabase.from('users').select('created_at').gte('created_at', startDateIso),
+        supabase.from('companies').select('created_at').gte('created_at', startDateIso),
+        supabase.from('projects').select('created_at').gte('created_at', startDateIso)
+      ]);
+
+      // Group by date
+      const groupByDate = (items: any[]) => {
+        const grouped: any = {};
+        items.forEach((item: any) => {
+          const date = new Date(item.created_at).toISOString().split('T')[0];
+          grouped[date] = (grouped[date] || 0) + 1;
+        });
+        return Object.entries(grouped)
+          .map(([date, count]) => ({ date, count }))
+          .sort((a: any, b: any) => b.date.localeCompare(a.date));
+      };
+
+      // Get top companies
+      const { data: allCompanies } = await supabase
+        .from('companies')
+        .select('id, name, subscription_plan')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      const topCompanies = await Promise.all(
+        (allCompanies || []).map(async (company: any) => {
+          const [usersResult, projectsResult] = await Promise.all([
+            supabase.from('users').select('id', { count: 'exact', head: true }).eq('company_id', company.id),
+            supabase.from('projects').select('id', { count: 'exact', head: true }).eq('company_id', company.id)
+          ]);
+
+          return {
+            name: company.name,
+            subscription_plan: company.subscription_plan,
+            user_count: usersResult.count || 0,
+            project_count: projectsResult.count || 0
+          };
+        })
+      );
+
+      topCompanies.sort((a: any, b: any) => b.user_count - a.user_count || b.project_count - a.project_count);
+
+      // Get subscription distribution
+      const { data: companiesForSubs } = await supabase
+        .from('companies')
+        .select('subscription_plan');
+
+      const subscriptionDistribution = (companiesForSubs || []).reduce((acc: any, c: any) => {
+        const plan = c.subscription_plan || 'free';
+        acc[plan] = (acc[plan] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Get role distribution
+      const { data: usersForRoles } = await supabase
+        .from('users')
+        .select('role');
+
+      const roleDistribution = (usersForRoles || []).reduce((acc: any, u: any) => {
+        const role = u.role || 'unknown';
+        acc[role] = (acc[role] || 0) + 1;
+        return acc;
+      }, {});
+
       const analytics = {
-        userGrowth: db.prepare(`
-          SELECT DATE(created_at) as date, COUNT(*) as count 
-          FROM users 
-          WHERE created_at > datetime('now', '-${daysBack} days')
-          GROUP BY DATE(created_at)
-          ORDER BY date DESC
-        `).all(),
-        
-        companyGrowth: db.prepare(`
-          SELECT DATE(created_at) as date, COUNT(*) as count 
-          FROM companies 
-          WHERE created_at > datetime('now', '-${daysBack} days')
-          GROUP BY DATE(created_at)
-          ORDER BY date DESC
-        `).all(),
-        
-        projectGrowth: db.prepare(`
-          SELECT DATE(created_at) as date, COUNT(*) as count 
-          FROM projects 
-          WHERE created_at > datetime('now', '-${daysBack} days')
-          GROUP BY DATE(created_at)
-          ORDER BY date DESC
-        `).all(),
-        
-        topCompanies: db.prepare(`
-          SELECT c.name, c.subscription_plan,
-            (SELECT COUNT(*) FROM users WHERE company_id = c.id) as user_count,
-            (SELECT COUNT(*) FROM projects WHERE company_id = c.id) as project_count
-          FROM companies c
-          ORDER BY user_count DESC, project_count DESC
-          LIMIT 10
-        `).all(),
-        
-        subscriptionDistribution: db.prepare(`
-          SELECT subscription_plan, COUNT(*) as count
-          FROM companies
-          GROUP BY subscription_plan
-        `).all(),
-        
-        roleDistribution: db.prepare(`
-          SELECT role, COUNT(*) as count
-          FROM users
-          GROUP BY role
-        `).all()
+        userGrowth: groupByDate(usersData.data || []),
+        companyGrowth: groupByDate(companiesData.data || []),
+        projectGrowth: groupByDate(projectsData.data || []),
+        topCompanies,
+        subscriptionDistribution: Object.entries(subscriptionDistribution).map(([plan, count]) => ({
+          subscription_plan: plan,
+          count
+        })),
+        roleDistribution: Object.entries(roleDistribution).map(([role, count]) => ({
+          role,
+          count
+        }))
       };
 
       res.json({ success: true, data: analytics });

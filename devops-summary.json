@@ -1,0 +1,31 @@
+{
+  "timestamp": "2025-10-17T05:05:24.135Z",
+  "overall": "CRITICAL",
+  "scores": {
+    "health": 100,
+    "performance": 100,
+    "security": 0,
+    "deployment": 0
+  },
+  "recommendations": [
+    {
+      "category": "Security",
+      "priority": "CRITICAL",
+      "action": "Address security vulnerabilities",
+      "details": "Critical security issues detected"
+    },
+    {
+      "category": "Deployment",
+      "priority": "MEDIUM",
+      "action": "Improve deployment reliability",
+      "details": "Recent deployments have failed"
+    }
+  ],
+  "alerts": [
+    {
+      "level": "CRITICAL",
+      "message": "1 critical security vulnerabilities detected",
+      "timestamp": "2025-10-17T05:05:24.137Z"
+    }
+  ]
+}

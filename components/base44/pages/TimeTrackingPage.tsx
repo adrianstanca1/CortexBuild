@@ -274,7 +274,7 @@ export const TimeTrackingPage: React.FC = () => {
                         <div className="flex items-start justify-between">
                             <div className="flex-1">
                                 <div className="flex items-center space-x-2 mb-2">
-                                    <h4 className="font-semibold text-gray-900">{entry.project}</h4>
+                                    <h4 className="font-semibold text-gray-900">{entry.project || entry.project_name || 'N/A'}</h4>
                                     {entry.billable && (
                                         <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
                                             Billable

@@ -3,7 +3,7 @@
  * Handles real-time updates for admin dashboard using Supabase Realtime
  */
 
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 // ============================================
@@ -244,12 +244,12 @@ export function subscribeToPresence(
 
     channel
         .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            newPresences.forEach((presence: PresenceState) => {
+            newPresences.forEach((presence: any) => {
                 onJoin(presence);
             });
         })
         .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            leftPresences.forEach((presence: PresenceState) => {
+            leftPresences.forEach((presence: any) => {
                 onLeave(presence);
             });
         })

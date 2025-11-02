@@ -1,18 +1,37 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { cdnSupabasePlugin } from './vite-plugin-cdn-supabase';
 
 export default defineConfig(async ({ mode }) => {
     const env = loadEnv(mode, '.', '');
+    const apiUrl = env.VITE_API_URL || 'http://localhost:3001';
+
     return {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        // Aggressive cache busting for development
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
         proxy: {
-          '/api': {
-            target: 'http://localhost:3001',
+          '/api/': {
+            target: apiUrl,
             changeOrigin: true,
+            rewrite: (path) => path
           }
+        },
+        // Force HMR to always reload
+        hmr: {
+          overlay: true,
+        },
+        // Watch for changes aggressively
+        watch: {
+          usePolling: true,
+          interval: 100,
         }
       },
       plugins: [
@@ -31,7 +50,17 @@ export default defineConfig(async ({ mode }) => {
         minify: 'esbuild',
         sourcemap: false,
         rollupOptions: {
+          external: [
+            '@supabase/supabase-js',
+            '@supabase/postgrest-js',
+            '@supabase/realtime-js',
+            '@supabase/storage-js'
+          ],
           output: {
+            // Optimize chunk naming for better caching
+            chunkFileNames: 'assets/[name]-[hash].js',
+            entryFileNames: 'assets/[name]-[hash].js',
+            assetFileNames: 'assets/[name]-[hash][extname]',
             manualChunks(id) {
               // React ecosystem - core runtime
               if (id.includes('node_modules/react') ||
@@ -144,7 +173,43 @@ export default defineConfig(async ({ mode }) => {
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
-        }
-      }
+          // Force Supabase to use CDN from importmap
+          '@supabase/supabase-js': '@supabase/supabase-js',
+        },
+        // Ensure proper module resolution
+        extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
+        // Don't add extensions to imports
+        preserveSymlinks: false
+      },
+      esbuild: {
+        // Keep import paths as-is without adding extensions
+        keepNames: true
+      },
+      // Optimize dependencies
+      optimizeDeps: {
+        include: [
+          'react',
+          'react-dom',
+          'axios',
+          'uuid',
+          '@google/genai',
+          'react-markdown',
+          'react-hot-toast',
+          '@monaco-editor/react',
+          'lucide-react',
+          'react-router-dom'
+        ],
+        // Exclude ALL Supabase packages - use CDN version from importmap instead
+        exclude: [
+          '@supabase/supabase-js',
+          '@supabase/postgrest-js',
+          '@supabase/realtime-js',
+          '@supabase/storage-js',
+          '@supabase/functions-js',
+          '@supabase/gotrue-js'
+        ]
+      },
+      // Clear cache on startup
+      cacheDir: 'node_modules/.vite'
     };
 });

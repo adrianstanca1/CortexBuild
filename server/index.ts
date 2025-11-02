@@ -1,12 +1,25 @@
 /**
  * Express Server with Real Authentication
- * JWT-based auth with SQLite database
+ * JWT-based auth with Supabase PostgreSQL database
  */
 
+// Load environment variables FIRST, before any other imports
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..');
+
+dotenv.config({ path: join(projectRoot, '.env.local') });
+dotenv.config({ path: join(projectRoot, '.env') });
+
+// Now import other modules after environment is configured
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { createServer } from 'http';
+import { supabase, verifyConnection } from './supabase';
 import { db, initDatabase } from './database';
 import * as auth from './auth';
 import * as mcp from './services/mcp';
@@ -69,9 +82,6 @@ import {
   refreshTokenSchema
 } from './utils/validation';
 
-// Load environment variables from .env.local first, then .env
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 // Setup process-level error handlers (MUST be before any other code)
 handleUncaughtException();
@@ -116,8 +126,8 @@ app.post('/api/auth/refresh', validateBody(refreshTokenSchema), async (req, res)
     try {
         const { token } = req.body;
 
-        const result = await auth.refreshToken(token);
-        
+        const result = auth.refreshToken(db, token);
+
         res.json({
             success: true,
             user: result.user,
@@ -125,9 +135,9 @@ app.post('/api/auth/refresh', validateBody(refreshTokenSchema), async (req, res)
         });
     } catch (error: any) {
         console.error('Refresh token error:', error);
-        res.status(401).json({ 
+        res.status(401).json({
             success: false,
-            error: error.message || 'Token refresh failed' 
+            error: error.message || 'Token refresh failed'
         });
     }
 });
@@ -171,7 +181,6 @@ app.post('/api/chat/message', generalRateLimit, auth.authenticateToken, async (r
 
                 // Import chatbot dynamically
                 const { GeminiChatbot } = await import('../lib/ai/gemini-client');
-                const { ChatTools } = await import('../lib/ai/chat-tools');
 
                 // Build context
                 const chatContext = {
@@ -188,7 +197,7 @@ app.post('/api/chat/message', generalRateLimit, auth.authenticateToken, async (r
                 const chatbot = new GeminiChatbot();
                 await chatbot.initializeChat(chatContext, []);
 
-                // Send message
+                // Send message via Gemini
                 const response = await chatbot.sendMessage(message, chatContext);
 
                 res.json({
@@ -226,25 +235,17 @@ app.delete('/api/chat/message', generalRateLimit, auth.authenticateToken, async 
  */
 const startServer = async () => {
     try {
-        // Initialize database
-        initDatabase();
-        auth.setDatabase(db);
-
-        // Initialize MCP tables
-        console.log('🧠 Initializing MCP (Model Context Protocol)...');
-        try {
-            mcp.initializeMCPTables(db);
-        } catch (error) {
-            console.warn('⚠️ MCP initialization failed, continuing without MCP:', error.message);
+        // Verify Supabase connection
+        console.log('🔌 Connecting to Supabase...');
+        const isConnected = await verifyConnection();
+        if (!isConnected) {
+            throw new Error('Failed to connect to Supabase');
         }
 
-        // Initialize deployment tables
-        console.log('🚀 Initializing Deployment tables...');
-        deploymentService.initDeploymentTables(db);
-
-        // Initialize SDK tables
-        console.log('🔧 Initializing SDK Developer tables...');
-        initSdkTables(db);
+        // Initialize local SQLite for modules/marketplace/SDK local features
+        console.log('🗄️ Initializing local SQLite (for marketplace/SDK)...');
+        initDatabase();
+        console.log('✅ Supabase connection verified');
 
         // Initialize subscription service
         console.log('💳 Initializing Subscription service...');
@@ -258,6 +259,13 @@ const startServer = async () => {
                 const { email, password } = req.body;
 
                 const result = auth.login(db, email, password);
+
+                if (!result) {
+                    return res.status(401).json({
+                        success: false,
+                        error: 'Invalid email or password'
+                    });
+                }
 
                 res.json({
                     success: true,
@@ -275,7 +283,7 @@ const startServer = async () => {
 
         app.post('/api/auth/register', authRateLimit, validateBody(registerSchema), (req, res) => {
             try {
-                const { email, password, name, companyName } = req.body;
+                const { email, password, firstName, lastName, role, companyId } = req.body;
 
                 const result = auth.register(db, email, password, name, companyName);
 
@@ -528,9 +536,9 @@ const startServer = async () => {
         console.log('  ✓ Global error handler registered');
 
         // Clean up expired sessions every hour
-        setInterval(() => {
-            auth.cleanupExpiredSessions();
-        }, 60 * 60 * 1000);
+        // setInterval(() => {
+        //     auth.cleanupExpiredSessions();
+        // }, 60 * 60 * 1000);
 
         // Check subscription statuses every 6 hours
         setInterval(async () => {
@@ -546,7 +554,7 @@ const startServer = async () => {
         const server = createServer(app);
 
         // Setup WebSocket
-        setupWebSocket(server, db);
+        setupWebSocket(server, supabase);
 
         // Start listening
         server.listen(PORT, () => {

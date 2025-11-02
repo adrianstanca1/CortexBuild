@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Company } from '../../../types';
 import * as api from '../../../api';
+import type { CompanyPlan } from '../../../api/platformAdmin';
 
 interface CompaniesManagementProps {
     currentUser: User;
@@ -26,8 +27,13 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                 apiClient.getAllCompanies(currentUser),
                 apiClient.getAllCompanyPlans()
             ]);
-            setCompanies(companiesData);
-            setPlans(plansData);
+            // Ensure arrays are extracted from responses
+            const companiesArray: any[] = Array.isArray(companiesData) ? companiesData : 
+                (companiesData && typeof companiesData === 'object' && 'data' in companiesData && Array.isArray((companiesData as any).data)) ? (companiesData as any).data : [];
+            const plansArray: CompanyPlan[] = Array.isArray(plansData) ? plansData : 
+                (plansData && typeof plansData === 'object' && 'data' in plansData && Array.isArray((plansData as any).data)) ? (plansData as any).data : [];
+            setCompanies(companiesArray);
+            setPlans(plansArray);
         } catch (err: any) {
             console.error('Error loading data:', err);
             setError(err.message || 'Failed to load data');
@@ -62,6 +68,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
             <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                 <div className="text-red-800">{error}</div>
                 <button
+                    type="button"
                     onClick={loadData}
                     className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
                 >
@@ -149,7 +156,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                                         )}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {company.plan && company.plan.maxUsers > 0 && 
+                                        {company.plan && company.plan.maxUsers > 0 &&
                                             `${Math.round((company.userCount / company.plan.maxUsers) * 100)}% used`
                                         }
                                     </div>
@@ -164,7 +171,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                                         )}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {company.plan && company.plan.maxProjects > 0 && 
+                                        {company.plan && company.plan.maxProjects > 0 &&
                                             `${Math.round((company.projectCount / company.plan.maxProjects) * 100)}% used`
                                         }
                                     </div>
@@ -179,12 +186,16 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <button
+                                        type="button"
                                         onClick={() => setSelectedCompany(company.id)}
                                         className="text-blue-600 hover:text-blue-900 mr-4"
                                     >
                                         Change Plan
                                     </button>
-                                    <button className="text-gray-600 hover:text-gray-900">
+                                    <button
+                                        type="button"
+                                        className="text-gray-600 hover:text-gray-900"
+                                    >
                                         View Details
                                     </button>
                                 </td>
@@ -201,7 +212,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
                             Change Company Plan
                         </h3>
-                        
+
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Select New Plan
@@ -210,6 +221,8 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                                 value={newPlanId}
                                 onChange={(e) => setNewPlanId(e.target.value)}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                aria-label="Select new plan"
+                                title="Select new plan"
                             >
                                 <option value="">Select a plan...</option>
                                 {plans.map(plan => (
@@ -222,6 +235,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
 
                         <div className="flex justify-end space-x-3">
                             <button
+                                type="button"
                                 onClick={() => {
                                     setSelectedCompany(null);
                                     setNewPlanId('');
@@ -231,6 +245,7 @@ const CompaniesManagement: React.FC<CompaniesManagementProps> = ({ currentUser }
                                 Cancel
                             </button>
                             <button
+                                type="button"
                                 onClick={() => handlePlanUpdate(selectedCompany, newPlanId)}
                                 disabled={!newPlanId}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"

@@ -13,7 +13,9 @@ import * as authService from '../../auth/authService';
 import { RealtimeStats } from './RealtimeStats';
 import { RecentActivity } from './RecentActivity';
 import { NotificationCenter } from './NotificationCenter';
-import { DeveloperDashboard } from '../developer/DeveloperDashboard';
+import { DeveloperDashboard } from '../admin/DeveloperDashboard';
+import { PerformanceCharts } from './PerformanceCharts';
+import { LazyComponentWrapper } from '../layout/LazyComponentWrapper';
 
 interface DashboardStats {
   totalProjects: number;
@@ -60,7 +62,7 @@ export const EnhancedDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       // Load current user
-      const user = await authService.getCurrentUser();
+      const user = authService.getCurrentUser();
       setCurrentUser(user);
 
       // Set mock health status (API endpoint not implemented yet)
@@ -337,7 +339,9 @@ export const EnhancedDashboard: React.FC = () => {
       <RealtimeStats />
 
       {/* Performance Charts */}
-      <PerformanceCharts />
+      <LazyComponentWrapper isDarkMode={false} showSkeleton={true} skeletonHeight="h-96">
+        <PerformanceCharts />
+      </LazyComponentWrapper>
 
       {/* Two Column Layout for Activity and Notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test - CortexBuild</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        .warning { border-left: 4px solid #f59e0b; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 CortexBuild - Simple Test Page</h1>
+
+    <div class="test-card success">
+        <h2>✅ HTML Loaded</h2>
+        <p>This HTML page loaded successfully!</p>
+    </div>
+
+    <div class="test-card warning">
+        <h2>🧪 JavaScript Test</h2>
+        <button onclick="testJavaScript()">Click Me to Test JavaScript</button>
+        <div id="js-result"></div>
+    </div>
+
+    <div class="test-card warning">
+        <h2>🌐 Backend API Test</h2>
+        <button onclick="testBackend()">Test Backend Connection</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <div class="test-card warning">
+        <h2>🔐 Login Test</h2>
+        <button onclick="testLogin()">Test Login API</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="test-card warning">
+        <h2>📱 Main App Test</h2>
+        <p>Try opening the main app:</p>
+        <a href="/" style="color: #3b82f6; text-decoration: underline;">
+            <button>Open Main App (http://localhost:3000)</button>
+        </a>
+        <p style="margin-top: 10px; font-size: 14px; color: #666;">
+            If you see a blank page, check the browser console (F12) for errors.
+        </p>
+    </div>
+
+    <script>
+        console.log('✅ Simple test page loaded');
+
+        function testJavaScript() {
+            const result = document.getElementById('js-result');
+            result.innerHTML = '<div class="result">✅ JavaScript is working! Date: ' + new Date().toISOString() + '</div>';
+            console.log('✅ JavaScript test passed');
+        }
+
+        async function testBackend() {
+            const result = document.getElementById('backend-result');
+            result.innerHTML = '<div class="result">⏳ Testing backend...</div>';
+
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Backend response:', data);
+
+                result.innerHTML = `<div class="result">
+                    ✅ Backend is responding!<br>
+                    Status: ${response.status}<br>
+                    Response: ${JSON.stringify(data, null, 2)}
+                </div>`;
+            } catch (error) {
+                console.error('Backend error:', error);
+                result.innerHTML = `<div class="result">❌ Backend error: ${error.message}</div>`;
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            result.innerHTML = '<div class="result">⏳ Testing login...</div>';
+
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'adrian.stanca1@gmail.com',
+                        password: 'parola123'
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Login response:', data);
+
+                if (data.success) {
+                    result.innerHTML = `<div class="result">
+                        ✅ Login successful!<br>
+                        User: ${data.user.name}<br>
+                        Role: ${data.user.role}<br>
+                        Token: ${data.token.substring(0, 50)}...
+                    </div>`;
+                } else {
+                    result.innerHTML = `<div class="result">❌ Login failed: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                result.innerHTML = `<div class="result">❌ Login error: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, running auto-tests...');
+            testJavaScript();
+        });
+    </script>
+</body>
+</html>

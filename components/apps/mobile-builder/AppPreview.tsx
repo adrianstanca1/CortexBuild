@@ -8,8 +8,6 @@ import {
     Tablet,
     Monitor,
     RotateCw,
-    Download,
-    Share2,
     Play,
     Bug,
     CheckCircle,
@@ -242,4 +240,3 @@ const AppPreview: React.FC<AppPreviewProps> = ({ isDarkMode = true, appName, app
 };
 
 export default AppPreview;
-

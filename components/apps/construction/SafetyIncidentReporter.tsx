@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { AlertTriangle, Camera, MapPin, Clock, User, FileText, Send, TrendingDown, Shield } from 'lucide-react';
+import { AlertTriangle, Camera, MapPin, Clock, User, Send, TrendingDown, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface SafetyIncidentReporterProps {
@@ -269,4 +269,3 @@ const SafetyIncidentReporter: React.FC<SafetyIncidentReporterProps> = ({ isDarkM
 };
 
 export default SafetyIncidentReporter;
-

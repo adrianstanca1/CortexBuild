@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import {
     User, Project, Task, RFI, PunchListItem, Drawing, Document, SiteInstruction, DeliveryItem, DayworkSheet,
-    Comment, Notification, ActivityEvent, Company, AISuggestion, AIInsight, AIFeedback, DailyLog, LogItem, Attachment,
+    Comment, Notification, ActivityEvent, Company, AISuggestion, AIInsight, AIFeedback, DailyLog, Attachment,
     TimeEntry,
     PermissionAction,
     PermissionSubject,
@@ -20,14 +20,47 @@ import { APIError, withErrorHandling } from './utils/errorHandling';
 import { getMLPredictor } from './utils/mlPredictor';
 import { PredictionResult } from './utils/neuralNetwork';
 import * as authService from './auth/authService';
-import { supabase } from './supabaseClient';
+import { supabase } from './lib/supabase/client';
 
 // Simulate API latency
 const LATENCY = 200;
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize Google Generative AI only if API key is available
+let ai: any = null;
+const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (geminiApiKey) {
+  try {
+    ai = new GoogleGenAI({ apiKey: geminiApiKey });
+  } catch (error) {
+    console.warn('⚠️ Failed to initialize Google Generative AI:', error);
+  }
+} else {
+  console.warn('⚠️ VITE_GEMINI_API_KEY not configured - AI features will be limited');
+}
 const model = 'gemini-2.5-flash';
+
+// Generic API request helper
+const apiRequest = async <T = any>(endpoint: string, options?: RequestInit): Promise<T> => {
+    try {
+        const response = await fetch(`/api${endpoint}`, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options?.headers
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`API request to ${endpoint} failed:`, error);
+        throw error;
+    }
+};
 
 const checkPermissions = (user: User, action: PermissionAction, subject: PermissionSubject) => {
     if (!can(user.role, action, subject)) {
@@ -235,16 +268,54 @@ export const registerUser = async (details: { name: string, email: string, compa
 
 // --- User & Company ---
 export const fetchUsers = async (): Promise<User[]> => {
+    try {
+        const { ensureDatabaseConnected } = await import('./lib/database/adapter');
+        const adapter = await ensureDatabaseConnected();
+        const { data, error } = await adapter.select<User>('users', { is_active: true });
+        if (!error && data) {
+            return data as unknown as User[];
+        }
+    } catch (e) {
+        console.warn('Adapter not available for fetchUsers, falling back:', (e as any)?.message || e);
+    }
     await delay(LATENCY);
     return db.getUsers();
 };
 
 export const fetchUsersByCompany = async (companyId: string): Promise<User[]> => {
+    try {
+        const { ensureDatabaseConnected } = await import('./lib/database/adapter');
+        const adapter = await ensureDatabaseConnected();
+        const { data, error } = await adapter.select<User>('users', { company_id: companyId, is_active: true });
+        if (!error && data) {
+            return (data as any[]).map(u => ({
+                id: u.id,
+                email: u.email,
+                name: u.name,
+                role: u.role,
+                companyId: (u as any).company_id,
+                avatar: (u as any).avatar || null,
+            })) as unknown as User[];
+        }
+    } catch (e) {
+        console.warn('Adapter not available for fetchUsersByCompany, falling back:', (e as any)?.message || e);
+    }
     await delay(LATENCY);
     return db.getUsers().filter(u => u.companyId === companyId);
 };
 
 export const fetchCompanies = async (currentUser: User): Promise<Company[]> => {
+    try {
+        const { ensureDatabaseConnected } = await import('./lib/database/adapter');
+        const adapter = await ensureDatabaseConnected();
+        const filters = currentUser.role === 'super_admin' ? undefined : { id: currentUser.companyId } as any;
+        const { data, error } = await adapter.select<Company>('companies', filters);
+        if (!error && data) {
+            return data as unknown as Company[];
+        }
+    } catch (e) {
+        console.warn('Adapter not available for fetchCompanies, falling back:', (e as any)?.message || e);
+    }
     await delay(LATENCY);
     if (currentUser.role === 'super_admin') {
         return db.getCompanies();
@@ -262,6 +333,40 @@ export const fetchAllProjects = async (currentUser: User): Promise<Project[]> =>
             throw new APIError('User company ID is required', 'VALIDATION_ERROR');
         }
 
+        // Prefer unified adapter when configured
+        try {
+            const { ensureDatabaseConnected } = await import('./lib/database/adapter');
+            const adapter = await ensureDatabaseConnected();
+            const { data, error } = await adapter.listProjects(currentUser.companyId || '');
+            if (!error && data) {
+                return (data || []).map((p: any) => ({
+                    id: p.id,
+                    name: p.name,
+                    description: p.description || '',
+                    status: p.status,
+                    startDate: p.start_date,
+                    endDate: p.end_date,
+                    budget: p.budget,
+                    spent: p.spent || 0,
+                    location: p.location || '',
+                    companyId: p.company_id,
+                    projectManagerId: p.project_manager_id,
+                    createdAt: p.created_at,
+                    updatedAt: p.updated_at,
+                    image: '',
+                    contacts: [],
+                    snapshot: {
+                        openRFIs: 0,
+                        overdueTasks: 0,
+                        pendingTMTickets: 0,
+                        aiRiskLevel: 'low'
+                    }
+                }));
+            }
+        } catch (e) {
+            console.warn('Adapter path not available or failed, falling back to direct supabase/mock:', e?.message || e);
+        }
+
         if (supabase) {
             const { data: projects, error } = await supabase
                 .from('projects')
@@ -270,13 +375,11 @@ export const fetchAllProjects = async (currentUser: User): Promise<Project[]> =>
                     name,
                     description,
                     status,
-                    start_date,
-                    end_date,
-                    budget,
-                    spent,
                     location,
+                    image,
                     company_id,
-                    project_manager_id,
+                    contacts,
+                    snapshot,
                     created_at,
                     updated_at
                 `)
@@ -334,6 +437,45 @@ export const fetchAllProjects = async (currentUser: User): Promise<Project[]> =>
 
 export const fetchProjectById = async (id: string, currentUser?: User): Promise<Project | null> => {
     console.log('🏗️ Fetching project by ID:', id, 'for user:', currentUser?.email);
+
+    // Try adapter first
+    try {
+        const { ensureDatabaseConnected } = await import('./lib/database/adapter');
+        const adapter = await ensureDatabaseConnected();
+        const { data, error } = await adapter.findProjectById(id);
+        if (!error && data) {
+            const p: any = data;
+            if (currentUser && p.company_id && currentUser.role !== 'super_admin' && p.company_id !== currentUser.companyId) {
+                console.log('❌ Access denied to project (adapter)');
+                return null;
+            }
+            return {
+                id: p.id,
+                name: p.name,
+                description: p.description || '',
+                status: p.status,
+                startDate: p.start_date,
+                endDate: p.end_date,
+                budget: p.budget,
+                spent: p.spent || 0,
+                location: p.location || '',
+                companyId: p.company_id,
+                projectManagerId: p.project_manager_id,
+                createdAt: p.created_at,
+                updatedAt: p.updated_at,
+                image: '',
+                contacts: [],
+                snapshot: {
+                    openRFIs: 0,
+                    overdueTasks: 0,
+                    pendingTMTickets: 0,
+                    aiRiskLevel: 'low'
+                }
+            } as Project;
+        }
+    } catch (e) {
+        console.warn('Adapter not available for fetchProjectById, falling back:', (e as any)?.message || e);
+    }
 
     if (supabase && currentUser) {
         try {
@@ -415,15 +557,47 @@ export const fetchProjectById = async (id: string, currentUser?: User): Promise<
 export const fetchTasksForProject = async (projectId: string, currentUser: User): Promise<Task[]> => {
     console.log('📋 Fetching tasks for project:', projectId, 'user:', currentUser.email);
 
+    // Adapter first
+    try {
+        const { ensureDatabaseConnected } = await import('./lib/database/adapter');
+        const adapter = await ensureDatabaseConnected();
+
+        const project = await fetchProjectById(projectId, currentUser);
+        if (!project) {
+            console.log('❌ Access denied to project tasks');
+            return [];
+        }
+
+        const { data, error } = await adapter.select<any>('tasks', { project_id: projectId });
+        if (!error && data) {
+            return (data as any[]).map(t => ({
+                id: t.id,
+                title: t.title,
+                description: t.description || '',
+                status: t.status,
+                priority: t.priority,
+                assignee: t.assigned_to || '',
+                dueDate: t.due_date,
+                completedAt: t.completed_at,
+                createdBy: t.created_by,
+                projectId: t.project_id,
+                attachments: [],
+                comments: [],
+                history: [],
+                targetRoles: []
+            }));
+        }
+    } catch (e) {
+        console.warn('Adapter not available for fetchTasksForProject, falling back:', (e as any)?.message || e);
+    }
+
     if (supabase) {
         try {
-            // First verify the user has access to this project (multi-tenant check)
             const project = await fetchProjectById(projectId, currentUser);
             if (!project) {
                 console.log('❌ Access denied to project tasks');
                 return [];
             }
-
             const { data: tasks, error } = await supabase
                 .from('tasks')
                 .select(`
@@ -441,13 +615,7 @@ export const fetchTasksForProject = async (projectId: string, currentUser: User)
                     updated_at
                 `)
                 .eq('project_id', projectId);
-
-            if (error) {
-                console.error('❌ Error fetching tasks:', error);
-                throw error;
-            }
-
-            console.log('✅ Fetched tasks:', tasks?.length || 0);
+            if (error) throw error;
             return tasks?.map(t => ({
                 id: t.id,
                 title: t.title,
@@ -459,33 +627,59 @@ export const fetchTasksForProject = async (projectId: string, currentUser: User)
                 completedAt: t.completed_at,
                 createdBy: t.created_by,
                 projectId: t.project_id,
-                attachments: [], // Would need separate query for attachments
-                comments: [], // Would need separate query for comments
-                history: [], // Would need separate query for history
-                targetRoles: [] // Would need to add this field to schema if needed
+                attachments: [],
+                comments: [],
+                history: [],
+                targetRoles: []
             })) || [];
         } catch (error) {
             console.error('❌ Error in fetchTasksForProject:', error);
             return [];
         }
-    } else {
-        // Mock implementation with multi-tenant check
-        await delay(LATENCY);
-        checkPermissions(currentUser, 'read', 'task');
-
-        // Verify project access first
-        const project = db.findProject(projectId);
-        if (!project || (project.companyId !== currentUser.companyId && currentUser.role !== 'super_admin')) {
-            console.log('❌ Access denied to project tasks (mock)');
-            return [];
-        }
-
-        return db.getTasks().filter(t => t.projectId === projectId);
     }
+
+    // Mock
+    await delay(LATENCY);
+    checkPermissions(currentUser, 'read', 'task');
+    const project = db.findProject(projectId);
+    if (!project || (project.companyId !== currentUser.companyId && currentUser.role !== 'super_admin')) {
+        console.log('❌ Access denied to project tasks (mock)');
+        return [];
+    }
+    return db.getTasks().filter(t => t.projectId === projectId);
 };
 
 export const fetchTasksForUser = async (user: User): Promise<Task[]> => {
     console.log('📋 Fetching tasks for user:', user.email);
+
+    // Adapter first
+    try {
+        const { ensureDatabaseConnected } = await import('./lib/database/adapter');
+        const adapter = await ensureDatabaseConnected();
+        const { data, error } = await adapter.select<any>('tasks', { assigned_to: user.id });
+        if (!error && data) {
+            // Multi-tenant filter: ensure task's project belongs to user's company if project info is available
+            const tasks = data as any[];
+            return tasks.map(t => ({
+                id: t.id,
+                title: t.title,
+                description: t.description || '',
+                status: t.status,
+                priority: t.priority,
+                assignee: t.assigned_to || '',
+                dueDate: t.due_date,
+                completedAt: t.completed_at,
+                createdBy: t.created_by,
+                projectId: t.project_id,
+                attachments: [],
+                comments: [],
+                history: [],
+                targetRoles: []
+            }));
+        }
+    } catch (e) {
+        console.warn('Adapter not available for fetchTasksForUser, falling back:', (e as any)?.message || e);
+    }
 
     if (supabase) {
         try {
@@ -507,14 +701,8 @@ export const fetchTasksForUser = async (user: User): Promise<Task[]> => {
                     projects!inner(company_id)
                 `)
                 .eq('assigned_to', user.id)
-                .eq('projects.company_id', user.companyId); // Multi-tenant filter
-
-            if (error) {
-                console.error('❌ Error fetching user tasks:', error);
-                throw error;
-            }
-
-            console.log('✅ Fetched user tasks:', tasks?.length || 0);
+                .eq('projects.company_id', user.companyId);
+            if (error) throw error;
             return tasks?.map(t => ({
                 id: t.id,
                 title: t.title,
@@ -535,17 +723,15 @@ export const fetchTasksForUser = async (user: User): Promise<Task[]> => {
             console.error('❌ Error in fetchTasksForUser:', error);
             return [];
         }
-    } else {
-        // Mock implementation with multi-tenant filtering
-        await delay(LATENCY);
-        const userTasks = db.getTasks().filter(t => t.assignee === user.name || t.targetRoles?.includes(user.role));
-
-        // Filter by company access
-        return userTasks.filter(task => {
-            const project = db.findProject(task.projectId);
-            return project && (project.companyId === user.companyId || user.role === 'super_admin');
-        });
     }
+
+    // Mock
+    await delay(LATENCY);
+    const userTasks = db.getTasks().filter(t => t.assignee === user.name || t.targetRoles?.includes(user.role));
+    return userTasks.filter(task => {
+        const project = db.findProject(task.projectId);
+        return project && (project.companyId === user.companyId || user.role === 'super_admin');
+    });
 };
 
 export const fetchTaskById = async (id: string, currentUser?: User): Promise<Task | null> => {
@@ -702,7 +888,7 @@ export const updateTask = async (updatedTask: Task, user: User): Promise<Task> =
     await delay(LATENCY);
     checkPermissions(user, 'update', 'task');
     const { task: originalTask, index } = db.findTaskAndIndex(updatedTask.id);
-    
+
     if (index !== -1 && originalTask) {
         const taskWithHistory = { ...updatedTask };
         if (!taskWithHistory.history) {
@@ -752,7 +938,7 @@ export const updateTask = async (updatedTask: Task, user: User): Promise<Task> =
                 change: `Changed assignee from ${originalAssignee} to ${updatedAssignee}.`
             });
         }
-        
+
         db.updateTaskInDb(index, taskWithHistory);
         return taskWithHistory;
     }
@@ -769,7 +955,7 @@ export const addCommentToTask = async (taskId: string, text: string, attachments
         attachments
     };
     const task = db.addCommentToTaskInDb(taskId, newComment);
-    
+
     if (task) {
         const project = db.findProject(task.projectId);
         const activity: ActivityEvent = {
@@ -784,7 +970,7 @@ export const addCommentToTask = async (taskId: string, text: string, attachments
         };
         db.addActivityEvent(activity);
     }
-    
+
     return newComment;
 };
 
@@ -807,10 +993,10 @@ export const fetchRFIVersions = async (rfiNumber: string): Promise<RFI[]> => {
 export const createRFI = async (rfiData: Omit<RFI, 'id' | 'rfiNumber' | 'version' | 'comments'| 'answeredBy' | 'dueDateNotified' | 'response' | 'createdBy' | 'history' | 'responseAttachments'>, createdBy: User): Promise<RFI> => {
     await delay(LATENCY);
     checkPermissions(createdBy, 'create', 'rfi');
-    
+
     const projectRFIs = db.getRFIs().filter(r => r.projectId === rfiData.projectId);
     const nextRfiNum = `RFI-${String(projectRFIs.length + 1).padStart(3, '0')}`;
-    
+
     const newRFI: RFI = {
         id: `rfi-${Date.now()}`,
         rfiNumber: nextRfiNum,
@@ -1165,7 +1351,7 @@ export const fetchNotificationsForUser = async (currentUser: User): Promise<Noti
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
-export const markNotificationsAsRead = async (ids: string[], currentUser: User): Promise<void> => {
+export const markNotificationsAsRead = async (ids: string[], _currentUser: User): Promise<void> => {
     await delay(LATENCY / 2);
     // In a real app, you'd also check ownership here on the backend
     db.markNotificationsAsReadInDb(ids);
@@ -1181,7 +1367,7 @@ export const fetchRecentActivity = async (currentUser: User): Promise<ActivityEv
 
 export const checkAndCreateDueDateNotifications = async (currentUser: User): Promise<void> => {
     await delay(LATENCY);
-    const userTasks = db.getTasks().filter(t => 
+    const userTasks = db.getTasks().filter(t =>
         (t.assignee === currentUser.name || t.targetRoles?.includes(currentUser.role)) &&
         t.status !== 'Done' &&
         !t.dueDateNotified
@@ -1255,7 +1441,7 @@ export const getAISuggestedAction = async (user: User): Promise<AISuggestion | n
             }
         };
     }
-    
+
     const pendingRFIs = db.getRFIs().filter(rfi => rfi.createdBy === user.id && rfi.status === 'Open');
     if (pendingRFIs.length > 0) {
         const rfi = pendingRFIs[0];
@@ -1268,7 +1454,7 @@ export const getAISuggestedAction = async (user: User): Promise<AISuggestion | n
             }
         };
     }
-    
+
     return null;
 };
 
@@ -1283,7 +1469,7 @@ export const getAIInsightsForMyDay = async (tasks: Task[], project: Project, wea
             message: `You have ${overdue.length} overdue task(s). Prioritize "${overdue[0].title}" to avoid project delays.`
         });
     }
-    
+
     if (weather.condition.toLowerCase().includes('rain')) {
          insights.push({
             type: 'alert',
@@ -1299,7 +1485,7 @@ export const getAIInsightsForMyDay = async (tasks: Task[], project: Project, wea
             message: 'You have a busy day! Tackle your highest priority task first to build momentum.'
         });
     }
-    
+
     return insights;
 };
 
@@ -1329,7 +1515,7 @@ export const getAITaskSuggestions = async (description: string, allUsers: User[]
         - Inspection, safety, hazard: Suggest a 'Safety Officer'.
         - Coordination, schedule, meeting, report: Suggest a 'Project Manager'.
         - Installation, drywall, concrete, framing, site work: Suggest a 'Foreman'.
-        
+
         Keywords for photos:
         - install, inspect, repair, verify, existing condition, damage, complete
 
@@ -1350,8 +1536,14 @@ export const getAITaskSuggestions = async (description: string, allUsers: User[]
         If you cannot determine a value, use an empty array, empty string, or false.
         The suggestedAssigneeIds should be ordered from most to least likely.
     `;
-    
+
     try {
+        // Check if AI is initialized
+        if (!ai) {
+            console.warn("⚠️ Google Generative AI not configured - returning null");
+            return null;
+        }
+
         const response = await ai.models.generateContent({
             model: model,
             contents: prompt,
@@ -1580,7 +1772,7 @@ export const getAIRFISuggestions = async (subject: string, question: string, pos
     } else if (text.includes('hvac') || text.includes('plumbing') || text.includes('electrical')) {
         suggestedAssignee = 'MEP Consultant';
     }
-    
+
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 7);
 
@@ -1606,7 +1798,7 @@ export const analyzeDrawingAndGenerateTags = async (drawing: { title: string, nu
         Respond ONLY with a JSON array of strings, like this:
         ["Tag 1", "Tag 2", "Tag 3"]
     `;
-    
+
      try {
         const response = await ai.models.generateContent({
             model: model,
@@ -1619,7 +1811,7 @@ export const analyzeDrawingAndGenerateTags = async (drawing: { title: string, nu
                 }
             }
         });
-        
+
         const jsonStr = response.text.trim();
         const aiTags = JSON.parse(jsonStr);
 
@@ -1631,7 +1823,7 @@ export const analyzeDrawingAndGenerateTags = async (drawing: { title: string, nu
 
     } catch (e) {
         console.warn("Gemini API call for drawing analysis failed or returned empty. Using fallback tagging.", e);
-        
+
         // Robust Fallback Logic
         const tags = new Set<string>();
         const combinedText = `${drawing.title} ${drawing.number}`.toLowerCase();
@@ -2986,8 +3178,8 @@ export const getProjectPredictions = async (
 
         // Fetch related data
         const tasks = await fetchTasksForProject(projectId, currentUser);
-        const rfis = await fetchRFIsForProject(projectId, currentUser);
-        const punchItems = await fetchPunchListItemsForProject(projectId, currentUser);
+        const rfis = await fetchRFIsForProject(projectId);
+        const punchItems = await fetchPunchListItemsForProject(projectId);
 
         // Generate predictions using ML
         const predictor = getMLPredictor();
@@ -3018,8 +3210,8 @@ export const getAllProjectsPredictions = async (
         for (const project of projects.slice(0, 5)) { // Limit to 5 projects for performance
             try {
                 const tasks = await fetchTasksForProject(project.id, currentUser);
-                const rfis = await fetchRFIsForProject(project.id, currentUser);
-                const punchItems = await fetchPunchListItemsForProject(project.id, currentUser);
+                const rfis = await fetchRFIsForProject(project.id);
+                const punchItems = await fetchPunchListItemsForProject(project.id);
 
                 const predictor = getMLPredictor();
                 const prediction = await predictor.predictProjectOutcome(

@@ -1,16 +1,15 @@
-// CortexBuild Main App Component
-import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types';
-import * as api from './api';
+// CortexBuild Main App Component - Performance Optimized
+import React, { useState, useEffect, useCallback, Suspense, lazy, useMemo } from 'react';
+import { Screen, User, Project, NotificationLink, AISuggestion } from './types';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
-import Sidebar from './components/layout/Sidebar';
-import { MOCK_PROJECT } from './constants';
+import MainSidebar from './components/layout/MainSidebar';
 import AISuggestionModal from './components/modals/AISuggestionModal';
 import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
 import FloatingMenu from './components/layout/FloatingMenu';
 import ErrorBoundary from './components/ErrorBoundary';
 import ToastContainer from './components/ToastContainer';
+import { InfiniteLoopErrorBoundary } from './utils/reactDebugger';
 import { usePermissions } from './hooks/usePermissions';
 import * as authService from './auth/authService';
 import { useToast } from './hooks/useToast';
@@ -20,17 +19,58 @@ import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { supabase } from './supabaseClient';
 import LandingRouter from './components/landing/LandingRouter';
 
-// Lazily loaded screens and feature modules
+// Core screen imports - only the essential ones
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
+const DeveloperDashboardScreen = lazy(() => import('./components/screens/developer/DeveloperDashboardScreen'));
+const CompanyAdminDashboardV2 = lazy(() => import('./components/screens/company/CompanyAdminDashboardV2'));
+const SuperAdminDashboard = lazy(() => import('./components/screens/dashboards/SuperAdminDashboard'));
+const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
+
+// Advanced feature screens
+const AnalyticsScreen = lazy(() => import('./components/screens/AnalyticsScreen'));
+const ReportsScreen = lazy(() => import('./components/screens/ReportsScreen'));
+const TeamManagementScreen = lazy(() => import('./components/screens/TeamManagementScreen'));
+const NotificationsScreen = lazy(() => import('./components/screens/NotificationsScreen'));
+const ProjectPlanningScreen = lazy(() => import('./components/screens/ProjectPlanningScreen'));
+
+// Additional core screen imports
 const ProjectsListScreen = lazy(() => import('./components/screens/ProjectsListScreen'));
+const ProjectsManagement = lazy(() => import('./components/construction/ProjectsManagement'));
+const TasksManagement = lazy(() => import('./components/construction/TasksManagement'));
+const DailyLogsManagement = lazy(() => import('./components/construction/DailyLogsManagement'));
+const RFIManagement = lazy(() => import('./components/construction/RFIManagement'));
+const DocumentsManagement = lazy(() => import('./components/construction/DocumentsManagement'));
+const BillingPaymentsManagement = lazy(() => import('./components/admin/BillingPaymentsManagement'));
+const AnalyticsReports = lazy(() => import('./components/admin/AnalyticsReports'));
+const MarketplaceManagement = lazy(() => import('./components/marketplace/MarketplaceManagement'));
+const AppDiscovery = lazy(() => import('./components/marketplace/AppDiscovery'));
+const TeamManagement = lazy(() => import('./components/company/TeamManagement'));
+const ProjectDashboard = lazy(() => import('./components/company/ProjectDashboard'));
+const NotificationsCenter = lazy(() => import('./components/realtime/NotificationsCenter'));
 const ProjectHomeScreen = lazy(() => import('./components/screens/ProjectHomeScreen'));
-const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
 const TasksScreen = lazy(() => import('./components/screens/TasksScreen'));
+const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
+const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
+const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
+const MyDayScreen = lazy(() => import('./components/screens/MyDayScreen'));
+
+// Advanced AI & Quality screens
+const AIInsightsScreen = lazy(() => import('./components/screens/AIInsightsScreen'));
+const QualitySafetyScreen = lazy(() => import('./components/screens/QualitySafetyScreen'));
+const ProjectHealthDashboard = lazy(() => import('./components/screens/ProjectHealthDashboard'));
+
+// Business Intelligence & Automation screens
+const BusinessIntelligenceScreen = lazy(() => import('./components/screens/BusinessIntelligenceScreen'));
+
+// Advanced Enterprise screens
+const SystemAdminScreen = lazy(() => import('./components/screens/SystemAdminScreen'));
+const UnifiedAdminDashboard = lazy(() => import('./components/screens/admin/UnifiedAdminDashboard'));
+
+// Additional project screens
 const TaskDetailScreen = lazy(() => import('./components/screens/TaskDetailScreen'));
 const NewTaskScreen = lazy(() => import('./components/screens/NewTaskScreen'));
 const DailyLogScreen = lazy(() => import('./components/screens/DailyLogScreen'));
 const PhotoGalleryScreen = lazy(() => import('./components/screens/PhotoGalleryScreen'));
-const RFIsScreen = lazy(() => import('./components/screens/RFIsScreen'));
 const RFIDetailScreen = lazy(() => import('./components/screens/RFIDetailScreen'));
 const NewRFIScreen = lazy(() => import('./components/screens/NewRFIScreen'));
 const ProductionSDKDeveloperView = lazy(() =>
@@ -54,9 +94,11 @@ const PlansViewerScreen = lazy(() => import('./components/screens/PlansViewerScr
 const DayworkSheetsListScreen = lazy(() => import('./components/screens/DayworkSheetsListScreen'));
 const DayworkSheetDetailScreen = lazy(() => import('./components/screens/DayworkSheetDetailScreen'));
 const NewDayworkSheetScreen = lazy(() => import('./components/screens/NewDayworkSheetScreen'));
-const DocumentsScreen = lazy(() => import('./components/screens/DocumentsScreen'));
 const DeliveryScreen = lazy(() => import('./components/screens/DeliveryScreen'));
 const DrawingComparisonScreen = lazy(() => import('./components/screens/DrawingComparisonScreen'));
+const TMTicketScreen = lazy(() => import('./components/screens/TMTicketScreen'));
+
+// Module screens
 const AccountingScreen = lazy(() => import('./components/screens/modules/AccountingScreen'));
 const AIToolsScreen = lazy(() => import('./components/screens/modules/AIToolsScreen'));
 const DocumentManagementScreen = lazy(() => import('./components/screens/modules/DocumentManagementScreen'));
@@ -65,8 +107,26 @@ const ProjectOperationsScreen = lazy(() => import('./components/screens/modules/
 const FinancialManagementScreen = lazy(() => import('./components/screens/modules/FinancialManagementScreen'));
 const BusinessDevelopmentScreen = lazy(() => import('./components/screens/modules/BusinessDevelopmentScreen'));
 const AIAgentsMarketplaceScreen = lazy(() => import('./components/screens/modules/AIAgentsMarketplaceScreen'));
-const MyTasksScreen = lazy(() => import('./components/screens/MyTasksScreen'));
-const PlaceholderToolScreen = lazy(() => import('./components/screens/tools/PlaceholderToolScreen'));
+
+// Developer & SDK screens
+const ConstructionAutomationStudio = lazy(() => import('./components/screens/developer/ConstructionAutomationStudio'));
+const ProductionSDKDeveloperView = lazy(() => import('./components/sdk/ProductionSDKDeveloperView').then(module => ({
+  default: module.ProductionSDKDeveloperView
+})));
+const DeveloperWorkspaceScreen = lazy(() => import('./components/screens/developer/DeveloperWorkspaceScreen'));
+const EnhancedDeveloperConsole = lazy(() => import('./components/screens/developer/EnhancedDeveloperConsole'));
+
+// Company Admin Legacy & Additional Dashboards
+// const CompanyAdminDashboardLegacy = lazy(() => import('./components/screens/company/CompanyAdminDashboard'));
+
+// Admin Control Panel
+const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
+
+// Marketing & Landing Pages
+const MainLandingPage = lazy(() => import('./components/marketing/MainLandingPage'));
+const DeveloperLandingPage = lazy(() => import('./components/sdk/DeveloperLandingPage').then(module => ({ default: module.DeveloperLandingPage })));
+
+// Marketplace & App screens
 const GlobalMarketplace = lazy(() => import('./components/marketplace/GlobalMarketplace'));
 const MyApplicationsDesktop = lazy(() => import('./components/desktop/MyApplicationsDesktop'));
 const AdminReviewInterface = lazy(() => import('./components/marketplace/AdminReviewInterface'));
@@ -88,6 +148,14 @@ const ScreenLoader: React.FC = () => (
   </div>
 );
 
+// Comprehensive screen components mapping
+const SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
+  'global-dashboard': UnifiedDashboardScreen,
+  'company-admin-dashboard': CompanyAdminDashboardV2,
+  'developer-dashboard': DeveloperDashboardScreen,
+  'super-admin-dashboard': SuperAdminDashboard,
+  'platform-admin': UnifiedAdminDashboard,
+  'placeholder-tool': PlaceholderToolScreen,
 
 type NavigationItem = {
   screen: Screen;
@@ -154,6 +222,7 @@ const SCREEN_COMPONENTS: Record<Screen, React.ComponentType<any>> = {
   'placeholder-tool': PlaceholderToolScreen,
 };
 
+// CortexBuild 2.0 - Powered by Vite + React with HMR
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);

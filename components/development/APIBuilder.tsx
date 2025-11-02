@@ -12,17 +12,10 @@
 
 import React, { useState } from 'react';
 import {
-    Globe,
-    Key,
     Send,
     Plus,
     Trash2,
-    Copy,
-    Check,
-    AlertCircle,
-    Zap,
-    Database,
-    Lock
+    Copy
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -112,6 +105,7 @@ const APIBuilder: React.FC<APIBuilderProps> = ({ isDarkMode = true }) => {
             toast.dismiss();
             toast.success('Request successful!');
         } catch (error) {
+            console.error('Request failed:', error);
             toast.dismiss();
             toast.error('Request failed');
             setResponse({
@@ -393,4 +387,3 @@ const APIBuilder: React.FC<APIBuilderProps> = ({ isDarkMode = true }) => {
 };
 
 export default APIBuilder;
-

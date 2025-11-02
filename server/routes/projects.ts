@@ -1,9 +1,9 @@
 // CortexBuild Platform - Projects API Routes
-// Version: 1.0.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Project, ApiResponse, PaginatedResponse, ProjectFilters } from '../types';
 import { logProjectActivity } from '../utils/activity-logger';
 import { asyncHandler, ValidationError, NotFoundError, DatabaseError } from '../middleware/errorHandler';
@@ -17,7 +17,7 @@ import {
   idParamSchema
 } from '../utils/validation';
 
-export function createProjectsRouter(db: Database.Database): Router {
+export function createProjectsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/projects - List all projects with filters
@@ -230,7 +230,7 @@ export function createProjectsRouter(db: Database.Database): Router {
         client_id || null, project_manager_id || null
       );
 
-      const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       if (!project) {
         throw new DatabaseError('Failed to retrieve created project');

@@ -1,12 +1,12 @@
 
 
 import React, { useState, useEffect } from 'react';
-// Fix: Corrected import paths to include file extensions.
 import { Project, User } from '../../types';
 // Fix: Corrected import paths to include file extensions.
 // Fix: Corrected the import path for the 'api' module.
 import { apiClient } from '../../lib/api/client';
 import { XMarkIcon, MapPinIcon } from '../Icons';
+import { mockApi } from '../../api/mockApi';
 
 interface ProjectSelectorModalProps {
     onSelectProject: (projectId: string) => void;

@@ -26,7 +26,7 @@ const NewDayworkSheetScreen: React.FC<NewDayworkSheetScreenProps> = ({ project, 
             date,
             contractor,
             description,
-        }, currentUser);
+        });
 
         alert('Daywork sheet submitted!');
         goBack();

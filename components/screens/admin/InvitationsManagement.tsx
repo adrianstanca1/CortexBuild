@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
 import * as api from '../../../api';
+import type { PlatformInvitation } from '../../../api/platformAdmin';
 
 interface InvitationsManagementProps {
     currentUser: User;
@@ -106,7 +107,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({ currentUs
                             <input
                                 type="email"
                                 value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter email address"
                                 title="Email Address"
@@ -120,7 +121,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({ currentUs
                             <input
                                 type="text"
                                 value={formData.companyName}
-                                onChange={(e) => setFormData({...formData, companyName: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter company name"
                                 title="Company Name"
@@ -133,7 +134,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({ currentUs
                             </label>
                             <select
                                 value={formData.invitationType}
-                                onChange={(e) => setFormData({...formData, invitationType: e.target.value as any})}
+                                onChange={(e) => setFormData({ ...formData, invitationType: e.target.value as any })}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 title="Invitation Type"
                             >

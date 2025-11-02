@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Visibility</title>
+    <style>
+        .hidden {
+            display: none !important;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #marketing-site {
+            background: lightblue;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #app-container {
+            background: lightcoral;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Visibility Test</h1>
+    
+    <div id="marketing-site">
+        <h2>MARKETING SITE</h2>
+        <p>This should be VISIBLE on page load</p>
+        <button onclick="showApp()">Show App</button>
+    </div>
+    
+    <div id="app-container" class="hidden">
+        <h2>APP CONTAINER</h2>
+        <p>This should be HIDDEN on page load</p>
+        <div id="root">
+            <p>React would render here</p>
+        </div>
+    </div>
+    
+    <script>
+        function showApp() {
+            document.getElementById('marketing-site').style.display = 'none';
+            document.getElementById('app-container').classList.remove('hidden');
+        }
+        
+        // Log what's visible
+        window.addEventListener('load', () => {
+            const marketing = document.getElementById('marketing-site');
+            const app = document.getElementById('app-container');
+            
+            console.log('Marketing site display:', window.getComputedStyle(marketing).display);
+            console.log('App container display:', window.getComputedStyle(app).display);
+            console.log('App container has hidden class:', app.classList.contains('hidden'));
+        });
+    </script>
+</body>
+</html>
+

@@ -1,231 +1,469 @@
-import { PlatformDashboardData } from '../types/platformAdmin';
+// Platform Admin API
+export interface PlatformStats {
+  totalUsers: number;
+  totalCompanies: number;
+  totalProjects: number;
+  activeUsers: number;
+  systemHealth: 'healthy' | 'degraded' | 'down';
+  uptime: number;
+}
 
-const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+export interface SystemMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: number;
+  responseTime: number;
+  errorRate: number;
+}
 
-const getAuthToken = (): string =>
-    localStorage.getItem('constructai_token') ||
-    localStorage.getItem('token') ||
-    '';
+export interface UserActivity {
+  userId: string;
+  userName: string;
+  lastActive: string;
+  actionsToday: number;
+  currentSession: boolean;
+}
 
-const randomId = () => `id-${Math.random().toString(36).slice(2, 10)}`;
+// Import PlatformStats and PlatformMetrics from types
+import type { PlatformStats as PlatformStatsType, PlatformMetrics as PlatformMetricsType, CompanyDetails, AgentStats, ActivityItem, SystemHealth, RevenueBreakdown, ChartData } from '../types/platformAdmin';
 
-const buildPlatformDashboardData = (payload: any): PlatformDashboardData => {
-    const totals = payload?.totals ?? {};
-    const userStats = payload?.userStats ?? {};
-    const companyStats = payload?.companyStats ?? {};
-    const projectStats = payload?.projectStats ?? {};
-    const sdkStats = payload?.sdkStats ?? {};
-    const systemStats = payload?.systemStats ?? {};
-    const tenantUsage = Array.isArray(payload?.tenantUsage) ? payload.tenantUsage : [];
-    const recentActivity = Array.isArray(payload?.recentActivity) ? payload.recentActivity : [];
-
-    const totalCompanies = Number(totals.companies ?? companyStats.total ?? tenantUsage.length ?? 0);
-    const totalUsers = Number(totals.users ?? userStats.total ?? 0);
-    const totalProjects = Number(totals.projects ?? projectStats.total ?? 0);
-    const activeCompanies = Number(companyStats.active ?? Math.max(1, tenantUsage.length));
-    const monthlyCost = Number(sdkStats.costThisMonth ?? 0);
-
-    const freePlanCount = Math.max(0, Math.round(totalCompanies * 0.35));
-    const professionalPlanCount = Math.max(0, Math.round(totalCompanies * 0.4));
-    const enterprisePlanCount = Math.max(
-        0,
-        totalCompanies - freePlanCount - professionalPlanCount
-    );
-
-    const stats: PlatformDashboardData['stats'] = {
-        active_companies: activeCompanies,
-        total_companies: totalCompanies,
-        total_users: totalUsers,
-        total_projects: totalProjects,
-        total_tasks: Number(projectStats.total ?? 0) * 24,
-        active_subscriptions: Number(sdkStats.developers ?? tenantUsage.length ?? 0),
-        monthly_revenue: monthlyCost,
-    };
-
-    const metrics: PlatformDashboardData['metrics'] = {
-        new_companies_this_month: Number(companyStats.newThisMonth ?? 0),
-        new_users_this_month: Number(userStats.newThisWeek ?? 0),
-        new_projects_this_month: Number(projectStats.active ?? 0),
-        mrr: monthlyCost,
-        arr: monthlyCost * 12,
-        revenue_growth: Number(sdkStats.revenueGrowth ?? 12),
-        active_users_today: Number(userStats.active ?? 0),
-        active_users_this_week: Number(userStats.active ?? 0),
-        active_users_this_month: Number(userStats.total ?? 0),
-        free_plan_count: freePlanCount,
-        professional_plan_count: professionalPlanCount,
-        enterprise_plan_count: enterprisePlanCount,
-        most_popular_agent: sdkStats.topProviders?.[0]?.provider ?? 'Not available',
-        total_agent_subscriptions: Number(sdkStats.requestsThisMonth ?? 0),
-        agent_revenue: monthlyCost,
-    };
-
-    const companies: PlatformDashboardData['companies'] = tenantUsage.map((tenant: any) => {
-        const plan =
-            tenant.projects >= 6 ? 'enterprise'
-                : tenant.projects >= 3 ? 'professional'
-                    : 'free';
-
-        return {
-            id: String(tenant.companyId ?? tenant.company_id ?? randomId()),
-            name: tenant.companyName ?? 'Unknown Company',
-            plan,
-            user_count: Number(tenant.users ?? 0),
-            project_count: Number(tenant.projects ?? 0),
-            task_count: Number(tenant.projects ?? 0) * 12,
-            subscription_count: Number(tenant.users ?? 0),
-            monthly_spend: Number((tenant.apiCost ?? 0).toFixed(2)),
-        };
-    });
-
-    const agents: PlatformDashboardData['agents'] = (sdkStats.topProviders ?? []).map(
-        (provider: any, index: number) => ({
-            id: String(provider.provider ?? `provider-${index}`),
-            name: provider.provider ?? `Provider ${index + 1}`,
-            description: provider.provider ?? 'AI Provider',
-            category: 'integration',
-            status: 'active',
-            icon: '🤖',
-            subscription_count: Number(provider.requests ?? 0),
-            monthly_revenue: Number(provider.cost ?? 0),
-        })
-    );
-
-    const revenueBreakdown: PlatformDashboardData['revenueBreakdown'] = {
-        plan_revenue: {
-            free: Number((monthlyCost * 0.1).toFixed(2)),
-            professional: Number((monthlyCost * 0.45).toFixed(2)),
-            enterprise: Number((monthlyCost * 0.45).toFixed(2)),
-        },
-        agent_revenue: agents.reduce<Record<string, number>>((acc, agent) => {
-            acc[agent.id] = agent.monthly_revenue;
-            return acc;
-        }, {}),
-        total_revenue: monthlyCost,
-    };
-
-    const systemHealth: PlatformDashboardData['systemHealth'] = {
-        status: systemStats?.uptime && systemStats.uptime < 95 ? 'degraded' : 'healthy',
-        database: {
-            status: 'connected',
-            response_time_ms: Math.round(systemStats?.cpu ?? 42),
-        },
-        api: {
-            status: 'operational',
-            response_time_ms: Math.round(systemStats?.memory ?? 38),
-        },
-        storage: {
-            used_gb: Math.round(systemStats?.storage ?? 512),
-            total_gb: 1024,
-            percentage: Math.round((systemStats?.storage ?? 512) / 1024 * 100),
-        },
-        uptime_percentage: Number((systemStats?.uptime ?? 99.9).toFixed(2)),
-    };
-
-    const baseLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-
-    const companiesGrowthChart: PlatformDashboardData['companiesGrowthChart'] = {
-        labels: baseLabels,
-        datasets: [
-            {
-                label: 'Companies',
-                data: baseLabels.map((_, idx) =>
-                    Math.max(1, Math.round(totalCompanies * ((idx + 1) / baseLabels.length)))
-                ),
-                backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                borderColor: 'rgb(59, 130, 246)',
-            },
-        ],
-    };
-
-    const revenueGrowthChart: PlatformDashboardData['revenueGrowthChart'] = {
-        labels: baseLabels,
-        datasets: [
-            {
-                label: 'Revenue ($)',
-                data: baseLabels.map((_, idx) =>
-                    Math.round((monthlyCost || 1000) * (0.6 + idx * 0.15))
-                ),
-                backgroundColor: 'rgba(34, 197, 94, 0.5)',
-                borderColor: 'rgb(34, 197, 94)',
-            },
-        ],
-    };
-
-    const planDistributionChart: PlatformDashboardData['planDistributionChart'] = {
-        labels: ['Free', 'Professional', 'Enterprise'],
-        datasets: [
-            {
-                label: 'Companies',
-                data: [freePlanCount, professionalPlanCount, enterprisePlanCount],
-                backgroundColor: [
-                    'rgba(156, 163, 175, 0.5)',
-                    'rgba(59, 130, 246, 0.5)',
-                    'rgba(139, 92, 246, 0.5)',
-                ],
-                borderColor: ['rgb(156, 163, 175)', 'rgb(59, 130, 246)', 'rgb(139, 92, 246)'],
-            },
-        ],
-    };
-
-    const agentPopularityChart: PlatformDashboardData['agentPopularityChart'] = {
-        labels: agents.map((agent) => agent.name),
-        datasets: [
-            {
-                label: 'Subscriptions',
-                data: agents.map((agent) => agent.subscription_count),
-                backgroundColor: 'rgba(168, 85, 247, 0.5)',
-                borderColor: 'rgb(168, 85, 247)',
-            },
-        ],
-    };
-
-    return {
-        stats,
-        metrics,
-        companies,
-        agents,
-        recentActivity: recentActivity.map((item: any) => ({
-            id: String(item.id ?? randomId()),
-            type: (item.action ?? 'company_created') as 'company_created',
-            title: item.action ?? 'System Event',
-            description: item.description ?? 'No additional details',
-            company_id: item.companyId ?? item.company_id,
-            company_name: item.companyName ?? item.company_name,
-            user_id: item.userId ?? item.user_id,
-            user_name: item.userName ?? item.user_name,
-            timestamp: item.createdAt ?? item.created_at ?? new Date().toISOString(),
-            icon: '🛰️',
-            color: '#6366F1',
-        })),
-        revenueBreakdown,
-        systemHealth,
-        companiesGrowthChart,
-        revenueGrowthChart,
-        planDistributionChart,
-        agentPopularityChart,
-    };
+// Mock platform admin functions
+export const getPlatformStats = async (): Promise<PlatformStatsType> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  return {
+    active_companies: 89,
+    total_companies: 89,
+    total_users: 1247,
+    total_projects: 456,
+    total_tasks: 2340,
+    active_subscriptions: 89,
+    monthly_revenue: 125000
+  };
 };
 
-export const getPlatformDashboardData = async (): Promise<PlatformDashboardData> => {
-    const token = getAuthToken();
+export const getPlatformMetrics = async (): Promise<PlatformMetricsType> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return {
+    new_companies_this_month: 5,
+    new_users_this_month: 87,
+    new_projects_this_month: 23,
+    mrr: 125000,
+    arr: 1500000,
+    revenue_growth: 12.5,
+    active_users_today: 234,
+    active_users_this_week: 567,
+    active_users_this_month: 890,
+    free_plan_count: 25,
+    professional_plan_count: 45,
+    enterprise_plan_count: 19,
+    most_popular_agent: 'safety-inspector',
+    total_agent_subscriptions: 156,
+    agent_revenue: 45000
+  };
+};
 
-    const response = await fetch(`${API_BASE}/admin/dashboard`, {
-        headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-    });
+// Keep SystemMetrics for backward compatibility (might be used elsewhere)
+export const getSystemMetrics = async (): Promise<SystemMetrics> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return {
+    cpu: Math.random() * 80 + 10,
+    memory: Math.random() * 70 + 20,
+    disk: Math.random() * 60 + 30,
+    network: Math.random() * 50 + 10,
+    responseTime: Math.random() * 100 + 50,
+    errorRate: Math.random() * 2
+  };
+};
 
-    if (!response.ok) {
-        throw new Error(`Failed to load platform dashboard (${response.status})`);
+export const getUserActivity = async (): Promise<UserActivity[]> => {
+  await new Promise(resolve => setTimeout(resolve, 400));
+
+  return [
+    {
+      userId: 'user-1',
+      userName: 'John Manager',
+      lastActive: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+      actionsToday: 45,
+      currentSession: true
+    },
+    {
+      userId: 'user-2',
+      userName: 'Adrian ASC',
+      lastActive: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      actionsToday: 32,
+      currentSession: true
+    },
+    {
+      userId: 'user-3',
+      userName: 'Sarah Supervisor',
+      lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      actionsToday: 28,
+      currentSession: false
     }
+  ];
+};
 
-    const body = await response.json();
+// AIAgent API functions
+import type { AIAgent } from '../types';
 
-    if (body?.error) {
-        throw new Error(body.error);
+export const getAIAgents = async (): Promise<AIAgent[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+export const fetchAvailableAIAgents = async (): Promise<AIAgent[]> => {
+  return getAIAgents();
+};
+
+export const createAIAgent = async (formData: Partial<AIAgent>): Promise<AIAgent> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // TODO: Implement actual API call
+  return {
+    id: `agent-${Date.now()}`,
+    name: formData.name || '',
+    description: formData.description || '',
+    category: formData.category || 'safety',
+    priceMonthly: formData.priceMonthly || 0,
+    priceYearly: formData.priceYearly || 0,
+    features: formData.features || [],
+    capabilities: formData.capabilities || [],
+    iconUrl: formData.iconUrl,
+    bannerUrl: formData.bannerUrl,
+    isActive: formData.isActive ?? true,
+    isFeatured: formData.isFeatured ?? false,
+    minPlan: formData.minPlan || 'basic'
+  };
+};
+
+export const updateAIAgent = async (agentId: string, formData: Partial<AIAgent>): Promise<AIAgent> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // TODO: Implement actual API call
+  return {
+    id: agentId,
+    name: formData.name || '',
+    description: formData.description || '',
+    category: formData.category || 'safety',
+    priceMonthly: formData.priceMonthly || 0,
+    priceYearly: formData.priceYearly || 0,
+    features: formData.features || [],
+    capabilities: formData.capabilities || [],
+    iconUrl: formData.iconUrl,
+    bannerUrl: formData.bannerUrl,
+    isActive: formData.isActive ?? true,
+    isFeatured: formData.isFeatured ?? false,
+    minPlan: formData.minPlan || 'basic'
+  };
+};
+
+export const toggleAIAgentStatus = async (agentId: string, isActive: boolean): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  console.info('Mock toggleAIAgentStatus', { agentId, isActive });
+};
+
+export const deleteAIAgent = async (agentId: string): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  console.info('Mock deleteAIAgent', { agentId });
+};
+
+// Audit Log API functions
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  userId: string;
+  userName: string;
+  timestamp: string;
+  createdAt?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  oldValues?: Record<string, any>;
+  newValues?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export const getPlatformAuditLogs = async (offset: number = 0, limit: number = 50): Promise<AuditLogEntry[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  console.info('Mock getPlatformAuditLogs', { offset, limit });
+  return [];
+};
+
+// Company Management API functions
+export interface CompanyPlan {
+  id: string;
+  name: string;
+  description: string;
+  priceMonthly: number;
+  priceYearly: number;
+  features: string[];
+  limits?: {
+    users: number;
+    projects: number;
+    storage: number;
+  };
+  maxUsers?: number;
+  maxProjects?: number;
+  aiAgentsIncluded?: string[];
+  aiAgentsLimit?: number;
+  storageGb?: number;
+  sortOrder?: number;
+  isActive: boolean;
+  isFeatured?: boolean;
+}
+
+export const getAllCompanies = async (): Promise<any[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+export const getAllCompanyPlans = async (): Promise<CompanyPlan[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+export const updateCompanyPlan = async (companyId: string, planId: string): Promise<boolean> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // TODO: Implement actual API call
+  console.info('Mock updateCompanyPlan', { companyId, planId });
+  return true;
+};
+
+export const toggleCompanyPlanStatus = async (planId: string, isActive: boolean): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  console.info('Mock toggleCompanyPlanStatus', { planId, isActive });
+};
+
+// Platform Invitations API functions
+export interface PlatformInvitation {
+  id: string;
+  email: string;
+  companyName?: string;
+  invitationType: 'company_admin' | 'super_admin' | 'platform_partner';
+  status: 'pending' | 'accepted' | 'expired';
+  sentAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  createdAt?: string;
+}
+
+export const getPlatformInvitations = async (): Promise<PlatformInvitation[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [];
+};
+
+export const sendPlatformInvitation = async (email: string, invitationType: 'company_admin' | 'super_admin' | 'platform_partner', companyName?: string): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // TODO: Implement actual API call
+  console.info('Mock sendPlatformInvitation', { email, invitationType, companyName });
+};
+
+// Helper functions for dashboard data
+export const getCompanies = async (): Promise<CompanyDetails[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [
+    {
+      id: 'company-1',
+      name: 'BuildCo Inc',
+      plan: 'enterprise',
+      user_count: 45,
+      project_count: 12,
+      task_count: 234,
+      subscription_count: 3,
+      monthly_spend: 1500,
+      status: 'active',
+      created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+    } as CompanyDetails
+  ];
+};
+
+export const getAgents = async (): Promise<AgentStats[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  // TODO: Implement actual API call
+  return [
+    {
+      id: 'agent-safety-inspector',
+      name: 'Safety Inspector',
+      description: 'Automated safety compliance checking',
+      category: 'safety',
+      status: 'active',
+      icon: '🦺',
+      subscription_count: 45,
+      monthly_revenue: 2250
+    },
+    {
+      id: 'agent-quality-assurance',
+      name: 'Quality Assurance',
+      description: 'Quality control and inspection automation',
+      category: 'quality',
+      status: 'active',
+      icon: '✅',
+      subscription_count: 32,
+      monthly_revenue: 1600
     }
+  ];
+};
 
-    return buildPlatformDashboardData(body?.data);
+export const getSystemHealth = async (): Promise<SystemHealth> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  return {
+    status: 'healthy',
+    database: {
+      status: 'connected',
+      response_time_ms: 25
+    },
+    api: {
+      status: 'operational',
+      response_time_ms: 150
+    },
+    storage: {
+      used_gb: 245,
+      total_gb: 500,
+      percentage: 49
+    },
+    uptime_percentage: 99.8
+  };
+};
+
+export const getRevenueBreakdown = async (): Promise<RevenueBreakdown> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  return {
+    plan_revenue: {
+      free: 0,
+      professional: 67500,
+      enterprise: 57000
+    },
+    agent_revenue: {
+      'safety-inspector': 22500,
+      'quality-assurance': 16000,
+      'project-manager': 6500
+    },
+    total_revenue: 125000
+  };
+};
+
+export const getRecentActivity = async (): Promise<ActivityItem[]> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  return [
+    {
+      id: 'activity-1',
+      type: 'user_registered',
+      title: 'New User Registered',
+      description: 'John Smith registered to BuildCo Inc',
+      user_id: 'user-123',
+      user_name: 'John Smith',
+      company_id: 'company-1',
+      company_name: 'BuildCo Inc',
+      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      icon: '👤',
+      color: 'text-blue-500'
+    },
+    {
+      id: 'activity-2',
+      type: 'company_created',
+      title: 'New Company Created',
+      description: 'New company "TechBuild Ltd" was created',
+      company_id: 'company-2',
+      company_name: 'TechBuild Ltd',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      icon: '🏢',
+      color: 'text-purple-500'
+    },
+    {
+      id: 'activity-3',
+      type: 'subscription_created',
+      title: 'Subscription Created',
+      description: 'Safety Inspector subscription activated for BuildCo Inc',
+      company_id: 'company-1',
+      company_name: 'BuildCo Inc',
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      icon: '💰',
+      color: 'text-green-500'
+    }
+  ];
+};
+
+export const getChartData = async (): Promise<{
+  companiesGrowthChart: ChartData;
+  revenueGrowthChart: ChartData;
+  planDistributionChart: ChartData;
+  agentPopularityChart: ChartData;
+}> => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  // Generate chart data for the last 12 months
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  return {
+    companiesGrowthChart: {
+      labels: months,
+      datasets: [{
+        label: 'Companies',
+        data: [65, 70, 75, 80, 82, 85, 87, 88, 89, 89, 89, 89]
+      }]
+    },
+    revenueGrowthChart: {
+      labels: months,
+      datasets: [{
+        label: 'Revenue ($)',
+        data: [95000, 100000, 105000, 110000, 115000, 118000, 120000, 122000, 123000, 124000, 125000, 125000]
+      }]
+    },
+    planDistributionChart: {
+      labels: ['Free', 'Professional', 'Enterprise'],
+      datasets: [{
+        label: 'Companies',
+        data: [25, 45, 19]
+      }]
+    },
+    agentPopularityChart: {
+      labels: ['Safety Inspector', 'Quality Assurance', 'Project Manager', 'Cost Tracker'],
+      datasets: [{
+        label: 'Subscriptions',
+        data: [45, 32, 28, 15]
+      }]
+    }
+  };
+};
+
+export const getPlatformDashboardData = async (): Promise<import('../types/platformAdmin').PlatformDashboardData> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const [stats, metrics, companies, agents, recentActivity, systemHealth, revenueBreakdown, chartData] = await Promise.all([
+    getPlatformStats(),
+    getPlatformMetrics(),
+    getCompanies(),
+    getAgents(),
+    getRecentActivity(),
+    getSystemHealth(),
+    getRevenueBreakdown(),
+    getChartData()
+  ]);
+
+  return {
+    stats,
+    metrics,
+    companies,
+    agents,
+    recentActivity,
+    systemHealth,
+    revenueBreakdown,
+    ...chartData
+  };
 };

@@ -1,364 +1,197 @@
-# 🚀 ConstructAI - Deployment Instructions
+# 🚀 Deployment Instructions for CortexBuild
 
-## 📋 Prerequisites
+## Current Status
 
-- Node.js 18+ installed
-- npm or yarn package manager
-- Supabase account (for OAuth and database)
-- Vercel account (for deployment)
+We've completed the following:
 
-## 🔧 Local Development Setup
+1. ✅ **Database Schema Created** - `supabase/migrations/marketplace_apps_schema.sql`
+2. ✅ **Service Layer Built** - `lib/services/marketplaceAppsService.ts`
+3. ✅ **TodoListApp Updated** - Connected to Supabase with persistence
+4. ✅ **Supabase Client Configured** - Real client with proper API keys
 
-### 1. Install Dependencies
+## Next Steps to Deploy
 
-```bash
-npm install
-```
+### Step 1: Run Database Migration
 
-### 2. Environment Variables
+You need to manually run the SQL migration in Supabase Dashboard:
 
-Create a `.env` file in the root directory:
+1. Go to https://supabase.com/dashboard/project/qglvhxkgbzujglehewsa
+2. Click on "SQL Editor" in the left sidebar
+3. Click "New Query"
+4. Copy the entire contents of `supabase/migrations/marketplace_apps_schema.sql`
+5. Paste into the SQL editor
+6. Click "Run" to execute
 
-```env
-# Supabase Configuration
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+This will create:
+- 7 database tables for marketplace apps
+- Row Level Security (RLS) policies
+- Indexes for performance
+- Triggers for automatic timestamps
 
-# Google Gemini AI (optional)
-GEMINI_API_KEY=your_gemini_api_key
-```
+### Step 2: Update AppContainer to Pass User Context
 
-### 3. Run Development Server
+The `AppContainer` component needs to pass the `currentUser` prop to apps. 
 
-```bash
-npm run dev
-```
+**File to modify**: `components/apps/AppContainer.tsx`
 
-Application will be available at: `http://localhost:5173`
-
-## 🌐 Production Deployment
-
-### Option 1: Vercel (Recommended)
-
-#### Step 1: Install Vercel CLI
-
-```bash
-npm install -g vercel
-```
-
-#### Step 2: Login to Vercel
-
-```bash
-vercel login
-```
-
-#### Step 3: Deploy
-
-```bash
-vercel --prod
-```
-
-#### Step 4: Configure Environment Variables
-
-In Vercel Dashboard:
-1. Go to Project Settings
-2. Navigate to Environment Variables
-3. Add:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-   - `GEMINI_API_KEY` (optional)
-
-### Option 2: Manual Build
-
-#### Step 1: Build for Production
-
-```bash
-npm run build
-```
-
-#### Step 2: Preview Build
-
-```bash
-npm run preview
-```
-
-#### Step 3: Deploy `dist` folder
-
-Upload the `dist` folder to your hosting provider.
-
-## 🔐 OAuth Configuration
-
-### Google OAuth Setup
-
-#### 1. Google Cloud Console
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project or select existing
-3. Navigate to "APIs & Services" → "Credentials"
-4. Click "Create Credentials" → "OAuth 2.0 Client ID"
-5. Configure OAuth consent screen:
-   - Application name: ConstructAI
-   - User support email: your-email@example.com
-   - Developer contact: your-email@example.com
-6. Create OAuth Client ID:
-   - Application type: Web application
-   - Name: ConstructAI Web Client
-   - Authorized redirect URIs:
-     - `https://your-project.supabase.co/auth/v1/callback`
-     - `http://localhost:5173/auth/callback` (for development)
-
-#### 2. Supabase Configuration
-
-1. Go to [Supabase Dashboard](https://app.supabase.com)
-2. Select your project
-3. Navigate to Authentication → Providers
-4. Enable Google provider
-5. Add Google Client ID and Client Secret
-6. Save configuration
-
-### GitHub OAuth Setup
-
-#### 1. GitHub Developer Settings
-
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
-2. Click "New OAuth App"
-3. Fill in details:
-   - Application name: ConstructAI
-   - Homepage URL: `https://your-domain.com`
-   - Authorization callback URL: `https://your-project.supabase.co/auth/v1/callback`
-4. Click "Register application"
-5. Generate a new client secret
-
-#### 2. Supabase Configuration
-
-1. Go to Supabase Dashboard
-2. Navigate to Authentication → Providers
-3. Enable GitHub provider
-4. Add GitHub Client ID and Client Secret
-5. Save configuration
-
-## 🗄️ Database Setup
-
-### Supabase Tables
-
-The application requires the following tables:
-
-1. **profiles** - User profiles
-2. **companies** - Company information
-3. **projects** - Project data
-4. **tasks** - Task management
-5. **rfis** - RFI tracking
-6. **punch_list_items** - Punch list items
-7. **ai_agents** - AI agents marketplace
-8. **company_subscriptions** - Company AI subscriptions
-
-### Run Migrations
-
-```sql
--- See MULTI_TENANT_IMPLEMENTATION.md for complete SQL schema
-```
-
-## 🧪 Testing
-
-### Run Tests
-
-```bash
-npm run test
-```
-
-### Test ML Features
-
-1. Login to the application
-2. Navigate to ML Analytics
-3. Verify predictions are generated
-4. Check confidence scores
-5. Test different projects
-
-### Test OAuth
-
-1. Click "Sign in with Google"
-2. Verify redirect to Google
-3. Authorize application
-4. Verify redirect back to app
-5. Check user profile creation
-
-Repeat for GitHub OAuth.
-
-## 📊 Monitoring
-
-### Vercel Analytics
-
-Enable Vercel Analytics in project settings:
-1. Go to Vercel Dashboard
-2. Select project
-3. Navigate to Analytics
-4. Enable Web Analytics
-
-### Supabase Monitoring
-
-Monitor database and auth:
-1. Go to Supabase Dashboard
-2. Check Database → Logs
-3. Check Authentication → Users
-4. Monitor API usage
-
-## 🔒 Security Checklist
-
-- [ ] Environment variables configured
-- [ ] OAuth redirect URIs whitelisted
-- [ ] Supabase RLS policies enabled
-- [ ] API keys secured
-- [ ] HTTPS enabled in production
-- [ ] CORS configured properly
-- [ ] Rate limiting enabled
-- [ ] Error logging configured
-
-## 🚀 Performance Optimization
-
-### 1. Code Splitting
-
-Already configured in Vite:
+Change line 93 from:
 ```typescript
-// Automatic code splitting for routes
-const LazyComponent = lazy(() => import('./Component'));
+<AppComponent isDarkMode={isDarkMode} />
 ```
 
-### 2. Image Optimization
-
-Use optimized images:
-- WebP format
-- Lazy loading
-- Responsive images
-
-### 3. Caching
-
-Configure caching headers:
-```
-Cache-Control: public, max-age=31536000, immutable
+To:
+```typescript
+<AppComponent isDarkMode={isDarkMode} currentUser={currentUser} />
 ```
 
-### 4. CDN
-
-Vercel automatically provides CDN for static assets.
-
-## 📱 Mobile Optimization
-
-The application is responsive and works on:
-- Desktop (1920x1080+)
-- Tablet (768x1024)
-- Mobile (375x667+)
-
-## 🔄 CI/CD Pipeline
-
-### GitHub Actions (Optional)
-
-Create `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy to Vercel
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-      - run: npm install
-      - run: npm run build
-      - uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
+And add `currentUser` to the props:
+```typescript
+interface AppContainerProps {
+    app: MiniApp;
+    onClose: () => void;
+    isDarkMode?: boolean;
+    currentUser?: any;  // ADD THIS
+}
 ```
 
-## 🐛 Troubleshooting
+### Step 3: Deploy to Vercel
 
-### Issue: OAuth not working
+Run the deployment command:
 
-**Solution**:
-1. Check redirect URIs in OAuth provider
-2. Verify Supabase configuration
-3. Check browser console for errors
-4. Ensure HTTPS in production
+```bash
+npm run vercel:deploy
+```
 
-### Issue: ML predictions not loading
+### Step 4: Test TodoListApp
 
-**Solution**:
+1. Open the deployed preview URL
+2. Log in with test account:
+   - Email: `super@admin.com`
+   - Password: `admin123`
+3. Open "My Applications" desktop
+4. Launch "Todo List" app
+5. Add a few todos
+6. Refresh the page
+7. Verify todos persist!
+
+## What's Working
+
+- ✅ TodoListApp with full Supabase persistence
+- ✅ Loading states and error handling
+- ✅ User-specific data isolation
+- ✅ Real-time data sync
+
+## What's Next
+
+After successful deployment and testing:
+
+1. Update remaining 5 apps with Supabase:
+   - ExpenseTrackerApp
+   - PomodoroTimerApp
+   - NotesApp
+   - HabitTrackerApp
+   - MobileAppBuilder
+
+2. Build Daily Site Inspector app
+
+3. Enhance Git Integration
+
+## Troubleshooting
+
+### If todos don't persist:
+
 1. Check browser console for errors
-2. Verify project data is complete
-3. Check API endpoints
-4. Verify neural network initialization
+2. Verify Supabase tables were created (check Supabase Dashboard > Table Editor)
+3. Verify RLS policies are enabled
+4. Check that `currentUser` prop is being passed to TodoListApp
 
-### Issue: Database connection errors
+### If you get authentication errors:
 
-**Solution**:
-1. Check Supabase URL and key
-2. Verify environment variables
-3. Check RLS policies
-4. Review database logs
+1. Verify `.env` file has correct `VITE_SUPABASE_ANON_KEY`
+2. Check that Supabase client is initialized properly in `lib/supabase/client.ts`
+3. Verify user is logged in before opening TodoListApp
 
-## 📞 Support
+## Database Schema Overview
 
-For issues or questions:
-- Check documentation files
-- Review error logs
-- Contact support team
+```
+app_todos
+├── id (TEXT, PK)
+├── user_id (TEXT, FK → users.id)
+├── text (TEXT)
+├── completed (BOOLEAN)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
 
-## 🎉 Launch Checklist
+app_transactions
+├── id (TEXT, PK)
+├── user_id (TEXT, FK → users.id)
+├── description (TEXT)
+├── amount (DECIMAL)
+├── type (TEXT: 'income' | 'expense')
+├── category (TEXT)
+├── date (TIMESTAMP)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
 
-Before going live:
+app_pomodoro_sessions
+├── id (TEXT, PK)
+├── user_id (TEXT, FK → users.id)
+├── duration_minutes (INTEGER)
+├── type (TEXT: 'work' | 'break')
+├── completed (BOOLEAN)
+├── started_at (TIMESTAMP)
+├── completed_at (TIMESTAMP)
+└── created_at (TIMESTAMP)
 
-- [ ] All environment variables set
-- [ ] OAuth providers configured
-- [ ] Database migrations run
-- [ ] Tests passing
-- [ ] Performance optimized
-- [ ] Security reviewed
-- [ ] Monitoring enabled
-- [ ] Backup strategy in place
-- [ ] Documentation updated
-- [ ] Team trained
+app_notes
+├── id (TEXT, PK)
+├── user_id (TEXT, FK → users.id)
+├── title (TEXT)
+├── content (TEXT)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
 
-## 🚀 Post-Deployment
+app_habits
+├── id (TEXT, PK)
+├── user_id (TEXT, FK → users.id)
+├── name (TEXT)
+├── icon (TEXT)
+├── color (TEXT)
+├── streak (INTEGER)
+├── total_completed (INTEGER)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
 
-After deployment:
+app_habit_completions
+├── id (TEXT, PK)
+├── habit_id (TEXT, FK → app_habits.id)
+├── user_id (TEXT, FK → users.id)
+├── completed_date (DATE)
+└── created_at (TIMESTAMP)
 
-1. **Verify Functionality**
-   - Test login (traditional + OAuth)
-   - Test ML predictions
-   - Test all major features
+app_builder_projects
+├── id (TEXT, PK)
+├── user_id (TEXT, FK → users.id)
+├── name (TEXT)
+├── description (TEXT)
+├── icon (TEXT)
+├── database_type (TEXT)
+├── database_config (JSONB)
+├── screens (JSONB)
+├── logic (TEXT)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
+```
 
-2. **Monitor Performance**
-   - Check response times
-   - Monitor error rates
-   - Review analytics
+## Security
 
-3. **User Feedback**
-   - Collect user feedback
-   - Track usage patterns
-   - Identify improvements
-
-4. **Continuous Improvement**
-   - Regular updates
-   - Security patches
-   - Feature enhancements
+All tables have Row Level Security (RLS) enabled with policies that ensure:
+- Users can only see their own data
+- Users can only modify their own data
+- No cross-user data leakage
 
 ---
 
-**🎊 Congratulations! ConstructAI is now live!**
-
-**Built with ❤️ using:**
-- React + TypeScript
-- Vite
-- Supabase
-- Custom Neural Network
-- OAuth 2.0
-- Tailwind CSS
+**Last Updated**: 2025-10-21
+**Status**: Ready for deployment and testing
 

@@ -9,6 +9,7 @@ import {
     Download, Users, Building2, RefreshCw, Package
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAPIUrl } from '../../config/api.config';
 
 interface MyApp {
     id: string;
@@ -58,7 +59,7 @@ const DeveloperSubmissionInterface: React.FC<DeveloperSubmissionInterfaceProps> 
                 return;
             }
 
-            const response = await fetch('http://localhost:3001/api/global-marketplace/my-apps', {
+            const response = await fetch(getAPIUrl('/global-marketplace/my-apps'), {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -85,7 +86,7 @@ const DeveloperSubmissionInterface: React.FC<DeveloperSubmissionInterfaceProps> 
             setSubmitting(true);
             const token = localStorage.getItem('token');
 
-            const response = await fetch(`http://localhost:3001/api/global-marketplace/submit-for-review/${appId}`, {
+            const response = await fetch(getAPIUrl(`/global-marketplace/submit-for-review/${appId}`), {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
