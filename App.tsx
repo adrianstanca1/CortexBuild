@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, Suspense, lazy, useMemo } from
 import { Screen, User, Project, NotificationLink, AISuggestion } from './types';
 import AuthScreen from './components/screens/AuthScreen';
 import AppLayout from './components/layout/AppLayout';
-import MainSidebar from './components/layout/MainSidebar';
+import Sidebar from './components/layout/Sidebar';
 import AISuggestionModal from './components/modals/AISuggestionModal';
 import ProjectSelectorModal from './components/modals/ProjectSelectorModal';
 import FloatingMenu from './components/layout/FloatingMenu';
@@ -18,6 +18,8 @@ import { logger } from './utils/logger';
 import { ChatbotWidget } from './components/chat/ChatbotWidget';
 import { supabase } from './supabaseClient';
 import LandingRouter from './components/landing/LandingRouter';
+import * as api from './api';
+import { MOCK_PROJECT } from './constants';
 
 // Core screen imports - only the essential ones
 const UnifiedDashboardScreen = lazy(() => import('./components/screens/UnifiedDashboardScreen'));
@@ -134,6 +136,7 @@ const PlatformAdminScreen = lazy(() => import('./components/screens/admin/Platfo
 const SuperAdminDashboardScreen = lazy(() => import('./components/screens/admin/SuperAdminDashboardScreen'));
 const SuperAdminDashboardV2 = lazy(() => import('./components/admin/SuperAdminDashboardV2'));
 const AdvancedMLDashboard = lazy(() => import('./components/screens/dashboards/AdvancedMLDashboard'));
+const AdminControlPanel = lazy(() => import('./components/admin/AdminControlPanel'));
 
 const ScreenLoader: React.FC = () => (
   <div className="py-16 text-center text-slate-500">
