@@ -8,7 +8,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { LayoutDashboard, RefreshCw, AlertTriangle, Home, TrendingUp, Users, FolderKanban } from 'lucide-react';
-import { ErrorLogger } from '../../utils/errorHandler';
+import { logger } from '../../../utils/logger';
 
 interface DashboardErrorBoundaryProps {
     children: ReactNode;
@@ -41,7 +41,8 @@ export class DashboardErrorBoundary extends Component<DashboardErrorBoundaryProp
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-        ErrorLogger.log(error, {
+        logger.error('Dashboard error caught:', {
+            error: error.message,
             component: this.props.componentName || 'DashboardErrorBoundary',
             componentStack: errorInfo.componentStack,
             type: 'dashboard_error',
@@ -186,7 +187,7 @@ export class DashboardErrorBoundary extends Component<DashboardErrorBoundaryProp
                         {/* Help Text */}
                         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
                             <p className="text-sm text-blue-700 dark:text-blue-300">
-                                💡 <strong>What happened?</strong> The dashboard encountered an unexpected error.
+                                ?? <strong>What happened?</strong> The dashboard encountered an unexpected error.
                                 This is usually temporary. Try refreshing the page or clicking "Try Again".
                                 If the problem persists, please contact support.
                             </p>

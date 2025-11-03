@@ -11,6 +11,7 @@ export { default as ChartErrorBoundary } from './ChartErrorBoundary';
 export { default as FormErrorBoundary } from './FormErrorBoundary';
 export { default as NavigationErrorBoundary } from './NavigationErrorBoundary';
 
-// Re-export main error boundary from parent
-export { default as ErrorBoundary, LightErrorBoundary } from '../ErrorBoundary';
+// Re-export main error boundary from parent (if exists)
+// Note: Using components/ErrorBoundary.tsx instead of src/components/ErrorBoundary.tsx
+// export { default as ErrorBoundary, LightErrorBoundary } from '../ErrorBoundary';
 
