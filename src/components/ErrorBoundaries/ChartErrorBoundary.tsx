@@ -8,7 +8,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { BarChart3, RefreshCw, AlertTriangle, Download, Table } from 'lucide-react';
-import { ErrorLogger } from '../../utils/errorHandler';
+import { logger } from '../../../utils/logger';
 
 interface ChartErrorBoundaryProps {
     children: ReactNode;
@@ -37,7 +37,8 @@ export class ChartErrorBoundary extends Component<ChartErrorBoundaryProps, Chart
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-        ErrorLogger.log(error, {
+        logger.error('Chart error caught:', {
+            error: error.message,
             component: this.props.componentName || 'ChartErrorBoundary',
             componentStack: errorInfo.componentStack,
             type: 'chart_error',
@@ -178,7 +179,7 @@ export class ChartErrorBoundary extends Component<ChartErrorBoundaryProps, Chart
                     {/* Help Text */}
                     <div className="mt-4 p-3 bg-purple-100 dark:bg-purple-800/50 border border-purple-200 dark:border-purple-700 rounded">
                         <p className="text-xs text-purple-700 dark:text-purple-300">
-                            💡 <strong>Tip:</strong> The chart visualization failed, but your data is safe.
+                            ?? <strong>Tip:</strong> The chart visualization failed, but your data is safe.
                             You can view it in table format above or download it as CSV.
                         </p>
                     </div>

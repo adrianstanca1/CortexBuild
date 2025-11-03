@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { User, Project } from '../../../types';
 import toast from 'react-hot-toast';
-import { DashboardErrorBoundary } from '../../../src/components/ErrorBoundaries';
+import { DashboardErrorBoundary } from '../../ErrorBoundaries/DashboardErrorBoundary';
 
 interface CompanyAdminDashboardV2Props {
     currentUser: User;

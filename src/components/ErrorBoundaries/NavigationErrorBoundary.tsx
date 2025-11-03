@@ -8,7 +8,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Home, LogOut, RefreshCw, AlertTriangle, Menu } from 'lucide-react';
-import { ErrorLogger } from '../../utils/errorHandler';
+import { logger } from '../../../utils/logger';
 
 interface NavigationErrorBoundaryProps {
     children: ReactNode;
@@ -37,7 +37,8 @@ export class NavigationErrorBoundary extends Component<NavigationErrorBoundaryPr
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-        ErrorLogger.log(error, {
+        logger.error('Navigation error caught:', {
+            error: error.message,
             component: this.props.componentName || 'NavigationErrorBoundary',
             componentStack: errorInfo.componentStack,
             type: 'navigation_error',

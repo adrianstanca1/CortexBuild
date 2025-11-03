@@ -8,7 +8,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { FileText, RefreshCw, AlertTriangle, Save, Copy, Check } from 'lucide-react';
-import { ErrorLogger } from '../../utils/errorHandler';
+import { logger } from '../../../utils/logger';
 
 interface FormErrorBoundaryProps {
     children: ReactNode;
@@ -41,7 +41,8 @@ export class FormErrorBoundary extends Component<FormErrorBoundaryProps, FormErr
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-        ErrorLogger.log(error, {
+        logger.error('Form error caught:', {
+            error: error.message,
             component: this.props.componentName || 'FormErrorBoundary',
             componentStack: errorInfo.componentStack,
             type: 'form_error',

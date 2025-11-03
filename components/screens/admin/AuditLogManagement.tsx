@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
-import apiClient from '../../../src/services/apiClient';
+import apiClient from '../../../lib/api-client';
 
 interface AuditLogManagementProps {
     currentUser: User;

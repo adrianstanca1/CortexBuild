@@ -17,7 +17,7 @@ import {
     Sparkles, Cpu, ChevronRight, LayoutDashboard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { DashboardErrorBoundary } from '../../src/components/ErrorBoundaries';
+import { DashboardErrorBoundary } from '../ErrorBoundaries/DashboardErrorBoundary';
 import './SuperAdminDashboardV2.css';
 
 interface SuperAdminDashboardV2Props {
@@ -168,7 +168,7 @@ const SuperAdminDashboardV2: React.FC<SuperAdminDashboardV2Props> = React.memo((
                             </button>
                             <button
                                 type="button"
-                                onClick={() => toast('Downloading report...', { icon: '📥' })}
+                                onClick={() => toast('Downloading report...', { icon: '??' })}
                                 className="px-6 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium flex items-center space-x-2"
                                 title="Export dashboard report"
                                 aria-label="Export dashboard report"
