@@ -3,7 +3,7 @@
 
 const express = require('express');
 const path = require('path');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+// const { createProxyMiddleware } = require('http-proxy-middleware'); // Reserved for future use
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -91,7 +91,7 @@ app.use((req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error('Server error:', err);
   res.status(500).json({
     error: 'Internal server error',

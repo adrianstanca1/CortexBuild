@@ -1,7 +1,6 @@
 // Secure API Server for CortexBuild Development
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const helmet = require('helmet');
 const { AuthMiddleware, authHelpers } = require('./middleware/auth.cjs');
 
@@ -159,7 +158,7 @@ const mockResponses = [
 ];
 
 // Generate AI response based on user input
-function generateAIResponse(userMessage, conversationHistory) {
+function generateAIResponse(userMessage) {
   const lowerMessage = userMessage.toLowerCase();
 
   // Context-aware responses based on keywords

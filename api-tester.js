@@ -5,8 +5,8 @@
  * Interactive command-line tool for testing APIs with style!
  */
 
-const https = require('https');
 const http = require('http');
+const { URL } = require('url');
 const readline = require('readline');
 
 // Fun colors and emojis
@@ -286,7 +286,8 @@ class FunAPITester {
                 await this.makeRequest('/api/admin/users', {
                     headers: { 'Authorization': `Bearer ${this.token}` }
                 });
-            } catch (error) {
+            } catch (err) {
+                console.error('Error:', err);
                 this.log('Admin endpoints require admin role', 'yellow', emojis.warning);
             }
         }

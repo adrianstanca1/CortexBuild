@@ -31,7 +31,8 @@ class AuthMiddleware {
   verifyToken(token) {
     try {
       return jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+    } catch (err) {
+      console.error('Token verification error:', err);
       throw new Error('Invalid or expired token');
     }
   }
@@ -252,8 +253,8 @@ const authHelpers = {
   },
 
   // Validate password (simplified for demo)
-  validatePassword(password, hashedPassword) {
-    // In production, use bcrypt or similar
+  validatePassword(password) {
+    // In production, use bcrypt or similar with hashedPassword
     return password === 'demo-password' || password === 'user-password';
   },
 

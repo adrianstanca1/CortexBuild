@@ -182,7 +182,8 @@ app.post('/api/chat/message', auth.authenticate(), auth.requireUser(), (req, res
     };
 
     res.json(response);
-  } catch (error) {
+  } catch (err) {
+    console.error('Error in handler:', err);
     res.status(500).json({
       success: false,
       error: 'Internal server error'
@@ -362,7 +363,7 @@ app.get('/api/admin/users', auth.authenticate(), auth.requireAdmin(), (req, res)
 });
 
 // Error handling middleware
-app.use((error, req, res, next) => {
+app.use((error, req, res) => {
   console.error('Server error:', error);
 
   // Handle JSON parsing errors
@@ -381,13 +382,13 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Simple API Server running on http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🔐 Login: POST http://localhost:${PORT}/api/auth/login`);
+  console.log(`?? Simple API Server running on http://localhost:${PORT}`);
+  console.log(`?? Health check: http://localhost:${PORT}/api/health`);
+  console.log(`?? Login: POST http://localhost:${PORT}/api/auth/login`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n🛑 Shutting down server...');
+  console.log('\n?? Shutting down server...');
   process.exit(0);
 });
