@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { User, Screen } from '../../../types';
 import toast from 'react-hot-toast';
-import DashboardErrorBoundary from '../../ErrorBoundaries/DashboardErrorBoundary';
+import { DashboardErrorBoundary } from '../../ErrorBoundaries/DashboardErrorBoundary';
 
 // Lazy load CodexAgent to prevent blocking the main app
 const CodexAgent = lazy(() => import('../../CodexAgent').then(module => ({

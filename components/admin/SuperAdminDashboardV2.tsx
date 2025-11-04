@@ -17,7 +17,7 @@ import {
     Sparkles, Cpu, ChevronRight, LayoutDashboard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import DashboardErrorBoundary from '../ErrorBoundaries/DashboardErrorBoundary';
+import { DashboardErrorBoundary } from '../ErrorBoundaries/DashboardErrorBoundary';
 import './SuperAdminDashboardV2.css';
 
 interface SuperAdminDashboardV2Props {
