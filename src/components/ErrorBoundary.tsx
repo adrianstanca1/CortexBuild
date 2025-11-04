@@ -9,11 +9,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
-import { ErrorLogger, AppError } from '../utils/errorHandler';
-import { advancedErrorLogger } from '../utils/advancedErrorLogger';
-import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
-import { sessionTracker } from '../utils/sessionTracker';
-import { performanceMonitor } from '../utils/performanceMonitor';
+import { logger } from '../../utils/logger';
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -54,34 +50,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-        // Track error in session
-        sessionTracker.trackError();
-
-        // Log with advanced error logger
-        const errorId = advancedErrorLogger.logError(
-            error,
-            {
-                appState: {
-                    route: window.location.pathname,
-                    component: this.props.componentName || 'ErrorBoundary',
-                    props: undefined,
-                    state: undefined
-                },
-                custom: {
-                    componentStack: errorInfo.componentStack,
-                    errorCount: this.state.errorCount + 1
-                }
-            },
-            ErrorSeverity.HIGH,
-            ErrorCategory.UI
-        );
-
-        // Also log with legacy logger for backward compatibility
-        ErrorLogger.log(error, {
+        // Log error
+        const errorId = `error-${Date.now()}`;
+        logger.error('Error boundary caught:', {
+            error: error.message,
             component: this.props.componentName || 'ErrorBoundary',
             componentStack: errorInfo.componentStack,
             errorCount: this.state.errorCount + 1,
-            errorId
+            errorId,
+            route: window.location.pathname
         });
 
         // Update state with error details
@@ -232,7 +209,7 @@ const DefaultErrorFallback: React.FC<DefaultErrorFallbackProps> = ({
                 {errorCount > 1 && (
                     <div className="mb-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                         <p className="text-sm text-yellow-800 dark:text-yellow-300 text-center">
-                            ⚠️ This error has occurred {errorCount} times. Consider reloading the page.
+                            ?? This error has occurred {errorCount} times. Consider reloading the page.
                         </p>
                     </div>
                 )}
@@ -286,7 +263,7 @@ export const LightErrorBoundary: React.FC<{
                 fallback || (
                     <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                         <p className="text-red-800 dark:text-red-300 text-sm">
-                            ⚠️ This component encountered an error. Please try refreshing the page.
+                            ?? This component encountered an error. Please try refreshing the page.
                         </p>
                     </div>
                 )

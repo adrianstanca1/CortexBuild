@@ -4,7 +4,7 @@ import { Project, User, LogItem } from '../../types';
 // Fix: Added .tsx extension to import
 import { ChevronLeftIcon, SunIcon, UsersIcon, CameraIcon, PlusIcon, TrashIcon, ClipboardDocumentListIcon } from '../Icons';
 // Fix: Added .ts extension to import
-import apiClient from '../../src/services/apiClient';
+import apiClient from '../../lib/api-client';
 
 
 interface DailyLogScreenProps {
