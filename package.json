@@ -77,6 +77,9 @@
     "ws": "8.18.3"
   },
   "devDependencies": {
+    "@babel/core": "7.28.5",
+    "@babel/preset-env": "7.28.5",
+    "@babel/preset-typescript": "7.28.5",
     "@eslint/js": "9.37.0",
     "@playwright/test": "1.56.1",
     "@tailwindcss/postcss": "4.1.14",
@@ -91,6 +94,8 @@
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "10.4.21",
     "babel-jest": "30.2.0",
+    "babel-preset-env": "1.7.0",
+    "babel-preset-typescript": "7.0.0-alpha.19",
     "concurrently": "9.2.1",
     "eslint": "9.37.0",
     "eslint-plugin-react": "7.37.5",

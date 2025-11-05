@@ -19,7 +19,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/tasks - List all tasks
-  router.get('/', validateQuery(taskFiltersSchema), (req: Request, res: Response) => {
+  router.get('/', validateQuery(taskFiltersSchema), async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -103,7 +103,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // GET /api/tasks/:id - Get single task
-  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
