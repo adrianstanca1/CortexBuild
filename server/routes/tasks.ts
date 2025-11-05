@@ -148,7 +148,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // POST /api/tasks - Create new task
-  router.post('/', validateBody(createTaskSchema), (req: Request, res: Response) => {
+  router.post('/', validateBody(createTaskSchema), async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -206,7 +206,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // PUT /api/tasks/:id - Update task
-  router.put('/:id', validateParams(idParamSchema), validateBody(updateTaskSchema), (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateTaskSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -244,7 +244,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // PUT /api/tasks/:id/complete - Mark task as complete
-  router.put('/:id/complete', validateParams(idParamSchema), (req: Request, res: Response) => {
+  router.put('/:id/complete', validateParams(idParamSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -305,7 +305,7 @@ export function createTasksRouter(supabase: SupabaseClient): Router {
   });
 
   // DELETE /api/tasks/:id - Delete task
-  router.delete('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
+  router.delete('/:id', validateParams(idParamSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 

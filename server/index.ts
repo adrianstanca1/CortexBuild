@@ -283,7 +283,7 @@ const startServer = async () => {
 
         app.post('/api/auth/register', authRateLimit, validateBody(registerSchema), (req, res) => {
             try {
-                const { email, password, firstName, lastName, role, companyId } = req.body;
+                const { email, password, name, companyName } = req.body;
 
                 const result = auth.register(db, email, password, name, companyName);
 

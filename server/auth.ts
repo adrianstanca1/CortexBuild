@@ -184,45 +184,37 @@ export const register = (
 
   const companyRecord = db
     .prepare('SELECT id FROM companies WHERE LOWER(name) = LOWER(?)')
-    .get(companyName) as { id: number } | undefined;
+    .get(companyName) as { id: string } | undefined;
 
-  let companyId: number;
+  let companyId: string;
   if (companyRecord) {
     companyId = companyRecord.id;
   } else {
-    const insertCompany = db
-      .prepare(
-        'INSERT INTO companies (name, created_at, updated_at) VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
-      )
-      .run(companyName);
-    companyId = Number(insertCompany.lastInsertRowid);
+    const newCompanyId = uuidv4();
+    db.prepare(
+      'INSERT INTO companies (id, name, created_at, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
+    ).run(newCompanyId, companyName);
+    companyId = newCompanyId;
   }
 
   const trimmedName = name.trim();
-  const [firstName, ...rest] = trimmedName.split(' ');
-  const lastName = rest.length > 0 ? rest.join(' ') : firstName;
 
   const { hasPasswordHash } = getUserTableInfo(db);
   const passwordColumn = hasPasswordHash ? 'password_hash' : 'password';
 
-  const insertUser = db
-    .prepare(
-      `INSERT INTO users (
-        email,
-        ${passwordColumn},
-        first_name,
-        last_name,
-        role,
-        company_id,
-        is_active,
-        email_verified,
-        created_at,
-        updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-    )
-    .run(email, passwordHash, firstName, lastName, 'user', companyId);
-
-  const userId = Number(insertUser.lastInsertRowid);
+  const userId = uuidv4();
+  db.prepare(
+    `INSERT INTO users (
+      id,
+      email,
+      ${passwordColumn},
+      name,
+      role,
+      company_id,
+      created_at,
+      updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+  ).run(userId, email, passwordHash, trimmedName, 'company_admin', companyId);
   ensureSessionsTable(db);
 
   const token = jwt.sign(

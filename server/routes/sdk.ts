@@ -449,46 +449,59 @@ export const createSDKRouter = (supabase: SupabaseClient) => {
   });
 
 // Get or create SDK profile (available to all authenticated users)
-router.get('/profile', authenticateToken, requireAuth, (req: Request, res: Response) => {
+router.get('/profile', authenticateToken, requireAuth, async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const db = (req as any).db;
 
-      const limits: Record<string, number> = {
-        free: 100,
-        starter: 1000,
-        pro: 10000,
-        enterprise: 100000
-      };
+    const { data: profile, error } = await supabase
+      .from('sdk_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
 
-      const limit = limits[tier] || 100;
+    if (error && error.code !== 'PGRST116') throw error;
 
-      const { data: profile, error } = await supabase
+    if (!profile) {
+      // Create new profile
+      const { data: newProfile, error: createError } = await supabase
         .from('sdk_profiles')
-        .update({
-          subscription_tier: tier,
-          api_requests_limit: limit
+        .insert({
+          user_id: user.id,
+          developer_name: user.name,
+          subscription_tier: 'free',
+          api_requests_limit: 100
         })
-        .eq('user_id', user.id)
         .select()
         .single();
 
-      if (error) throw error;
+      if (createError) throw createError;
 
-      res.json({
+      return res.json({
         success: true,
         profile: {
-          ...profile,
-          apiRequestsUsed: profile.api_requests_used || 0,
-          apiRequestsLimit: profile.api_requests_limit || 100,
-          subscriptionTier: profile.subscription_tier || 'free'
+          ...newProfile,
+          apiRequestsUsed: newProfile.api_requests_used || 0,
+          apiRequestsLimit: newProfile.api_requests_limit || 100,
+          subscriptionTier: newProfile.subscription_tier || 'free'
         }
       });
-    } catch (error: any) {
-      console.error('Update subscription error:', error);
-      res.status(500).json({ error: 'Failed to update subscription' });
     }
-  });
+
+    res.json({
+      success: true,
+      profile: {
+        ...profile,
+        apiRequestsUsed: profile.api_requests_used || 0,
+        apiRequestsLimit: profile.api_requests_limit || 100,
+        subscriptionTier: profile.subscription_tier || 'free'
+      }
+    });
+  } catch (error: any) {
+    console.error('Get SDK profile error:', error);
+    res.status(500).json({ error: 'Failed to get SDK profile' });
+  }
+});
 
   // Save API key
   router.post('/profile/api-key', async (req: Request, res: Response) => {

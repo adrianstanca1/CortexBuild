@@ -209,7 +209,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   });
 
   // DELETE /api/clients/:id - Delete client
-  router.delete('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
+  router.delete('/:id', validateParams(idParamSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
