@@ -19,7 +19,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/clients - List all clients
-  router.get('/', validateQuery(clientFiltersSchema), (req: Request, res: Response) => {
+  router.get('/', validateQuery(clientFiltersSchema), async (req: Request, res: Response) => {
     try {
       const {
         search,
@@ -73,7 +73,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   });
 
   // GET /api/clients/:id - Get single client
-  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -170,7 +170,7 @@ export function createClientsRouter(supabase: SupabaseClient): Router {
   });
 
   // PUT /api/clients/:id - Update client
-  router.put('/:id', validateParams(idParamSchema), validateBody(updateClientSchema), (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateClientSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
