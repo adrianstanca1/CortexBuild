@@ -170,7 +170,7 @@ process.on('SIGINT', () => {
 async function startServer() {
   try {
     // Initialize database
-    await initializeDatabase();
+    await initDatabase();
     
     server.listen(PORT, () => {
       console.log(`🚀 CortexBuild Production Server`);
