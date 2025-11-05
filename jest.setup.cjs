@@ -1,54 +1,51 @@
-require('@testing-library/jest-dom');
+// Jest setup file for CortexBuild tests
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+// Mock environment variables
+process.env.NODE_ENV = 'test';
+process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+process.env.VITE_SUPABASE_ANON_KEY = 'test-anon-key';
+process.env.VITE_API_URL = 'http://localhost:3001/api';
 
-// Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() { }
-  disconnect() { }
-  observe() { }
-  takeRecords() {
-    return [];
+// Mock window object for browser APIs
+global.window = {
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  dispatchEvent: jest.fn(),
+  localStorage: {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn()
   }
-  unobserve() { }
 };
 
-// Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  constructor() { }
-  disconnect() { }
-  observe() { }
-  unobserve() { }
+// Mock navigator
+global.navigator = {
+  onLine: true
 };
 
-// Suppress console errors in tests (optional)
-const originalError = console.error;
-beforeAll(() => {
-  console.error = (...args) => {
-    if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render')
-    ) {
-      return;
-    }
-    originalError.call(console, ...args);
-  };
+// Mock console methods to reduce noise during tests
+const originalConsole = global.console;
+global.console = {
+  ...originalConsole,
+  log: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  info: jest.fn()
+};
+
+// Clean up after each test
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
-afterAll(() => {
-  console.error = originalError;
-});
-
+// Global test utilities
+global.testUtils = {
+  waitFor: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
+  createMockResponse: (data, status = 200) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => data
+  })
+};
