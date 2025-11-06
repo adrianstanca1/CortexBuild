@@ -1,11 +1,12 @@
 /**
  * Comprehensive useAPI Hook Tests
  * Tests API calls, caching, error handling, retry logic, and React integration
+ * @jest-environment jsdom
  */
 
-import { renderHook, act } from '@testing-library/react';
-import { useAPI, useGET, usePOST, usePUT, useDELETE, clearCache, getCacheStats } from '../useAPI';
+import { act, renderHook } from '@testing-library/react';
 import apiClient from '../../services/apiClient';
+import { clearCache, getCacheStats, useAPI, useDELETE, useGET, usePOST, usePUT } from '../useAPI';
 
 // Mock API client
 jest.mock('../../services/apiClient', () => ({
