@@ -6,9 +6,12 @@ module.exports = {
     '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/src/__mocks__/fileMock.js'
   },
   transform: {
-    '^.+\\.(ts|tsx)$': 'babel-jest',
-    '^.+\\.(js|jsx)$': 'babel-jest'
+    '^.+\\.(ts|tsx)$': ['babel-jest', { rootMode: 'upward' }],
+    '^.+\\.(js|jsx)$': ['babel-jest', { rootMode: 'upward' }]
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@supabase|@firebase|firebase|react-hot-toast)/)'
+  ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.(ts|tsx|js)',
@@ -24,9 +27,5 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   testTimeout: 10000,
   // Add globals for Node.js compatibility
-  setupFiles: ['<rootDir>/jest.polyfills.js'],
-  // Transform ignore patterns for Vite-specific modules
-  transformIgnorePatterns: [
-    'node_modules/(?!(@supabase|@firebase|firebase|react-hot-toast)/)'
-  ]
+  setupFiles: ['<rootDir>/jest.polyfills.js']
 };

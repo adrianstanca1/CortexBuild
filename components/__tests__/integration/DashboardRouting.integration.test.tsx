@@ -16,7 +16,7 @@ jest.mock('../../screens/developer/DeveloperWorkspaceScreen', () => {
   };
 });
 
-jest.mock('../../screens/company/CompanyAdminDashboardScreen', () => {
+jest.mock('../../screens/company/CompanyAdminDashboardV2', () => {
   return function MockCompanyAdminDashboardScreen() {
     return <div data-testid="company-admin-dashboard-screen">Company Admin Dashboard Screen</div>;
   };
@@ -201,4 +201,3 @@ describe('Dashboard Routing Integration Tests', () => {
     });
   });
 });
-

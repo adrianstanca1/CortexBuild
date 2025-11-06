@@ -6,6 +6,20 @@ process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'test-anon-key';
 process.env.VITE_API_URL = 'http://localhost:3001/api';
 
+// Mock import.meta for Vite
+global.import = global.import || {};
+global.import.meta = {
+  env: {
+    VITE_SUPABASE_URL: 'https://test.supabase.co',
+    VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+    VITE_API_URL: 'http://localhost:3001/api',
+    MODE: 'test',
+    DEV: false,
+    PROD: false,
+    SSR: false
+  }
+};
+
 // Mock window object for browser APIs
 global.window = {
   addEventListener: jest.fn(),
@@ -18,6 +32,7 @@ global.window = {
     clear: jest.fn()
   }
 };
+
 
 // Mock navigator
 global.navigator = {

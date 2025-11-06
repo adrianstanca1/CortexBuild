@@ -166,8 +166,9 @@ describe('Rate Limiter Middleware', () => {
       const response = await request(app).get('/api/test');
       const resetTime = parseInt(response.headers['x-ratelimit-reset']);
 
-      expect(resetTime).toBeGreaterThan(Date.now() / 1000);
-      expect(resetTime).toBeLessThan(Date.now() / 1000 + 70); // Should reset within ~1 minute
+      // Reset time is in milliseconds, not seconds
+      expect(resetTime).toBeGreaterThan(Date.now());
+      expect(resetTime).toBeLessThan(Date.now() + 70000); // Should reset within ~1 minute (70 seconds in ms)
     });
   });
 

@@ -69,7 +69,8 @@ export class BundleMonitor {
     }
 
     // Log to console in development
-    if (import.meta.env.DEV) {
+    const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
+    if (isDev) {
       console.group('📦 Bundle Analysis');
       console.log(`Total Size: ${(totalSize / 1024).toFixed(2)} kB`);
       console.log(`Gzipped: ${(gzippedSize / 1024).toFixed(2)} kB`);
