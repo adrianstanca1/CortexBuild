@@ -3,6 +3,35 @@
  * Tests real database connectivity and operations
  */
 
+// Mock supabaseClient before importing
+jest.mock('../../../supabaseClient', () => {
+  const mockSupabase = {
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => Promise.resolve({ data: [], error: null })),
+        single: jest.fn(() => Promise.resolve({ data: null, error: null }))
+      })),
+      insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
+      update: jest.fn(() => ({
+        eq: jest.fn(() => Promise.resolve({ data: null, error: null }))
+      })),
+      delete: jest.fn(() => ({
+        eq: jest.fn(() => Promise.resolve({ data: null, error: null }))
+      }))
+    })),
+    auth: {
+      getSession: jest.fn(() => Promise.resolve({ data: { session: null }, error: null })),
+      signInWithPassword: jest.fn(() => Promise.resolve({ data: { user: null, session: null }, error: null })),
+      signOut: jest.fn(() => Promise.resolve({ error: null }))
+    }
+  };
+
+  return {
+    supabase: mockSupabase,
+    getMyProfile: jest.fn(() => Promise.resolve(null))
+  };
+});
+
 import { supabase, getMyProfile } from '../../../supabaseClient';
 
 // Mock environment variables for testing

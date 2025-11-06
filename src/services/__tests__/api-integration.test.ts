@@ -3,8 +3,6 @@
  * Tests real API client with Supabase backend
  */
 
-import apiClient, { ApiRequest } from '../apiClient';
-
 // Mock Supabase for authentication
 jest.mock('../../../supabaseClient', () => ({
   supabase: {
@@ -21,6 +19,8 @@ jest.mock('../../../supabaseClient', () => ({
     }
   }
 }));
+
+import apiClient, { ApiRequest } from '../apiClient';
 
 describe('API Client Integration Tests', () => {
   beforeEach(() => {

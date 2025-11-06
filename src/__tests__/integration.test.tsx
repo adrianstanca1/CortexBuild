@@ -4,16 +4,17 @@
  */
 
 import { jest } from '@jest/globals';
-import * as authService from '../../auth/authService';
-import { apiClient } from '../../lib/api/client';
 
-// Mock external dependencies
+// Mock external dependencies BEFORE importing
 jest.mock('../../auth/authService');
 jest.mock('../../lib/api/client');
 jest.mock('../../src/monitoring/webVitals');
 jest.mock('../../src/monitoring/performanceObserver');
 jest.mock('../../src/monitoring/metricsCollector');
 jest.mock('../../src/monitoring/alerting');
+
+import * as authService from '../../auth/authService';
+import { apiClient } from '../../lib/api/client';
 
 const mockedAuthService = authService as jest.Mocked<typeof authService>;
 const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;

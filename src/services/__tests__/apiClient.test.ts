@@ -3,14 +3,14 @@
  * Tests error handling, retry logic, offline queuing, and HTTP methods
  */
 
-import axios, { AxiosError } from 'axios';
-import { APIClient, APIError, RetryConfig } from '../apiClient';
-import offlineManager from '../offlineManager';
-
-// Mock dependencies
+// Mock dependencies BEFORE importing
 jest.mock('axios');
 jest.mock('react-hot-toast');
 jest.mock('../offlineManager');
+
+import axios, { AxiosError } from 'axios';
+import { APIClient, APIError, RetryConfig } from '../apiClient';
+import offlineManager from '../offlineManager';
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 const mockedOfflineManager = offlineManager as jest.Mocked<typeof offlineManager>;
