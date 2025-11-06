@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
+import { describe, expect, it } from '@jest/globals';
 
 /**
  * Mock user objects for testing
@@ -187,3 +188,14 @@ export const mockSessionStorage = () => {
   };
 };
 
+describe('testUtils.helper exports', () => {
+  it('provides mock user roles', () => {
+    expect(mockUsers.superAdmin.role).toBe('super_admin');
+  });
+
+  it('renders using renderWithProviders helper', () => {
+    const element = React.createElement('div', { 'data-testid': 'provider-test' });
+    const { container } = renderWithProviders(element);
+    expect(container.firstChild).toBeTruthy();
+  });
+});

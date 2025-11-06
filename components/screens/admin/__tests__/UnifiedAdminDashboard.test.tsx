@@ -4,6 +4,17 @@ import '@testing-library/jest-dom';
 import UnifiedAdminDashboard from '../UnifiedAdminDashboard';
 
 // Mock the child components
+jest.mock('../../../../lib/supabase/client', () => ({
+  supabase: {
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({ eq: jest.fn(() => Promise.resolve({ data: [], error: null })) })),
+    })),
+    auth: {
+      getUser: jest.fn(() => Promise.resolve({ data: { user: null }, error: null })),
+    },
+  },
+}));
+
 jest.mock('../../../admin/UserManagement', () => {
   return function MockUserManagement() {
     return <div data-testid="user-management">User Management</div>;
@@ -140,4 +151,3 @@ describe('UnifiedAdminDashboard', () => {
     // Adjust based on your actual component
   });
 });
-

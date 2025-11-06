@@ -19,6 +19,7 @@ global.window = {
   }
 };
 
+
 // Mock navigator
 global.navigator = {
   onLine: true
