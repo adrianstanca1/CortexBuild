@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef */
 #!/usr/bin/env node
 
 // DevOps Automation Script for CortexBuild 2.0

@@ -15,7 +15,7 @@ if (user) {
   console.log('Testing password validation...');
   console.log('Stored password hash:', user.password);
   console.log('Input password:', password);
-  
+
   const isValid = authHelpers.validatePassword(password, user.password);
   console.log('Password validation result:', isValid);
 } else {

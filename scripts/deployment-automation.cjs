@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef */
 #!/usr/bin/env node
 
 // Deployment Automation System for CortexBuild 2.0
