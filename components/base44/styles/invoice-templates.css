@@ -1,0 +1,494 @@
+/**
+ * Invoice Templates CSS - CortexBuild Platform
+ * 10 Professional Invoice Templates
+ * Version: 1.0.0
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@300;400&family=Poppins:wght@400;600;700&family=Caveat:wght@500&family=Lora:ital@0;1&display=swap');
+
+/* Base A4 Preview Container */
+.a4-preview-container {
+    display: block;
+    background: white;
+    width: 21cm;
+    min-height: 29.7cm;
+    margin: 2rem auto;
+    padding: 1cm;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Print Styles */
+@media print {
+    .a4-preview-container {
+        box-shadow: none;
+        margin: 0;
+        width: 100%;
+        min-height: auto;
+    }
+}
+
+/* --- 1. Modern Template (Default) --- */
+.a4-preview-container.modern header h2 {
+    color: #2563eb;
+}
+
+.a4-preview-container.modern table thead {
+    background-color: #f3f4f6;
+    border-bottom: 2px solid #d1d5db;
+}
+
+.a4-preview-container.modern .amount-due-box {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.a4-preview-container.modern .summary-box {
+    background-color: #f9fafb;
+    border: 1px solid #f3f4f6;
+}
+
+.a4-preview-container.modern h3 {
+    font-weight: 600;
+}
+
+/* --- 2. Classic Template --- */
+.a4-preview-container.classic {
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.a4-preview-container.classic header {
+    border-bottom-width: 3px;
+    border-color: #000;
+    padding-bottom: 0.75rem;
+}
+
+.a4-preview-container.classic header h2 {
+    color: #000;
+    font-size: 2.25rem;
+    letter-spacing: 0.15em;
+    font-variant: small-caps;
+}
+
+.a4-preview-container.classic h3 {
+    border-bottom: 1px solid #9ca3af;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    font-variant: small-caps;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.a4-preview-container.classic table thead {
+    background-color: #374151;
+    color: #fff;
+    border-bottom: 2px solid #000;
+}
+
+.a4-preview-container.classic table {
+    border-top: 1px solid #9ca3af;
+}
+
+.a4-preview-container.classic table th,
+.a4-preview-container.classic table td {
+    padding: 0.65rem;
+}
+
+.a4-preview-container.classic .summary-box {
+    background-color: transparent;
+    border: 1px solid #9ca3af;
+}
+
+.a4-preview-container.classic .amount-due-box {
+    background-color: #1f2937;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+/* --- 3. Creative Template --- */
+.a4-preview-container.creative {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', Arial, sans-serif;
+}
+
+.a4-preview-container.creative header {
+    background: linear-gradient(to right, #0d9488, #0891b2);
+    color: white;
+    margin: -1cm -1cm 1.5rem -1cm;
+    padding: 1.25rem 1cm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.a4-preview-container.creative header h1 {
+    color: white;
+}
+
+.a4-preview-container.creative header h2 {
+    color: #f0f9ff;
+    font-size: 2.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.a4-preview-container.creative h3 {
+    color: #115e59;
+    font-weight: bold;
+    border-bottom: 2px solid #ccfbf1;
+    padding-bottom: 0.25rem;
+}
+
+.a4-preview-container.creative table thead {
+    background: #115e59;
+    color: white;
+}
+
+.a4-preview-container.creative table th {
+    padding: 0.75rem;
+    font-weight: bold;
+}
+
+.a4-preview-container.creative table tbody tr {
+    border-color: #99f6e4;
+}
+
+.a4-preview-container.creative .summary-box {
+    background-color: #f0fdfa;
+    border: 1px solid #ccfbf1;
+}
+
+.a4-preview-container.creative .amount-due-box {
+    background: #0d9488;
+    color: white;
+    font-size: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+/* --- 4. Minimalist Template --- */
+.a4-preview-container.minimalist {
+    font-family: 'Inter', sans-serif, system-ui;
+}
+
+.a4-preview-container.minimalist header {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+}
+
+.a4-preview-container.minimalist header h2 {
+    color: #111827;
+    font-size: 1.875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.a4-preview-container.minimalist h3 {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.a4-preview-container.minimalist table thead {
+    border-bottom: 1px solid #6b7280;
+}
+
+.a4-preview-container.minimalist table th {
+    color: #111827;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+.a4-preview-container.minimalist table td {
+    padding: 0.75rem;
+}
+
+.a4-preview-container.minimalist .summary-box {
+    background-color: transparent;
+    border: none;
+}
+
+.a4-preview-container.minimalist .amount-due-box {
+    background-color: transparent;
+    color: #111827;
+    text-align: right;
+    padding: 0;
+}
+
+.a4-preview-container.minimalist .amount-due-box p {
+    font-size: 1.5rem;
+}
+
+/* --- 5. Corporate Template --- */
+.a4-preview-container.corporate {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.a4-preview-container.corporate header {
+    background-color: #2d3748;
+    color: white;
+    margin: -1cm -1cm 1.5rem -1cm;
+    padding: 1rem 1cm;
+}
+
+.a4-preview-container.corporate header h2 {
+    color: white;
+    font-weight: 300;
+    font-size: 3rem;
+    letter-spacing: 0.05em;
+}
+
+.a4-preview-container.corporate h3 {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.a4-preview-container.corporate table thead {
+    background-color: #edf2f7;
+}
+
+.a4-preview-container.corporate table th {
+    color: #4a5568;
+}
+
+.a4-preview-container.corporate .summary-box {
+    background-color: #edf2f7;
+}
+
+.a4-preview-container.corporate .amount-due-box {
+    background-color: #2d3748;
+    color: white;
+}
+
+/* --- 6. Artistic Template --- */
+.a4-preview-container.artistic {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+}
+
+.a4-preview-container.artistic header h2 {
+    font-family: 'Playfair Display', serif;
+    color: #832729;
+    font-size: 3rem;
+    text-align: right;
+}
+
+.a4-preview-container.artistic header {
+    border-bottom: 1px solid #f3e5e5;
+    padding-bottom: 0.5rem;
+}
+
+.a4-preview-container.artistic h3 {
+    font-weight: 400;
+    color: #832729;
+    border: none;
+    border-left: 3px solid #f3e5e5;
+    padding-left: 0.75rem;
+}
+
+.a4-preview-container.artistic table thead {
+    background: transparent;
+    border-bottom: 2px solid #832729;
+}
+
+.a4-preview-container.artistic table th {
+    color: #832729;
+    font-weight: 400;
+}
+
+.a4-preview-container.artistic .summary-box {
+    background-color: #fff9f9;
+}
+
+.a4-preview-container.artistic .amount-due-box {
+    background-color: #832729;
+    color: #fff;
+}
+
+/* --- 7. Teal Template --- */
+.a4-preview-container.teal header h2 {
+    color: #0d9488;
+}
+
+.a4-preview-container.teal table thead {
+    background-color: #f0fdfa;
+    border-bottom: 2px solid #99f6e4;
+}
+
+.a4-preview-container.teal .amount-due-box {
+    background-color: #ccfbf1;
+    color: #134e4a;
+}
+
+.a4-preview-container.teal .summary-box {
+    background-color: #f0fdfa;
+    border: 1px solid #ccfbf1;
+}
+
+.a4-preview-container.teal h3 {
+    font-weight: 600;
+    color: #115e59;
+}
+
+/* --- 8. Geometric Template --- */
+.a4-preview-container.geometric {
+    font-family: 'Poppins', sans-serif;
+}
+
+.a4-preview-container.geometric header {
+    background-color: #1a202c;
+    color: white;
+    margin: -1cm -1cm 1.5rem -1cm;
+    padding: 1.5rem 1cm;
+    background-image: linear-gradient(45deg, #2d3748 25%, transparent 25%),
+        linear-gradient(-45deg, #2d3748 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #2d3748 75%),
+        linear-gradient(-45deg, transparent 75%, #2d3748 75%);
+    background-size: 20px 20px;
+    border-bottom: 4px solid #fbbf24;
+}
+
+.a4-preview-container.geometric header h2 {
+    color: white;
+    font-size: 3rem;
+    letter-spacing: 0.1em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.a4-preview-container.geometric h3 {
+    font-weight: 600;
+    color: #1a202c;
+    border-bottom: 2px solid #fbbf24;
+    padding-bottom: 0.25rem;
+    display: inline-block;
+}
+
+.a4-preview-container.geometric table thead {
+    background-color: #1a202c;
+    color: #fbbf24;
+}
+
+.a4-preview-container.geometric table th {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.a4-preview-container.geometric .summary-box {
+    border-left: 4px solid #fbbf24;
+    background-color: #f7fafc;
+}
+
+.a4-preview-container.geometric .amount-due-box {
+    background-color: #fbbf24;
+    color: #1a202c;
+    font-weight: 700;
+}
+
+/* --- 9. Handwritten Template --- */
+.a4-preview-container.handwritten {
+    font-family: 'Caveat', cursive;
+    font-size: 1.3rem;
+    line-height: 1.6;
+}
+
+.a4-preview-container.handwritten header h2 {
+    color: #374151;
+    font-size: 4rem;
+}
+
+.a4-preview-container.handwritten h3 {
+    color: #4b5563;
+    border-bottom: 1px dashed #9ca3af;
+    padding-bottom: 4px;
+}
+
+.a4-preview-container.handwritten table {
+    border-top: 1px solid #d1d5db;
+    border-bottom: 1px solid #d1d5db;
+}
+
+.a4-preview-container.handwritten table thead {
+    background: transparent;
+    color: #1f2937;
+}
+
+.a4-preview-container.handwritten table th {
+    font-size: 1.4rem;
+    font-weight: 500;
+    padding: 0.75rem;
+}
+
+.a4-preview-container.handwritten table tbody tr {
+    border-color: #e5e7eb;
+}
+
+.a4-preview-container.handwritten table td {
+    padding: 0.75rem;
+}
+
+.a4-preview-container.handwritten .summary-box {
+    background-color: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #f3f4f6;
+}
+
+.a4-preview-container.handwritten .amount-due-box {
+    background-color: #eff6ff;
+    color: #1e40af;
+    border: 1px dashed #bfdbfe;
+    border-radius: 8px;
+}
+
+/* --- 10. Vintage Template --- */
+.a4-preview-container.vintage {
+    font-family: 'Lora', serif;
+    background-color: #fef3c7;
+}
+
+.a4-preview-container.vintage header {
+    border-bottom: 2px double #92400e;
+    padding-bottom: 1rem;
+}
+
+.a4-preview-container.vintage header h2 {
+    color: #92400e;
+    font-size: 3rem;
+    font-style: italic;
+    text-align: center;
+}
+
+.a4-preview-container.vintage h3 {
+    color: #92400e;
+    font-weight: bold;
+    border-bottom: 1px solid #d97706;
+    padding-bottom: 0.25rem;
+}
+
+.a4-preview-container.vintage table thead {
+    background-color: #fde68a;
+    border-bottom: 2px solid #d97706;
+}
+
+.a4-preview-container.vintage table th {
+    color: #92400e;
+}
+
+.a4-preview-container.vintage .summary-box {
+    background-color: #fef3c7;
+    border: 1px solid #fde68a;
+}
+
+.a4-preview-container.vintage .amount-due-box {
+    background-color: #d97706;
+    color: #fef3c7;
+    border: 2px solid #92400e;
+}

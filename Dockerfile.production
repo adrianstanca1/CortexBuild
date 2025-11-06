@@ -1,0 +1,71 @@
+# CortexBuild 2.0 Production Dockerfile
+# Multi-stage build for optimal production deployment
+
+# Stage 1: Build the application
+FROM node:18-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production --silent
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Stage 2: Production server
+FROM nginx:alpine AS production
+
+# Install additional tools
+RUN apk add --no-cache curl
+
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy PWA files to root
+COPY --from=builder /app/dist/manifest.json /usr/share/nginx/html/
+COPY --from=builder /app/dist/sw.js /usr/share/nginx/html/
+
+# Create nginx cache directories
+RUN mkdir -p /var/cache/nginx/client_temp \
+    && mkdir -p /var/cache/nginx/proxy_temp \
+    && mkdir -p /var/cache/nginx/fastcgi_temp \
+    && mkdir -p /var/cache/nginx/uwsgi_temp \
+    && mkdir -p /var/cache/nginx/scgi_temp
+
+# Set proper permissions
+RUN chown -R nginx:nginx /var/cache/nginx \
+    && chown -R nginx:nginx /usr/share/nginx/html \
+    && chmod -R 755 /usr/share/nginx/html
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:80/health || exit 1
+
+# Create health check endpoint
+RUN echo '<!DOCTYPE html><html><head><title>Health Check</title></head><body><h1>CortexBuild 2.0 - Healthy</h1><p>Status: OK</p><p>Version: 2.0.0</p><p>Timestamp: '"$(date)"'</p></body></html>' > /usr/share/nginx/html/health
+
+# Expose port
+EXPOSE 80
+
+# Add labels for better container management
+LABEL maintainer="CortexBuild Team <admin@cortexbuild.com>"
+LABEL version="2.0.0"
+LABEL description="CortexBuild 2.0 - Ultimate Enterprise Construction Management Platform"
+LABEL org.opencontainers.image.title="CortexBuild 2.0"
+LABEL org.opencontainers.image.description="Enterprise Construction Management Platform"
+LABEL org.opencontainers.image.version="2.0.0"
+LABEL org.opencontainers.image.vendor="CortexBuild"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

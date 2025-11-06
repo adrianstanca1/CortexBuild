@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arhitectura Interactivă a Platformei ConstructAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1f2937;
+            min-height: 100vh;
+        }
+        .node {
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: absolute;
+        }
+        .node:hover, .node.active {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-color: #f59e0b;
+            z-index: 50;
+        }
+        .cognitive-core {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5), 0 0 50px rgba(124, 58, 237, 0.3);
+            animation: pulse 3s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .line {
+            position: absolute;
+            background-color: #a0aec0;
+            height: 2px;
+            transform-origin: left center;
+            opacity: 0.6;
+            z-index: -10;
+            transition: all 0.3s ease-in-out;
+        }
+        .line.active {
+            height: 3px;
+            background-color: #3b82f6;
+            opacity: 1;
+        }
+        .data-packet {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: white;
+            border-radius: 50%;
+            border: 1px solid #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
+            animation: move-packet 4s linear infinite;
+            offset-path: var(--motion-path);
+            opacity: 0;
+            z-index: 10;
+        }
+        @keyframes move-packet {
+            0% { opacity: 0; motion-offset: 0%; }
+            25% { opacity: 1; }
+            75% { opacity: 1; }
+            100% { opacity: 0; motion-offset: 100%; }
+        }
+        #info-panel-wrapper.visible #info-panel {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        #info-panel {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-7xl mx-auto">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">Arhitectura Platformei ConstructAI</h1>
+            <p class="text-md md:text-lg text-white/90 mt-2">O diagramă interactivă care explică fluxul de la date brute la decizii strategice.</p>
+            <p class="text-sm text-yellow-300 font-semibold mt-2 animate-pulse">CLICK pe un Agent AI pentru detalii</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
+            <!-- Diagrama -->
+            <div id="diagram-container" class="lg:col-span-3 h-[500px] sm:h-[600px] md:h-[700px] relative glass-panel rounded-2xl p-4">
+                <div id="lines-container" class="absolute top-0 left-0 w-full h-full z-0"></div>
+            </div>
+
+            <!-- Panoul Informativ -->
+            <div id="info-panel-wrapper" class="lg:col-span-1">
+                <div id="info-panel" class="glass-panel p-6 rounded-xl shadow-lg h-full opacity-0 transform translate-x-4">
+                    <div id="info-content" class="text-center">
+                        <div class="text-xl text-gray-400 mb-4">🧠</div>
+                        <h2 class="text-xl font-bold text-gray-800">Bine ați venit!</h2>
+                        <p class="mt-2 text-gray-600 text-sm">Selectați un Agent AI din diagramă pentru a afla mai multe despre rolul său.</p>
+                        <p class="mt-4 text-xs text-gray-500">Fiecare agent este un modul specializat care colectează date, le analizează și le trimite către Nucleul Cognitiv pentru sinteză strategică.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Footer -->
+        <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-blue-600">5</div>
+                <div class="text-sm text-gray-600">AI Agents</div>
+            </div>
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-green-600">22</div>
+                <div class="text-sm text-gray-600">Database Tables</div>
+            </div>
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-purple-600">100%</div>
+                <div class="text-sm text-gray-600">Real-time</div>
+            </div>
+            <div class="glass-panel p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-orange-600">10K+</div>
+                <div class="text-sm text-gray-600">Lines of Code</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const diagramContainer = document.getElementById('diagram-container');
+            const linesContainer = document.getElementById('lines-container');
+            const infoPanelWrapper = document.getElementById('info-panel-wrapper');
+            const infoPanel = document.getElementById('info-panel');
+            const infoContent = document.getElementById('info-content');
+
+            const nodes = {
+                core: { id: 'core', type: 'core', text: 'Nucleu Cognitiv AI', icon: '🧠', details: 'Creierul platformei. Analizează datele de la toți agenții pentru a identifica tipare, a înțelege cauzele și a genera strategii predictive. Nu doar reacționează, ci înțelege contextul complet al proiectului.' },
+                output: { id: 'output', type: 'output', text: 'Output Strategic', icon: '🎯', details: 'Rezultatul final al sintezei AI: nu simple date, ci recomandări clare, planuri de acțiune și alerte predictive pentru management.' },
+                
+                hse: { id: 'hse', type: 'agent', text: 'HSE Sentinel', icon: '🛡️', details: 'Analizează imagini și rapoarte pentru a detecta riscuri de siguranță și neconformități. Monitorizează 24/7 pentru protecția lucrătorilor.' },
+                controls: { id: 'controls', type: 'agent', text: 'Project Controls', icon: '📊', details: 'Monitorizează progresul, productivitatea și graficele de execuție. Calculează SPI, CPI și previzionează finalizarea.' },
+                commercial: { id: 'commercial', type: 'agent', text: 'Commercial Guardian', icon: '⚖️', details: 'Analizează contracte și comunicări pentru a proteja interesele comerciale și a preveni disputele. Expert în claims și variații.' },
+                financial: { id: 'financial', type: 'agent', text: 'Financial Forecaster', icon: '💰', details: 'Monitorizează costurile, prognozează fluxul de numerar și analizează profitabilitatea în timp real. Previne overruns.' },
+                quality: { id: 'quality', type: 'agent', text: 'Quality Inspector', icon: '✅', details: 'Verifică conformitatea cu standardele de calitate, detectează defecte și recomandă remedieri. Asigură excelența.' },
+                
+                data_visual: { id: 'data_visual', type: 'data', text: 'Poze & Video', icon: '📸', details: 'Sursa de date vizuale pentru detectarea problemelor de siguranță, calitate și progres.' },
+                data_reports: { id: 'data_reports', type: 'data', text: 'Grafice & Rapoarte', icon: '📋', details: 'Planificarea și datele de progres care stau la baza analizelor de performanță.' },
+                data_contracts: { id: 'data_contracts', type: 'data', text: 'Contracte & Emailuri', icon: '📄', details: 'Datele nestructurate care conțin obligații, riscuri și oportunități comerciale.' },
+            };
+
+            const connections = [
+                { from: 'data_visual', to: 'hse' }, { from: 'data_visual', to: 'quality' },
+                { from: 'data_reports', to: 'controls' }, { from: 'data_reports', to: 'financial' },
+                { from: 'data_contracts', to: 'commercial' },
+                { from: 'hse', to: 'core' }, { from: 'controls', to: 'core' }, { from: 'commercial', to: 'core' },
+                { from: 'financial', to: 'core' }, { from: 'quality', to: 'core' },
+                { from: 'core', to: 'output' }
+            ];
+
+            // Crearea nodurilor in DOM
+            Object.values(nodes).forEach(node => {
+                let el;
+                if (node.type === 'core') {
+                    el = document.createElement('div');
+                    el.className = 'node cognitive-core w-40 h-40 md:w-48 md:h-48 rounded-full flex flex-col items-center justify-center text-white text-center p-4';
+                    el.innerHTML = `<div class="text-3xl md:text-4xl mb-2">${node.icon}</div><div class="font-bold text-sm md:text-base">${node.text}</div>`;
+                } else if (node.type === 'output') {
+                    el = document.createElement('div');
+                    el.className = 'node bg-white p-3 md:p-4 rounded-xl shadow-lg text-center w-56 md:w-64';
+                    el.innerHTML = `<div class="font-bold text-md md:text-lg text-blue-600">${node.icon} ${node.text}</div>`;
+                } else if (node.type === 'agent') {
+                    el = document.createElement('div');
+                    el.className = 'node bg-white p-2 md:p-3 rounded-full shadow-lg w-24 h-24 md:w-28 md:h-28 flex flex-col items-center justify-center text-center';
+                    el.innerHTML = `<div class="text-2xl">${node.icon}</div><div class="font-bold text-[10px] md:text-xs mt-1">${node.text}</div>`;
+                } else {
+                    el = document.createElement('div');
+                    el.className = 'node bg-slate-200 p-3 rounded-xl w-32 text-center border-2 border-dashed border-slate-400';
+                    el.innerHTML = `<div class="font-semibold text-xs text-slate-700">${node.icon} ${node.text}</div>`;
+                }
+                el.id = node.id;
+                el.dataset.type = node.type;
+                diagramContainer.appendChild(el);
+            });
+            
+            // Pozitionarea nodurilor
+            function layout() {
+                const width = diagramContainer.clientWidth;
+                const height = diagramContainer.clientHeight;
+                const center = { x: width / 2, y: height / 2 };
+                
+                const padding = Math.min(width, height) * 0.1;
+                const drawingAreaRadius = (Math.min(width, height) / 2) - padding;
+
+                const coreEl = document.getElementById('core');
+                coreEl.style.left = `${center.x - coreEl.offsetWidth / 2}px`;
+                coreEl.style.top = `${center.y - coreEl.offsetHeight / 2}px`;
+
+                const outputEl = document.getElementById('output');
+                outputEl.style.left = `${center.x - outputEl.offsetWidth / 2}px`;
+                outputEl.style.top = `${padding / 2}px`;
+
+                const agents = Object.values(nodes).filter(n => n.type === 'agent');
+                const agentRadius = drawingAreaRadius * 0.5; 
+                agents.forEach((agent, i) => {
+                    const angle = (i / agents.length) * 2 * Math.PI - (Math.PI / 2);
+                    const agentEl = document.getElementById(agent.id);
+                    const x = center.x + agentRadius * Math.cos(angle) - agentEl.offsetWidth / 2;
+                    const y = center.y + agentRadius * Math.sin(angle) - agentEl.offsetHeight / 2;
+                    agentEl.style.left = `${x}px`;
+                    agentEl.style.top = `${y}px`;
+                });
+
+                const dataNodes = Object.values(nodes).filter(n => n.type === 'data');
+                const dataRadius = drawingAreaRadius * 1; 
+                dataNodes.forEach((data, i) => {
+                    const angle = (i / dataNodes.length) * 2 * Math.PI - (Math.PI / 2) + (Math.PI / dataNodes.length);
+                    const dataEl = document.getElementById(data.id);
+                    const x = center.x + dataRadius * Math.cos(angle) - dataEl.offsetWidth / 2;
+                    const y = center.y + dataRadius * Math.sin(angle) - dataEl.offsetHeight / 2;
+                    dataEl.style.left = `${x}px`;
+                    dataEl.style.top = `${y}px`;
+                });
+            }
+
+            // Crearea liniilor de conectare si a pachetelor de date
+            function drawConnections() {
+                linesContainer.innerHTML = '';
+                connections.forEach(({ from, to }) => {
+                    const el1 = document.getElementById(from);
+                    const el2 = document.getElementById(to);
+                    if (!el1 || !el2) return;
+
+                    const rect1 = el1.getBoundingClientRect();
+                    const rect2 = el2.getBoundingClientRect();
+                    const containerRect = diagramContainer.getBoundingClientRect();
+
+                    const x1 = rect1.left + rect1.width / 2 - containerRect.left;
+                    const y1 = rect1.top + rect1.height / 2 - containerRect.top;
+                    const x2 = rect2.left + rect2.width / 2 - containerRect.left;
+                    const y2 = rect2.top + rect2.height / 2 - containerRect.top;
+                    
+                    const length = Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
+                    const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+
+                    const line = document.createElement('div');
+                    line.className = 'line';
+                    line.dataset.from = from;
+                    line.dataset.to = to;
+                    line.style.width = `${length}px`;
+                    line.style.left = `${x1}px`;
+                    line.style.top = `${y1}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+                    linesContainer.appendChild(line);
+                    
+                    const motionPath = `path('M ${x1} ${y1} L ${x2} ${y2}')`;
+                    const packet = document.createElement('div');
+                    packet.className = 'data-packet';
+                    packet.style.setProperty('--motion-path', motionPath);
+                    packet.style.animationDelay = `${Math.random() * 4}s`;
+                    linesContainer.appendChild(packet);
+                });
+            }
+            
+            function updateInfoPanel(nodeId) {
+                const node = nodes[nodeId];
+                if (!node) return;
+                
+                infoPanelWrapper.classList.add('visible');
+                infoContent.innerHTML = `
+                    <div class="text-4xl mb-4">${node.icon}</div>
+                    <h2 class="text-2xl font-bold text-gray-800">${node.text}</h2>
+                    <p class="mt-4 text-gray-600">${node.details}</p>
+                `;
+            }
+
+            // Event Handlers
+            diagramContainer.addEventListener('click', (e) => {
+                const clickedNode = e.target.closest('.node');
+                
+                document.querySelectorAll('.node.active').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.line.active').forEach(l => l.classList.remove('active'));
+
+                if (clickedNode && (clickedNode.dataset.type === 'agent' || clickedNode.dataset.type === 'core')) {
+                    clickedNode.classList.add('active');
+                    const nodeId = clickedNode.id;
+                    updateInfoPanel(nodeId);
+
+                    document.querySelectorAll(`.line[data-from="${nodeId}"], .line[data-to="${nodeId}"]`).forEach(l => l.classList.add('active'));
+                } else if (clickedNode) {
+                    updateInfoPanel(clickedNode.id);
+                }
+            });
+
+            // Initializare si Resize Observer
+            const observer = new ResizeObserver(() => {
+                layout();
+                drawConnections();
+            });
+            observer.observe(diagramContainer);
+        });
+    </script>
+</body>
+</html>
+
