@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '../../supabaseClient';
+import { getEnv } from '../utils/env';
 
 export interface ApiRequest {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -26,16 +27,16 @@ class ApiClient {
   private defaultTimeout = 30000;
 
   constructor(baseURL: string = '') {
-    this.baseURL = baseURL || import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+    this.baseURL = baseURL || getEnv('VITE_API_URL', 'http://localhost:3001/api');
   }
 
   async request<T = any>(config: ApiRequest): Promise<ApiResponse<T>> {
     const url = config.url.startsWith('http') ? config.url : `${this.baseURL}${config.url}`;
-    
+
     try {
       // Get current session for authentication
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         ...config.headers
@@ -57,10 +58,10 @@ class ApiClient {
       }
 
       const response = await fetch(url, requestConfig);
-      
+
       let responseData: any;
       const contentType = response.headers.get('content-type');
-      
+
       if (contentType && contentType.includes('application/json')) {
         responseData = await response.json();
       } else {
@@ -83,7 +84,7 @@ class ApiClient {
 
     } catch (error: any) {
       console.error('API Request failed:', error);
-      
+
       return {
         error: error.message || 'Network request failed',
         status: 0
