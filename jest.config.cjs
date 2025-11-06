@@ -4,9 +4,9 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/src/__mocks__/fileMock.js',
-    '^@/utils/env$': '<rootDir>/src/utils/__mocks__/env.ts',
-    '^\\.\\./utils/env$': '<rootDir>/src/utils/__mocks__/env.ts',
-    '^\\.\\./\\.\\./utils/env$': '<rootDir>/src/utils/__mocks__/env.ts'
+    // Map all imports of env.ts to the mock version
+    '^.*/utils/env$': '<rootDir>/src/utils/__mocks__/env.ts',
+    '^@/utils/env$': '<rootDir>/src/utils/__mocks__/env.ts'
   },
   transform: {
     '^.+\\.(ts|tsx)$': ['babel-jest', { rootMode: 'upward' }],
