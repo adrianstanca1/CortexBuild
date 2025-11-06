@@ -1,9 +1,10 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { User } from './types';
+import { getEnv } from './src/utils/env';
 
 // Use environment variables directly - no global variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = getEnv('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY');
 
 // Configuration check - only warn if explicitly configured but invalid
 if (supabaseUrl && supabaseAnonKey) {
@@ -15,8 +16,8 @@ if (supabaseUrl && supabaseAnonKey) {
 let supabaseInstance: SupabaseClient | null = null;
 
 // Only initialize Supabase if both URL and key are properly configured
-if (supabaseUrl && supabaseAnonKey && 
-    supabaseUrl !== 'YOUR_SUPABASE_URL' && 
+if (supabaseUrl && supabaseAnonKey &&
+    supabaseUrl !== 'YOUR_SUPABASE_URL' &&
     supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY' &&
     supabaseUrl.startsWith('http') &&
     supabaseAnonKey.length > 20) {

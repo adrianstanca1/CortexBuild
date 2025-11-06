@@ -3,6 +3,8 @@
  * Centralized logging settings for the application
  */
 
+import { getEnv } from '../utils/env';
+
 export interface LoggingConfig {
   enabled: boolean;
   environment: 'development' | 'production' | 'staging';
@@ -70,7 +72,7 @@ export class Logger {
  */
 export const loggingConfig: LoggingConfig = {
   enabled: true,
-  environment: (import.meta.env?.MODE as any) || 'development',
+  environment: (getEnv('MODE', 'development') as any),
   console: {
     enabled: Logger.isDevelopment,
     level: Logger.isDevelopment ? 'debug' : 'error',
