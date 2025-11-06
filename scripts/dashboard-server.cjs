@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef */
 #!/usr/bin/env node
 
 // Simple HTTP Server for DevOps Dashboard

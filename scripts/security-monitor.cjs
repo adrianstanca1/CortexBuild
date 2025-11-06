@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef */
 #!/usr/bin/env node
 
 // Security Monitoring System for CortexBuild 2.0

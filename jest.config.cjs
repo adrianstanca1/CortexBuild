@@ -3,7 +3,10 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/src/__mocks__/fileMock.js'
+    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/src/__mocks__/fileMock.js',
+    // Map all imports of env.ts to the mock version
+    '^.*/utils/env$': '<rootDir>/src/utils/__mocks__/env.ts',
+    '^@/utils/env$': '<rootDir>/src/utils/__mocks__/env.ts'
   },
   transform: {
     '^.+\\.(ts|tsx)$': ['babel-jest', { rootMode: 'upward' }],

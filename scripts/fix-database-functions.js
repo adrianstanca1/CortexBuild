@@ -13,7 +13,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function createVerifyPasswordFunction() {
     console.log('🔧 Creating verify_password function...');
-    
+
     const functionSQL = `
         -- Create the verify_password function
         CREATE OR REPLACE FUNCTION public.verify_password(user_email text, user_password text)
@@ -27,29 +27,29 @@ async function createVerifyPasswordFunction() {
         BEGIN
             -- Check if user exists in our users table
             SELECT EXISTS(
-                SELECT 1 FROM public.users 
+                SELECT 1 FROM public.users
                 WHERE email = user_email
             ) INTO user_exists;
-            
+
             IF user_exists THEN
                 -- Get the stored password hash
                 SELECT password_hash INTO stored_password_hash
-                FROM public.users 
+                FROM public.users
                 WHERE email = user_email;
-                
+
                 -- For development, allow both hashed and plain password
                 RETURN stored_password_hash = user_password OR user_password = 'parola123';
             END IF;
-            
+
             -- User not found
             RETURN false;
         END;
         $$;
     `;
-    
+
     try {
         const { data, error } = await supabase.rpc('exec_sql', { sql: functionSQL });
-        
+
         if (error) {
             console.error('❌ Error creating function:', error);
             // Try alternative approach
@@ -67,14 +67,14 @@ async function createVerifyPasswordFunction() {
 
 async function createFunctionAlternative() {
     console.log('🔄 Using alternative function creation method...');
-    
+
     // Add password_hash column if it doesn't exist
     try {
         const { error: alterError } = await supabase
             .from('users')
             .select('password_hash')
             .limit(1);
-            
+
         if (alterError && alterError.message.includes('column "password_hash" does not exist')) {
             console.log('📝 Adding password_hash column...');
             // We'll handle this in the auth service instead
@@ -82,31 +82,31 @@ async function createFunctionAlternative() {
     } catch (err) {
         console.log('ℹ️ password_hash column check completed');
     }
-    
+
     // Update the test user
     const { error: updateError } = await supabase
         .from('users')
         .update({ password_hash: 'parola123' })
         .eq('email', 'adrian.stanca1@gmail.com');
-        
+
     if (updateError) {
         console.log('ℹ️ User update note:', updateError.message);
     } else {
         console.log('✅ Test user updated');
     }
-    
+
     return true;
 }
 
 async function testFunction() {
     console.log('🧪 Testing verify_password function...');
-    
+
     try {
         const { data, error } = await supabase.rpc('verify_password', {
             user_email: 'adrian.stanca1@gmail.com',
             user_password: 'parola123'
         });
-        
+
         if (error) {
             console.log('ℹ️ Function test result:', error.message);
             return false;
@@ -123,18 +123,18 @@ async function testFunction() {
 async function main() {
     console.log('🚀 Starting database function fix...');
     console.log('=====================================');
-    
+
     try {
         // Create the function
         await createVerifyPasswordFunction();
-        
+
         // Test the function
         await testFunction();
-        
+
         console.log('');
         console.log('✅ Database function fix completed!');
         console.log('The authentication system should now work without warnings.');
-        
+
     } catch (error) {
         console.error('❌ Error during fix:', error);
         console.log('');

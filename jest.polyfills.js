@@ -1,3 +1,5 @@
+/* eslint-env node, jest */
+/* eslint-disable no-undef */
 // Jest polyfills for Node.js environment
 
 // Mock fetch globally

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef */
 /**
  * Check Users Table Schema in Supabase
  * Run with: node scripts/check-users-table.js
@@ -37,7 +38,7 @@ async function checkUsersTable() {
             console.error('❌ Error querying users table:', error.message);
             console.error('   Code:', error.code);
             console.error('   Details:', error.details);
-            
+
             if (error.code === '42P01') {
                 console.log('\n💡 The users table does not exist!');
                 console.log('   You need to run the migration first:');

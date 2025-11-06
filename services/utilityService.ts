@@ -64,10 +64,10 @@ class UtilityService {
   }> {
     const timestamp = new Date().toISOString().split('T')[0];
     const fileName = `export_${timestamp}.${options.format}`;
-    
+
     // Simulate export processing
     await this.delay(1000);
-    
+
     return {
       downloadUrl: `/api/exports/${fileName}`,
       fileName,
@@ -81,7 +81,7 @@ class UtilityService {
     const headers = Object.keys(data[0]);
     const csvContent = [
       headers.join(','),
-      ...data.map(row => 
+      ...data.map(row =>
         headers.map(header => {
           const value = row[header];
           // Escape commas and quotes
@@ -102,11 +102,11 @@ class UtilityService {
   async importData(file: File, mapping: { [csvColumn: string]: string }): Promise<ImportResult> {
     // Simulate file processing
     await this.delay(2000);
-    
+
     const recordsProcessed = Math.floor(Math.random() * 1000) + 100;
     const errorRate = Math.random() * 0.1; // 0-10% error rate
     const recordsImported = Math.floor(recordsProcessed * (1 - errorRate));
-    
+
     return {
       success: true,
       recordsProcessed,
@@ -122,38 +122,38 @@ class UtilityService {
 
     for (const rule of rules) {
       const value = this.getNestedValue(data, rule.field);
-      
+
       switch (rule.type) {
         case 'required':
           if (value === null || value === undefined || value === '') {
             errors.push({ field: rule.field, message: rule.message });
           }
           break;
-        
+
         case 'email':
           if (value && !this.isValidEmail(value)) {
             errors.push({ field: rule.field, message: rule.message });
           }
           break;
-        
+
         case 'phone':
           if (value && !this.isValidPhone(value)) {
             errors.push({ field: rule.field, message: rule.message });
           }
           break;
-        
+
         case 'date':
           if (value && !this.isValidDate(value)) {
             errors.push({ field: rule.field, message: rule.message });
           }
           break;
-        
+
         case 'number':
           if (value && isNaN(Number(value))) {
             errors.push({ field: rule.field, message: rule.message });
           }
           break;
-        
+
         case 'custom':
           if (rule.customValidator && !rule.customValidator(value)) {
             errors.push({ field: rule.field, message: rule.message });
@@ -172,9 +172,9 @@ class UtilityService {
   async uploadFile(file: File, category: string = 'general'): Promise<FileUploadResult> {
     // Simulate file upload
     await this.delay(1000);
-    
+
     const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     return {
       success: true,
       fileId,
@@ -188,7 +188,7 @@ class UtilityService {
 
   async uploadMultipleFiles(files: File[], category: string = 'general'): Promise<FileUploadResult[]> {
     const results: FileUploadResult[] = [];
-    
+
     for (const file of files) {
       try {
         const result = await this.uploadFile(file, category);
@@ -205,7 +205,7 @@ class UtilityService {
         });
       }
     }
-    
+
     return results;
   }
 
@@ -218,8 +218,8 @@ class UtilityService {
     pageSize: number = 20
   ): Promise<SearchResult<T>> {
     const normalizedQuery = query.toLowerCase();
-    
-    const filteredData = data.filter(item => 
+
+    const filteredData = data.filter(item =>
       searchFields.some(field => {
         const value = this.getNestedValue(item, field);
         return value && value.toString().toLowerCase().includes(normalizedQuery);
@@ -253,12 +253,12 @@ class UtilityService {
   getCache<T>(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
-    
+
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return entry.data;
   }
 
@@ -278,7 +278,7 @@ class UtilityService {
   // Date and Time Utilities
   formatDate(date: string | Date, format: 'short' | 'long' | 'iso' = 'short'): string {
     const d = new Date(date);
-    
+
     switch (format) {
       case 'short':
         return d.toLocaleDateString('en-US', {
@@ -321,7 +321,7 @@ class UtilityService {
     if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    
+
     return this.formatDate(date);
   }
 
@@ -351,7 +351,7 @@ class UtilityService {
   }
 
   capitalizeWords(text: string): string {
-    return text.replace(/\w\S*/g, (txt) => 
+    return text.replace(/\w\S*/g, (txt) =>
       txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
     );
   }
@@ -375,7 +375,7 @@ class UtilityService {
       'on-hold': 'bg-yellow-100 text-yellow-800',
       'planning': 'bg-purple-100 text-purple-800'
     };
-    
+
     return colorMap[status.toLowerCase()] || 'bg-gray-100 text-gray-800';
   }
 
@@ -387,7 +387,7 @@ class UtilityService {
       'critical': 'text-red-600',
       'urgent': 'text-red-600'
     };
-    
+
     return colorMap[priority.toLowerCase()] || 'text-gray-600';
   }
 
@@ -402,8 +402,8 @@ class UtilityService {
   }
 
   private isValidPhone(phone: string): boolean {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(phone.replace(/[\s\-()]/g, ''));
   }
 
   private isValidDate(date: string): boolean {

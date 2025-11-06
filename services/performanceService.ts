@@ -154,8 +154,8 @@ class PerformanceService {
           }
         });
 
-        this.performanceObserver.observe({ 
-          entryTypes: ['navigation', 'resource', 'measure', 'paint', 'largest-contentful-paint'] 
+        this.performanceObserver.observe({
+          entryTypes: ['navigation', 'resource', 'measure', 'paint', 'largest-contentful-paint']
         });
       } catch (error) {
         console.warn('Performance monitoring not available:', error);
@@ -176,7 +176,7 @@ class PerformanceService {
     const now = new Date().toISOString();
 
     switch (entry.entryType) {
-      case 'navigation':
+      case 'navigation': {
         const navEntry = entry as PerformanceNavigationTiming;
         this.addMetric({
           id: `nav-${Date.now()}`,
@@ -191,8 +191,9 @@ class PerformanceService {
           metadata: { url: navEntry.name }
         });
         break;
+      }
 
-      case 'resource':
+      case 'resource': {
         const resEntry = entry as PerformanceResourceTiming;
         if (resEntry.duration > 1000) { // Only track slow resources
           this.addMetric({
@@ -205,7 +206,7 @@ class PerformanceService {
             threshold: { warning: 1000, critical: 3000 },
             status: this.getMetricStatus(resEntry.duration, 1000, 3000),
             trend: 'stable',
-            metadata: { 
+            metadata: {
               url: resEntry.name,
               size: resEntry.transferSize,
               type: this.getResourceType(resEntry.name)
@@ -213,6 +214,7 @@ class PerformanceService {
           });
         }
         break;
+      }
 
       case 'largest-contentful-paint':
         this.addMetric({
@@ -301,7 +303,7 @@ class PerformanceService {
       threshold: { warning: 80, critical: 95 },
       status: this.getMetricStatus(memoryUsagePercent, 80, 95),
       trend: this.calculateTrend('memory', memoryUsagePercent),
-      metadata: { 
+      metadata: {
         used: resource.memory.used,
         total: resource.memory.total,
         free: resource.memory.free
@@ -328,11 +330,11 @@ class PerformanceService {
 
   private generateMockData() {
     const now = new Date();
-    
+
     // Generate historical metrics for the last 24 hours
     for (let i = 0; i < 24; i++) {
       const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000).toISOString();
-      
+
       // Response Time Metric
       const responseTime = 150 + Math.random() * 100;
       this.addMetric({
@@ -397,14 +399,14 @@ class PerformanceService {
       });
     }
 
-    return filteredMetrics.sort((a, b) => 
+    return filteredMetrics.sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
 
   async getLatestMetrics(): Promise<PerformanceMetric[]> {
     const latest = new Map<string, PerformanceMetric>();
-    
+
     this.metrics.forEach(metric => {
       const key = `${metric.name}-${metric.category}`;
       if (!latest.has(key) || new Date(metric.timestamp) > new Date(latest.get(key)!.timestamp)) {
@@ -417,7 +419,7 @@ class PerformanceService {
 
   async generatePerformanceReport(period: { start: string; end: string }): Promise<PerformanceReport> {
     const metrics = await this.getMetrics(undefined, period);
-    
+
     const summary = this.calculateSummary(metrics);
     const insights = this.generateInsights(metrics);
     const recommendations = this.generateRecommendations(insights);
@@ -462,7 +464,7 @@ class PerformanceService {
       });
     }
 
-    return resources.sort((a, b) => 
+    return resources.sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
@@ -475,7 +477,7 @@ class PerformanceService {
     user: number;
   }> {
     const latestMetrics = await this.getLatestMetrics();
-    
+
     const scores = {
       frontend: this.calculateCategoryScore(latestMetrics.filter(m => m.category === 'frontend')),
       backend: this.calculateCategoryScore(latestMetrics.filter(m => m.category === 'backend')),
@@ -535,11 +537,11 @@ class PerformanceService {
     return {
       overallScore: this.calculateCategoryScore(metrics),
       totalRequests: throughputMetrics.reduce((sum, m) => sum + (m.metadata?.totalRequests || 0), 0),
-      averageResponseTime: responseTimeMetrics.length > 0 
-        ? responseTimeMetrics.reduce((sum, m) => sum + m.value, 0) / responseTimeMetrics.length 
+      averageResponseTime: responseTimeMetrics.length > 0
+        ? responseTimeMetrics.reduce((sum, m) => sum + m.value, 0) / responseTimeMetrics.length
         : 0,
-      errorRate: errorMetrics.length > 0 
-        ? errorMetrics.reduce((sum, m) => sum + m.value, 0) / errorMetrics.length 
+      errorRate: errorMetrics.length > 0
+        ? errorMetrics.reduce((sum, m) => sum + m.value, 0) / errorMetrics.length
         : 0,
       uptime: 99.9 // Mock uptime
     };
