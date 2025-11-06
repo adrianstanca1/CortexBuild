@@ -3,6 +3,7 @@
  * Task 1.3: Bundle Size Optimization
  */
 
+
 export interface BundleMetrics {
   timestamp: string;
   totalSize: number;
@@ -69,8 +70,7 @@ export class BundleMonitor {
     }
 
     // Log to console in development
-    const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
-    if (isDev) {
+    if (isDev()) {
       console.group('📦 Bundle Analysis');
       console.log(`Total Size: ${(totalSize / 1024).toFixed(2)} kB`);
       console.log(`Gzipped: ${(gzippedSize / 1024).toFixed(2)} kB`);
