@@ -22,7 +22,7 @@ export interface ApiResponse<T = any> {
   headers?: Record<string, string>;
 }
 
-class ApiClient {
+export class ApiClient {
   private baseURL: string;
   private defaultTimeout = 30000;
 
@@ -117,3 +117,6 @@ class ApiClient {
 // Export singleton instance
 export const apiClient = new ApiClient();
 export default apiClient;
+
+// Export class with uppercase alias for tests
+export { ApiClient as APIClient };
