@@ -4,6 +4,9 @@
  * Now uses real Supabase API client for authentic testing
  */
 
+// Mock logging config before importing
+jest.mock('../../config/logging.config');
+
 import { OfflineManager, QueuedRequest } from '../offlineManager';
 import apiClient, { ApiRequest } from '../apiClient';
 
