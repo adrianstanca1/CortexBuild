@@ -4,13 +4,12 @@ const STATIC_CACHE = 'cortexbuild-static-v2.0.0';
 const DYNAMIC_CACHE = 'cortexbuild-dynamic-v2.0.0';
 const API_CACHE = 'cortexbuild-api-v2.0.0';
 
-// Assets to cache immediately
+// Assets to cache immediately (app shell)
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/favicon.ico'
 ];
 
 // API endpoints to cache
@@ -25,7 +24,7 @@ const API_ENDPOINTS = [
 // Install event - cache static assets
 self.addEventListener('install', event => {
   console.log('CortexBuild Service Worker: Installing...');
-  
+
   event.waitUntil(
     Promise.all([
       caches.open(STATIC_CACHE).then(cache => {
@@ -40,14 +39,14 @@ self.addEventListener('install', event => {
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
   console.log('CortexBuild Service Worker: Activating...');
-  
+
   event.waitUntil(
     Promise.all([
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
-            if (cacheName !== STATIC_CACHE && 
-                cacheName !== DYNAMIC_CACHE && 
+            if (cacheName !== STATIC_CACHE &&
+                cacheName !== DYNAMIC_CACHE &&
                 cacheName !== API_CACHE) {
               console.log('CortexBuild Service Worker: Deleting old cache:', cacheName);
               return caches.delete(cacheName);
@@ -64,6 +63,17 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Skip chrome-extension and non-HTTP/HTTPS requests
+  if (url.protocol === 'chrome-extension:' ||
+      !['http:', 'https:'].includes(url.protocol)) {
+    return;
+  }
+
+  // Skip localhost during development
+  if (url.hostname === 'localhost' && url.port === '5173') {
+    return;
+  }
 
   // Handle different types of requests
   if (request.method === 'GET') {
@@ -88,23 +98,23 @@ async function handleApiRequest(request) {
   try {
     // Try network first
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       // Cache successful responses
       const cache = await caches.open(API_CACHE);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.log('CortexBuild Service Worker: Network failed, trying cache for:', request.url);
-    
+
     // Fallback to cache
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Return offline response for API calls
     return new Response(
       JSON.stringify({
@@ -127,7 +137,7 @@ async function handleImageRequest(request) {
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   try {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
@@ -146,11 +156,19 @@ async function handleImageRequest(request) {
 
 // Handle static asset requests with Cache First strategy
 async function handleStaticAssetRequest(request) {
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) {
-    return cachedResponse;
+  // In development (e.g. Vite on localhost:5173) we prefer the network so
+  // the dev server can serve the latest assets. In production we use
+  // cache-first for performance.
+  const url = new URL(request.url);
+  const isDev = url.hostname === 'localhost' && url.port === '5173';
+
+  if (!isDev) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
   }
-  
+
   try {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
@@ -174,18 +192,18 @@ async function handlePageRequest(request) {
     return networkResponse;
   } catch (error) {
     console.log('CortexBuild Service Worker: Network failed, trying cache for:', request.url);
-    
+
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Return offline page
     const offlineResponse = await caches.match('/');
     if (offlineResponse) {
       return offlineResponse;
     }
-    
+
     // Fallback offline page
     return new Response(
       `<!DOCTYPE html>
@@ -194,14 +212,14 @@ async function handlePageRequest(request) {
         <title>CortexBuild - Offline</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                  margin: 0; padding: 2rem; text-align: center; background: #f9fafb; }
-          .container { max-width: 400px; margin: 0 auto; padding: 2rem; background: white; 
+          .container { max-width: 400px; margin: 0 auto; padding: 2rem; background: white;
                       border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
           .icon { font-size: 4rem; margin-bottom: 1rem; }
           h1 { color: #1f2937; margin-bottom: 1rem; }
           p { color: #6b7280; margin-bottom: 2rem; }
-          button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; 
+          button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem;
                   border-radius: 6px; cursor: pointer; font-size: 1rem; }
           button:hover { background: #2563eb; }
         </style>
@@ -225,7 +243,7 @@ async function handlePageRequest(request) {
 // Background sync for offline actions
 self.addEventListener('sync', event => {
   console.log('CortexBuild Service Worker: Background sync triggered:', event.tag);
-  
+
   if (event.tag === 'background-sync-tasks') {
     event.waitUntil(syncOfflineActions());
   }
@@ -236,10 +254,10 @@ async function syncOfflineActions() {
   try {
     // Get offline actions from IndexedDB (would be implemented)
     console.log('CortexBuild Service Worker: Syncing offline actions...');
-    
+
     // Sync offline task updates, form submissions, etc.
     // This would integrate with the app's offline storage
-    
+
     // Notify the app that sync is complete
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
@@ -256,7 +274,7 @@ async function syncOfflineActions() {
 // Push notification handling
 self.addEventListener('push', event => {
   console.log('CortexBuild Service Worker: Push notification received');
-  
+
   const options = {
     body: 'You have new updates in CortexBuild',
     icon: '/icons/icon-192x192.png',
@@ -279,13 +297,13 @@ self.addEventListener('push', event => {
       }
     ]
   };
-  
+
   if (event.data) {
     const data = event.data.json();
     options.body = data.body || options.body;
     options.data = { ...options.data, ...data };
   }
-  
+
   event.waitUntil(
     self.registration.showNotification('CortexBuild', options)
   );
@@ -294,9 +312,9 @@ self.addEventListener('push', event => {
 // Notification click handling
 self.addEventListener('notificationclick', event => {
   console.log('CortexBuild Service Worker: Notification clicked');
-  
+
   event.notification.close();
-  
+
   if (event.action === 'explore') {
     event.waitUntil(
       clients.openWindow('/')
@@ -315,11 +333,11 @@ self.addEventListener('notificationclick', event => {
 // Message handling from the main app
 self.addEventListener('message', event => {
   console.log('CortexBuild Service Worker: Message received:', event.data);
-  
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
+
   if (event.data && event.data.type === 'CACHE_URLS') {
     event.waitUntil(
       caches.open(DYNAMIC_CACHE).then(cache => {

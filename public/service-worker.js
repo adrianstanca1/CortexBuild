@@ -65,6 +65,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip localhost development
+  if (url.hostname === 'localhost' && url.port === '5173') {
+    return;
+  }
+
   // API requests - Network first, fallback to cache
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirstStrategy(request, CACHE_NAMES.API));

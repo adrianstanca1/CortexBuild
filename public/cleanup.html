@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Service Worker Cleanup</title>
+</head>
+<body>
+    <h1>Service Worker Cleanup</h1>
+    <p>This page will help clean up service worker issues during development.</p>
+    <button type="button" onclick="cleanupServiceWorkers()">Clean Up Service Workers</button>
+    <div id="output"></div>
+
+    <script>
+        function cleanupServiceWorkers() {
+            const output = document.getElementById('output');
+            output.innerHTML = 'Starting cleanup...<br>';
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    output.innerHTML += `Found ${registrations.length} service worker registrations<br>`;
+                    
+                    registrations.forEach(registration => {
+                        output.innerHTML += `Unregistering: ${registration.scope}<br>`;
+                        registration.unregister().then(success => {
+                            output.innerHTML += `Unregistered: ${success}<br>`;
+                        });
+                    });
+                });
+                
+                // Clear all caches
+                if ('caches' in window) {
+                    caches.keys().then(cacheNames => {
+                        output.innerHTML += `Found ${cacheNames.length} caches<br>`;
+                        cacheNames.forEach(cacheName => {
+                            caches.delete(cacheName).then(success => {
+                                output.innerHTML += `Deleted cache: ${cacheName} (${success})<br>`;
+                            });
+                        });
+                    });
+                }
+            } else {
+                output.innerHTML += 'Service workers not supported in this browser<br>';
+            }
+        }
+
+        // Auto-run cleanup on page load
+        window.addEventListener('load', cleanupServiceWorkers);
+    </script>
+</body>
+</html>

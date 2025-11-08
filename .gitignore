@@ -63,3 +63,4 @@ out/
 *.bak4
 
 .next
+tsconfig.tsbuildinfo
