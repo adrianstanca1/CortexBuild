@@ -76,12 +76,27 @@ export class CodexSDK {
     };
     this.threads = new Map();
 
-    // Initialize Supabase for persistence
+    // Initialize Supabase for persistence (only if properly configured)
     if (typeof window !== 'undefined') {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      if (supabaseUrl && supabaseKey) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+      
+      // Only initialize if both URL and key are properly configured
+      if (supabaseUrl && supabaseKey && 
+          supabaseUrl !== 'YOUR_SUPABASE_URL' && 
+          supabaseKey !== 'YOUR_SUPABASE_ANON_KEY' &&
+          supabaseUrl.startsWith('http') &&
+          supabaseKey.length > 20) {
+        try {
+          this.supabase = createClient(supabaseUrl, supabaseKey);
+          console.log('✅ Codex SDK: Supabase client initialized');
+        } catch (e) {
+          console.warn('⚠️ Codex SDK: Supabase initialization failed, using local storage');
+          this.supabase = null;
+        }
+      } else {
+        console.log('ℹ️ Codex SDK: Supabase not configured, using local storage');
+        this.supabase = null;
       }
     }
   }

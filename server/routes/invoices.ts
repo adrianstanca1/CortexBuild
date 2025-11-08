@@ -1,16 +1,16 @@
 // CortexBuild Platform - Invoices API Routes
-// Version: 1.0.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Invoice, InvoiceItem, ApiResponse, PaginatedResponse } from '../types';
 
-export function createInvoicesRouter(db: Database.Database): Router {
+export function createInvoicesRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/invoices - List all invoices with filters
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         client_id,
@@ -25,59 +25,63 @@ export function createInvoicesRouter(db: Database.Database): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT i.*, 
-               c.name as client_name,
-               p.name as project_name
-        FROM invoices i
-        LEFT JOIN clients c ON i.client_id = c.id
-        LEFT JOIN projects p ON i.project_id = p.id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('invoices')
+        .select(`
+          *,
+          clients!invoices_client_id_fkey(id, name),
+          projects!invoices_project_id_fkey(id, name)
+        `, { count: 'exact' });
 
+      // Apply filters
       if (client_id) {
-        query += ' AND i.client_id = ?';
-        params.push(parseInt(client_id));
+        query = query.eq('client_id', client_id);
       }
 
       if (project_id) {
-        query += ' AND i.project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (status) {
-        query += ' AND i.status = ?';
-        params.push(status);
+        query = query.eq('status', status);
       }
 
       if (search) {
-        query += ' AND (i.invoice_number LIKE ? OR c.name LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm);
+        query = query.or(`invoice_number.ilike.%${search}%,clients.name.ilike.%${search}%`);
       }
 
-      // Get total count
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      // Add pagination and ordering
+      query = query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      // Add pagination
-      query += ' ORDER BY i.created_at DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      const { data: invoices, error, count } = await query;
 
-      const invoices = db.prepare(query).all(...params);
+      if (error) throw error;
+
+      // Transform data
+      const transformedInvoices = (invoices || []).map((i: any) => {
+        const clients = Array.isArray(i.clients) ? i.clients[0] : i.clients;
+        const projects = Array.isArray(i.projects) ? i.projects[0] : i.projects;
+        return {
+          ...i,
+          client_name: clients?.name || null,
+          project_name: projects?.name || null
+        };
+      });
 
       res.json({
         success: true,
-        data: invoices,
+        data: transformedInvoices,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get invoices error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -86,23 +90,21 @@ export function createInvoicesRouter(db: Database.Database): Router {
   });
 
   // GET /api/invoices/:id - Get single invoice with line items
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const invoice = db.prepare(`
-        SELECT i.*, 
-               c.name as client_name,
-               c.email as client_email,
-               c.phone as client_phone,
-               p.name as project_name
-        FROM invoices i
-        LEFT JOIN clients c ON i.client_id = c.id
-        LEFT JOIN projects p ON i.project_id = p.id
-        WHERE i.id = ?
-      `).get(id);
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .select(`
+          *,
+          clients!invoices_client_id_fkey(id, name, email, phone),
+          projects!invoices_project_id_fkey(id, name)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!invoice) {
+      if (invoiceError || !invoice) {
         return res.status(404).json({
           success: false,
           error: 'Invoice not found'
@@ -110,18 +112,31 @@ export function createInvoicesRouter(db: Database.Database): Router {
       }
 
       // Get line items
-      const items = db.prepare(`
-        SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id
-      `).all(id);
+      const { data: items } = await supabase
+        .from('invoice_items')
+        .select('*')
+        .eq('invoice_id', id)
+        .order('id');
+
+      // Transform data
+      const clients = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
+      const projects = Array.isArray(invoice.projects) ? invoice.projects[0] : invoice.projects;
+
+      const transformedInvoice = {
+        ...invoice,
+        client_name: clients?.name || null,
+        client_email: clients?.email || null,
+        client_phone: clients?.phone || null,
+        project_name: projects?.name || null,
+        items: items || []
+      };
 
       res.json({
         success: true,
-        data: {
-          ...invoice,
-          items
-        }
+        data: transformedInvoice
       });
     } catch (error: any) {
+      console.error('Get invoice error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -130,7 +145,7 @@ export function createInvoicesRouter(db: Database.Database): Router {
   });
 
   // POST /api/invoices - Create new invoice with line items
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         client_id,
@@ -154,51 +169,60 @@ export function createInvoicesRouter(db: Database.Database): Router {
       }
 
       // Create invoice
-      const result = db.prepare(`
-        INSERT INTO invoices (
-          client_id, project_id, invoice_number, issue_date, due_date,
-          subtotal, tax_rate, tax_amount, total, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        client_id, project_id, invoice_number, issue_date, due_date,
-        subtotal, tax_rate, tax_amount, total, notes
-      );
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          client_id,
+          project_id: project_id || null,
+          invoice_number,
+          issue_date,
+          due_date,
+          subtotal,
+          tax_rate,
+          tax_amount,
+          total,
+          notes: notes || null
+        })
+        .select()
+        .single();
 
-      const invoiceId = result.lastInsertRowid;
+      if (invoiceError) throw invoiceError;
 
-      // Create line items
-      if (items.length > 0) {
-        const insertItem = db.prepare(`
-          INSERT INTO invoice_items (
-            invoice_id, description, quantity, unit_price, amount
-          ) VALUES (?, ?, ?, ?, ?)
-        `);
-
-        for (const item of items) {
-          insertItem.run(
-            invoiceId,
-            item.description,
-            item.quantity,
-            item.unit_price,
-            item.amount
+      // Create line items if provided
+      if (items.length > 0 && invoice) {
+        const { error: itemsError } = await supabase
+          .from('invoice_items')
+          .insert(
+            items.map((item: InvoiceItem) => ({
+              invoice_id: invoice.id,
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              amount: item.amount
+            }))
           );
+
+        if (itemsError) {
+          console.warn('Failed to create invoice items:', itemsError);
         }
       }
 
-      const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
-
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        project_id,
-        'invoice',
-        invoiceId,
-        'created',
-        `Created invoice: ${invoice_number}`
-      );
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id: project_id || null,
+            entity_type: 'invoice',
+            entity_id: invoice.id,
+            action: 'created',
+            description: `Created invoice: ${invoice_number}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -206,6 +230,7 @@ export function createInvoicesRouter(db: Database.Database): Router {
         message: 'Invoice created successfully'
       });
     } catch (error: any) {
+      console.error('Create invoice error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -214,12 +239,17 @@ export function createInvoicesRouter(db: Database.Database): Router {
   });
 
   // PUT /api/invoices/:id - Update invoice
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM invoices WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -227,50 +257,50 @@ export function createInvoicesRouter(db: Database.Database): Router {
         });
       }
 
-      const fields = Object.keys(updates).filter(key => key !== 'id' && key !== 'items');
-      if (fields.length === 0 && !updates.items) {
-        return res.status(400).json({
-          success: false,
-          error: 'No fields to update'
-        });
-      }
+      const { id: _, items, ...updateData } = updates;
 
-      // Update invoice
-      if (fields.length > 0) {
-        const setClause = fields.map(field => `${field} = ?`).join(', ');
-        const values = fields.map(field => updates[field]);
+      // Update invoice if there are fields to update
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateError } = await supabase
+          .from('invoices')
+          .update(updateData)
+          .eq('id', id);
 
-        db.prepare(`
-          UPDATE invoices 
-          SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-          WHERE id = ?
-        `).run(...values, id);
+        if (updateError) throw updateError;
       }
 
       // Update line items if provided
-      if (updates.items) {
+      if (items) {
         // Delete existing items
-        db.prepare('DELETE FROM invoice_items WHERE invoice_id = ?').run(id);
+        await supabase
+          .from('invoice_items')
+          .delete()
+          .eq('invoice_id', id);
 
         // Insert new items
-        const insertItem = db.prepare(`
-          INSERT INTO invoice_items (
-            invoice_id, description, quantity, unit_price, amount
-          ) VALUES (?, ?, ?, ?, ?)
-        `);
+        if (items.length > 0) {
+          const { error: itemsError } = await supabase
+            .from('invoice_items')
+            .insert(
+              items.map((item: InvoiceItem) => ({
+                invoice_id: id,
+                description: item.description,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                amount: item.amount
+              }))
+            );
 
-        for (const item of updates.items) {
-          insertItem.run(
-            id,
-            item.description,
-            item.quantity,
-            item.unit_price,
-            item.amount
-          );
+          if (itemsError) throw itemsError;
         }
       }
 
-      const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(id);
+      // Get updated invoice
+      const { data: invoice } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('id', id)
+        .single();
 
       res.json({
         success: true,
@@ -278,6 +308,7 @@ export function createInvoicesRouter(db: Database.Database): Router {
         message: 'Invoice updated successfully'
       });
     } catch (error: any) {
+      console.error('Update invoice error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -286,11 +317,16 @@ export function createInvoicesRouter(db: Database.Database): Router {
   });
 
   // PUT /api/invoices/:id/send - Send invoice to client
-  router.put('/:id/send', (req: Request, res: Response) => {
+  router.put('/:id/send', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const existing = db.prepare('SELECT * FROM invoices WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -298,13 +334,17 @@ export function createInvoicesRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare(`
-        UPDATE invoices 
-        SET status = 'sent', sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(id);
+      const { data: invoice, error } = await supabase
+        .from('invoices')
+        .update({
+          status: 'sent',
+          sent_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-      const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(id);
+      if (error) throw error;
 
       res.json({
         success: true,
@@ -312,6 +352,7 @@ export function createInvoicesRouter(db: Database.Database): Router {
         message: 'Invoice sent successfully'
       });
     } catch (error: any) {
+      console.error('Send invoice error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -320,12 +361,17 @@ export function createInvoicesRouter(db: Database.Database): Router {
   });
 
   // PUT /api/invoices/:id/pay - Mark invoice as paid
-  router.put('/:id/pay', (req: Request, res: Response) => {
+  router.put('/:id/pay', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { payment_date } = req.body;
 
-      const existing = db.prepare('SELECT * FROM invoices WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -333,13 +379,17 @@ export function createInvoicesRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare(`
-        UPDATE invoices 
-        SET status = 'paid', paid_at = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(payment_date || new Date().toISOString(), id);
+      const { data: invoice, error } = await supabase
+        .from('invoices')
+        .update({
+          status: 'paid',
+          paid_at: payment_date || new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-      const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(id);
+      if (error) throw error;
 
       res.json({
         success: true,
@@ -347,6 +397,7 @@ export function createInvoicesRouter(db: Database.Database): Router {
         message: 'Invoice marked as paid'
       });
     } catch (error: any) {
+      console.error('Pay invoice error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -355,11 +406,16 @@ export function createInvoicesRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/invoices/:id - Delete invoice
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(id);
+      const { data: invoice } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!invoice) {
         return res.status(404).json({
           success: false,
@@ -368,16 +424,25 @@ export function createInvoicesRouter(db: Database.Database): Router {
       }
 
       // Delete line items first
-      db.prepare('DELETE FROM invoice_items WHERE invoice_id = ?').run(id);
-      
+      await supabase
+        .from('invoice_items')
+        .delete()
+        .eq('invoice_id', id);
+
       // Delete invoice
-      db.prepare('DELETE FROM invoices WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Invoice deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete invoice error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -387,4 +452,3 @@ export function createInvoicesRouter(db: Database.Database): Router {
 
   return router;
 }
-

@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { Play, CheckCircle, XCircle, Clock, FileText, Plus, Trash2 } from 'lucide-react';
+import { Play, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface TestingFrameworkProps {
@@ -190,4 +190,3 @@ const TestingFramework: React.FC<TestingFrameworkProps> = ({ isDarkMode = true }
 };
 
 export default TestingFramework;
-

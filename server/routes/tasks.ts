@@ -1,9 +1,9 @@
 // CortexBuild Platform - Tasks API Routes
-// Version: 1.1.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Task, ApiResponse, PaginatedResponse } from '../types';
 import {
   validateBody,
@@ -15,11 +15,11 @@ import {
   idParamSchema
 } from '../utils/validation';
 
-export function createTasksRouter(db: Database.Database): Router {
+export function createTasksRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/tasks - List all tasks
-  router.get('/', validateQuery(taskFiltersSchema), (req: Request, res: Response) => {
+  router.get('/', validateQuery(taskFiltersSchema), async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -36,69 +36,65 @@ export function createTasksRouter(db: Database.Database): Router {
       const limitNum = limit;
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT t.*, 
-               p.name as project_name,
-               m.name as milestone_title,
-               u.name as assigned_to_name
-        FROM tasks t
-        LEFT JOIN projects p ON t.project_id = p.id
-        LEFT JOIN milestones m ON t.milestone_id = m.id
-        LEFT JOIN users u ON t.assigned_to = u.id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('project_tasks_gantt')
+        .select('*', { count: 'exact' });
 
+      // Apply filters
       if (project_id) {
-        query += ' AND t.project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (milestone_id) {
-        query += ' AND t.milestone_id = ?';
-        params.push(parseInt(milestone_id));
+        query = query.eq('milestone_id', milestone_id);
       }
 
       if (assigned_to) {
-        query += ' AND t.assigned_to = ?';
-        params.push(parseInt(assigned_to));
+        query = query.eq('assigned_to', assigned_to);
       }
 
       if (status) {
-        query += ' AND t.status = ?';
-        params.push(status);
+        query = query.eq('status', status);
       }
 
       if (priority) {
-        query += ' AND t.priority = ?';
-        params.push(priority);
+        query = query.eq('priority', priority);
       }
 
       if (search) {
-        query += ' AND (t.title LIKE ? OR t.description LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm);
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
       }
 
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      // Add pagination and ordering
+      query = query
+        .order('end_date', { ascending: true })
+        .order('priority', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      query += ' ORDER BY t.due_date ASC, t.priority DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      const { data: tasks, error, count } = await query;
 
-      const tasks = db.prepare(query).all(...params);
+      if (error) throw error;
+
+      // Transform data
+      const transformedTasks = (tasks || []).map((t: any) => ({
+        ...t,
+        project_name: t.projects?.name || null,
+        milestone_title: t.milestones?.name || null,
+        assigned_to_name: t.users?.name || null
+      }));
 
       res.json({
         success: true,
-        data: tasks,
+        data: transformedTasks,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get tasks error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -107,35 +103,43 @@ export function createTasksRouter(db: Database.Database): Router {
   });
 
   // GET /api/tasks/:id - Get single task
-  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const task = db.prepare(`
-        SELECT t.*, 
-               p.name as project_name,
-               m.name as milestone_title,
-               u.name as assigned_to_name,
-               u.email as assigned_to_email
-        FROM tasks t
-        LEFT JOIN projects p ON t.project_id = p.id
-        LEFT JOIN milestones m ON t.milestone_id = m.id
-        LEFT JOIN users u ON t.assigned_to = u.id
-        WHERE t.id = ?
-      `).get(id);
+      const { data: task, error } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          projects!tasks_project_id_fkey(id, name),
+          milestones!tasks_milestone_id_fkey(id, name),
+          users!tasks_assigned_to_fkey(id, name, email)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!task) {
+      if (error || !task) {
         return res.status(404).json({
           success: false,
           error: 'Task not found'
         });
       }
 
+      // Transform data
+      const transformedTask = {
+        ...task,
+        project_name: task.projects?.name || null,
+        milestone_title: task.milestones?.name || null,
+        assigned_to_name: task.users?.name || null,
+        assigned_to_email: task.users?.email || null
+      };
+
       res.json({
         success: true,
-        data: task
+        data: transformedTask
       });
     } catch (error: any) {
+      console.error('Get task error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -168,19 +172,24 @@ export function createTasksRouter(db: Database.Database): Router {
         status, priority, due_date, estimated_hours
       );
 
-      const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        project_id,
-        'task',
-        result.lastInsertRowid,
-        'created',
-        `Created task: ${title}`
-      );
+      // Log activity
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id,
+            entity_type: 'task',
+            entity_id: task.id,
+            action: 'created',
+            description: `Created task: ${title}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -188,6 +197,7 @@ export function createTasksRouter(db: Database.Database): Router {
         message: 'Task created successfully'
       });
     } catch (error: any) {
+      console.error('Create task error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -201,7 +211,12 @@ export function createTasksRouter(db: Database.Database): Router {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -212,13 +227,7 @@ export function createTasksRouter(db: Database.Database): Router {
       const setClause = fields.map(field => `${field} = ?`).join(', ');
       const values = fields.map(field => updates[field]);
 
-      db.prepare(`
-        UPDATE tasks 
-        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(...values, id);
-
-      const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+      if (error) throw error;
 
       res.json({
         success: true,
@@ -226,6 +235,7 @@ export function createTasksRouter(db: Database.Database): Router {
         message: 'Task updated successfully'
       });
     } catch (error: any) {
+      console.error('Update task error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -238,7 +248,12 @@ export function createTasksRouter(db: Database.Database): Router {
     try {
       const { id } = req.params;
 
-      const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('tasks')
+        .select('id, project_id, title')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -246,25 +261,34 @@ export function createTasksRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare(`
-        UPDATE tasks 
-        SET status = 'completed', completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(id);
+      const { data: task, error } = await supabase
+        .from('tasks')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-      const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+      if (error) throw error;
 
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        (existing as any).project_id,
-        'task',
-        id,
-        'completed',
-        `Completed task: ${(existing as any).title}`
-      );
+      // Log activity
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id: existing.project_id,
+            entity_type: 'task',
+            entity_id: id,
+            action: 'completed',
+            description: `Completed task: ${existing.title}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.json({
         success: true,
@@ -272,6 +296,7 @@ export function createTasksRouter(db: Database.Database): Router {
         message: 'Task marked as complete'
       });
     } catch (error: any) {
+      console.error('Complete task error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -284,7 +309,12 @@ export function createTasksRouter(db: Database.Database): Router {
     try {
       const { id } = req.params;
 
-      const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+      const { data: task } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!task) {
         return res.status(404).json({
           success: false,
@@ -292,13 +322,19 @@ export function createTasksRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Task deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete task error:', error);
       res.status(500).json({
         success: false,
         error: error.message

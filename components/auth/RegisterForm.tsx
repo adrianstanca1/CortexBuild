@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User } from '../../types';
 import * as authService from '../../auth/authService';
 import { ArrowPathIcon } from '../Icons';
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../../lib/supabase/client';
 import { validateName, validateEmail, validatePassword, validateCompanyName, combineValidations } from '../../utils/validation';
 
 interface RegisterFormProps {
@@ -59,6 +59,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(({ onLoginSuccess }
     const handleOAuthSignup = async (provider: 'google' | 'github') => {
         if (!supabase) {
             setError('OAuth authentication is not available. Supabase is not configured.');
+            setIsOAuthLoading(null);
             return;
         }
 
@@ -66,7 +67,7 @@ const RegisterForm: React.FC<RegisterFormProps> = React.memo(({ onLoginSuccess }
         setIsOAuthLoading(provider);
 
         try {
-            const { data, error } = await supabase.auth.signInWithOAuth({
+            const { error } = await supabase.auth.signInWithOAuth({
                 provider: provider,
                 options: {
                     redirectTo: `${window.location.origin}/#dashboard`,

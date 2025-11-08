@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, Clock, Play, Pause, Trash2, Plus, Calendar, Activity } from 'lucide-react';
+import { getAPIUrl } from '../../../config/api.config';
 
 interface SmartTool {
   id: number;
@@ -26,7 +27,6 @@ export const SmartToolsManager: React.FC = () => {
   const [tools, setTools] = useState<SmartTool[]>([]);
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedTool, setSelectedTool] = useState<SmartTool | null>(null);
 
   useEffect(() => {
     fetchTools();
@@ -36,7 +36,7 @@ export const SmartToolsManager: React.FC = () => {
   const fetchTools = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/smart-tools', {
+      const response = await fetch(getAPIUrl('/smart-tools'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -51,7 +51,7 @@ export const SmartToolsManager: React.FC = () => {
   const fetchExecutions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/smart-tools/executions', {
+      const response = await fetch(getAPIUrl('/smart-tools/executions'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -66,7 +66,7 @@ export const SmartToolsManager: React.FC = () => {
   const createTool = async (toolData: any) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/smart-tools', {
+      const response = await fetch(getAPIUrl('/smart-tools'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -87,7 +87,7 @@ export const SmartToolsManager: React.FC = () => {
   const toggleTool = async (toolId: number, isActive: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/smart-tools/${toolId}/toggle`, {
+      await fetch(getAPIUrl(`/smart-tools/${toolId}/toggle`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,7 +104,7 @@ export const SmartToolsManager: React.FC = () => {
   const runTool = async (toolId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/smart-tools/${toolId}/run`, {
+      const response = await fetch(getAPIUrl(`/smart-tools/${toolId}/run`), {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -123,7 +123,7 @@ export const SmartToolsManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/smart-tools/${toolId}`, {
+      await fetch(getAPIUrl(`/smart-tools/${toolId}`), {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -401,4 +401,3 @@ const CreateToolModal: React.FC<{ onClose: () => void; onCreate: (data: any) => 
     </div>
   );
 };
-

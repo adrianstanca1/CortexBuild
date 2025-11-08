@@ -18,7 +18,7 @@ const NotificationsWidget: React.FC<NotificationsWidgetProps> = ({ onDeepLink, c
 
     const loadNotifications = async () => {
         setIsLoading(true);
-        const fetchedNotifications = await api.fetchNotificationsForUser(currentUser);
+        const fetchedNotifications = await api.fetchNotificationsForUser(currentUser.id);
         setNotifications(fetchedNotifications);
         setIsLoading(false);
     };
@@ -31,7 +31,7 @@ const NotificationsWidget: React.FC<NotificationsWidgetProps> = ({ onDeepLink, c
         const notif = notifications.find(n => n.id === id);
         if (notif && !notif.read) {
             // Fix: Pass currentUser to the markNotificationsAsRead API call.
-            await api.markNotificationsAsRead([id], currentUser);
+            await api.markNotificationsAsRead([id]);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
         }
     };
@@ -40,7 +40,7 @@ const NotificationsWidget: React.FC<NotificationsWidgetProps> = ({ onDeepLink, c
         const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
         if (unreadIds.length > 0) {
             // Fix: Pass currentUser to the markNotificationsAsRead API call.
-            await api.markNotificationsAsRead(unreadIds, currentUser);
+            await api.markNotificationsAsRead(unreadIds);
             setNotifications(prev => prev.map(n => ({...n, read: true})));
         }
     };

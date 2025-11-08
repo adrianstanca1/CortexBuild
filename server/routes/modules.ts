@@ -1,18 +1,18 @@
 // CortexBuild Platform - Developer Platform API Routes
-// Version: 1.1.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Module, ModuleReview, ApiKey, ApiResponse, PaginatedResponse } from '../types';
 
-export function createModulesRouter(db: Database.Database): Router {
+export function createModulesRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // ========== MODULES MARKETPLACE ==========
 
   // GET /api/modules - List all modules in marketplace
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         category,
@@ -26,55 +26,66 @@ export function createModulesRouter(db: Database.Database): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT m.*, 
-               u.name as developer_name,
-               AVG(mr.rating) as avg_rating,
-               COUNT(DISTINCT mr.id) as review_count
-        FROM modules m
-        LEFT JOIN users u ON m.developer_id = u.id
-        LEFT JOIN module_reviews mr ON m.id = mr.module_id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('modules')
+        .select(`
+          *,
+          users!modules_developer_id_fkey(id, name),
+          module_reviews(rating)
+        `, { count: 'exact' });
 
+      // Apply filters
       if (category) {
-        query += ' AND m.category = ?';
-        params.push(category);
+        query = query.eq('category', category);
       }
 
       if (status) {
-        query += ' AND m.status = ?';
-        params.push(status);
+        query = query.eq('status', status);
       }
 
       if (search) {
-        query += ' AND (m.name LIKE ? OR m.description LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm);
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
       }
 
-      query += ' GROUP BY m.id';
+      // Add pagination and ordering
+      query = query
+        .order('downloads', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      const countQuery = `SELECT COUNT(*) as total FROM (${query})`;
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      const { data: modules, error, count } = await query;
 
-      query += ' ORDER BY m.downloads DESC, m.created_at DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      if (error) throw error;
 
-      const modules = db.prepare(query).all(...params);
+      // Transform data and calculate ratings
+      const transformedModules = (modules || []).map((m: any) => {
+        const users = Array.isArray(m.users) ? m.users[0] : m.users;
+        const reviews = m.module_reviews || [];
+        const ratings = reviews.map((r: any) => r.rating).filter(Boolean);
+        const avgRating = ratings.length > 0 
+          ? ratings.reduce((sum: number, r: number) => sum + r, 0) / ratings.length 
+          : 0;
+
+        return {
+          ...m,
+          developer_name: users?.name || null,
+          avg_rating: Math.round(avgRating * 10) / 10,
+          review_count: ratings.length
+        };
+      });
 
       res.json({
         success: true,
-        data: modules,
+        data: transformedModules,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get modules error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -83,20 +94,20 @@ export function createModulesRouter(db: Database.Database): Router {
   });
 
   // GET /api/modules/:id - Get single module with reviews
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const module = db.prepare(`
-        SELECT m.*, 
-               u.name as developer_name,
-               u.email as developer_email
-        FROM modules m
-        LEFT JOIN users u ON m.developer_id = u.id
-        WHERE m.id = ?
-      `).get(id);
+      const { data: module, error: moduleError } = await supabase
+        .from('modules')
+        .select(`
+          *,
+          users!modules_developer_id_fkey(id, name, email)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!module) {
+      if (moduleError || !module) {
         return res.status(404).json({
           success: false,
           error: 'Module not found'
@@ -104,24 +115,39 @@ export function createModulesRouter(db: Database.Database): Router {
       }
 
       // Get reviews
-      const reviews = db.prepare(`
-        SELECT mr.*, 
-               u.name as reviewer_name
-        FROM module_reviews mr
-        LEFT JOIN users u ON mr.user_id = u.id
-        WHERE mr.module_id = ?
-        ORDER BY mr.created_at DESC
-        LIMIT 10
-      `).all(id);
+      const { data: reviews } = await supabase
+        .from('module_reviews')
+        .select(`
+          *,
+          users!module_reviews_user_id_fkey(id, name)
+        `)
+        .eq('module_id', id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      // Transform data
+      const users = Array.isArray(module.users) ? module.users[0] : module.users;
+      const transformedReviews = (reviews || []).map((r: any) => {
+        const reviewUsers = Array.isArray(r.users) ? r.users[0] : r.users;
+        return {
+          ...r,
+          reviewer_name: reviewUsers?.name || null
+        };
+      });
+
+      const transformedModule = {
+        ...module,
+        developer_name: users?.name || null,
+        developer_email: users?.email || null,
+        reviews: transformedReviews
+      };
 
       res.json({
         success: true,
-        data: {
-          ...module,
-          reviews
-        }
+        data: transformedModule
       });
     } catch (error: any) {
+      console.error('Get module error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -130,7 +156,7 @@ export function createModulesRouter(db: Database.Database): Router {
   });
 
   // POST /api/modules - Publish new module
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         developer_id,
@@ -150,17 +176,22 @@ export function createModulesRouter(db: Database.Database): Router {
         });
       }
 
-      const result = db.prepare(`
-        INSERT INTO modules (
-          developer_id, name, description, category, version,
-          price, repository_url, documentation_url
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        developer_id, name, description, category, version,
-        price, repository_url, documentation_url
-      );
+      const { data: module, error } = await supabase
+        .from('modules')
+        .insert({
+          developer_id,
+          name,
+          description,
+          category,
+          version,
+          price,
+          repository_url: repository_url || null,
+          documentation_url: documentation_url || null
+        })
+        .select()
+        .single();
 
-      const module = db.prepare('SELECT * FROM modules WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       res.status(201).json({
         success: true,
@@ -168,6 +199,7 @@ export function createModulesRouter(db: Database.Database): Router {
         message: 'Module published successfully'
       });
     } catch (error: any) {
+      console.error('Publish module error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -176,12 +208,17 @@ export function createModulesRouter(db: Database.Database): Router {
   });
 
   // PUT /api/modules/:id - Update module
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM modules WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('modules')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -189,24 +226,22 @@ export function createModulesRouter(db: Database.Database): Router {
         });
       }
 
-      const fields = Object.keys(updates).filter(key => key !== 'id');
-      if (fields.length === 0) {
+      const { id: _, ...updateData } = updates;
+      if (Object.keys(updateData).length === 0) {
         return res.status(400).json({
           success: false,
           error: 'No fields to update'
         });
       }
 
-      const setClause = fields.map(field => `${field} = ?`).join(', ');
-      const values = fields.map(field => updates[field]);
+      const { data: module, error } = await supabase
+        .from('modules')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-      db.prepare(`
-        UPDATE modules 
-        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(...values, id);
-
-      const module = db.prepare('SELECT * FROM modules WHERE id = ?').get(id);
+      if (error) throw error;
 
       res.json({
         success: true,
@@ -214,6 +249,7 @@ export function createModulesRouter(db: Database.Database): Router {
         message: 'Module updated successfully'
       });
     } catch (error: any) {
+      console.error('Update module error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -222,7 +258,7 @@ export function createModulesRouter(db: Database.Database): Router {
   });
 
   // POST /api/modules/:id/review - Add review to module
-  router.post('/:id/review', (req: Request, res: Response) => {
+  router.post('/:id/review', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { user_id, rating, comment } = req.body;
@@ -241,7 +277,12 @@ export function createModulesRouter(db: Database.Database): Router {
         });
       }
 
-      const module = db.prepare('SELECT * FROM modules WHERE id = ?').get(id);
+      const { data: module } = await supabase
+        .from('modules')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!module) {
         return res.status(404).json({
           success: false,
@@ -249,12 +290,18 @@ export function createModulesRouter(db: Database.Database): Router {
         });
       }
 
-      const result = db.prepare(`
-        INSERT INTO module_reviews (module_id, user_id, rating, comment)
-        VALUES (?, ?, ?, ?)
-      `).run(id, user_id, rating, comment);
+      const { data: review, error } = await supabase
+        .from('module_reviews')
+        .insert({
+          module_id: id,
+          user_id,
+          rating,
+          comment: comment || null
+        })
+        .select()
+        .single();
 
-      const review = db.prepare('SELECT * FROM module_reviews WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       res.status(201).json({
         success: true,
@@ -262,6 +309,7 @@ export function createModulesRouter(db: Database.Database): Router {
         message: 'Review added successfully'
       });
     } catch (error: any) {
+      console.error('Add review error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -271,8 +319,8 @@ export function createModulesRouter(db: Database.Database): Router {
 
   // ========== API KEYS MANAGEMENT ==========
 
-  // GET /api/api-keys - List all API keys for user
-  router.get('/api-keys/list', (req: Request, res: Response) => {
+  // GET /api/api-keys/list - List all API keys for user
+  router.get('/api-keys/list', async (req: Request, res: Response) => {
     try {
       const { user_id } = req.query as any;
 
@@ -283,18 +331,20 @@ export function createModulesRouter(db: Database.Database): Router {
         });
       }
 
-      const keys = db.prepare(`
-        SELECT id, user_id, name, key_prefix, permissions, created_at, last_used_at, expires_at
-        FROM api_keys
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-      `).all(user_id);
+      const { data: keys, error } = await supabase
+        .from('api_keys')
+        .select('id, user_id, name, key_prefix, permissions, created_at, last_used_at, expires_at')
+        .eq('user_id', user_id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
 
       res.json({
         success: true,
-        data: keys
+        data: keys || []
       });
     } catch (error: any) {
+      console.error('Get API keys error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -302,8 +352,8 @@ export function createModulesRouter(db: Database.Database): Router {
     }
   });
 
-  // POST /api/api-keys - Generate new API key
-  router.post('/api-keys/generate', (req: Request, res: Response) => {
+  // POST /api/api-keys/generate - Generate new API key
+  router.post('/api-keys/generate', async (req: Request, res: Response) => {
     try {
       const { user_id, name, permissions = 'read' } = req.body;
 
@@ -318,15 +368,24 @@ export function createModulesRouter(db: Database.Database): Router {
       const apiKey = `cbk_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
       const keyPrefix = apiKey.substring(0, 12);
 
-      const result = db.prepare(`
-        INSERT INTO api_keys (user_id, name, api_key, key_prefix, permissions)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(user_id, name, apiKey, keyPrefix, permissions);
+      const { data: keyData, error } = await supabase
+        .from('api_keys')
+        .insert({
+          user_id,
+          name,
+          api_key: apiKey,
+          key_prefix: keyPrefix,
+          permissions
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
 
       res.status(201).json({
         success: true,
         data: {
-          id: result.lastInsertRowid,
+          id: keyData.id,
           api_key: apiKey,
           key_prefix: keyPrefix,
           name,
@@ -335,6 +394,7 @@ export function createModulesRouter(db: Database.Database): Router {
         message: 'API key generated successfully. Save it securely - it will not be shown again.'
       });
     } catch (error: any) {
+      console.error('Generate API key error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -343,11 +403,16 @@ export function createModulesRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/api-keys/:id - Revoke API key
-  router.delete('/api-keys/:id', (req: Request, res: Response) => {
+  router.delete('/api-keys/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const key = db.prepare('SELECT * FROM api_keys WHERE id = ?').get(id);
+      const { data: key } = await supabase
+        .from('api_keys')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!key) {
         return res.status(404).json({
           success: false,
@@ -355,13 +420,19 @@ export function createModulesRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare('DELETE FROM api_keys WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('api_keys')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'API key revoked successfully'
       });
     } catch (error: any) {
+      console.error('Revoke API key error:', error);
       res.status(500).json({
         success: false,
         error: error.message

@@ -3,6 +3,7 @@ import { User, Screen, Company, Project } from '../../../types';
 import * as api from '../../../api';
 import GlobalStatsWidget from '../../widgets/GlobalStatsWidget';
 import { BuildingOfficeIcon, UsersIcon } from '../../Icons';
+import { LazyImage } from '../../ui/LazyImage';
 import {
     TrendingUp,
     TrendingDown,
@@ -31,13 +32,15 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
         const loadData = async () => {
             setIsLoading(true);
             const [fetchedCompanies, fetchedUsers, fetchedProjects] = await Promise.all([
-                api.fetchCompanies(currentUser),
+                api.getAllCompanies ? await api.getAllCompanies() : [],
                 api.fetchUsers(),
                 api.fetchAllProjects(currentUser)
             ]);
-            setCompanies(fetchedCompanies);
-            setUsers(fetchedUsers);
-            setProjects(fetchedProjects);
+            // Ensure that we use .data if AxiosResponse is returned, otherwise fall back to the value itself
+            const safeExtract = (res: any) => (Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []));
+            setCompanies(safeExtract(fetchedCompanies));
+            setUsers(safeExtract(fetchedUsers));
+            setProjects(safeExtract(fetchedProjects));
             setIsLoading(false);
         };
         loadData();
@@ -67,16 +70,22 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
             {/* Modern Header */}
             <header className="mb-8">
                 <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-4xl font-black text-gray-900 mb-2">Super Admin Dashboard</h1>
-                        <p className="text-lg text-gray-600">Platform-wide overview and analytics</p>
-                    </div>
+                    <div></div>
                     <div className="flex items-center gap-4">
                         <div className="text-right">
                             <p className="text-sm font-semibold text-gray-900">{currentUser.name}</p>
                             <p className="text-xs text-gray-500 capitalize">{currentUser.role.replace('_', ' ')}</p>
                         </div>
-                        <img src={currentUser.avatar} alt="User Avatar" className="w-14 h-14 rounded-full ring-4 ring-purple-500/20" />
+                        <div className="w-14 h-14 rounded-full ring-4 ring-purple-500/20 overflow-hidden">
+                            <LazyImage
+                                src={currentUser.avatar}
+                                alt="User Avatar"
+                                placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'%3E%3Crect fill='%23e5e7eb' width='56' height='56'/%3E%3C/svg%3E"
+                                blurUp={true}
+                                className="w-14 h-14 rounded-full object-cover"
+                                containerClassName="w-14 h-14 rounded-full"
+                            />
+                        </div>
                     </div>
                 </div>
             </header>

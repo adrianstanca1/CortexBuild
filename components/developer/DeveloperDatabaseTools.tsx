@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Play, Table, Download } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 export const DeveloperDatabaseTools: React.FC = () => {
   const [query, setQuery] = useState('SELECT * FROM users LIMIT 10;');
@@ -15,7 +16,7 @@ export const DeveloperDatabaseTools: React.FC = () => {
   const fetchTables = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/developer/database/tables', {
+      const response = await fetch(getAPIUrl('/developer/database/tables'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -35,7 +36,7 @@ export const DeveloperDatabaseTools: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/developer/database/query', {
+      const response = await fetch(getAPIUrl('/developer/database/query'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1,10 +1,11 @@
 /**
- * Todo List App - Simple task management
+ * Todo List App - Simple task management with Supabase persistence
  */
 
-import React, { useState } from 'react';
-import { Plus, Trash2, Check, Circle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, Check, Circle, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { todoService } from '../../../lib/services/marketplaceAppsService';
 
 interface Todo {
     id: string;
@@ -15,46 +16,114 @@ interface Todo {
 
 interface TodoListAppProps {
     isDarkMode?: boolean;
+    currentUser?: any;
 }
 
-const TodoListApp: React.FC<TodoListAppProps> = ({ isDarkMode = true }) => {
-    const [todos, setTodos] = useState<Todo[]>([
-        { id: '1', text: 'Welcome to Todo List!', completed: false, createdAt: new Date() },
-        { id: '2', text: 'Add your first task', completed: false, createdAt: new Date() }
-    ]);
+const TodoListApp: React.FC<TodoListAppProps> = ({ isDarkMode = true, currentUser }) => {
+    const [todos, setTodos] = useState<Todo[]>([]);
     const [newTodo, setNewTodo] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
-    const addTodo = () => {
+    // Load todos from Supabase on mount
+    useEffect(() => {
+        loadTodos();
+    }, [currentUser]);
+
+    const loadTodos = async () => {
+        if (!currentUser?.id) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const data = await todoService.getAll(currentUser.id);
+            setTodos(data.map(t => ({
+                id: t.id,
+                text: t.text,
+                completed: t.completed,
+                createdAt: new Date(t.created_at)
+            })));
+        } catch (error) {
+            console.error('Failed to load todos:', error);
+            toast.error('Failed to load tasks');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const addTodo = async () => {
         if (!newTodo.trim()) {
             toast.error('Please enter a task');
             return;
         }
 
-        const todo: Todo = {
-            id: Date.now().toString(),
-            text: newTodo,
-            completed: false,
-            createdAt: new Date()
-        };
+        if (!currentUser?.id) {
+            toast.error('Please log in to save tasks');
+            return;
+        }
 
-        setTodos([...todos, todo]);
-        setNewTodo('');
-        toast.success('Task added!');
+        try {
+            setSaving(true);
+            const created = await todoService.create(currentUser.id, newTodo);
+            setTodos([{
+                id: created.id,
+                text: created.text,
+                completed: created.completed,
+                createdAt: new Date(created.created_at)
+            }, ...todos]);
+            setNewTodo('');
+            toast.success('Task added!');
+        } catch (error) {
+            console.error('Failed to add todo:', error);
+            toast.error('Failed to add task');
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const toggleTodo = (id: string) => {
-        setTodos(todos.map(todo =>
-            todo.id === id ? { ...todo, completed: !todo.completed } : todo
-        ));
+    const toggleTodo = async (id: string) => {
+        const todo = todos.find(t => t.id === id);
+        if (!todo) return;
+
+        try {
+            await todoService.update(id, { completed: !todo.completed });
+            setTodos(todos.map(t =>
+                t.id === id ? { ...t, completed: !t.completed } : t
+            ));
+        } catch (error) {
+            console.error('Failed to update todo:', error);
+            toast.error('Failed to update task');
+        }
     };
 
-    const deleteTodo = (id: string) => {
-        setTodos(todos.filter(todo => todo.id !== id));
-        toast.success('Task deleted!');
+    const deleteTodo = async (id: string) => {
+        try {
+            await todoService.delete(id);
+            setTodos(todos.filter(t => t.id !== id));
+            toast.success('Task deleted!');
+        } catch (error) {
+            console.error('Failed to delete todo:', error);
+            toast.error('Failed to delete task');
+        }
     };
 
     const completedCount = todos.filter(t => t.completed).length;
     const totalCount = todos.length;
+
+    if (loading) {
+        return (
+            <div className={`min-h-full ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} p-8 flex items-center justify-center`}>
+                <div className="text-center">
+                    <Loader2 className={`h-12 w-12 animate-spin mx-auto mb-4 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
+                    <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Loading your tasks...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`min-h-full ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} p-8`}>
@@ -76,21 +145,31 @@ const TodoListApp: React.FC<TodoListAppProps> = ({ isDarkMode = true }) => {
                             type="text"
                             value={newTodo}
                             onChange={(e) => setNewTodo(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+                            onKeyPress={(e) => e.key === 'Enter' && !saving && addTodo()}
                             placeholder="Add a new task..."
-                            className={`flex-1 px-4 py-3 rounded-xl border ${
-                                isDarkMode 
-                                    ? 'bg-gray-800 text-white border-gray-700' 
-                                    : 'bg-white text-gray-900 border-gray-300'
-                            } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                            disabled={saving}
+                            className={`flex-1 px-4 py-3 rounded-xl border ${isDarkMode
+                                ? 'bg-gray-800 text-white border-gray-700'
+                                : 'bg-white text-gray-900 border-gray-300'
+                                } focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50`}
                         />
                         <button
                             type="button"
                             onClick={addTodo}
-                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold flex items-center gap-2 transition-all"
+                            disabled={saving}
+                            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Plus className="h-5 w-5" />
-                            Add
+                            {saving ? (
+                                <>
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="h-5 w-5" />
+                                    Add
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -100,46 +179,42 @@ const TodoListApp: React.FC<TodoListAppProps> = ({ isDarkMode = true }) => {
                     {todos.map(todo => (
                         <div
                             key={todo.id}
-                            className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
-                                todo.completed
-                                    ? isDarkMode 
-                                        ? 'bg-gray-800/50 border-gray-700' 
-                                        : 'bg-gray-100 border-gray-200'
-                                    : isDarkMode
-                                        ? 'bg-gray-800 border-gray-700 hover:border-purple-500'
-                                        : 'bg-white border-gray-200 hover:border-purple-500'
-                            }`}
+                            className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${todo.completed
+                                ? isDarkMode
+                                    ? 'bg-gray-800/50 border-gray-700'
+                                    : 'bg-gray-100 border-gray-200'
+                                : isDarkMode
+                                    ? 'bg-gray-800 border-gray-700 hover:border-purple-500'
+                                    : 'bg-white border-gray-200 hover:border-purple-500'
+                                }`}
                         >
                             <button
                                 type="button"
                                 onClick={() => toggleTodo(todo.id)}
-                                className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                    todo.completed
-                                        ? 'bg-purple-600 border-purple-600'
-                                        : isDarkMode
-                                            ? 'border-gray-600 hover:border-purple-500'
-                                            : 'border-gray-300 hover:border-purple-500'
-                                }`}
+                                className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${todo.completed
+                                    ? 'bg-purple-600 border-purple-600'
+                                    : isDarkMode
+                                        ? 'border-gray-600 hover:border-purple-500'
+                                        : 'border-gray-300 hover:border-purple-500'
+                                    }`}
                             >
                                 {todo.completed && <Check className="h-4 w-4 text-white" />}
                             </button>
 
-                            <span className={`flex-1 ${
-                                todo.completed
-                                    ? `line-through ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`
-                                    : isDarkMode ? 'text-white' : 'text-gray-900'
-                            }`}>
+                            <span className={`flex-1 ${todo.completed
+                                ? `line-through ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`
+                                : isDarkMode ? 'text-white' : 'text-gray-900'
+                                }`}>
                                 {todo.text}
                             </span>
 
                             <button
                                 type="button"
                                 onClick={() => deleteTodo(todo.id)}
-                                className={`p-2 rounded-lg transition-colors ${
-                                    isDarkMode 
-                                        ? 'hover:bg-red-500/20 text-red-400' 
-                                        : 'hover:bg-red-50 text-red-500'
-                                }`}
+                                className={`p-2 rounded-lg transition-colors ${isDarkMode
+                                    ? 'hover:bg-red-500/20 text-red-400'
+                                    : 'hover:bg-red-50 text-red-500'
+                                    }`}
                             >
                                 <Trash2 className="h-4 w-4" />
                             </button>
@@ -158,9 +233,8 @@ const TodoListApp: React.FC<TodoListAppProps> = ({ isDarkMode = true }) => {
 
                 {/* Stats */}
                 {todos.length > 0 && (
-                    <div className={`mt-8 p-6 rounded-xl ${
-                        isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-                    }`}>
+                    <div className={`mt-8 p-6 rounded-xl ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+                        }`}>
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <div className={`text-3xl font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>

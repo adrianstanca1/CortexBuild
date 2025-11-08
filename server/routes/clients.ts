@@ -1,9 +1,9 @@
 // CortexBuild Platform - Clients API Routes
-// Version: 1.0.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Client, ApiResponse, PaginatedResponse } from '../types';
 import {
   validateBody,
@@ -15,11 +15,11 @@ import {
   idParamSchema
 } from '../utils/validation';
 
-export function createClientsRouter(db: Database.Database): Router {
+export function createClientsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/clients - List all clients
-  router.get('/', validateQuery(clientFiltersSchema), (req: Request, res: Response) => {
+  router.get('/', validateQuery(clientFiltersSchema), async (req: Request, res: Response) => {
     try {
       const {
         search,
@@ -32,41 +32,39 @@ export function createClientsRouter(db: Database.Database): Router {
       const limitNum = limit;
       const offset = (pageNum - 1) * limitNum;
 
-      let query = 'SELECT * FROM clients WHERE 1=1';
-      const params: any[] = [];
+      let query = supabase
+        .from('clients')
+        .select('*', { count: 'exact' });
 
       if (search) {
-        query += ' AND (name LIKE ? OR contact_name LIKE ? OR email LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm, searchTerm);
+        query = query.or(`name.ilike.%${search}%,contact_name.ilike.%${search}%,email.ilike.%${search}%`);
       }
 
       if (is_active !== undefined) {
-        query += ' AND is_active = ?';
-        params.push(is_active === 'true' ? 1 : 0);
+        query = query.eq('is_active', is_active === 'true');
       }
 
-      // Get total count
-      const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
-
       // Add pagination
-      query += ' ORDER BY name LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      query = query
+        .order('name')
+        .range(offset, offset + limitNum - 1);
 
-      const clients = db.prepare(query).all(...params);
+      const { data: clients, error, count } = await query;
+
+      if (error) throw error;
 
       res.json({
         success: true,
-        data: clients,
+        data: clients || [],
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get clients error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -75,13 +73,17 @@ export function createClientsRouter(db: Database.Database): Router {
   });
 
   // GET /api/clients/:id - Get single client
-  router.get('/:id', validateParams(idParamSchema), (req: Request, res: Response) => {
+  router.get('/:id', validateParams(idParamSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const client = db.prepare('SELECT * FROM clients WHERE id = ?').get(id);
+      const { data: client, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-      if (!client) {
+      if (clientError || !client) {
         return res.status(404).json({
           success: false,
           error: 'Client not found'
@@ -89,29 +91,30 @@ export function createClientsRouter(db: Database.Database): Router {
       }
 
       // Get client projects
-      const projects = db.prepare(`
-        SELECT * FROM projects 
-        WHERE client_id = ? 
-        ORDER BY created_at DESC
-      `).all(id);
+      const { data: projects } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('client_id', id)
+        .order('created_at', { ascending: false });
 
       // Get client invoices
-      const invoices = db.prepare(`
-        SELECT * FROM invoices 
-        WHERE client_id = ? 
-        ORDER BY issue_date DESC
-        LIMIT 10
-      `).all(id);
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('client_id', id)
+        .order('issue_date', { ascending: false })
+        .limit(10);
 
       res.json({
         success: true,
         data: {
           ...client,
-          projects,
-          invoices
+          projects: projects || [],
+          invoices: invoices || []
         }
       });
     } catch (error: any) {
+      console.error('Get client error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -150,7 +153,7 @@ export function createClientsRouter(db: Database.Database): Router {
         zip_code, country, website, tax_id, payment_terms, credit_limit, notes
       );
 
-      const client = db.prepare('SELECT * FROM clients WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       res.status(201).json({
         success: true,
@@ -158,6 +161,7 @@ export function createClientsRouter(db: Database.Database): Router {
         message: 'Client created successfully'
       });
     } catch (error: any) {
+      console.error('Create client error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -166,12 +170,18 @@ export function createClientsRouter(db: Database.Database): Router {
   });
 
   // PUT /api/clients/:id - Update client
-  router.put('/:id', validateParams(idParamSchema), validateBody(updateClientSchema), (req: Request, res: Response) => {
+  router.put('/:id', validateParams(idParamSchema), validateBody(updateClientSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM clients WHERE id = ?').get(id);
+      // Check if client exists
+      const { data: existing } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -182,13 +192,7 @@ export function createClientsRouter(db: Database.Database): Router {
       const setClause = fields.map(field => `${field} = ?`).join(', ');
       const values = fields.map(field => updates[field]);
 
-      db.prepare(`
-        UPDATE clients 
-        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(...values, id);
-
-      const client = db.prepare('SELECT * FROM clients WHERE id = ?').get(id);
+      if (error) throw error;
 
       res.json({
         success: true,
@@ -196,6 +200,7 @@ export function createClientsRouter(db: Database.Database): Router {
         message: 'Client updated successfully'
       });
     } catch (error: any) {
+      console.error('Update client error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -208,7 +213,12 @@ export function createClientsRouter(db: Database.Database): Router {
     try {
       const { id } = req.params;
 
-      const client = db.prepare('SELECT * FROM clients WHERE id = ?').get(id);
+      const { data: client } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!client) {
         return res.status(404).json({
           success: false,
@@ -217,21 +227,31 @@ export function createClientsRouter(db: Database.Database): Router {
       }
 
       // Check if client has projects
-      const projectCount = db.prepare('SELECT COUNT(*) as count FROM projects WHERE client_id = ?').get(id) as { count: number };
-      if (projectCount.count > 0) {
+      const { count } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', id);
+
+      if ((count || 0) > 0) {
         return res.status(400).json({
           success: false,
           error: 'Cannot delete client with existing projects'
         });
       }
 
-      db.prepare('DELETE FROM clients WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Client deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete client error:', error);
       res.status(500).json({
         success: false,
         error: error.message

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, Send, Copy, Check, Download } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface APIEndpoint {
   method: string;
@@ -10,7 +11,7 @@ interface APIEndpoint {
 export const DeveloperAPIExplorer: React.FC = () => {
   const [endpoints, setEndpoints] = useState<APIEndpoint[]>([]);
   const [selectedMethod, setSelectedMethod] = useState('GET');
-  const [url, setUrl] = useState('http://localhost:3001/api/');
+  const [url, setUrl] = useState(`${getAPIUrl()}/`);
   const [headers, setHeaders] = useState<Record<string, string>>({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -28,7 +29,7 @@ export const DeveloperAPIExplorer: React.FC = () => {
   const fetchEndpoints = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3001/api/developer/endpoints', {
+      const res = await fetch(getAPIUrl('/developer/endpoints'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -86,7 +87,7 @@ export const DeveloperAPIExplorer: React.FC = () => {
 
   const selectEndpoint = (endpoint: APIEndpoint) => {
     setSelectedMethod(endpoint.method);
-    setUrl(`http://localhost:3001${endpoint.path}`);
+    setUrl(getAPIUrl(endpoint.path.replace('/api', '')));
   };
 
   const copyResponse = () => {

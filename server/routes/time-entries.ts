@@ -1,16 +1,16 @@
 // CortexBuild Platform - Time Tracking API Routes
-// Version: 1.0.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { TimeEntry, ApiResponse, PaginatedResponse } from '../types';
 
-export function createTimeEntriesRouter(db: Database.Database): Router {
+export function createTimeEntriesRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/time-entries - List all time entries with filters
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         user_id,
@@ -27,70 +27,74 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT te.*, 
-               u.name as user_name,
-               p.name as project_name,
-               t.title as task_title
-        FROM time_entries te
-        LEFT JOIN users u ON te.user_id = u.id
-        LEFT JOIN projects p ON te.project_id = p.id
-        LEFT JOIN tasks t ON te.task_id = t.id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('time_entries')
+        .select(`
+          *,
+          users!time_entries_user_id_fkey(id, name),
+          projects!time_entries_project_id_fkey(id, name),
+          tasks!time_entries_task_id_fkey(id, title)
+        `, { count: 'exact' });
 
+      // Apply filters
       if (user_id) {
-        query += ' AND te.user_id = ?';
-        params.push(parseInt(user_id));
+        query = query.eq('user_id', user_id);
       }
 
       if (project_id) {
-        query += ' AND te.project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (task_id) {
-        query += ' AND te.task_id = ?';
-        params.push(parseInt(task_id));
+        query = query.eq('task_id', task_id);
       }
 
       if (billable !== undefined) {
-        query += ' AND te.billable = ?';
-        params.push(billable === 'true' ? 1 : 0);
+        query = query.eq('billable', billable === 'true');
       }
 
       if (start_date) {
-        query += ' AND te.start_time >= ?';
-        params.push(start_date);
+        query = query.gte('start_time', start_date);
       }
 
       if (end_date) {
-        query += ' AND te.start_time <= ?';
-        params.push(end_date);
+        query = query.lte('start_time', end_date);
       }
 
-      // Get total count
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      // Add pagination and ordering
+      query = query
+        .order('start_time', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      // Add pagination
-      query += ' ORDER BY te.start_time DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      const { data: entries, error, count } = await query;
 
-      const entries = db.prepare(query).all(...params);
+      if (error) throw error;
+
+      // Transform data
+      const transformedEntries = (entries || []).map((e: any) => {
+        const users = Array.isArray(e.users) ? e.users[0] : e.users;
+        const projects = Array.isArray(e.projects) ? e.projects[0] : e.projects;
+        const tasks = Array.isArray(e.tasks) ? e.tasks[0] : e.tasks;
+        return {
+          ...e,
+          user_name: users?.name || null,
+          project_name: projects?.name || null,
+          task_title: tasks?.title || null
+        };
+      });
 
       res.json({
         success: true,
-        data: entries,
+        data: transformedEntries,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get time entries error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -99,35 +103,47 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
   });
 
   // GET /api/time-entries/:id - Get single time entry
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const entry = db.prepare(`
-        SELECT te.*, 
-               u.name as user_name,
-               u.email as user_email,
-               p.name as project_name,
-               t.title as task_title
-        FROM time_entries te
-        LEFT JOIN users u ON te.user_id = u.id
-        LEFT JOIN projects p ON te.project_id = p.id
-        LEFT JOIN tasks t ON te.task_id = t.id
-        WHERE te.id = ?
-      `).get(id);
+      const { data: entry, error } = await supabase
+        .from('time_entries')
+        .select(`
+          *,
+          users!time_entries_user_id_fkey(id, name, email),
+          projects!time_entries_project_id_fkey(id, name),
+          tasks!time_entries_task_id_fkey(id, title)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!entry) {
+      if (error || !entry) {
         return res.status(404).json({
           success: false,
           error: 'Time entry not found'
         });
       }
 
+      // Transform data
+      const users = Array.isArray(entry.users) ? entry.users[0] : entry.users;
+      const projects = Array.isArray(entry.projects) ? entry.projects[0] : entry.projects;
+      const tasks = Array.isArray(entry.tasks) ? entry.tasks[0] : entry.tasks;
+
+      const transformedEntry = {
+        ...entry,
+        user_name: users?.name || null,
+        user_email: users?.email || null,
+        project_name: projects?.name || null,
+        task_title: tasks?.title || null
+      };
+
       res.json({
         success: true,
-        data: entry
+        data: transformedEntry
       });
     } catch (error: any) {
+      console.error('Get time entry error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -136,7 +152,7 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
   });
 
   // POST /api/time-entries - Create/start new time entry
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         user_id,
@@ -155,34 +171,37 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
         });
       }
 
-      const result = db.prepare(`
-        INSERT INTO time_entries (
-          user_id, project_id, task_id, description, start_time, billable, hourly_rate
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        user_id,
-        project_id,
-        task_id,
-        description,
-        start_time || new Date().toISOString(),
-        billable ? 1 : 0,
-        hourly_rate
-      );
+      const { data: entry, error } = await supabase
+        .from('time_entries')
+        .insert({
+          user_id,
+          project_id,
+          task_id: task_id || null,
+          description: description || null,
+          start_time: start_time || new Date().toISOString(),
+          billable,
+          hourly_rate: hourly_rate || null
+        })
+        .select()
+        .single();
 
-      const entry = db.prepare('SELECT * FROM time_entries WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        user_id,
-        project_id,
-        'time_entry',
-        result.lastInsertRowid,
-        'created',
-        'Started time tracking'
-      );
+      try {
+        await supabase
+          .from('activities')
+          .insert({
+            user_id,
+            project_id,
+            entity_type: 'time_entry',
+            entity_id: entry.id,
+            action: 'created',
+            description: 'Started time tracking'
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -190,6 +209,7 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
         message: 'Time entry started successfully'
       });
     } catch (error: any) {
+      console.error('Create time entry error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -198,12 +218,17 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
   });
 
   // PUT /api/time-entries/:id - Update/stop time entry
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM time_entries WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('time_entries')
+        .select('id, start_time, end_time')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -212,30 +237,29 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
       }
 
       // If stopping timer, calculate duration
-      if (updates.end_time && !(existing as any).end_time) {
-        const startTime = new Date((existing as any).start_time).getTime();
-        const endTime = new Date(updates.end_time).getTime();
-        updates.duration = Math.round((endTime - startTime) / 1000 / 60); // minutes
+      const updateData = { ...updates };
+      if (updateData.end_time && !existing.end_time) {
+        const startTime = new Date(existing.start_time).getTime();
+        const endTime = new Date(updateData.end_time).getTime();
+        updateData.duration = Math.round((endTime - startTime) / 1000 / 60); // minutes
       }
 
-      const fields = Object.keys(updates).filter(key => key !== 'id');
-      if (fields.length === 0) {
+      const { id: _, ...updateFields } = updateData;
+      if (Object.keys(updateFields).length === 0) {
         return res.status(400).json({
           success: false,
           error: 'No fields to update'
         });
       }
 
-      const setClause = fields.map(field => `${field} = ?`).join(', ');
-      const values = fields.map(field => updates[field]);
+      const { data: entry, error } = await supabase
+        .from('time_entries')
+        .update(updateFields)
+        .eq('id', id)
+        .select()
+        .single();
 
-      db.prepare(`
-        UPDATE time_entries 
-        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(...values, id);
-
-      const entry = db.prepare('SELECT * FROM time_entries WHERE id = ?').get(id);
+      if (error) throw error;
 
       res.json({
         success: true,
@@ -243,6 +267,7 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
         message: 'Time entry updated successfully'
       });
     } catch (error: any) {
+      console.error('Update time entry error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -250,49 +275,50 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
     }
   });
 
-  // GET /api/time-entries/summary - Get time summary
-  router.get('/summary/stats', (req: Request, res: Response) => {
+  // GET /api/time-entries/summary/stats - Get time summary
+  router.get('/summary/stats', async (req: Request, res: Response) => {
     try {
       const { user_id, project_id, start_date, end_date } = req.query as any;
 
-      let query = `
-        SELECT 
-          COUNT(*) as total_entries,
-          SUM(duration) as total_minutes,
-          SUM(CASE WHEN billable = 1 THEN duration ELSE 0 END) as billable_minutes,
-          SUM(CASE WHEN billable = 0 THEN duration ELSE 0 END) as non_billable_minutes
-        FROM time_entries
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('time_entries')
+        .select('duration, billable', { count: 'exact' });
 
+      // Apply filters
       if (user_id) {
-        query += ' AND user_id = ?';
-        params.push(parseInt(user_id));
+        query = query.eq('user_id', user_id);
       }
 
       if (project_id) {
-        query += ' AND project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (start_date) {
-        query += ' AND start_time >= ?';
-        params.push(start_date);
+        query = query.gte('start_time', start_date);
       }
 
       if (end_date) {
-        query += ' AND start_time <= ?';
-        params.push(end_date);
+        query = query.lte('start_time', end_date);
       }
 
-      const summary = db.prepare(query).get(...params);
+      const { data: entries, error, count } = await query;
+
+      if (error) throw error;
+
+      // Calculate summary
+      const summary = {
+        total_entries: count || 0,
+        total_minutes: (entries || []).reduce((sum, e) => sum + (e.duration || 0), 0),
+        billable_minutes: (entries || []).reduce((sum, e) => sum + (e.billable && e.duration ? e.duration : 0), 0),
+        non_billable_minutes: (entries || []).reduce((sum, e) => sum + (!e.billable && e.duration ? e.duration : 0), 0)
+      };
 
       res.json({
         success: true,
         data: summary
       });
     } catch (error: any) {
+      console.error('Get time summary error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -301,11 +327,16 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/time-entries/:id - Delete time entry
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const entry = db.prepare('SELECT * FROM time_entries WHERE id = ?').get(id);
+      const { data: entry } = await supabase
+        .from('time_entries')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!entry) {
         return res.status(404).json({
           success: false,
@@ -313,13 +344,19 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
         });
       }
 
-      db.prepare('DELETE FROM time_entries WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('time_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Time entry deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete time entry error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -329,4 +366,3 @@ export function createTimeEntriesRouter(db: Database.Database): Router {
 
   return router;
 }
-

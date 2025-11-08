@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexBuild - Pagină Debug</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .status {
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .ok { background: #10b981; color: white; }
+        .error { background: #ef4444; color: white; }
+        .warning { background: #f59e0b; color: white; }
+        .info { background: #3b82f6; color: white; }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        button:active { transform: translateY(0); }
+        #console {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .card {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .card h3 { margin-bottom: 10px; font-size: 1.2rem; }
+        .card p { font-size: 0.9rem; opacity: 0.9; }
+        .error-text { color: #fca5a5; }
+        .success-text { color: #86efac; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 CortexBuild - Diagnostic Complet</h1>
+
+        <div class="section">
+            <h2>📊 Status Servere</h2>
+            <div id="server-status">
+                <div class="status info">⏳ Se testează serverele...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Teste Funcționale</h2>
+            <div>
+                <button onclick="testFrontend()">🌐 Test Frontend</button>
+                <button onclick="testBackend()">🖥️ Test Backend</button>
+                <button onclick="testLogin()">🔐 Test Login</button>
+                <button onclick="testTenders()">📋 Test Tenders API</button>
+                <button onclick="window.location.href='/'">🏠 Deschide Aplicația Principală</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Rezultate Teste</h2>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="section">
+            <h2>💻 Console Log</h2>
+            <div id="console"></div>
+        </div>
+
+        <div class="section">
+            <h2>ℹ️ Informații Sistem</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>🌐 Browser</h3>
+                    <p id="browser-info">Se încarcă...</p>
+                </div>
+                <div class="card">
+                    <h3>⏰ Timp</h3>
+                    <p id="time-info">Se încarcă...</p>
+                </div>
+                <div class="card">
+                    <h3>📍 URL</h3>
+                    <p id="url-info">Se încarcă...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const consoleEl = document.getElementById('console');
+        const resultsEl = document.getElementById('test-results');
+        const serverStatusEl = document.getElementById('server-status');
+
+        function log(msg, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('ro-RO');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            const line = `[${timestamp}] ${prefix} ${msg}`;
+            console.log(line);
+            consoleEl.textContent += line + '\n';
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function addResult(title, message, isSuccess) {
+            const div = document.createElement('div');
+            div.className = `status ${isSuccess ? 'ok' : 'error'}`;
+            div.innerHTML = `<strong>${title}:</strong> ${message}`;
+            resultsEl.appendChild(div);
+        }
+
+        async function testFrontend() {
+            log('Testare Frontend...', 'info');
+            try {
+                const res = await fetch('http://localhost:3000');
+                const text = await res.text();
+                const hasTitle = text.includes('CortexBuild');
+                if (hasTitle) {
+                    log('Frontend OK - pagina se încarcă', 'success');
+                    addResult('Frontend', 'Pagina HTML se încarcă corect', true);
+                } else {
+                    log('Frontend returnează răspuns dar fără titlu', 'warning');
+                    addResult('Frontend', 'Răspuns primit dar format neașteptat', false);
+                }
+            } catch (err) {
+                log('Frontend ERROR: ' + err.message, 'error');
+                addResult('Frontend', 'Nu se poate conecta: ' + err.message, false);
+            }
+        }
+
+        async function testBackend() {
+            log('Testare Backend API...', 'info');
+            try {
+                const res = await fetch('http://localhost:3001/api/tenders');
+                const data = await res.json();
+                if (data.success || data.data) {
+                    log('Backend OK - API răspunde', 'success');
+                    addResult('Backend', `API funcționează - ${data.data ? data.data.length + ' tenders' : 'răspuns valid'}`, true);
+                } else {
+                    log('Backend răspunde dar cu eroare: ' + JSON.stringify(data), 'warning');
+                    addResult('Backend', 'API răspunde dar cu eroare', false);
+                }
+            } catch (err) {
+                log('Backend ERROR: ' + err.message, 'error');
+                addResult('Backend', 'Nu se poate conecta: ' + err.message, false);
+            }
+        }
+
+        async function testLogin() {
+            log('Testare Login...', 'info');
+            try {
+                const res = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'adrian.stanca1@gmail.com',
+                        password: 'parola123'
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    log('Login SUCCES pentru: ' + data.user.email, 'success');
+                    addResult('Login', `Autentificare reușită - ${data.user.email} (${data.user.role})`, true);
+                } else {
+                    log('Login eșuat: ' + data.error, 'error');
+                    addResult('Login', 'Autentificare eșuată: ' + data.error, false);
+                }
+            } catch (err) {
+                log('Login ERROR: ' + err.message, 'error');
+                addResult('Login', 'Eroare la autentificare: ' + err.message, false);
+            }
+        }
+
+        async function testTenders() {
+            log('Testare UK Tenders...', 'info');
+            try {
+                const res = await fetch('http://localhost:3001/api/tenders/stats/overview');
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const total = data.data.total.count;
+                    const value = data.data.total_value.total_value;
+                    log(`Tenders OK - ${total} tenders, valoare £${value.toLocaleString()}`, 'success');
+                    addResult('UK Tenders', `${total} tenders disponibile (£${value.toLocaleString()})`, true);
+                } else {
+                    log('Tenders ERROR: ' + JSON.stringify(data), 'error');
+                    addResult('UK Tenders', 'Nu se pot prelua datele', false);
+                }
+            } catch (err) {
+                log('Tenders ERROR: ' + err.message, 'error');
+                addResult('UK Tenders', 'Eroare: ' + err.message, false);
+            }
+        }
+
+        async function checkServers() {
+            try {
+                const [frontendRes, backendRes] = await Promise.all([
+                    fetch('http://localhost:3000').catch(() => null),
+                    fetch('http://localhost:3001/api/tenders').catch(() => null)
+                ]);
+
+                let status = '';
+                if (frontendRes && backendRes) {
+                    status = '<div class="status ok">✅ Ambele servere rulează!</div>';
+                } else if (frontendRes) {
+                    status = '<div class="status warning">⚠️ Doar Frontend rulează</div>';
+                } else if (backendRes) {
+                    status = '<div class="status warning">⚠️ Doar Backend rulează</div>';
+                } else {
+                    status = '<div class="status error">❌ Niciun server nu răspunde!</div>';
+                }
+                serverStatusEl.innerHTML = status;
+            } catch (err) {
+                serverStatusEl.innerHTML = '<div class="status error">❌ Eroare la verificare: ' + err.message + '</div>';
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Pagină de diagnostic încărcată', 'success');
+            log('Browser: ' + navigator.userAgent, 'info');
+            log('URL: ' + window.location.href, 'info');
+
+            document.getElementById('browser-info').textContent = navigator.userAgent.split(' ').pop();
+            document.getElementById('time-info').textContent = new Date().toLocaleString('ro-RO');
+            document.getElementById('url-info').textContent = window.location.href;
+
+            // Auto-check servers
+            checkServers();
+
+            // Auto-run tests after 1 second
+            setTimeout(() => {
+                log('Rulare teste automate...', 'info');
+                testBackend();
+                setTimeout(() => testLogin(), 500);
+            }, 1000);
+        });
+
+        // Catch any errors
+        window.addEventListener('error', (e) => {
+            log('JavaScript ERROR: ' + e.message + ' in ' + e.filename + ':' + e.lineno, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            log('Promise ERROR: ' + e.reason, 'error');
+        });
+    </script>
+</body>
+</html>

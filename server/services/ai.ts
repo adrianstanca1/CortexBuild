@@ -1,9 +1,96 @@
-// CortexBuild AI Service - OpenAI Integration
+// CortexBuild AI Service - Multi-Provider AI Integration
 // Handles all AI operations: code generation, chat, analysis, etc.
 
 import OpenAI from 'openai';
+
+// Rate limiting tracker
+const rateLimitTracker = {
+  lastRequest: 0,
+  requestCount: 0,
+  resetTime: 0,
+  isLimited: false
+};
 import Database from 'better-sqlite3';
 import * as mcp from './mcp';
+
+// Gemini AI Integration
+interface GeminiResponse {
+  candidates: Array<{
+    content: {
+      parts: Array<{ text: string }>;
+    };
+  }>;
+}
+
+// Check rate limiting
+function checkRateLimit(): boolean {
+  const now = Date.now();
+
+  // Reset counter every hour
+  if (now - rateLimitTracker.resetTime > 3600000) {
+    rateLimitTracker.requestCount = 0;
+    rateLimitTracker.resetTime = now;
+    rateLimitTracker.isLimited = false;
+  }
+
+  // Check if we're rate limited
+  if (rateLimitTracker.isLimited && now < rateLimitTracker.resetTime + 300000) { // 5 minute cooldown
+    return false;
+  }
+
+  // Check request frequency (max 10 per minute)
+  if (now - rateLimitTracker.lastRequest < 6000 && rateLimitTracker.requestCount > 10) {
+    rateLimitTracker.isLimited = true;
+    return false;
+  }
+
+  return true;
+}
+
+async function callGeminiAPI(message: string): Promise<string> {
+  // Check rate limiting first
+  if (!checkRateLimit()) {
+    throw new Error('Rate limit exceeded. Please try again later.');
+  }
+
+  // Update rate limiting tracker
+  rateLimitTracker.lastRequest = Date.now();
+  rateLimitTracker.requestCount++;
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'test-gemini-key-for-development-only') {
+    throw new Error('Gemini API key not configured');
+  }
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: message }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    // Handle rate limiting specifically
+    if (response.status === 429) {
+      console.log('⚠️ Gemini API rate limit reached, using fallback response');
+      return 'I apologize, but I\'m currently experiencing high demand. Please try again in a few moments. In the meantime, I can help you with construction management best practices and general guidance.';
+    }
+
+    // Handle other API errors
+    console.error(`Gemini API error: ${response.status} ${response.statusText}`, errorText);
+    throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data: GeminiResponse = await response.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini';
+}
 
 // Initialize OpenAI clients with multiple API keys for load balancing
 const primaryOpenAI = new OpenAI({
@@ -370,5 +457,60 @@ export function addProjectContext(
 // Get MCP session statistics
 export function getMCPStats(db: Database.Database, userId: string): any {
   return mcp.getSessionStats(db, userId);
+}
+
+// Gemini Chat Function
+export async function generateGeminiResponse(
+  message: string,
+  context: any = {},
+  userId: string,
+  companyId: string
+): Promise<string> {
+  try {
+    // Create construction-focused prompt
+    const constructionPrompt = `You are an AI assistant specialized in construction management and project coordination.
+
+User Context:
+- User ID: ${userId}
+- Company: ${companyId}
+- Projects: ${JSON.stringify(context.projects || [])}
+- Recent Tasks: ${JSON.stringify(context.tasks || [])}
+
+Please provide helpful, accurate, and construction-industry-specific advice for the following question:
+
+${message}
+
+Focus on practical solutions, safety considerations, and industry best practices.`;
+
+    const response = await callGeminiAPI(constructionPrompt);
+
+    return response;
+  } catch (error: any) {
+    console.error('Gemini chat error:', error);
+
+    // Check if it's a rate limiting error
+    if (error.message && error.message.includes('429')) {
+      return `I'm currently experiencing high demand and need to limit requests. Please try again in a few minutes.
+
+While you wait, here are some quick construction management tips:
+- Always prioritize safety protocols on site
+- Keep detailed daily logs for project tracking
+- Maintain clear communication channels with all stakeholders
+- Regular quality inspections prevent costly rework
+
+For urgent matters, please contact your project manager directly.`;
+    }
+
+    // General fallback message
+    return `I apologize, but I'm currently unable to process your request. Please try again later.
+
+For immediate construction management assistance, consider:
+- Checking project documentation
+- Consulting with your project manager
+- Reviewing safety protocols
+- Contacting technical support
+
+Error: ${error.message}`;
+  }
 }
 

@@ -6,7 +6,44 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
-    ignores: ['dist/**'],
+    ignores: [
+      'dist/**',
+      '.next/**',
+      'apps/**',
+      'node_modules/**',
+      'build/**',
+      'coverage/**',
+      '*.min.js',
+      '*.bundle.js',
+      '**/*.bundle.js',
+      '**/*.min.js',
+      '**/vendor-*.js',
+      '**/admin-vendor-*.js',
+      '**/base44-vendor-*.js',
+      '**/react-vendor-*.js',
+      '**/ai-vendor-*.js',
+      '**/http-vendor-*.js',
+      '**/ui-vendor-*.js',
+      '**/modules-vendor-*.js',
+      '**/utils-vendor-*.js',
+      '**/monaco-vendor-*.js',
+      '**/supabase-vendor-*.js',
+      'api-server*.cjs',
+      'api-tester.js',
+      'jest.setup.cjs',
+      '*.config.cjs',
+      '*.setup.cjs',
+      'middleware/**',
+      'production-server.cjs',
+      'public/service-worker.js',
+      'public/sw.js',
+      'scripts/**',
+      'public/**',
+      '*.cjs',
+      'setup-supabase-db.js',
+      'test-auth.cjs',
+      'test-login-api.js',
+    ],
   },
   js.configs.recommended,
   {
@@ -30,7 +67,6 @@ export default [
     },
   },
   {
-<<<<<<< Updated upstream
     files: ['**/*.cjs'],
     languageOptions: {
       sourceType: 'commonjs',
@@ -51,8 +87,6 @@ export default [
     },
   },
   {
-=======
->>>>>>> Stashed changes
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsparser,

@@ -1,55 +1,70 @@
 /**
  * Global Marketplace API Routes
+ * Version: 2.0.0 - Supabase Migration
  * Complete publishing workflow and installation system for sdk_apps
+ * Last Updated: 2025-10-31
  */
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
+import * as auth from '../auth-supabase';
 
-export function createGlobalMarketplaceRouter(db: Database.Database): Router {
+export function createGlobalMarketplaceRouter(supabase: SupabaseClient): Router {
     const router = Router();
 
     // Middleware to get current user
-    const getCurrentUser = (req: any, res: Response, next: any) => {
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        if (!token) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
+    const getCurrentUser = async (req: any, res: Response, next: any) => {
+        try {
+            const token = req.headers.authorization?.replace('Bearer ', '');
+            if (!token) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
 
-        const session = db.prepare('SELECT user_id FROM sessions WHERE token = ?').get(token) as any;
-        if (!session) {
-            return res.status(401).json({ error: 'Invalid session' });
-        }
+            const user = await auth.getCurrentUserByToken(token);
+            if (!user) {
+                return res.status(401).json({ error: 'Invalid session' });
+            }
 
-        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(session.user_id) as any;
-        if (!user) {
-            return res.status(401).json({ error: 'User not found' });
+            req.user = user;
+            next();
+        } catch (error: any) {
+            res.status(401).json({ error: error.message || 'Unauthorized' });
         }
-
-        req.user = user;
-        next();
     };
 
     // Helper: Log analytics
-    const logAnalytics = (appId: string, eventType: string, userId?: string, companyId?: string, metadata?: any) => {
+    const logAnalytics = async (appId: string, eventType: string, userId?: string, companyId?: string, metadata?: any) => {
         try {
-            db.prepare(`
-                INSERT INTO app_analytics (id, app_id, event_type, user_id, company_id, metadata, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            `).run(uuidv4(), appId, eventType, userId || null, companyId || null, metadata ? JSON.stringify(metadata) : null);
+            await supabase
+                .from('app_analytics')
+                .insert({
+                    id: uuidv4(),
+                    app_id: appId,
+                    event_type: eventType,
+                    user_id: userId || null,
+                    company_id: companyId || null,
+                    metadata: metadata ? JSON.stringify(metadata) : null
+                });
         } catch (error) {
             console.warn('[Analytics] Failed to log event:', error);
         }
     };
 
     // Helper: Log review history
-    const logReviewHistory = (appId: string, reviewerId: string, previousStatus: string | null, newStatus: string, feedback?: string) => {
+    const logReviewHistory = async (appId: string, reviewerId: string, previousStatus: string | null, newStatus: string, feedback?: string) => {
         try {
-            db.prepare(`
-                INSERT INTO app_review_history (id, app_id, reviewer_id, previous_status, new_status, feedback, reviewed_at)
-                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            `).run(uuidv4(), appId, reviewerId, previousStatus, newStatus, feedback || null);
+            await supabase
+                .from('app_review_history')
+                .insert({
+                    id: uuidv4(),
+                    app_id: appId,
+                    reviewer_id: reviewerId,
+                    previous_status: previousStatus,
+                    new_status: newStatus,
+                    feedback: feedback || null,
+                    reviewed_at: new Date().toISOString()
+                });
         } catch (error) {
             console.warn('[Review History] Failed to log:', error);
         }
@@ -60,47 +75,71 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     // ========================================================================
 
     // GET /api/global-marketplace/apps - Browse all published apps
-    router.get('/apps', (req: Request, res: Response) => {
+    router.get('/apps', async (req: Request, res: Response) => {
         try {
-            const { category, search, sort = 'recent' } = req.query;
+            const { category, search, sort = 'recent' } = req.query as any;
             
-            let query = `
-                SELECT 
+            let query = supabase
+                .from('sdk_apps')
+                .select(`
                     id, name, description, icon, category, version,
                     developer_id, published_at,
-                    (SELECT COUNT(*) FROM user_app_installations WHERE app_id = sdk_apps.id AND is_active = 1) as install_count,
-                    (SELECT COUNT(*) FROM company_app_installations WHERE app_id = sdk_apps.id AND is_active = 1) as company_install_count
-                FROM sdk_apps
-                WHERE review_status = 'approved' AND is_public = 1
-            `;
-            
-            const params: any[] = [];
-            
+                    user_app_installations!inner(id),
+                    company_app_installations!inner(id)
+                `, { count: 'exact' })
+                .eq('review_status', 'approved')
+                .eq('is_public', true)
+                .eq('user_app_installations.is_active', true)
+                .eq('company_app_installations.is_active', true);
+
             if (category && category !== 'all') {
-                query += ` AND category = ?`;
-                params.push(category);
+                query = query.eq('category', category);
             }
-            
+
             if (search) {
-                query += ` AND (name LIKE ? OR description LIKE ?)`;
-                params.push(`%${search}%`, `%${search}%`);
+                query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
             }
-            
+
             // Sorting
             if (sort === 'popular') {
-                query += ` ORDER BY (install_count + company_install_count) DESC`;
+                // Note: Supabase doesn't support complex ORDER BY with subqueries directly
+                // We'll need to fetch and sort in memory or use a view
+                query = query.order('published_at', { ascending: false });
             } else if (sort === 'name') {
-                query += ` ORDER BY name ASC`;
+                query = query.order('name');
             } else {
-                query += ` ORDER BY published_at DESC`;
+                query = query.order('published_at', { ascending: false });
             }
-            
-            const apps = db.prepare(query).all(...params);
-            
+
+            const { data: apps, error, count } = await query;
+
+            if (error) throw error;
+
+            // Transform data and calculate install counts
+            const transformedApps = (apps || []).map((app: any) => {
+                const userInstalls = Array.isArray(app.user_app_installations) ? app.user_app_installations : [app.user_app_installations];
+                const companyInstalls = Array.isArray(app.company_app_installations) ? app.company_app_installations : [app.company_app_installations];
+                const install_count = userInstalls.filter((i: any) => i).length;
+                const company_install_count = companyInstalls.filter((i: any) => i).length;
+
+                return {
+                    ...app,
+                    install_count,
+                    company_install_count
+                };
+            });
+
+            // Sort by popularity if needed (after fetching)
+            if (sort === 'popular') {
+                transformedApps.sort((a: any, b: any) => 
+                    (b.install_count + b.company_install_count) - (a.install_count + a.company_install_count)
+                );
+            }
+
             res.json({
                 success: true,
-                apps,
-                total: apps.length
+                apps: transformedApps,
+                total: count || transformedApps.length
             });
         } catch (error: any) {
             console.error('[Global Marketplace] Error fetching apps:', error);
@@ -113,49 +152,93 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     // ========================================================================
 
     // GET /api/global-marketplace/apps/detailed - Get apps with user-specific data
-    router.get('/apps/detailed', getCurrentUser, (req: any, res: Response) => {
+    router.get('/apps/detailed', getCurrentUser, async (req: any, res: Response) => {
         try {
             const userId = req.user?.id;
             const companyId = req.user?.company_id;
-            const { category, search, sort = 'recent' } = req.query;
+            const { category, search, sort = 'recent' } = req.query as any;
             
-            let query = `
-                SELECT 
-                    a.*,
-                    (SELECT COUNT(*) FROM user_app_installations WHERE app_id = a.id AND is_active = 1) as install_count,
-                    (SELECT COUNT(*) FROM company_app_installations WHERE app_id = a.id AND is_active = 1) as company_install_count,
-                    (SELECT 1 FROM user_app_installations WHERE app_id = a.id AND user_id = ? AND is_active = 1) as is_installed_by_me,
-                    (SELECT 1 FROM company_app_installations WHERE app_id = a.id AND company_id = ? AND is_active = 1) as is_installed_by_company
-                FROM sdk_apps a
-                WHERE a.review_status = 'approved' AND a.is_public = 1
-            `;
-            
-            const params: any[] = [userId, companyId];
-            
+            let query = supabase
+                .from('sdk_apps')
+                .select(`
+                    *,
+                    user_app_installations!left(id, is_active),
+                    company_app_installations!left(id, is_active)
+                `)
+                .eq('review_status', 'approved')
+                .eq('is_public', true);
+
             if (category && category !== 'all') {
-                query += ` AND a.category = ?`;
-                params.push(category);
+                query = query.eq('category', category);
             }
-            
+
             if (search) {
-                query += ` AND (a.name LIKE ? OR a.description LIKE ?)`;
-                params.push(`%${search}%`, `%${search}%`);
+                query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
             }
-            
-            if (sort === 'popular') {
-                query += ` ORDER BY (install_count + company_install_count) DESC`;
-            } else if (sort === 'name') {
-                query += ` ORDER BY a.name ASC`;
+
+            // Sorting
+            if (sort === 'name') {
+                query = query.order('name');
             } else {
-                query += ` ORDER BY a.published_at DESC`;
+                query = query.order('published_at', { ascending: false });
             }
-            
-            const apps = db.prepare(query).all(...params);
-            
+
+            const { data: apps, error } = await query;
+
+            if (error) throw error;
+
+            // Get install counts separately
+            const appsWithDetails = await Promise.all(
+                (apps || []).map(async (app: any) => {
+                    // Get install counts
+                    const [userInstallsResult, companyInstallsResult, myInstallResult, companyInstallResult] = await Promise.all([
+                        supabase
+                            .from('user_app_installations')
+                            .select('id', { count: 'exact', head: true })
+                            .eq('app_id', app.id)
+                            .eq('is_active', true),
+                        supabase
+                            .from('company_app_installations')
+                            .select('id', { count: 'exact', head: true })
+                            .eq('app_id', app.id)
+                            .eq('is_active', true),
+                        supabase
+                            .from('user_app_installations')
+                            .select('id')
+                            .eq('app_id', app.id)
+                            .eq('user_id', userId)
+                            .eq('is_active', true)
+                            .single(),
+                        supabase
+                            .from('company_app_installations')
+                            .select('id')
+                            .eq('app_id', app.id)
+                            .eq('company_id', companyId)
+                            .eq('is_active', true)
+                            .single()
+                    ]);
+
+                    return {
+                        ...app,
+                        install_count: userInstallsResult.count || 0,
+                        company_install_count: companyInstallsResult.count || 0,
+                        is_installed_by_me: !!myInstallResult.data,
+                        is_installed_by_company: !!companyInstallResult.data
+                    };
+                })
+            );
+
+            // Sort by popularity if needed
+            if (sort === 'popular') {
+                appsWithDetails.sort((a: any, b: any) => 
+                    (b.install_count + b.company_install_count) - (a.install_count + a.company_install_count)
+                );
+            }
+
             res.json({
                 success: true,
-                apps,
-                total: apps.length
+                apps: appsWithDetails,
+                total: appsWithDetails.length
             });
         } catch (error: any) {
             console.error('[Global Marketplace] Error fetching detailed apps:', error);
@@ -164,24 +247,46 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // GET /api/global-marketplace/my-apps - Get my published apps (developer view)
-    router.get('/my-apps', getCurrentUser, (req: any, res: Response) => {
+    router.get('/my-apps', getCurrentUser, async (req: any, res: Response) => {
         try {
             const userId = req.user?.id;
             
-            const apps = db.prepare(`
-                SELECT 
-                    a.*,
-                    (SELECT COUNT(*) FROM user_app_installations WHERE app_id = a.id AND is_active = 1) as install_count,
-                    (SELECT COUNT(*) FROM company_app_installations WHERE app_id = a.id AND is_active = 1) as company_install_count
-                FROM sdk_apps a
-                WHERE a.developer_id = ?
-                ORDER BY a.created_at DESC
-            `).all(userId);
-            
+            const { data: apps, error } = await supabase
+                .from('sdk_apps')
+                .select('*')
+                .eq('developer_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Get install counts for each app
+            const appsWithCounts = await Promise.all(
+                (apps || []).map(async (app: any) => {
+                    const [userInstalls, companyInstalls] = await Promise.all([
+                        supabase
+                            .from('user_app_installations')
+                            .select('id', { count: 'exact', head: true })
+                            .eq('app_id', app.id)
+                            .eq('is_active', true),
+                        supabase
+                            .from('company_app_installations')
+                            .select('id', { count: 'exact', head: true })
+                            .eq('app_id', app.id)
+                            .eq('is_active', true)
+                    ]);
+
+                    return {
+                        ...app,
+                        install_count: userInstalls.count || 0,
+                        company_install_count: companyInstalls.count || 0
+                    };
+                })
+            );
+
             res.json({
                 success: true,
-                apps,
-                total: apps.length
+                apps: appsWithCounts,
+                total: appsWithCounts.length
             });
         } catch (error: any) {
             console.error('[Global Marketplace] Error fetching my apps:', error);
@@ -190,27 +295,55 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // GET /api/global-marketplace/my-installed-apps - Get apps installed for me
-    router.get('/my-installed-apps', getCurrentUser, (req: any, res: Response) => {
+    router.get('/my-installed-apps', getCurrentUser, async (req: any, res: Response) => {
         try {
             const userId = req.user?.id;
             const companyId = req.user?.company_id;
             
-            const apps = db.prepare(`
-                SELECT DISTINCT
-                    a.*,
-                    CASE 
-                        WHEN uai.id IS NOT NULL THEN 'individual'
-                        WHEN cai.id IS NOT NULL THEN 'company'
-                        ELSE NULL
-                    END as installation_type,
-                    COALESCE(uai.installed_at, cai.installed_at) as installed_at
-                FROM sdk_apps a
-                LEFT JOIN user_app_installations uai ON a.id = uai.app_id AND uai.user_id = ? AND uai.is_active = 1
-                LEFT JOIN company_app_installations cai ON a.id = cai.app_id AND cai.company_id = ? AND cai.is_active = 1
-                WHERE (uai.id IS NOT NULL OR cai.id IS NOT NULL)
-                ORDER BY installed_at DESC
-            `).all(userId, companyId);
+            // Get user installations
+            const { data: userInstalls } = await supabase
+                .from('user_app_installations')
+                .select('*, sdk_apps!inner(*)')
+                .eq('user_id', userId)
+                .eq('is_active', true);
+
+            // Get company installations
+            const { data: companyInstalls } = await supabase
+                .from('company_app_installations')
+                .select('*, sdk_apps!inner(*)')
+                .eq('company_id', companyId)
+                .eq('is_active', true);
+
+            // Merge and transform
+            const apps: any[] = [];
             
+            (userInstalls || []).forEach((install: any) => {
+                const app = Array.isArray(install.sdk_apps) ? install.sdk_apps[0] : install.sdk_apps;
+                if (app) {
+                    apps.push({
+                        ...app,
+                        installation_type: 'individual',
+                        installed_at: install.installed_at
+                    });
+                }
+            });
+
+            (companyInstalls || []).forEach((install: any) => {
+                const app = Array.isArray(install.sdk_apps) ? install.sdk_apps[0] : install.sdk_apps;
+                if (app && !apps.find((a: any) => a.id === app.id)) {
+                    apps.push({
+                        ...app,
+                        installation_type: 'company',
+                        installed_at: install.installed_at
+                    });
+                }
+            });
+
+            // Sort by installed_at
+            apps.sort((a: any, b: any) => 
+                new Date(b.installed_at).getTime() - new Date(a.installed_at).getTime()
+            );
+
             res.json({
                 success: true,
                 apps,
@@ -223,7 +356,7 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // GET /api/global-marketplace/pending-review - Get apps pending review (admin only)
-    router.get('/pending-review', getCurrentUser, (req: any, res: Response) => {
+    router.get('/pending-review', getCurrentUser, async (req: any, res: Response) => {
         try {
             const userRole = req.user?.role;
             
@@ -231,21 +364,31 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
                 return res.status(403).json({ success: false, error: 'Unauthorized' });
             }
             
-            const apps = db.prepare(`
-                SELECT 
-                    a.*,
-                    u.name as developer_name,
-                    u.email as developer_email
-                FROM sdk_apps a
-                LEFT JOIN users u ON a.developer_id = u.id
-                WHERE a.review_status = 'pending_review'
-                ORDER BY a.updated_at DESC
-            `).all();
-            
+            const { data: apps, error } = await supabase
+                .from('sdk_apps')
+                .select(`
+                    *,
+                    users!sdk_apps_developer_id_fkey(id, name, email)
+                `)
+                .eq('review_status', 'pending_review')
+                .order('updated_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Transform data
+            const transformedApps = (apps || []).map((app: any) => {
+                const users = Array.isArray(app.users) ? app.users[0] : app.users;
+                return {
+                    ...app,
+                    developer_name: users?.name || null,
+                    developer_email: users?.email || null
+                };
+            });
+
             res.json({
                 success: true,
-                apps,
-                total: apps.length
+                apps: transformedApps,
+                total: transformedApps.length
             });
         } catch (error: any) {
             console.error('[Global Marketplace] Error fetching pending apps:', error);
@@ -254,12 +397,17 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // POST /api/global-marketplace/submit-for-review/:appId - Submit app for review
-    router.post('/submit-for-review/:appId', getCurrentUser, (req: any, res: Response) => {
+    router.post('/submit-for-review/:appId', getCurrentUser, async (req: any, res: Response) => {
         try {
             const { appId } = req.params;
             const userId = req.user?.id;
 
-            const app = db.prepare('SELECT * FROM sdk_apps WHERE id = ? AND developer_id = ?').get(appId, userId) as any;
+            const { data: app } = await supabase
+                .from('sdk_apps')
+                .select('review_status')
+                .eq('id', appId)
+                .eq('developer_id', userId)
+                .single();
 
             if (!app) {
                 return res.status(404).json({ success: false, error: 'App not found or unauthorized' });
@@ -267,14 +415,17 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
 
             const previousStatus = app.review_status;
 
-            db.prepare(`
-                UPDATE sdk_apps
-                SET review_status = 'pending_review', updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            `).run(appId);
+            const { error } = await supabase
+                .from('sdk_apps')
+                .update({
+                    review_status: 'pending_review'
+                })
+                .eq('id', appId);
 
-            logReviewHistory(appId, userId, previousStatus, 'pending_review');
-            logAnalytics(appId, 'submit_for_review', userId);
+            if (error) throw error;
+
+            await logReviewHistory(appId, userId, previousStatus, 'pending_review');
+            await logAnalytics(appId, 'submit_for_review', userId);
 
             res.json({
                 success: true,
@@ -287,7 +438,7 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // POST /api/global-marketplace/approve/:appId - Approve app (admin only)
-    router.post('/approve/:appId', getCurrentUser, (req: any, res: Response) => {
+    router.post('/approve/:appId', getCurrentUser, async (req: any, res: Response) => {
         try {
             const { appId } = req.params;
             const { feedback } = req.body;
@@ -298,28 +449,35 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
                 return res.status(403).json({ success: false, error: 'Unauthorized' });
             }
 
-            const app = db.prepare('SELECT * FROM sdk_apps WHERE id = ?').get(appId) as any;
+            const { data: app } = await supabase
+                .from('sdk_apps')
+                .select('review_status')
+                .eq('id', appId)
+                .single();
 
             if (!app) {
                 return res.status(404).json({ success: false, error: 'App not found' });
             }
 
             const previousStatus = app.review_status;
+            const now = new Date().toISOString();
 
-            db.prepare(`
-                UPDATE sdk_apps
-                SET review_status = 'approved',
-                    is_public = 1,
-                    reviewed_by = ?,
-                    reviewed_at = CURRENT_TIMESTAMP,
-                    published_at = CURRENT_TIMESTAMP,
-                    review_feedback = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            `).run(userId, feedback || null, appId);
+            const { error } = await supabase
+                .from('sdk_apps')
+                .update({
+                    review_status: 'approved',
+                    is_public: true,
+                    reviewed_by: userId,
+                    reviewed_at: now,
+                    published_at: now,
+                    review_feedback: feedback || null
+                })
+                .eq('id', appId);
 
-            logReviewHistory(appId, userId, previousStatus, 'approved', feedback);
-            logAnalytics(appId, 'approved', userId);
+            if (error) throw error;
+
+            await logReviewHistory(appId, userId, previousStatus, 'approved', feedback);
+            await logAnalytics(appId, 'approved', userId);
 
             res.json({
                 success: true,
@@ -332,7 +490,7 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // POST /api/global-marketplace/reject/:appId - Reject app (admin only)
-    router.post('/reject/:appId', getCurrentUser, (req: any, res: Response) => {
+    router.post('/reject/:appId', getCurrentUser, async (req: any, res: Response) => {
         try {
             const { appId } = req.params;
             const { feedback } = req.body;
@@ -343,7 +501,11 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
                 return res.status(403).json({ success: false, error: 'Unauthorized' });
             }
 
-            const app = db.prepare('SELECT * FROM sdk_apps WHERE id = ?').get(appId) as any;
+            const { data: app } = await supabase
+                .from('sdk_apps')
+                .select('review_status')
+                .eq('id', appId)
+                .single();
 
             if (!app) {
                 return res.status(404).json({ success: false, error: 'App not found' });
@@ -351,18 +513,20 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
 
             const previousStatus = app.review_status;
 
-            db.prepare(`
-                UPDATE sdk_apps
-                SET review_status = 'rejected',
-                    reviewed_by = ?,
-                    reviewed_at = CURRENT_TIMESTAMP,
-                    review_feedback = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            `).run(userId, feedback || 'App rejected', appId);
+            const { error } = await supabase
+                .from('sdk_apps')
+                .update({
+                    review_status: 'rejected',
+                    reviewed_by: userId,
+                    reviewed_at: new Date().toISOString(),
+                    review_feedback: feedback || 'App rejected'
+                })
+                .eq('id', appId);
 
-            logReviewHistory(appId, userId, previousStatus, 'rejected', feedback);
-            logAnalytics(appId, 'rejected', userId);
+            if (error) throw error;
+
+            await logReviewHistory(appId, userId, previousStatus, 'rejected', feedback);
+            await logAnalytics(appId, 'rejected', userId);
 
             res.json({
                 success: true,
@@ -375,30 +539,49 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // POST /api/global-marketplace/install/individual/:appId - Install app for individual user
-    router.post('/install/individual/:appId', getCurrentUser, (req: any, res: Response) => {
+    router.post('/install/individual/:appId', getCurrentUser, async (req: any, res: Response) => {
         try {
             const { appId } = req.params;
             const userId = req.user?.id;
 
-            const app = db.prepare('SELECT * FROM sdk_apps WHERE id = ? AND review_status = ? AND is_public = 1').get(appId, 'approved') as any;
+            const { data: app } = await supabase
+                .from('sdk_apps')
+                .select('id')
+                .eq('id', appId)
+                .eq('review_status', 'approved')
+                .eq('is_public', true)
+                .single();
 
             if (!app) {
                 return res.status(404).json({ success: false, error: 'App not found or not published' });
             }
 
             // Check if already installed
-            const existing = db.prepare('SELECT * FROM user_app_installations WHERE user_id = ? AND app_id = ?').get(userId, appId);
+            const { data: existing } = await supabase
+                .from('user_app_installations')
+                .select('id')
+                .eq('user_id', userId)
+                .eq('app_id', appId)
+                .single();
 
             if (existing) {
                 return res.status(400).json({ success: false, error: 'App already installed' });
             }
 
-            db.prepare(`
-                INSERT INTO user_app_installations (id, user_id, app_id, installation_type, installed_by, installed_at, is_active)
-                VALUES (?, ?, ?, 'individual', ?, CURRENT_TIMESTAMP, 1)
-            `).run(uuidv4(), userId, appId, userId);
+            const { error } = await supabase
+                .from('user_app_installations')
+                .insert({
+                    id: uuidv4(),
+                    user_id: userId,
+                    app_id: appId,
+                    installation_type: 'individual',
+                    installed_by: userId,
+                    is_active: true
+                });
 
-            logAnalytics(appId, 'install', userId, req.user?.company_id, { type: 'individual' });
+            if (error) throw error;
+
+            await logAnalytics(appId, 'install', userId, req.user?.company_id, { type: 'individual' });
 
             res.json({
                 success: true,
@@ -411,7 +594,7 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // POST /api/global-marketplace/install/company/:appId - Install app for entire company (admin only)
-    router.post('/install/company/:appId', getCurrentUser, (req: any, res: Response) => {
+    router.post('/install/company/:appId', getCurrentUser, async (req: any, res: Response) => {
         try {
             const { appId } = req.params;
             const userId = req.user?.id;
@@ -422,25 +605,43 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
                 return res.status(403).json({ success: false, error: 'Only admins can install apps company-wide' });
             }
 
-            const app = db.prepare('SELECT * FROM sdk_apps WHERE id = ? AND review_status = ? AND is_public = 1').get(appId, 'approved') as any;
+            const { data: app } = await supabase
+                .from('sdk_apps')
+                .select('id')
+                .eq('id', appId)
+                .eq('review_status', 'approved')
+                .eq('is_public', true)
+                .single();
 
             if (!app) {
                 return res.status(404).json({ success: false, error: 'App not found or not published' });
             }
 
             // Check if already installed
-            const existing = db.prepare('SELECT * FROM company_app_installations WHERE company_id = ? AND app_id = ?').get(companyId, appId);
+            const { data: existing } = await supabase
+                .from('company_app_installations')
+                .select('id')
+                .eq('company_id', companyId)
+                .eq('app_id', appId)
+                .single();
 
             if (existing) {
                 return res.status(400).json({ success: false, error: 'App already installed for company' });
             }
 
-            db.prepare(`
-                INSERT INTO company_app_installations (id, company_id, app_id, installed_by, installed_at, is_active)
-                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 1)
-            `).run(uuidv4(), companyId, appId, userId);
+            const { error } = await supabase
+                .from('company_app_installations')
+                .insert({
+                    id: uuidv4(),
+                    company_id: companyId,
+                    app_id: appId,
+                    installed_by: userId,
+                    is_active: true
+                });
 
-            logAnalytics(appId, 'install', userId, companyId, { type: 'company' });
+            if (error) throw error;
+
+            await logAnalytics(appId, 'install', userId, companyId, { type: 'company' });
 
             res.json({
                 success: true,
@@ -453,17 +654,20 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // DELETE /api/global-marketplace/uninstall/individual/:appId - Uninstall app for individual user
-    router.delete('/uninstall/individual/:appId', getCurrentUser, (req: any, res: Response) => {
+    router.delete('/uninstall/individual/:appId', getCurrentUser, async (req: any, res: Response) => {
         try {
             const { appId } = req.params;
             const userId = req.user?.id;
 
-            db.prepare(`
-                DELETE FROM user_app_installations
-                WHERE user_id = ? AND app_id = ?
-            `).run(userId, appId);
+            const { error } = await supabase
+                .from('user_app_installations')
+                .delete()
+                .eq('user_id', userId)
+                .eq('app_id', appId);
 
-            logAnalytics(appId, 'uninstall', userId, req.user?.company_id, { type: 'individual' });
+            if (error) throw error;
+
+            await logAnalytics(appId, 'uninstall', userId, req.user?.company_id, { type: 'individual' });
 
             res.json({
                 success: true,
@@ -476,7 +680,7 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // DELETE /api/global-marketplace/uninstall/company/:appId - Uninstall app for company (admin only)
-    router.delete('/uninstall/company/:appId', getCurrentUser, (req: any, res: Response) => {
+    router.delete('/uninstall/company/:appId', getCurrentUser, async (req: any, res: Response) => {
         try {
             const { appId } = req.params;
             const userId = req.user?.id;
@@ -487,12 +691,15 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
                 return res.status(403).json({ success: false, error: 'Only admins can uninstall company apps' });
             }
 
-            db.prepare(`
-                DELETE FROM company_app_installations
-                WHERE company_id = ? AND app_id = ?
-            `).run(companyId, appId);
+            const { error } = await supabase
+                .from('company_app_installations')
+                .delete()
+                .eq('company_id', companyId)
+                .eq('app_id', appId);
 
-            logAnalytics(appId, 'uninstall', userId, companyId, { type: 'company' });
+            if (error) throw error;
+
+            await logAnalytics(appId, 'uninstall', userId, companyId, { type: 'company' });
 
             res.json({
                 success: true,
@@ -505,7 +712,7 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
     });
 
     // GET /api/global-marketplace/categories - Get all categories
-    router.get('/categories', (req: Request, res: Response) => {
+    router.get('/categories', (_req: Request, res: Response) => {
         try {
             const categories = [
                 { id: 'all', name: 'All Apps', icon: '📦' },
@@ -533,4 +740,3 @@ export function createGlobalMarketplaceRouter(db: Database.Database): Router {
 
     return router;
 }
-

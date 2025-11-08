@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Sparkles, Brain, Zap, History, Trash2, Download } from 'lucide-react';
+import { Bot, Send, Sparkles, Brain, Zap, Trash2, Download } from 'lucide-react';
+import { getAPIUrl } from '../../config/api.config';
 
 interface Message {
   id: string;
@@ -107,7 +108,7 @@ export const AdvancedAIAssistant: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/ai/chat', {
+      const response = await fetch(getAPIUrl('/ai/chat'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -366,4 +367,3 @@ export const AdvancedAIAssistant: React.FC = () => {
     </div>
   );
 };
-

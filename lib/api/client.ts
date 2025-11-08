@@ -1,23 +1,24 @@
 /**
  * Modern API Client for CortexBuild
- * 
+ *
  * This client replaces the old api.ts file with proper HTTP calls to the backend.
  * All functions return promises and handle errors consistently.
  */
 
 import { User, Project, Task, Notification, AISuggestion } from '../../types';
+import { isProd } from '../../src/utils/env';
 
 // API Configuration
-const API_BASE = import.meta.env.PROD 
-    ? '/api' 
+const API_BASE = isProd()
+    ? '/api'
     : 'http://localhost:3001/api';
 
 /**
  * Get authentication token from localStorage
  */
 const getAuthToken = (): string => {
-    return localStorage.getItem('token') || 
-           localStorage.getItem('constructai_token') || 
+    return localStorage.getItem('token') ||
+           localStorage.getItem('constructai_token') ||
            '';
 };
 
@@ -25,11 +26,11 @@ const getAuthToken = (): string => {
  * Make an authenticated API request
  */
 async function apiRequest<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
 ): Promise<T> {
     const token = getAuthToken();
-    
+
     const response = await fetch(`${API_BASE}${endpoint}`, {
         ...options,
         headers: {
@@ -52,7 +53,7 @@ async function apiRequest<T>(
  */
 export const apiClient = {
     // ==================== PROJECTS ====================
-    
+
     /**
      * Fetch all projects for the current user
      */

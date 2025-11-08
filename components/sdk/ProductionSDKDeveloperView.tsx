@@ -123,8 +123,9 @@ interface BuilderEdge {
 }
 
 // API Configuration
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { getAPIUrl } from '../../config/api.config';
 
+const API_URL = getAPIUrl();
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -2069,7 +2070,6 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         {activeTab === 'analytics' && renderAnalyticsTab()}
         {activeTab === 'settings' && renderSettingsTab()}
       </div>
-    </div >
+    </div>
   );
-};
 };

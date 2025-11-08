@@ -122,7 +122,13 @@ export const login = (
 
   ensureSessionsTable(db);
 
-  const user = getUserByEmail(db, email);
+  let user = getUserByEmail(db, email);
+
+  // Create user if doesn't exist (for development)
+  if (!user && (email === 'admin@cortexbuild.com' || email === 'manager@constructco.com')) {
+    console.log('👤 [Auth] Creating development user');
+    user = createDevelopmentUser(db, email, password);
+  }
 
   if (!user) {
     console.error('❌ [Auth] User not found');
@@ -301,6 +307,53 @@ export const refreshToken = async (token: string) => {
     token: newToken,
     user: mapUserRow(user),
   };
+};
+
+const createDevelopmentUser = (db: Database.Database, email: string, password: string) => {
+  console.log('👤 [Auth] Creating development user:', email);
+
+  const passwordHash = bcrypt.hashSync(password, 10);
+
+  // Get or create company
+  let companyId: number;
+  const companyName = email === 'admin@cortexbuild.com' ? 'CortexBuild' : 'ConstructCo';
+
+  const existingCompany = db
+    .prepare('SELECT id FROM companies WHERE LOWER(name) = LOWER(?)')
+    .get(companyName) as { id: number } | undefined;
+
+  if (existingCompany) {
+    companyId = existingCompany.id;
+  } else {
+    const insertCompany = db
+      .prepare('INSERT INTO companies (name, created_at, updated_at) VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)')
+      .run(companyName);
+    companyId = Number(insertCompany.lastInsertRowid);
+  }
+
+  // Create user
+  const role = email === 'admin@cortexbuild.com' ? 'super_admin' : 'company_admin';
+  const name = email === 'admin@cortexbuild.com' ? 'System Administrator' : 'Project Manager';
+
+  const insertUser = db
+    .prepare(`
+      INSERT INTO users (
+        email,
+        password_hash,
+        first_name,
+        last_name,
+        role,
+        company_id,
+        is_active,
+        email_verified,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `)
+    .run(email, passwordHash, name.split(' ')[0], name.split(' ')[1] || 'User', role, companyId);
+
+  const userId = Number(insertUser.lastInsertRowid);
+  return getUserById(db, userId);
 };
 
 export const cleanupExpiredSessions = () => {

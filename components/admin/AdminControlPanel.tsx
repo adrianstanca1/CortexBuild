@@ -14,7 +14,6 @@ import {
     CreditCard,
     FileText,
     Bell,
-    Lock,
     Globe,
     Zap
 } from 'lucide-react';
@@ -234,4 +233,3 @@ const AdminControlPanel: React.FC<AdminControlPanelProps> = ({ isDarkMode = true
 };
 
 export default AdminControlPanel;
-

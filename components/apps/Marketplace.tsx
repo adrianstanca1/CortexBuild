@@ -8,8 +8,6 @@ import {
     Download,
     Star,
     CheckCircle,
-    TrendingUp,
-    Filter,
     Grid,
     List
 } from 'lucide-react';
@@ -209,4 +207,3 @@ const Marketplace: React.FC<MarketplaceProps> = ({ apps, onInstall, onLaunch, is
 };
 
 export default Marketplace;
-

@@ -11,7 +11,6 @@ import {
   Database,
   DollarSign,
   Download,
-  Globe,
   HardDrive,
   Layers,
   Lock,
@@ -119,8 +118,9 @@ interface DashboardData {
 
 type Section = 'overview' | 'users' | 'companies' | 'sdk' | 'system';
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { getAPIUrl } from '../../../config/api.config';
 
+const API_URL = getAPIUrl();
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' }
@@ -256,14 +256,7 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-blue-600 uppercase tracking-wide">
-                <Shield className="h-4 w-4" />
-                Platform Oversight
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
-              <p className="text-gray-600 mt-1">Unified control over tenants, usage, and system health.</p>
-            </div>
+            <div></div>
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
@@ -333,7 +326,7 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
             <QuickAction icon={UserPlus} label="Invite User" onClick={() => setShowAddUserModal(true)} color="border-blue-300 text-blue-600" />
             <QuickAction icon={Building2} label="Add Company" onClick={() => setShowAddCompanyModal(true)} color="border-green-300 text-green-600" />
             <QuickAction icon={Package} label="Create Project" onClick={() => setShowAddProjectModal(true)} color="border-purple-300 text-purple-600" />
-            <QuickAction icon={Settings} label="Platform Admin" onClick={() => setActiveSection('system')} color="border-gray-300 text-gray-600" />
+            <QuickAction icon={Settings} label="System Settings" onClick={() => setActiveSection('system')} color="border-gray-300 text-gray-600" />
           </div>
         </div>
 
@@ -350,10 +343,10 @@ export const EnhancedSuperAdminDashboard: React.FC = () => {
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveSection(tab.id as Section)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                  activeSection === tab.id ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${activeSection === tab.id ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}

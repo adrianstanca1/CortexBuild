@@ -8,16 +8,8 @@ import {
     Shield,
     Mail,
     Globe,
-    Database,
-    Key,
-    Bell,
-    Lock,
-    Server,
-    Zap,
     Save,
-    RefreshCw,
-    CheckCircle,
-    AlertCircle
+    RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -332,4 +324,3 @@ const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({ isDarkMod
 };
 
 export default SystemSettingsManager;
-

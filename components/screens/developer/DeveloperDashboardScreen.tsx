@@ -32,6 +32,9 @@ import DeveloperMetricsWidget from '../../widgets/DeveloperMetricsWidget';
 import DeveloperInsightsWidget from '../../widgets/DeveloperInsightsWidget';
 import DeveloperFocusWidget from '../../widgets/DeveloperFocusWidget';
 import { processDeveloperDashboardData } from '../../../utils/developerDashboardLogic';
+import { mockApi } from '../../../api/mockApi';
+
+// Note: Using existing axios-based api object defined later in the file
 
 interface DeveloperDashboardScreenProps {
   currentUser: User;
@@ -183,8 +186,9 @@ interface RoleExperience {
   programs: RoleExperienceProgram[];
 }
 
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { getAPIUrl } from '../../../config/api.config';
 
+const API_URL = getAPIUrl();
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' }
@@ -502,6 +506,65 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     }
   }, [buildManifestFromEditor, builderEditor]);
 
+  // loadDashboardData must be declared before handleSandboxRun
+  const loadDashboardData = useCallback(async (withLoader: boolean) => {
+    if (withLoader) {
+      setLoading(true);
+    }
+
+    const loadFallback = async () => {
+      try {
+        const [profileRes, appsRes, workflowsRes, usageRes, webhooksRes, agentsRes, runsRes] = await Promise.all([
+          api.get('/sdk/profile'),
+          api.get('/sdk/apps'),
+          api.get('/sdk/workflows'),
+          api.get('/sdk/usage'),
+          api.get('/sdk/webhooks'),
+          api.get('/sdk/agents'),
+          api.get('/sdk/runs')
+        ]);
+
+        if (profileRes.data?.success) setProfile(profileRes.data.profile);
+        if (appsRes.data?.success) setApps(appsRes.data.apps || []);
+        if (workflowsRes.data?.success) setWorkflows(workflowsRes.data.workflows || []);
+        if (usageRes.data?.success) setUsage(usageRes.data);
+        if (webhooksRes.data?.success) setWebhooks(webhooksRes.data.webhooks || []);
+        if (agentsRes.data?.success) setAgents(agentsRes.data.agents || []);
+        if (runsRes.data?.success) setBuilderRuns(runsRes.data.runs || []);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to load dashboard data', error);
+        setLoading(false);
+      }
+    };
+
+    await loadFallback();
+  }, []);
+
+  // Sandbox run function - moved here to fix initialization order
+  const handleSandboxRun = useCallback(async (options: { appId?: string; workflowId?: string; definition?: any; name?: string; payload?: any } = {}) => {
+    if (sandboxRunning) return;
+    setSandboxRunning(true);
+    try {
+      const endpoint = options.definition ? '/developer/builder/run' : '/developer/sandbox/run';
+      const response = await api.post(endpoint, options);
+      if (response.data?.success) {
+        const resultPayload = response.data.run ?? response.data.simulation ?? null;
+        setSandboxResult(resultPayload);
+        toast.success('Sandbox simulation completed');
+        await loadDashboardData(false);
+      } else {
+        toast.error(response.data?.error || 'Sandbox simulation failed');
+      }
+    } catch (error) {
+      console.error('Sandbox run failed', error);
+      toast.error('Sandbox run failed');
+    } finally {
+      setSandboxRunning(false);
+    }
+  }, [sandboxRunning, loadDashboardData]);
+
   const handleRunBuilderModule = useCallback(async (module: BuilderModule) => {
     const payload = module.manifest?.metadata?.testPayload ?? {};
     await handleSandboxRun({ name: module.name, definition: module.manifest, payload });
@@ -545,112 +608,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     }
   }, []);
 
-  const loadDashboardData = useCallback(async (withLoader: boolean) => {
-    if (withLoader) {
-      setLoading(true);
-    }
-
-    const loadFallback = async () => {
-      try {
-        const [profileRes, appsRes, workflowsRes, usageRes, webhooksRes, agentsRes, runsRes] = await Promise.all([
-          api.get('/sdk/profile'),
-          api.get('/sdk/apps'),
-          api.get('/sdk/workflows'),
-          api.get('/sdk/analytics/usage'),
-          api.get('/integrations/webhooks/list'),
-          api.get('/sdk/agents'),
-          api.get('/developer/builder/runs')
-        ]);
-
-        if (profileRes.data.success) {
-          setProfile(profileRes.data.profile);
-        }
-        if (appsRes.data.success) {
-          setApps(appsRes.data.apps || []);
-        }
-        if (workflowsRes.data.success) {
-          setWorkflows(workflowsRes.data.workflows || []);
-        }
-        if (usageRes.data.success) {
-          setUsage(usageRes.data.costSummary || []);
-        }
-        if (webhooksRes.data.success) {
-          setWebhooks(webhooksRes.data.webhooks || []);
-        }
-        if (agentsRes.data.success) {
-          setAgents(agentsRes.data.agents || []);
-        }
-        if (runsRes.data.success) {
-          setBuilderRuns(runsRes.data.runs || []);
-        } else {
-          setBuilderRuns([]);
-        }
-        setSummaryStats(null);
-        setRoleExperience(null);
-        await loadCommunityModules();
-        await loadBuilderModules();
-        try {
-          const capabilitiesRes = await api.get('/developer/capabilities');
-          if (capabilitiesRes.data?.success) {
-            setCapabilities(capabilitiesRes.data.capabilities || null);
-            setRoleExperience(capabilitiesRes.data.roleExperience || null);
-          }
-        } catch (capError) {
-          console.error('Failed to load capabilities', capError);
-        }
-      } catch (fallbackError) {
-        console.error('Failed to load developer dashboard (fallback)', fallbackError);
-        toast.error('Unable to load developer dashboard data');
-      }
-    };
-
-    try {
-      const summaryRes = await api.get('/developer/dashboard/summary');
-      if (summaryRes.data?.success) {
-        const summary = summaryRes.data;
-        setProfile(summary.profile || null);
-        setApps(summary.apps || []);
-        setWorkflows(summary.workflows || []);
-        setWebhooks(summary.webhooks || []);
-        setUsage(summary.usageSummary || []);
-        setAgents(summary.agents || []);
-        setSummaryStats(summary.stats || null);
-        setBuilderRuns(summary.sandboxRuns || []);
-        setBuilderModules(summary.builderModules || []);
-        setCapabilities(summary.capabilities || null);
-        setRoleExperience(summary.roleExperience || null);
-        await loadCommunityModules();
-
-        // Process dashboard data with ML logic
-        try {
-          const processedData = processDeveloperDashboardData({
-            profile: summary.profile,
-            apps: summary.apps || [],
-            workflows: summary.workflows || [],
-            webhooks: summary.webhooks || [],
-            usage: summary.usageSummary || [],
-            agents: summary.agents || [],
-            stats: summary.stats,
-            sandboxRuns: summary.sandboxRuns || [],
-            capabilities: summary.capabilities
-          });
-          setDashboardData(processedData);
-        } catch (mlError) {
-          console.error('Failed to process dashboard data with ML', mlError);
-          setDashboardData(null);
-        }
-      } else {
-        await loadFallback();
-      }
-    } catch (error) {
-      console.error('Failed to load developer dashboard summary', error);
-      await loadFallback();
-    } finally {
-      if (withLoader) {
-        setLoading(false);
-      }
-    }
-  }, [loadCommunityModules, loadBuilderModules]);
+  // canPublishModules declaration moved to after sandboxLimitReached (line 763)
 
   useEffect(() => {
     loadDashboardData(true);
@@ -663,27 +621,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     toast.success('Developer insights refreshed');
   };
 
-  const handleSandboxRun = useCallback(async (options: { appId?: string; workflowId?: string; definition?: any; name?: string; payload?: any } = {}) => {
-    if (sandboxRunning) return;
-    setSandboxRunning(true);
-    try {
-      const endpoint = options.definition ? '/developer/builder/run' : '/developer/sandbox/run';
-      const response = await api.post(endpoint, options);
-      if (response.data?.success) {
-        const resultPayload = response.data.run ?? response.data.simulation ?? null;
-        setSandboxResult(resultPayload);
-        toast.success('Sandbox simulation completed');
-        await loadDashboardData(false);
-      } else {
-        toast.error(response.data?.error || 'Sandbox simulation failed');
-      }
-    } catch (error) {
-      console.error('Sandbox run failed', error);
-      toast.error('Sandbox run failed');
-    } finally {
-      setSandboxRunning(false);
-    }
-  }, [sandboxRunning, loadDashboardData]);
+  // handleSandboxRun moved to earlier in the file to fix initialization order
 
   const handleQuickAction = useCallback(
     async (action: RoleExperienceQuickAction) => {
@@ -720,6 +658,11 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     },
     [handleSandboxRun, navigateTo]
   );
+
+  const canPublishModules = useMemo(() => {
+    if (!capabilities) return true;
+    return capabilities.canPublishModules !== false;
+  }, [capabilities]);
 
   const handlePublishApp = useCallback(async (appId: string, nextStatus: 'pending_review' | 'approved' = 'pending_review') => {
     if (!canPublishModules) {
@@ -822,10 +765,7 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
     return capabilitySummary.runsRemaining <= 0;
   }, [capabilitySummary]);
 
-  const canPublishModules = useMemo(() => {
-    if (!capabilities) return true;
-    return capabilities.canPublishModules !== false;
-  }, [capabilities]);
+
 
   if (loading) {
     return (
@@ -1261,6 +1201,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   event.target.value = '';
                 }}
                 defaultValue=""
+                aria-label="Start from template"
+                title="Select a template to start from"
               >
                 <option value="" disabled>
                   Start from template...
@@ -1334,6 +1276,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   onChange={(event) => setBuilderEditor((prev) => ({ ...prev, description: event.target.value }))}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   rows={2}
+                  aria-label="Description"
+                  title="Builder description"
                 />
               </div>
               <div className="grid gap-4 md:grid-cols-3">
@@ -1344,6 +1288,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                     value={builderEditor.version}
                     onChange={(event) => setBuilderEditor((prev) => ({ ...prev, version: event.target.value }))}
                     className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Version"
+                    title="Builder version"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -1352,6 +1298,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                     value={builderEditor.status}
                     onChange={(event) => setBuilderEditor((prev) => ({ ...prev, status: event.target.value }))}
                     className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    aria-label="Status"
+                    title="Builder status"
                   >
                     <option value="draft">Draft</option>
                     <option value="ready">Ready</option>
@@ -1397,6 +1345,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                           value={node.type}
                           onChange={(event) => handleNodeChange(index, 'type', event.target.value)}
                           className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          aria-label="Node type"
+                          title="Select node type"
                         >
                           <option value="trigger">Trigger</option>
                           <option value="action">Action</option>
@@ -1422,6 +1372,8 @@ const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> = ({ cur
                   onChange={(event) => setBuilderEditor((prev) => ({ ...prev, testPayload: event.target.value }))}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   rows={3}
+                  aria-label="Test payload"
+                  title="Test payload JSON"
                 />
               </div>
 

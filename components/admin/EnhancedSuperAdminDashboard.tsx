@@ -4,7 +4,7 @@
  * Features: Real-time stats, animations, advanced analytics
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Users,
     Building2,
@@ -18,21 +18,9 @@ import {
     Bell,
     Lock,
     Globe,
-    Package,
-    Zap,
-    TrendingUp,
     DollarSign,
-    UserCheck,
-    AlertCircle,
     CheckCircle,
-    Clock,
-    Download,
-    ArrowUpRight,
-    ArrowDownRight,
-    Sparkles,
-    Target,
-    Award,
-    Cpu
+    Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -57,7 +45,7 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
     onNavigate
 }) => {
     const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'companies' | 'billing' | 'system'>('overview');
-    const [stats, setStats] = useState<AdminStats>({
+    const [stats] = useState<AdminStats>({
         totalUsers: 1247,
         activeUsers: 892,
         totalCompanies: 156,
@@ -245,26 +233,24 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
             <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                Super Admin Dashboard
-                            </h1>
-                            <p className={`mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Complete administrative control panel
-                            </p>
-                        </div>
+                        <div></div>
                         <div className="flex items-center space-x-3">
                             <button
+                                type="button"
                                 onClick={() => toast.success('Refreshing data...')}
+                                aria-label="Refresh data"
+                                title="Refresh data"
                                 className={`px-4 py-2 rounded-lg ${isDarkMode
-                                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                                     } transition-colors`}
                             >
-                                <Activity className="w-4 h-4" />
+                                <span className="sr-only">Refresh data</span>
+                                <Activity className="w-4 h-4" aria-hidden="true" />
                             </button>
                             <button
-                                onClick={() => toast.info('Downloading report...')}
+                                type="button"
+                                onClick={() => toast('Downloading report...', { icon: 'ℹ️' })}
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
                             >
                                 <Download className="w-4 h-4" />
@@ -277,11 +263,12 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
                     <div className="mt-6 flex space-x-4 border-b border-gray-200">
                         {navigationTabs.map((tab) => (
                             <button
+                                type="button"
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex items-center space-x-2 px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === tab.id
-                                        ? 'border-blue-500 text-blue-600'
-                                        : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
+                                    ? 'border-blue-500 text-blue-600'
+                                    : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`
                                     }`}
                             >
                                 <tab.icon className="w-4 h-4" />
@@ -368,4 +355,3 @@ const EnhancedSuperAdminDashboard: React.FC<EnhancedSuperAdminDashboardProps> = 
 };
 
 export default EnhancedSuperAdminDashboard;
-

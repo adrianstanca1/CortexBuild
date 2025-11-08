@@ -2,7 +2,7 @@
  * UI Builder - Visual drag & drop interface for building app screens
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Plus,
     Trash2,
@@ -48,6 +48,10 @@ const UIBuilder: React.FC<UIBuilderProps> = ({ isDarkMode = true, onScreensChang
     const [activeScreen, setActiveScreen] = useState<Screen>(screens[0]);
     const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
     const [previewMode, setPreviewMode] = useState(false);
+
+    useEffect(() => {
+        onScreensChange?.(screens);
+    }, [screens, onScreensChange]);
 
     const componentLibrary = [
         { type: 'text', label: 'Text', icon: Type, defaultProps: { text: 'Text', size: 'medium' } },
@@ -311,4 +315,3 @@ const UIBuilder: React.FC<UIBuilderProps> = ({ isDarkMode = true, onScreensChang
 };
 
 export default UIBuilder;
-

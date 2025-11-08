@@ -1,6 +1,6 @@
 /**
  * Platform Admin Types
- * 
+ *
  * Type definitions for platform-wide administration features
  */
 

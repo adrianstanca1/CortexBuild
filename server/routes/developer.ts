@@ -1,6 +1,11 @@
+// CortexBuild - Developer Routes
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
+
 import { v4 as uuidv4 } from 'uuid';
 import { Router } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { authenticateToken } from '../auth-supabase';
 import {
   getCapabilitiesForRole,
   enforceSandboxRunQuota,
@@ -8,109 +13,77 @@ import {
   buildRoleExperience
 } from '../utils/capabilities';
 
-export function createDeveloperRoutes(db: Database.Database) {
+export function createDeveloperRoutes(supabase: SupabaseClient) {
   const router = Router();
 
   // Middleware to check sandbox access privileges
-  const requireSandboxAccess = (req: any, res: any, next: any) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
+  const requireSandboxAccess = async (req: any, res: any, next: any) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+
+      const user = await (await import('../auth-supabase')).getCurrentUserByToken(token);
+      if (!user) {
+        return res.status(401).json({ success: false, error: 'Invalid session' });
+      }
+
+      const capabilities = getCapabilitiesForRole(user.role);
+
+      // Allow developer, super admin, or company admin with sandbox capabilities
+      if (!capabilities.canAccessSandbox) {
+        return res.status(403).json({ success: false, error: 'Sandbox access restricted for this role' });
+      }
+
+      req.user = user;
+      req.capabilities = capabilities;
+      next();
+    } catch (error: any) {
+      res.status(401).json({ success: false, error: error.message || 'Unauthorized' });
     }
-
-    const session = db.prepare('SELECT user_id FROM sessions WHERE token = ?').get(token) as any;
-    if (!session) {
-      return res.status(401).json({ success: false, error: 'Invalid session' });
-    }
-
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(session.user_id) as any;
-    if (!user) {
-      return res.status(401).json({ success: false, error: 'User not found' });
-    }
-
-    const capabilities = getCapabilitiesForRole(user.role);
-
-    // Allow developer, super admin, or company admin with sandbox capabilities
-    if (!capabilities.canAccessSandbox) {
-      return res.status(403).json({ success: false, error: 'Sandbox access restricted for this role' });
-    }
-
-    req.user = user;
-    req.capabilities = capabilities;
-    next();
   };
 
-  // Apply developer check to all routes
+  // Apply authentication and developer check to all routes
+  router.use(authenticateToken);
   router.use(requireSandboxAccess);
 
-  const ensureSandboxRunsTable = () => {
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS sandbox_runs (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        company_id TEXT,
-        name TEXT NOT NULL,
-        definition TEXT,
-        result TEXT,
-        status TEXT DEFAULT 'completed',
-        duration_ms INTEGER DEFAULT 0,
-        input_payload TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-      )
-    `);
-
-    const columns = db.prepare(`PRAGMA table_info(sandbox_runs)`).all() as Array<{ name: string }>;
-    const hasInput = columns.some(column => column.name === 'input_payload');
-    if (!hasInput) {
-      db.exec(`ALTER TABLE sandbox_runs ADD COLUMN input_payload TEXT`);
-    }
-  };
-
-  const ensureBuilderModulesTable = () => {
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS builder_modules (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        company_id TEXT,
-        name TEXT NOT NULL,
-        description TEXT,
-        version TEXT DEFAULT '1.0.0',
-        status TEXT DEFAULT 'draft',
-        manifest TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-      )
-    `);
-  };
-
-  const logDeveloperEvent = (user: any, eventType: string, payload: Record<string, unknown>) => {
+  const logDeveloperEvent = async (user: any, eventType: string, payload: Record<string, unknown>) => {
     try {
-      db.prepare(
-        `INSERT INTO developer_console_events (id, user_id, company_id, event_type, payload)
-         VALUES (?, ?, ?, ?, ?)`
-      ).run(
-        `dev-${uuidv4()}`,
-        user.id,
-        user.company_id ?? null,
-        eventType,
-        JSON.stringify(payload ?? {})
-      );
+      await supabase
+        .from('developer_console_events')
+        .insert({
+          id: `dev-${uuidv4()}`,
+          user_id: user.id,
+          company_id: user.company_id || user.companyId || null,
+          event_type: eventType,
+          payload: JSON.stringify(payload ?? {})
+        });
     } catch (error) {
       console.error('[Developer] log event failed', error);
     }
   };
 
-  const ensureSdkProfile = (userId: string) => {
-    let profile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(userId);
+  const ensureSdkProfile = async (userId: string) => {
+    let { data: profile } = await supabase
+      .from('sdk_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
     if (!profile) {
       const id = `sdk-profile-${Date.now()}`;
-      db.prepare(`
-        INSERT INTO sdk_profiles (id, user_id, subscription_tier, api_requests_limit)
-        VALUES (?, ?, ?, ?)
-      `).run(id, userId, 'free', 100);
-      profile = db.prepare('SELECT * FROM sdk_profiles WHERE user_id = ?').get(userId);
+      const { data: newProfile } = await supabase
+        .from('sdk_profiles')
+        .insert({
+          id,
+          user_id: userId,
+          subscription_tier: 'free',
+          api_requests_limit: 100
+        })
+        .select()
+        .single();
+      profile = newProfile;
     }
     return profile;
   };
@@ -133,8 +106,8 @@ export function createDeveloperRoutes(db: Database.Database) {
     name: row.name,
     developerId: row.developer_id,
     companyId: row.company_id,
-    definition: row.definition ? JSON.parse(row.definition) : { nodes: [], connections: [] },
-    isActive: row.is_active === 1,
+    definition: row.definition ? (typeof row.definition === 'string' ? JSON.parse(row.definition) : row.definition) : { nodes: [], connections: [] },
+    isActive: row.is_active === true || row.is_active === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   });
@@ -146,7 +119,7 @@ export function createDeveloperRoutes(db: Database.Database) {
     status: row.status,
     developerId: row.developer_id,
     companyId: row.company_id,
-    config: row.config ? JSON.parse(row.config) : {},
+    config: row.config ? (typeof row.config === 'string' ? JSON.parse(row.config) : row.config) : {},
     createdAt: row.created_at,
     updatedAt: row.updated_at
   });
@@ -157,94 +130,94 @@ export function createDeveloperRoutes(db: Database.Database) {
     description: row.description,
     version: row.version,
     status: row.status,
-    manifest: row.manifest ? JSON.parse(row.manifest) : { nodes: [], connections: [] },
+    manifest: row.manifest ? (typeof row.manifest === 'string' ? JSON.parse(row.manifest) : row.manifest) : { nodes: [], connections: [] },
     createdAt: row.created_at,
     updatedAt: row.updated_at
   });
 
-  router.get('/dashboard/summary', (req, res) => {
+  router.get('/dashboard/summary', async (req, res) => {
     try {
       const user = (req as any).user;
       const capabilities = (req as any).capabilities ?? getCapabilitiesForRole(user.role);
-      const profileRow = ensureSdkProfile(user.id);
-      ensureSandboxRunsTable();
-      ensureBuilderModulesTable();
-      const usageCounts = getSandboxUsageCounts(db, user.id);
+      const profileRow = await ensureSdkProfile(user.id);
+      const usageCounts = await getSandboxUsageCounts(supabase, user.id);
 
-      const apps = db
-        .prepare(`
-          SELECT * FROM sdk_apps
-          WHERE developer_id = ?
-          ORDER BY updated_at DESC
-        `)
-        .all(user.id)
-        .map(mapAppRow);
+      // Get all data in parallel
+      const [appsResult, workflowsResult, webhooksResult, agentsResult, builderModulesResult, usageSummaryResult, sandboxRunsResult] = await Promise.all([
+        supabase
+          .from('sdk_apps')
+          .select('*')
+          .eq('developer_id', user.id)
+          .order('updated_at', { ascending: false }),
+        supabase
+          .from('sdk_workflows')
+          .select('*')
+          .eq('developer_id', user.id)
+          .order('updated_at', { ascending: false }),
+        supabase
+          .from('webhooks')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false }),
+        supabase
+          .from('ai_agents')
+          .select('*')
+          .eq('developer_id', user.id)
+          .order('updated_at', { ascending: false }),
+        supabase
+          .from('builder_modules')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false }),
+        (async () => {
+          const startOfMonth = new Date();
+          startOfMonth.setDate(1);
+          startOfMonth.setHours(0, 0, 0, 0);
+          const { data } = await supabase
+            .from('api_usage_logs')
+            .select('provider, cost, total_tokens')
+            .eq('user_id', user.id)
+            .gte('created_at', startOfMonth.toISOString());
+          return data || [];
+        })(),
+        supabase
+          .from('sandbox_runs')
+          .select('id, name, definition, result, status, duration_ms, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(15)
+      ]);
 
-      const workflows = db
-        .prepare(`
-          SELECT * FROM sdk_workflows
-          WHERE developer_id = ?
-          ORDER BY updated_at DESC
-        `)
-        .all(user.id)
-        .map(mapWorkflowRow);
+      const apps = (appsResult.data || []).map(mapAppRow);
+      const workflows = (workflowsResult.data || []).map(mapWorkflowRow);
+      const webhooks = webhooksResult.data || [];
+      const agents = (agentsResult.data || []).map(mapAgentRow);
+      const builderModules = (builderModulesResult.data || []).map(mapBuilderModuleRow);
 
-      const webhooks = db
-        .prepare(`
-          SELECT * FROM webhooks
-          WHERE user_id = ?
-          ORDER BY updated_at DESC
-        `)
-        .all(user.id);
-
-      const agents = db
-        .prepare(`
-          SELECT * FROM ai_agents
-          WHERE developer_id = ?
-          ORDER BY updated_at DESC
-        `)
-        .all(user.id)
-        .map(mapAgentRow);
-
-      const builderModules = db
-        .prepare(`
-          SELECT * FROM builder_modules
-          WHERE user_id = ?
-          ORDER BY updated_at DESC
-        `)
-        .all(user.id)
-        .map(mapBuilderModuleRow);
-
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-
-      const usageSummary = db
-        .prepare(`
-          SELECT
+      // Group usage by provider
+      const usageSummary = (usageSummaryResult || []).reduce((acc: any, log: any) => {
+        const provider = log.provider || 'unknown';
+        if (!acc[provider]) {
+          acc[provider] = {
             provider,
-            COUNT(*) as requests_this_month,
-            SUM(cost) as month_to_date_cost,
-            SUM(total_tokens) as total_tokens
-          FROM api_usage_logs
-          WHERE user_id = ? AND created_at >= ?
-          GROUP BY provider
-        `)
-        .all(user.id, startOfMonth.toISOString())
-        .map((row: any) => ({
-          provider: row.provider,
-          requestsThisMonth: Number(row.requests_this_month || 0),
-          monthToDateCost: Number(row.month_to_date_cost || 0),
-          totalTokens: Number(row.total_tokens || 0)
-        }));
+            requestsThisMonth: 0,
+            monthToDateCost: 0,
+            totalTokens: 0
+          };
+        }
+        acc[provider].requestsThisMonth += 1;
+        acc[provider].monthToDateCost += log.cost || 0;
+        acc[provider].totalTokens += log.total_tokens || 0;
+        return acc;
+      }, {});
 
       const profile = {
-        id: profileRow.id,
-        userId: profileRow.user_id,
-        subscriptionTier: profileRow.subscription_tier,
-        apiRequestsUsed: profileRow.api_requests_used ?? 0,
-        apiRequestsLimit: profileRow.api_requests_limit ?? 0,
-        geminiApiKey: profileRow.gemini_api_key
+        id: profileRow?.id,
+        userId: profileRow?.user_id,
+        subscriptionTier: profileRow?.subscription_tier || 'free',
+        apiRequestsUsed: profileRow?.api_requests_used ?? 0,
+        apiRequestsLimit: profileRow?.api_requests_limit ?? 0,
+        geminiApiKey: profileRow?.gemini_api_key
       };
 
       const stats = {
@@ -254,38 +227,23 @@ export function createDeveloperRoutes(db: Database.Database) {
         totalWorkflows: workflows.length,
         activeWorkflows: workflows.filter((wf) => wf.isActive).length,
         totalWebhooks: webhooks.length,
-        activeWebhooks: webhooks.filter((hook: any) => hook.is_active === 1).length,
+        activeWebhooks: webhooks.filter((hook: any) => hook.is_active === true || hook.is_active === 1).length,
         totalAgents: agents.length,
         runningAgents: agents.filter((agent) => agent.status === 'running').length,
-        totalRequestsThisMonth: usageSummary.reduce((sum, item) => sum + item.requestsThisMonth, 0),
-        totalCostThisMonth: usageSummary.reduce((sum, item) => sum + item.monthToDateCost, 0),
-        totalTokensThisMonth: usageSummary.reduce((sum, item) => sum + item.totalTokens, 0)
+        totalRequestsThisMonth: Object.values(usageSummary).reduce((sum: number, item: any) => sum + item.requestsThisMonth, 0),
+        totalCostThisMonth: Object.values(usageSummary).reduce((sum: number, item: any) => sum + item.monthToDateCost, 0),
+        totalTokensThisMonth: Object.values(usageSummary).reduce((sum: number, item: any) => sum + item.totalTokens, 0)
       };
 
-      const sandboxRuns = db
-        .prepare(
-          `SELECT id,
-                  name,
-                  definition,
-                  result,
-                  status,
-                  duration_ms,
-                  created_at
-           FROM sandbox_runs
-           WHERE user_id = ?
-           ORDER BY created_at DESC
-           LIMIT 15`
-        )
-        .all(user.id)
-        .map((row: any) => ({
-          id: row.id,
-          name: row.name,
-          definition: row.definition ? JSON.parse(row.definition) : null,
-          result: row.result ? JSON.parse(row.result) : null,
-          status: row.status,
-          durationMs: row.duration_ms ?? 0,
-          createdAt: row.created_at
-        }));
+      const sandboxRuns = (sandboxRunsResult.data || []).map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        definition: row.definition ? (typeof row.definition === 'string' ? JSON.parse(row.definition) : row.definition) : null,
+        result: row.result ? (typeof row.result === 'string' ? JSON.parse(row.result) : row.result) : null,
+        status: row.status,
+        durationMs: row.duration_ms ?? 0,
+        createdAt: row.created_at
+      }));
 
       res.json({
         success: true,
@@ -297,7 +255,7 @@ export function createDeveloperRoutes(db: Database.Database) {
         apps,
         workflows,
         webhooks,
-        usageSummary,
+        usageSummary: Object.values(usageSummary),
         agents,
         stats,
         sandboxRuns,
@@ -315,50 +273,55 @@ export function createDeveloperRoutes(db: Database.Database) {
     }
   });
 
-  router.get('/modules/community', (req, res) => {
+  router.get('/modules/community', async (req, res) => {
     try {
       const user = (req as any).user;
-      const rows = db
-        .prepare(
-          `SELECT sa.id,
-                  sa.name,
-                  sa.description,
-                  sa.status,
-                  sa.version,
-                  sa.updated_at,
-                  u.name AS developer_name,
-                  c.name AS company_name
-           FROM sdk_apps sa
-           LEFT JOIN users u ON u.id = sa.developer_id
-           LEFT JOIN companies c ON c.id = sa.company_id
-           WHERE sa.status = 'approved' AND sa.developer_id != ?
-           ORDER BY sa.updated_at DESC
-           LIMIT 12`
-        )
-        .all(user.id)
-        .map((row: any) => ({
+      const { data: rows, error } = await supabase
+        .from('sdk_apps')
+        .select(`
+          id,
+          name,
+          description,
+          status,
+          version,
+          updated_at,
+          users!sdk_apps_developer_id_fkey(id, name),
+          companies!sdk_apps_company_id_fkey(id, name)
+        `)
+        .eq('status', 'approved')
+        .neq('developer_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(12);
+
+      if (error) throw error;
+
+      const modules = (rows || []).map((row: any) => {
+        const users = Array.isArray(row.users) ? row.users[0] : row.users;
+        const companies = Array.isArray(row.companies) ? row.companies[0] : row.companies;
+        return {
           id: row.id,
           name: row.name,
           description: row.description,
           status: row.status,
           version: row.version,
           updatedAt: row.updated_at,
-          developerName: row.developer_name ?? 'Unknown developer',
-          companyName: row.company_name ?? 'Independent'
-        }));
+          developerName: users?.name ?? 'Unknown developer',
+          companyName: companies?.name ?? 'Independent'
+        };
+      });
 
-      res.json({ success: true, modules: rows });
+      res.json({ success: true, modules });
     } catch (error: any) {
       console.error('[Developer] community modules failed', error);
       res.status(500).json({ success: false, error: error.message });
     }
   });
 
-  router.get('/capabilities', (req, res) => {
+  router.get('/capabilities', async (req, res) => {
     try {
       const user = (req as any).user;
       const capabilities = (req as any).capabilities ?? getCapabilitiesForRole(user.role);
-      const usage = getSandboxUsageCounts(db, user.id);
+      const usage = await getSandboxUsageCounts(supabase, user.id);
 
       res.json({
         success: true,
@@ -425,12 +388,12 @@ export function createDeveloperRoutes(db: Database.Database) {
     res.json({ success: true, templates });
   });
 
-  router.post('/sandbox/run', (req, res) => {
+  router.post('/sandbox/run', async (req, res) => {
     try {
       const user = (req as any).user;
       const capabilities = (req as any).capabilities ?? getCapabilitiesForRole(user.role);
-      enforceSandboxRunQuota(db, user, capabilities);
-      ensureSandboxRunsTable();
+      await enforceSandboxRunQuota(supabase, user, capabilities);
+
       const startedAt = Date.now();
       const { appId, workflowId, payload } = req.body ?? {};
       const timestamp = new Date().toISOString();
@@ -448,23 +411,22 @@ export function createDeveloperRoutes(db: Database.Database) {
         ]
       };
 
-      const runId = `sandbox-run-${Date.now()}`;
-      db.prepare(
-        `INSERT INTO sandbox_runs (id, user_id, company_id, name, definition, result, status, duration_ms, input_payload)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        runId,
-        user.id,
-        user.company_id ?? null,
-        appId ? `App Simulation: ${appId}` : workflowId ? `Workflow Simulation: ${workflowId}` : 'Sandbox Simulation',
-        JSON.stringify({ appId, workflowId }),
-        JSON.stringify(simulationOutput),
-        'completed',
-        Date.now() - startedAt,
-        JSON.stringify(payload ?? {})
-      );
+      const runId = uuidv4();
+      await supabase
+        .from('sandbox_runs')
+        .insert({
+          id: runId,
+          user_id: user.id,
+          company_id: user.company_id ?? null,
+          name: appId ? `App Simulation: ${appId}` : workflowId ? `Workflow Simulation: ${workflowId}` : 'Sandbox Simulation',
+          definition: JSON.stringify({ appId, workflowId }),
+          result: JSON.stringify(simulationOutput),
+          status: 'completed',
+          duration_ms: Date.now() - startedAt,
+          input_payload: JSON.stringify(payload ?? {})
+        });
 
-      logDeveloperEvent(user, 'sandbox.run', simulationOutput);
+      await logDeveloperEvent(user, 'sandbox.run', simulationOutput);
 
       res.json({ success: true, simulation: simulationOutput });
     } catch (error: any) {
@@ -473,7 +435,7 @@ export function createDeveloperRoutes(db: Database.Database) {
     }
   });
 
-  router.post('/modules/:id/publish', (req, res) => {
+  router.post('/modules/:id/publish', async (req, res) => {
     try {
       const user = (req as any).user;
       const capabilities = (req as any).capabilities ?? getCapabilitiesForRole(user.role);
@@ -483,20 +445,29 @@ export function createDeveloperRoutes(db: Database.Database) {
       const { id } = req.params;
       const { targetStatus = 'pending_review' } = req.body ?? {};
 
-      const app = db
-        .prepare('SELECT * FROM sdk_apps WHERE id = ? AND developer_id = ?')
-        .get(id, user.id);
+      const { data: app } = await supabase
+        .from('sdk_apps')
+        .select('*')
+        .eq('id', id)
+        .eq('developer_id', user.id)
+        .single();
 
       if (!app) {
         return res.status(404).json({ success: false, error: 'Module not found' });
       }
 
-      db.prepare('UPDATE sdk_apps SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-        .run(targetStatus, id);
+      await supabase
+        .from('sdk_apps')
+        .update({ status: targetStatus })
+        .eq('id', id);
 
-      logDeveloperEvent(user, 'modules.publish', { appId: id, newStatus: targetStatus });
+      await logDeveloperEvent(user, 'modules.publish', { appId: id, newStatus: targetStatus });
 
-      const updated = db.prepare('SELECT * FROM sdk_apps WHERE id = ?').get(id);
+      const { data: updated } = await supabase
+        .from('sdk_apps')
+        .select('*')
+        .eq('id', id)
+        .single();
 
       res.json({ success: true, app: mapAppRow(updated) });
     } catch (error: any) {
@@ -505,12 +476,11 @@ export function createDeveloperRoutes(db: Database.Database) {
     }
   });
 
-  router.post('/builder/run', (req, res) => {
+  router.post('/builder/run', async (req, res) => {
     try {
       const user = (req as any).user;
       const capabilities = (req as any).capabilities ?? getCapabilitiesForRole(user.role);
-      ensureSandboxRunsTable();
-      enforceSandboxRunQuota(db, user, capabilities);
+      await enforceSandboxRunQuota(supabase, user, capabilities);
 
       const {
         name = 'BuilderKit Simulation',
@@ -519,7 +489,7 @@ export function createDeveloperRoutes(db: Database.Database) {
         payload = {}
       } = req.body ?? {};
 
-      const runId = `sandbox-run-${Date.now()}`;
+      const runId = uuidv4();
       const startedAt = Date.now();
 
       const nodes = definition?.nodes ?? [];
@@ -542,22 +512,21 @@ export function createDeveloperRoutes(db: Database.Database) {
         }
       };
 
-      db.prepare(
-        `INSERT INTO sandbox_runs (id, user_id, company_id, name, definition, result, status, duration_ms, input_payload)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        runId,
-        user.id,
-        user.company_id ?? null,
-        name,
-        JSON.stringify(definition),
-        JSON.stringify(result),
-        'completed',
-        Date.now() - startedAt,
-        JSON.stringify(payload)
-      );
+      await supabase
+        .from('sandbox_runs')
+        .insert({
+          id: runId,
+          user_id: user.id,
+          company_id: user.company_id ?? null,
+          name,
+          definition: JSON.stringify(definition),
+          result: JSON.stringify(result),
+          status: 'completed',
+          duration_ms: Date.now() - startedAt,
+          input_payload: JSON.stringify(payload)
+        });
 
-      logDeveloperEvent(user, 'builder.run', { runId, name, nodes: steps.length });
+      await logDeveloperEvent(user, 'builder.run', { runId, name, nodes: steps.length });
 
       res.json({
         success: true,
@@ -577,61 +546,58 @@ export function createDeveloperRoutes(db: Database.Database) {
     }
   });
 
-  router.get('/builder/runs', (req, res) => {
+  router.get('/builder/runs', async (req, res) => {
     try {
       const user = (req as any).user;
-      ensureSandboxRunsTable();
 
-      const runs = db
-        .prepare(
-          `SELECT id, name, definition, result, status, duration_ms, created_at
-           FROM sandbox_runs
-           WHERE user_id = ?
-           ORDER BY created_at DESC
-           LIMIT 25`
-        )
-        .all(user.id)
-        .map((row: any) => ({
+      const { data: runs, error } = await supabase
+        .from('sandbox_runs')
+        .select('id, name, definition, result, status, duration_ms, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(25);
+
+      if (error) throw error;
+
+      res.json({
+        success: true,
+        runs: (runs || []).map((row: any) => ({
           id: row.id,
           name: row.name,
-          definition: row.definition ? JSON.parse(row.definition) : null,
-          result: row.result ? JSON.parse(row.result) : null,
+          definition: row.definition ? (typeof row.definition === 'string' ? JSON.parse(row.definition) : row.definition) : null,
+          result: row.result ? (typeof row.result === 'string' ? JSON.parse(row.result) : row.result) : null,
           status: row.status,
           durationMs: row.duration_ms ?? 0,
           createdAt: row.created_at
-        }));
-
-      res.json({ success: true, runs });
+        }))
+      });
     } catch (error: any) {
       console.error('[Developer] list builder runs failed', error);
       res.status(500).json({ success: false, error: error.message });
     }
   });
 
-  router.get('/builder/modules', (req, res) => {
+  router.get('/builder/modules', async (req, res) => {
     try {
       const user = (req as any).user;
-      ensureBuilderModulesTable();
-      const modules = db
-        .prepare(`
-          SELECT * FROM builder_modules
-          WHERE user_id = ?
-          ORDER BY updated_at DESC
-        `)
-        .all(user.id)
-        .map(mapBuilderModuleRow);
+      const { data: modules, error } = await supabase
+        .from('builder_modules')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
 
-      res.json({ success: true, modules });
+      if (error) throw error;
+
+      res.json({ success: true, modules: (modules || []).map(mapBuilderModuleRow) });
     } catch (error: any) {
       console.error('[Developer] list builder modules failed', error);
       res.status(500).json({ success: false, error: error.message });
     }
   });
 
-  router.post('/builder/modules', (req, res) => {
+  router.post('/builder/modules', async (req, res) => {
     try {
       const user = (req as any).user;
-      ensureBuilderModulesTable();
 
       const { id, name, description, version = '1.0.0', status = 'draft', manifest } = req.body ?? {};
       if (!name || !manifest) {
@@ -642,48 +608,63 @@ export function createDeveloperRoutes(db: Database.Database) {
         return res.status(400).json({ success: false, error: 'Manifest must include nodes array' });
       }
 
-      const moduleId = id ?? `builder-${Date.now()}`;
+      const moduleId = id ?? uuidv4();
       const now = new Date().toISOString();
 
-      const exists = db.prepare('SELECT id FROM builder_modules WHERE id = ? AND user_id = ?').get(moduleId, user.id);
-      if (exists) {
-        db.prepare(
-          `UPDATE builder_modules
-           SET name = ?, description = ?, version = ?, status = ?, manifest = ?, updated_at = ?
-           WHERE id = ? AND user_id = ?`
-        ).run(name, description ?? '', version, status, JSON.stringify(manifest), now, moduleId, user.id);
+      const { data: existing } = await supabase
+        .from('builder_modules')
+        .select('id')
+        .eq('id', moduleId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (existing) {
+        const { data: updated } = await supabase
+          .from('builder_modules')
+          .update({
+            name,
+            description: description ?? '',
+            version,
+            status,
+            manifest: JSON.stringify(manifest),
+            updated_at: now
+          })
+          .eq('id', moduleId)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        await logDeveloperEvent(user, 'builder.save', { moduleId, name, nodeCount: manifest.nodes.length });
+        res.json({ success: true, module: mapBuilderModuleRow(updated) });
       } else {
-        db.prepare(
-          `INSERT INTO builder_modules (id, user_id, company_id, name, description, version, status, manifest, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        ).run(
-          moduleId,
-          user.id,
-          user.company_id ?? null,
-          name,
-          description ?? '',
-          version,
-          status,
-          JSON.stringify(manifest),
-          now,
-          now
-        );
+        const { data: inserted } = await supabase
+          .from('builder_modules')
+          .insert({
+            id: moduleId,
+            user_id: user.id,
+            company_id: user.company_id ?? null,
+            name,
+            description: description ?? '',
+            version,
+            status,
+            manifest: JSON.stringify(manifest),
+            created_at: now,
+            updated_at: now
+          })
+          .select()
+          .single();
+
+        await logDeveloperEvent(user, 'builder.save', { moduleId, name, nodeCount: manifest.nodes.length });
+        res.json({ success: true, module: mapBuilderModuleRow(inserted) });
       }
-
-      const saved = db.prepare('SELECT * FROM builder_modules WHERE id = ?').get(moduleId);
-
-      logDeveloperEvent(user, 'builder.save', { moduleId, name, nodeCount: manifest.nodes.length });
-
-      res.json({ success: true, module: mapBuilderModuleRow(saved) });
     } catch (error: any) {
       console.error('[Developer] save builder module failed', error);
       res.status(500).json({ success: false, error: error.message });
     }
   });
 
-
   // Get developer stats
-  router.get('/stats', (req, res) => {
+  router.get('/stats', (_req, res) => {
     try {
       const stats = {
         apiCalls24h: 15234,
@@ -698,7 +679,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Get API endpoints list
-  router.get('/endpoints', (req, res) => {
+  router.get('/endpoints', (_req, res) => {
     try {
       const endpoints = [
         { method: 'GET', path: '/api/projects', description: 'Get all projects' },
@@ -727,7 +708,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Execute console command
-  router.post('/console/execute', (req, res) => {
+  router.post('/console/execute', async (req, res) => {
     try {
       const { command } = req.body;
       const user = (req as any).user;
@@ -743,7 +724,7 @@ export function createDeveloperRoutes(db: Database.Database) {
         output = `Command executed: ${command}\n✓ Success`;
       }
 
-      logDeveloperEvent(user, 'console.execute', { command, output });
+      await logDeveloperEvent(user, 'console.execute', { command, output });
       res.json({ success: true, output });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -751,7 +732,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Run code snippet
-  router.post('/code/run', (req, res) => {
+  router.post('/code/run', async (req, res) => {
     try {
       const { code, language } = req.body;
       const user = (req as any).user;
@@ -760,7 +741,7 @@ export function createDeveloperRoutes(db: Database.Database) {
       // For now, return simulated output
       const output = `Code executed successfully\nLanguage: ${language}\nOutput: Hello from CortexBuild!`;
       
-      logDeveloperEvent(user, 'code.run', { language, output });
+      await logDeveloperEvent(user, 'code.run', { language, output });
       res.json({ success: true, output });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -768,7 +749,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Execute database query
-  router.post('/database/query', (req, res) => {
+  router.post('/database/query', async (req, res) => {
     try {
       const { query } = req.body;
       const user = (req as any).user;
@@ -781,22 +762,31 @@ export function createDeveloperRoutes(db: Database.Database) {
         });
       }
 
-      const results = db.prepare(query).all();
-      logDeveloperEvent(user, 'database.query', { query, rows: results.length });
-      res.json({ success: true, results, changes: results.length });
+      // Note: Supabase doesn't allow arbitrary SQL execution for security
+      // This would need to be implemented using Supabase's query builder or RPC functions
+      // For now, return an error indicating this needs to be implemented differently
+      res.status(501).json({ 
+        success: false, 
+        error: 'Direct SQL queries are not supported in Supabase. Use the Supabase query builder or RPC functions instead.' 
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
   });
 
-  // Get database tables
-  router.get('/database/tables', (req, res) => {
+  // Get database tables (PostgreSQL equivalent)
+  router.get('/database/tables', async (_req, res) => {
     try {
-      const tables = db.prepare(`
-        SELECT name FROM sqlite_master 
-        WHERE type='table' 
-        ORDER BY name
-      `).all().map((row: any) => row.name);
+      // Note: Supabase doesn't expose direct access to information_schema for security
+      // This would need to be implemented using a database function or RPC
+      // For now, return a list of known tables
+      const tables = [
+        'companies', 'users', 'projects', 'tasks', 'clients', 'rfis', 'invoices',
+        'purchase_orders', 'time_entries', 'documents', 'activities', 'milestones',
+        'subcontractors', 'sdk_apps', 'sdk_workflows', 'sdk_profiles', 'ai_agents',
+        'webhooks', 'integrations', 'workflows', 'automations', 'gantt_tasks',
+        'wbs_items', 'budgets', 'contracts', 'change_orders', 'payment_applications'
+      ];
       
       res.json({ success: true, tables });
     } catch (error: any) {
@@ -804,34 +794,42 @@ export function createDeveloperRoutes(db: Database.Database) {
     }
   });
 
-  // Get table schema
-  router.get('/database/schema/:table', (req, res) => {
+  // Get table schema (PostgreSQL equivalent)
+  router.get('/database/schema/:table', async (req, res) => {
     try {
       const { table } = req.params;
-      const schema = db.prepare(`PRAGMA table_info(${table})`).all();
-      res.json({ success: true, schema });
+      
+      // Note: Supabase doesn't expose direct access to information_schema for security
+      // This would need to be implemented using a database function or RPC
+      res.status(501).json({ 
+        success: false, 
+        error: 'Table schema queries are not directly supported in Supabase. Use the Supabase dashboard or database functions instead.' 
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
   });
 
-  router.get('/events', (req, res) => {
+  router.get('/events', async (req, res) => {
     try {
       const user = (req as any).user;
       const limit = parseInt((req.query.limit as string) ?? '50', 10);
-      const rows = db.prepare(`
-        SELECT * FROM developer_console_events
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        LIMIT ?
-      `).all(user.id, limit);
+      
+      const { data: rows, error } = await supabase
+        .from('developer_console_events')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
 
       res.json({
         success: true,
-        events: rows.map((row: any) => ({
+        events: (rows || []).map((row: any) => ({
           id: row.id,
           eventType: row.event_type,
-          payload: row.payload ? JSON.parse(row.payload) : {},
+          payload: row.payload ? (typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload) : {},
           createdAt: row.created_at
         }))
       });
@@ -841,7 +839,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Get analytics data
-  router.get('/analytics', (req, res) => {
+  router.get('/analytics', (_req, res) => {
     try {
       const analytics = {
         apiCalls: Array.from({ length: 24 }, (_, i) => ({
@@ -861,7 +859,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // File operations
-  router.get('/files', (req, res) => {
+  router.get('/files', (_req, res) => {
     try {
       const files = [
         { id: '1', name: 'index.ts', type: 'file', content: '// Your code here' },
@@ -884,7 +882,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // API key management
-  router.get('/api-keys', (req, res) => {
+  router.get('/api-keys', (_req, res) => {
     try {
       const keys = [
         { id: '1', name: 'Production Key', key: 'sk_prod_***', created: new Date() },
@@ -921,7 +919,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Git operations
-  router.get('/git/status', (req, res) => {
+  router.get('/git/status', (_req, res) => {
     try {
       const status = {
         branch: 'main',
@@ -947,7 +945,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Module/SDK management
-  router.get('/modules', (req, res) => {
+  router.get('/modules', (_req, res) => {
     try {
       const modules = [
         { id: '1', name: '@cortexbuild/core', version: '1.0.0', installed: true },
@@ -979,7 +977,7 @@ export function createDeveloperRoutes(db: Database.Database) {
   });
 
   // Build and deploy
-  router.post('/build', (req, res) => {
+  router.post('/build', (_req, res) => {
     try {
       res.json({ success: true, message: 'Build started', buildId: Date.now().toString() });
     } catch (error: any) {

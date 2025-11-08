@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, UserRole } from '../../types';
 import { CompanyAdminDashboard } from './CompanyAdminDashboard';
+import GlobalMarketplace from '../marketplace/GlobalMarketplace';
 import { SDKWorkspace } from './SDKWorkspace';
 import {
   getAccessibleDashboards,
@@ -44,7 +45,8 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({
       '/sdk-developer': 'sdk_workspace',
       '/developer-dashboard': 'developer_dashboard',
       '/ai-agents-marketplace': 'ai_marketplace',
-      '/automation-studio': 'automation_studio'
+      '/automation-studio': 'automation_studio',
+      '/marketplace': 'marketplace' // Added marketplace route
     };
 
     const dashboardType = routeToDashboardMap[currentRoute];
@@ -61,6 +63,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({
     const routeComponentMap: Record<string, React.ComponentType<any>> = {
       '/company-admin-dashboard': CompanyAdminDashboard,
       '/sdk-developer': SDKWorkspace,
+      '/marketplace': GlobalMarketplace, // Added marketplace component
     };
 
     const Component = routeComponentMap[currentRoute];
@@ -154,7 +157,7 @@ export const useDashboardRouting = (user: User | null) => {
     const userRole = user.role as UserRole;
     const accessibleDashboards = getAccessibleDashboards(userRole);
 
-    return accessibleDashboards.map(dashboardType => {
+    const routes = accessibleDashboards.map(dashboardType => {
       const dashboardInfo = getDashboardInfo(dashboardType);
       return {
         path: getDashboardRoute(dashboardType),
@@ -162,6 +165,16 @@ export const useDashboardRouting = (user: User | null) => {
         category: dashboardInfo.category
       };
     });
+
+    // Ensure Marketplace is always available if not already included by role
+    if (!routes.some(r => r.path === '/marketplace')) {
+      routes.push({
+        path: '/marketplace',
+        label: 'Marketplace',
+        category: 'General'
+      });
+    }
+    return routes;
   };
 
   const canAccessRoute = (route: string): boolean => {
@@ -179,7 +192,8 @@ export const useDashboardRouting = (user: User | null) => {
       '/sdk-developer': 'sdk_workspace',
       '/developer-dashboard': 'developer_dashboard',
       '/ai-agents-marketplace': 'ai_marketplace',
-      '/automation-studio': 'automation_studio'
+      '/automation-studio': 'automation_studio',
+      '/marketplace': 'marketplace' // Added marketplace route
     };
 
     const dashboardType = routeToDashboardMap[route];

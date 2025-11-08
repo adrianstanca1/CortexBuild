@@ -7,11 +7,8 @@ import React, { useState } from 'react';
 import {
     GitBranch,
     GitCommit,
-    GitPullRequest,
-    GitMerge,
     Upload,
     Download,
-    RefreshCw,
     Check,
     X,
     Plus,
@@ -38,7 +35,7 @@ const MOCK_GIT_STATUS: GitFile[] = [
 ];
 
 const GitPanel: React.FC<GitPanelProps> = ({ isDarkMode }) => {
-    const [currentBranch, setCurrentBranch] = useState('main');
+    const [currentBranch] = useState('main');
     const [commitMessage, setCommitMessage] = useState('');
     const [stagedFiles, setStagedFiles] = useState<Set<string>>(new Set());
     const [isCommitting, setIsCommitting] = useState(false);

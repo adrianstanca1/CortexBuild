@@ -2,9 +2,10 @@
  * Notes App - Simple note-taking application
  */
 
-import React, { useState } from 'react';
-import { Plus, Trash2, Edit, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, Edit, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { notesService } from '../../../lib/services/marketplaceAppsService';
 
 interface Note {
     id: string;
@@ -16,45 +17,94 @@ interface Note {
 
 interface NotesAppProps {
     isDarkMode?: boolean;
+    currentUser?: any;
 }
 
-const NotesApp: React.FC<NotesAppProps> = ({ isDarkMode = true }) => {
-    const [notes, setNotes] = useState<Note[]>([
-        {
-            id: '1',
-            title: 'Welcome to Notes',
-            content: 'This is your first note. Click to edit or create a new one!',
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }
-    ]);
-    const [selectedNote, setSelectedNote] = useState<Note | null>(notes[0]);
+const NotesApp: React.FC<NotesAppProps> = ({ isDarkMode = true, currentUser }) => {
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState('');
     const [editContent, setEditContent] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
-    const createNote = () => {
-        const newNote: Note = {
-            id: Date.now().toString(),
-            title: 'New Note',
-            content: '',
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
-        setNotes([newNote, ...notes]);
-        setSelectedNote(newNote);
-        setIsEditing(true);
-        setEditTitle(newNote.title);
-        setEditContent(newNote.content);
-        toast.success('New note created!');
+    useEffect(() => {
+        loadNotes();
+    }, [currentUser]);
+
+    const loadNotes = async () => {
+        if (!currentUser?.id) {
+            setLoading(false);
+            return;
+        }
+        try {
+            setLoading(true);
+            const data = await notesService.getAll(currentUser.id);
+            const loadedNotes = data.map(n => ({
+                id: n.id,
+                title: n.title,
+                content: n.content || '',
+                createdAt: new Date(n.created_at),
+                updatedAt: new Date(n.updated_at)
+            }));
+            setNotes(loadedNotes);
+            if (loadedNotes.length > 0) {
+                setSelectedNote(loadedNotes[0]);
+            }
+        } catch (error) {
+            console.error('Failed to load notes:', error);
+            toast.error('Failed to load notes');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const deleteNote = (id: string) => {
-        setNotes(notes.filter(n => n.id !== id));
-        if (selectedNote?.id === id) {
-            setSelectedNote(notes[0] || null);
+    const createNote = async () => {
+        if (!currentUser?.id) {
+            toast.error('Please log in to create notes');
+            return;
         }
-        toast.success('Note deleted!');
+        try {
+            setSaving(true);
+            const newNote = await notesService.create(currentUser.id, 'New Note', '');
+            const note: Note = {
+                id: newNote.id,
+                title: newNote.title,
+                content: newNote.content || '',
+                createdAt: new Date(newNote.created_at),
+                updatedAt: new Date(newNote.updated_at)
+            };
+            setNotes([note, ...notes]);
+            setSelectedNote(note);
+            setIsEditing(true);
+            setEditTitle(note.title);
+            setEditContent(note.content);
+            toast.success('New note created!');
+        } catch (error) {
+            console.error('Failed to create note:', error);
+            toast.error('Failed to create note');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const deleteNote = async (id: string) => {
+        try {
+            setSaving(true);
+            await notesService.delete(id);
+            setNotes(notes.filter(n => n.id !== id));
+            if (selectedNote?.id === id) {
+                const remaining = notes.filter(n => n.id !== id);
+                setSelectedNote(remaining[0] || null);
+            }
+            toast.success('Note deleted!');
+        } catch (error) {
+            console.error('Failed to delete note:', error);
+            toast.error('Failed to delete note');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const startEdit = (note: Note) => {
@@ -64,18 +114,37 @@ const NotesApp: React.FC<NotesAppProps> = ({ isDarkMode = true }) => {
         setEditContent(note.content);
     };
 
-    const saveEdit = () => {
+    const saveEdit = async () => {
         if (!selectedNote) return;
 
-        setNotes(notes.map(n =>
-            n.id === selectedNote.id
-                ? { ...n, title: editTitle, content: editContent, updatedAt: new Date() }
-                : n
-        ));
-        setSelectedNote({ ...selectedNote, title: editTitle, content: editContent, updatedAt: new Date() });
-        setIsEditing(false);
-        toast.success('Note saved!');
+        try {
+            setSaving(true);
+            await notesService.update(selectedNote.id, { title: editTitle, content: editContent });
+            const updatedNote = { ...selectedNote, title: editTitle, content: editContent, updatedAt: new Date() };
+            setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
+            setSelectedNote(updatedNote);
+            setIsEditing(false);
+            toast.success('Note saved!');
+        } catch (error) {
+            console.error('Failed to save note:', error);
+            toast.error('Failed to save note');
+        } finally {
+            setSaving(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className={`min-h-full ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
+                <div className="text-center">
+                    <Loader2 className={`h-12 w-12 animate-spin mx-auto mb-4 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
+                    <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Loading notes...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`min-h-full ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex`}>
@@ -100,23 +169,20 @@ const NotesApp: React.FC<NotesAppProps> = ({ isDarkMode = true }) => {
                                 setSelectedNote(note);
                                 setIsEditing(false);
                             }}
-                            className={`p-4 rounded-xl cursor-pointer transition-all ${
-                                selectedNote?.id === note.id
-                                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                                    : isDarkMode
-                                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
-                            }`}
+                            className={`p-4 rounded-xl cursor-pointer transition-all ${selectedNote?.id === note.id
+                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                                : isDarkMode
+                                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                                }`}
                         >
                             <div className="font-semibold mb-1 truncate">{note.title}</div>
-                            <div className={`text-sm truncate ${
-                                selectedNote?.id === note.id ? 'text-white/70' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                            }`}>
+                            <div className={`text-sm truncate ${selectedNote?.id === note.id ? 'text-white/70' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                }`}>
                                 {note.content || 'Empty note'}
                             </div>
-                            <div className={`text-xs mt-2 ${
-                                selectedNote?.id === note.id ? 'text-white/50' : isDarkMode ? 'text-gray-500' : 'text-gray-500'
-                            }`}>
+                            <div className={`text-xs mt-2 ${selectedNote?.id === note.id ? 'text-white/50' : isDarkMode ? 'text-gray-500' : 'text-gray-500'
+                                }`}>
                                 {note.updatedAt.toLocaleDateString()}
                             </div>
                         </div>
@@ -146,11 +212,10 @@ const NotesApp: React.FC<NotesAppProps> = ({ isDarkMode = true }) => {
                                     <button
                                         type="button"
                                         onClick={() => startEdit(selectedNote)}
-                                        className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all ${
-                                            isDarkMode
-                                                ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                                                : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
-                                        }`}
+                                        className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all ${isDarkMode
+                                            ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                                            : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                                            }`}
                                     >
                                         <Edit className="h-4 w-4" />
                                         Edit
@@ -159,11 +224,10 @@ const NotesApp: React.FC<NotesAppProps> = ({ isDarkMode = true }) => {
                                 <button
                                     type="button"
                                     onClick={() => deleteNote(selectedNote.id)}
-                                    className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all ${
-                                        isDarkMode
-                                            ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
-                                            : 'bg-red-50 hover:bg-red-100 text-red-600'
-                                    }`}
+                                    className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all ${isDarkMode
+                                        ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
+                                        : 'bg-red-50 hover:bg-red-100 text-red-600'
+                                        }`}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                     Delete
@@ -179,21 +243,19 @@ const NotesApp: React.FC<NotesAppProps> = ({ isDarkMode = true }) => {
                                         value={editTitle}
                                         onChange={(e) => setEditTitle(e.target.value)}
                                         placeholder="Note title..."
-                                        className={`w-full px-4 py-3 rounded-xl border text-2xl font-bold ${
-                                            isDarkMode
-                                                ? 'bg-gray-800 text-white border-gray-700'
-                                                : 'bg-white text-gray-900 border-gray-300'
-                                        } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                        className={`w-full px-4 py-3 rounded-xl border text-2xl font-bold ${isDarkMode
+                                            ? 'bg-gray-800 text-white border-gray-700'
+                                            : 'bg-white text-gray-900 border-gray-300'
+                                            } focus:outline-none focus:ring-2 focus:ring-purple-500`}
                                     />
                                     <textarea
                                         value={editContent}
                                         onChange={(e) => setEditContent(e.target.value)}
                                         placeholder="Start writing..."
-                                        className={`w-full h-96 px-4 py-3 rounded-xl border resize-none ${
-                                            isDarkMode
-                                                ? 'bg-gray-800 text-white border-gray-700'
-                                                : 'bg-white text-gray-900 border-gray-300'
-                                        } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                        className={`w-full h-96 px-4 py-3 rounded-xl border resize-none ${isDarkMode
+                                            ? 'bg-gray-800 text-white border-gray-700'
+                                            : 'bg-white text-gray-900 border-gray-300'
+                                            } focus:outline-none focus:ring-2 focus:ring-purple-500`}
                                     />
                                 </div>
                             ) : (

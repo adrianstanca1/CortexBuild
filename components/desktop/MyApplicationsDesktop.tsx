@@ -3,13 +3,14 @@
  * Complete window management system with taskbar, multi-window support
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    Maximize2, Minimize2, X, Minus, Square, Monitor,
+    Maximize2, Minimize2, X, Minus, Monitor,
     Grid3x3, List, Search, Package, Building2, User,
-    Play, Pause, RefreshCw, Settings
+    Play, RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getAPIUrl } from '../../config/api.config';
 
 interface App {
     id: string;
@@ -36,12 +37,10 @@ interface RunningApp {
 
 interface MyApplicationsDesktopProps {
     isDarkMode?: boolean;
-    currentUser?: any;
 }
 
 const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
-    isDarkMode = true,
-    currentUser
+    isDarkMode = true
 }) => {
     const [installedApps, setInstalledApps] = useState<App[]>([]);
     const [runningApps, setRunningApps] = useState<RunningApp[]>([]);
@@ -70,7 +69,7 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                 return;
             }
 
-            const response = await fetch('http://localhost:3001/api/global-marketplace/my-installed-apps', {
+            const response = await fetch(getAPIUrl('/global-marketplace/my-installed-apps'), {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -78,7 +77,7 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 setInstalledApps(data.apps);
             } else {
@@ -130,16 +129,16 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
     };
 
     const toggleMinimize = (windowId: string) => {
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === windowId 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === windowId
                 ? { ...ra, isMinimized: !ra.isMinimized }
                 : ra
         ));
     };
 
     const toggleMaximize = (windowId: string) => {
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === windowId 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === windowId
                 ? { ...ra, isMaximized: !ra.isMaximized }
                 : ra
         ));
@@ -147,8 +146,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
 
     const bringToFront = (windowId: string) => {
         const newZIndex = maxZIndex + 1;
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === windowId 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === windowId
                 ? { ...ra, zIndex: newZIndex }
                 : ra
         ));
@@ -173,8 +172,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
         const newX = e.clientX - dragOffset.x;
         const newY = e.clientY - dragOffset.y;
 
-        setRunningApps(runningApps.map(ra => 
-            ra.windowId === draggingWindow 
+        setRunningApps(runningApps.map(ra =>
+            ra.windowId === draggingWindow
                 ? { ...ra, position: { x: newX, y: newY } }
                 : ra
         ));
@@ -202,11 +201,10 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                     <p className={`text-xs ${mutedClass}`}>v{app.version}</p>
                 </div>
                 {app.installation_type && (
-                    <div className={`text-xs px-2 py-1 rounded-full ${
-                        app.installation_type === 'company' 
-                            ? 'bg-purple-500/20 text-purple-400' 
-                            : 'bg-blue-500/20 text-blue-400'
-                    }`}>
+                    <div className={`text-xs px-2 py-1 rounded-full ${app.installation_type === 'company'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-blue-500/20 text-blue-400'
+                        }`}>
                         {app.installation_type === 'company' ? (
                             <div className="flex items-center space-x-1">
                                 <Building2 className="w-3 h-3" />
@@ -236,11 +234,10 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                     <h3 className={`font-semibold ${textClass}`}>{app.name}</h3>
                     <span className={`text-xs ${mutedClass}`}>v{app.version}</span>
                     {app.installation_type && (
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                            app.installation_type === 'company' 
-                                ? 'bg-purple-500/20 text-purple-400' 
-                                : 'bg-blue-500/20 text-blue-400'
-                        }`}>
+                        <span className={`text-xs px-2 py-1 rounded-full ${app.installation_type === 'company'
+                            ? 'bg-purple-500/20 text-purple-400'
+                            : 'bg-blue-500/20 text-blue-400'
+                            }`}>
                             {app.installation_type === 'company' ? 'Company' : 'Personal'}
                         </span>
                     )}
@@ -305,6 +302,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                                 e.stopPropagation();
                                 toggleMinimize(runningApp.windowId);
                             }}
+                            aria-label="Minimize window"
+                            title="Minimize window"
                             className="p-1 hover:bg-white/20 rounded transition-colors"
                         >
                             <Minus className="w-4 h-4 text-white" />
@@ -314,6 +313,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                                 e.stopPropagation();
                                 toggleMaximize(runningApp.windowId);
                             }}
+                            aria-label={runningApp.isMaximized ? 'Restore window' : 'Maximize window'}
+                            title={runningApp.isMaximized ? 'Restore window' : 'Maximize window'}
                             className="p-1 hover:bg-white/20 rounded transition-colors"
                         >
                             {runningApp.isMaximized ? (
@@ -327,6 +328,8 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                                 e.stopPropagation();
                                 closeApp(runningApp.windowId);
                             }}
+                            aria-label="Close window"
+                            title="Close window"
                             className="p-1 hover:bg-red-500 rounded transition-colors"
                         >
                             <X className="w-4 h-4 text-white" />
@@ -335,17 +338,21 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                 </div>
 
                 {/* Window Content */}
-                <div className="flex-1 overflow-auto p-6">
-                    <div className="text-center">
-                        <div className="text-6xl mb-4">{runningApp.app.icon}</div>
-                        <h2 className={`text-2xl font-bold ${textClass} mb-2`}>{runningApp.app.name}</h2>
-                        <p className={`${mutedClass} mb-4`}>{runningApp.app.description}</p>
-                        <div className={`${cardClass} border rounded-lg p-4 text-left`}>
-                            <p className={`${mutedClass} text-sm mb-2`}>App is running...</p>
-                            <p className={`${mutedClass} text-xs`}>Version: {runningApp.app.version}</p>
-                            <p className={`${mutedClass} text-xs`}>Category: {runningApp.app.category}</p>
+                <div className="flex-1 overflow-auto">
+                    {runningApp.app.component ? (
+                        <runningApp.app.component isDarkMode={isDarkMode} currentUser={currentUser} />
+                    ) : (
+                        <div className="p-6 text-center">
+                            <div className="text-6xl mb-4">{runningApp.app.icon}</div>
+                            <h2 className={`text-2xl font-bold ${textClass} mb-2`}>{runningApp.app.name}</h2>
+                            <p className={`${mutedClass} mb-4`}>{runningApp.app.description}</p>
+                            <div className={`${cardClass} border rounded-lg p-4 text-left`}>
+                                <p className={`${mutedClass} text-sm mb-2`}>App is running...</p>
+                                <p className={`${mutedClass} text-xs`}>Version: {runningApp.app.version}</p>
+                                <p className={`${mutedClass} text-xs`}>Category: {runningApp.app.category}</p>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         );
@@ -373,18 +380,24 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={() => setViewMode('grid')}
+                                aria-label="Switch to grid view"
+                                title="Switch to grid view"
                                 className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-blue-600 text-white' : `${cardClass} ${textClass}`}`}
                             >
                                 <Grid3x3 className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={() => setViewMode('list')}
+                                aria-label="Switch to list view"
+                                title="Switch to list view"
                                 className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-600 text-white' : `${cardClass} ${textClass}`}`}
                             >
                                 <List className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={fetchInstalledApps}
+                                aria-label="Refresh applications"
+                                title="Refresh applications"
                                 className={`p-2 rounded-lg ${cardClass} ${textClass} hover:bg-blue-600 hover:text-white transition-colors`}
                             >
                                 <RefreshCw className="w-5 h-5" />
@@ -442,11 +455,10 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
                                 }
                                 bringToFront(ra.windowId);
                             }}
-                            className={`px-3 py-2 rounded-lg transition-all ${
-                                ra.isMinimized 
-                                    ? `${cardClass} opacity-50` 
-                                    : 'bg-blue-600 text-white'
-                            } hover:scale-105`}
+                            className={`px-3 py-2 rounded-lg transition-all ${ra.isMinimized
+                                ? `${cardClass} opacity-50`
+                                : 'bg-blue-600 text-white'
+                                } hover:scale-105`}
                         >
                             <div className="flex items-center space-x-2">
                                 <span>{ra.app.icon}</span>
@@ -464,4 +476,3 @@ const MyApplicationsDesktop: React.FC<MyApplicationsDesktopProps> = ({
 };
 
 export default MyApplicationsDesktop;
-

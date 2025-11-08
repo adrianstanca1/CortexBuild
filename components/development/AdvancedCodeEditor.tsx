@@ -17,13 +17,10 @@ import {
     Play,
     Save,
     Download,
-    Upload,
     Settings,
     FileCode,
     Plus,
     X,
-    Search,
-    GitBranch,
     Terminal,
     Bug
 } from 'lucide-react';

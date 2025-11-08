@@ -51,6 +51,10 @@ firebase-debug.log
 # Vercel
 .vercel
 
+# Next.js
+.next/
+out/
+
 # Backup files
 *.backup
 *.bak
@@ -58,3 +62,4 @@ firebase-debug.log
 *.bak3
 *.bak4
 
+.next

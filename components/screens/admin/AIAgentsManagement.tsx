@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
-import apiClient from '../../../src/services/apiClient';
+import apiClient from '../../../lib/api-client';
 
 interface AIAgentsManagementProps {
     currentUser: User;
@@ -119,33 +119,33 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
     };
 
     const addFeature = () => {
-        setFormData({...formData, features: [...formData.features, '']});
+        setFormData({ ...formData, features: [...formData.features, ''] });
     };
 
     const updateFeature = (index: number, value: string) => {
         const newFeatures = [...formData.features];
         newFeatures[index] = value;
-        setFormData({...formData, features: newFeatures});
+        setFormData({ ...formData, features: newFeatures });
     };
 
     const removeFeature = (index: number) => {
         const newFeatures = formData.features.filter((_, i) => i !== index);
-        setFormData({...formData, features: newFeatures});
+        setFormData({ ...formData, features: newFeatures });
     };
 
     const addCapability = () => {
-        setFormData({...formData, capabilities: [...formData.capabilities, '']});
+        setFormData({ ...formData, capabilities: [...formData.capabilities, ''] });
     };
 
     const updateCapability = (index: number, value: string) => {
         const newCapabilities = [...formData.capabilities];
         newCapabilities[index] = value;
-        setFormData({...formData, capabilities: newCapabilities});
+        setFormData({ ...formData, capabilities: newCapabilities });
     };
 
     const removeCapability = (index: number) => {
         const newCapabilities = formData.capabilities.filter((_, i) => i !== index);
-        setFormData({...formData, capabilities: newCapabilities});
+        setFormData({ ...formData, capabilities: newCapabilities });
     };
 
     if (isLoading) {
@@ -189,7 +189,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 <input
                                     type="text"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Enter agent name"
                                     title="Agent Name"
@@ -224,7 +224,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                             </label>
                             <textarea
                                 value={formData.description}
-                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter agent description"
                                 title="Description"
@@ -241,7 +241,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 <input
                                     type="number"
                                     value={formData.priceMonthly}
-                                    onChange={(e) => setFormData({...formData, priceMonthly: parseFloat(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, priceMonthly: parseFloat(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0.00"
                                     title="Monthly Price"
@@ -256,7 +256,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 <input
                                     type="number"
                                     value={formData.priceYearly}
-                                    onChange={(e) => setFormData({...formData, priceYearly: parseFloat(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, priceYearly: parseFloat(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0.00"
                                     title="Yearly Price"
@@ -274,7 +274,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 <input
                                     type="url"
                                     value={formData.iconUrl}
-                                    onChange={(e) => setFormData({...formData, iconUrl: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, iconUrl: e.target.value })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="https://example.com/icon.png"
                                     title="Icon URL"
@@ -287,7 +287,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 <input
                                     type="url"
                                     value={formData.bannerUrl}
-                                    onChange={(e) => setFormData({...formData, bannerUrl: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, bannerUrl: e.target.value })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="https://example.com/banner.png"
                                     title="Banner URL"
@@ -386,7 +386,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 <input
                                     type="checkbox"
                                     checked={formData.isActive}
-                                    onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="ml-2 text-sm text-gray-700">Active</span>
@@ -395,7 +395,7 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                 <input
                                     type="checkbox"
                                     checked={formData.isFeatured}
-                                    onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
+                                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="ml-2 text-sm text-gray-700">Featured</span>
@@ -445,19 +445,17 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                                             </span>
                                         )}
                                     </h4>
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                        agent.category === 'safety' ? 'bg-red-100 text-red-800' :
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${agent.category === 'safety' ? 'bg-red-100 text-red-800' :
                                         agent.category === 'quality' ? 'bg-blue-100 text-blue-800' :
-                                        agent.category === 'productivity' ? 'bg-green-100 text-green-800' :
-                                        'bg-purple-100 text-purple-800'
-                                    }`}>
+                                            agent.category === 'productivity' ? 'bg-green-100 text-green-800' :
+                                                'bg-purple-100 text-purple-800'
+                                        }`}>
                                         {agent.category}
                                     </span>
                                 </div>
                             </div>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                agent.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${agent.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                }`}>
                                 {agent.isActive ? 'Active' : 'Inactive'}
                             </span>
                         </div>
@@ -484,9 +482,8 @@ const AIAgentsManagement: React.FC<AIAgentsManagementProps> = ({ currentUser }) 
                             </button>
                             <button
                                 onClick={() => handleToggleAgentStatus(agent.id, !agent.isActive)}
-                                className={`text-sm font-medium ${
-                                    agent.isActive ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'
-                                }`}
+                                className={`text-sm font-medium ${agent.isActive ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'
+                                    }`}
                             >
                                 {agent.isActive ? 'Deactivate' : 'Activate'}
                             </button>

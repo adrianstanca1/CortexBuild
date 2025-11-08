@@ -1,214 +1,304 @@
-# 🚀 CortexBuild v2.0 - Advanced AI Construction Platform
+# 🏗️ CortexBuild
+**The Complete Construction Industry Platform**
 
-**CortexBuild** is the world's most advanced AI-powered construction intelligence platform, featuring revolutionary workflow automation, comprehensive API infrastructure, and cutting-edge construction-specific AI agents.
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Supabase](https://img.shields.io/badge/supabase-enabled-3ECF8E.svg)
+![Vercel](https://img.shields.io/badge/vercel-deployed-black.svg)
 
-[![Version](https://img.shields.io/badge/version-2.0-blue.svg)](https://github.com/adrianstanca1/CortexBuild)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/adrianstanca1/CortexBuild)
+## 🎯 Overview
 
-## ✨ **REVOLUTIONARY FEATURES v2.0**
+CortexBuild is a revolutionary construction industry platform combining:
 
-### 🔥 **N8N + Procore + Zapier MEGA BUILDER**
-- **Visual Node Editor**: N8N-style drag-and-drop workflow builder
-- **60+ Procore API Endpoints**: Complete construction management integration
-- **Zapier Compatibility**: Seamless automation with 1000+ apps
-- **Real-time Canvas**: Live visual workflow rendering with smart node types
+- **Development Environment** (IDE, Sandbox, Git, API/SDK)
+- **Modular App Architecture** (6 pre-installed apps)
+- **Publishing Workflow** (dev → test → review → publish)
+- **Public Marketplace** with monetization
+- **Multi-tenant SaaS** with complete RBAC
 
-### ⚡ **Advanced Workflow Automation**
-- **3 Professional Builders**: N8N-style, Zapier-style, and Basic workflow builders
-- **Professional Templates**: Daily reports, RFI approval, safety incident response
-- **Template Management**: Load, save, and share workflow templates
-- **Intelligent Routing**: AI-powered task assignment and optimization
+## ✨ Key Features
 
-### 🤖 **Next-Generation AI Agents**
-- **Predictive Maintenance**: Equipment failure prediction and optimization
-- **Intelligent Workflow Router**: Automated decision making and task routing
-- **Commercial Guardian**: Contract and claims management
-- **HSE Sentinel**: Safety and compliance monitoring
-- **Financial Forecaster**: Budget analysis and cash flow prediction
-- **Quality Inspector**: Automated quality control and defect detection
+### 🎛️ Three-Tier User Hierarchy
 
-### 🏗️ **Complete API Infrastructure**
-- **64 API Endpoints**: 100% complete backend infrastructure
-- **Real-time Features**: WebSocket-powered live collaboration
-- **Multi-tenant Architecture**: Enterprise-grade security and scalability
-- **Developer Platform**: Open SDK with comprehensive documentation
+#### 🔴 Super Admin
+- Platform-wide control
+- 12 admin sections
+- User management across all companies
+- System configuration
+- Analytics & monitoring
 
----
+#### 🟠 Company Admin
+- Company-only control
+- **15 management sections:**
+  - **Office Operations (7 sections):** Projects, Teams, Billing, Analytics
+  - **Field Operations (8 sections):** Daily logs, Safety, Quality, Time tracking
 
-## 🚀 **QUICK START**
+#### 🟢 Developer
+- Pure development tools
+- 8 development sections
+- SDK access
+- API builder
+- Testing framework
+- Git integration
 
-### **Prerequisites**
+### 📱 6 Pre-Installed Marketplace Apps
+
+1. **📊 Project Dashboard** - Comprehensive project analytics
+2. **💬 Team Chat** - Real-time team communication
+3. **⏱️ Time Tracker** - Track time on tasks and projects
+4. **📅 Team Calendar** - Shared scheduling
+5. **✅ Task Manager** - Task and assignment management
+6. **💰 Expense Tracker** - Budget and expense tracking
+
+### 🖥️ MyApplications Desktop
+
+- Full desktop environment
+- Window management (drag, resize, minimize, maximize)
+- Taskbar with active applications
+- Multi-window support
+- Sandbox for running marketplace apps
+
+### 🔐 Complete RBAC System
+
+**5 Roles:**
+- `super_admin` - Platform-wide access
+- `company_admin` - Company-wide access
+- `developer` - Development tools only
+- `supervisor` - Team management
+- `operative` - Field operations
+
+**Granular Permissions:**
+- Row Level Security (RLS) in Supabase
+- Multi-tenant data isolation
+- Company-based access control
+
+## 🚀 Technology Stack
+
+### Frontend
+- **React 19.2.0** - UI framework
+- **Next.js 15.5.6** (Turbopack) - Full-stack React framework
+- **TypeScript 5.9.3** - Type safety
+- **Vite 6.2.0** - Build tool
+- **Tailwind CSS 4.1.14** - Styling
+- **Lucide React 0.545.0** - Icons
+
+### Backend
+- **Express.js** - API server
+- **TypeScript** - Type safety
+- **Supabase** - PostgreSQL database
+- **JWT** - Authentication
+
+### Database
+- **Supabase PostgreSQL** - Cloud database
+- **Row Level Security** - Multi-tenant isolation
+- **Real-time subscriptions** - Live updates
+- **Automatic backups** - Data protection
+
+### Deployment
+- **Vercel** - Frontend hosting
+- **Supabase** - Database hosting
+- **GitHub** - Version control
+
+## 📦 Installation
+
+### Prerequisites
 - Node.js 18+
 - npm or yarn
-- Git
+- Supabase account (paid plan recommended)
 
-### **1. Installation**
+### 1. Clone Repository
 ```bash
 git clone https://github.com/adrianstanca1/CortexBuild.git
 cd CortexBuild
+```
+
+### 2. Install Dependencies
+```bash
 npm install
 ```
 
-### **2. Environment Setup**
-Create `.env` file:
+### 3. Configure Environment Variables
+
+Create `.env.local`:
+
 ```env
-OPENAI_API_KEY=your_openai_key
-GOOGLE_AI_API_KEY=your_gemini_key
-ANTHROPIC_API_KEY=your_claude_key
-DATABASE_URL=your_database_url
-JWT_SECRET=your_jwt_secret
-PORT=3001
+# Supabase Configuration
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+
+# Backend API
+VITE_API_URL=http://localhost:3001
 ```
 
-### **3. Start Development**
-```bash
-# Start backend server
-npm run server
+### 4. Setup Supabase Database
 
-# Start frontend (new terminal)
+1. Go to Supabase SQL Editor
+2. Copy content from `supabase/COMPLETE_SCHEMA.sql` (or run the schema creation scripts)
+3. Paste and run in SQL Editor
+4. Update password hashes:
+```sql
+UPDATE users SET password_hash = crypt('parola123', gen_salt('bf', 10))
+WHERE email = 'adrian.stanca1@gmail.com';
+
+UPDATE users SET password_hash = crypt('lolozania1', gen_salt('bf', 10))
+WHERE email = 'adrian@ascladdingltd.co.uk';
+
+UPDATE users SET password_hash = crypt('password123', gen_salt('bf', 10))
+WHERE email = 'adrian.stanca1@icloud.com';
+```
+
+### 5. Start Development Server
+```bash
 npm run dev
 ```
 
-### **4. Access Platform**
-- **Frontend**: http://localhost:3000
-- **Backend**: http://localhost:3001
-- **API Docs**: http://localhost:3001/api
+Application will be available at `http://localhost:3000`
+
+## 🔑 Test Accounts
+
+### 🔴 Super Admin
+- **Email:** `adrian.stanca1@gmail.com`
+- **Password:** `parola123`
+
+### 🟠 Company Admin
+- **Email:** `adrian@ascladdingltd.co.uk`
+- **Password:** `lolozania1`
+
+### 🟢 Developer
+- **Email:** `adrian.stanca1@icloud.com`
+- **Password:** `password123`
+
+## 📚 Documentation
+
+- **Supabase Setup Guide** - Complete database setup
+- **Final Setup Instructions** - Production deployment
+- **Login Credentials** - All test accounts
+- **Platform Architecture** - System design
+- **API Documentation** - API reference
+
+## 🌐 Live Demo
+
+**Production URL:** https://cortex-build-mcnrk7yba-adrian-b7e84541.vercel.app
+
+## 📁 Project Structure
+
+```
+CortexBuild/
+├── src/                    # Source code
+├── components/             # React components
+│   ├── screens/           # Dashboard screens
+│   ├── desktop/           # MyApplications desktop
+│   ├── marketplace/       # Marketplace components
+│   └── developer/         # Developer tools
+├── lib/                   # Libraries
+│   ├── supabase/         # Supabase client
+│   ├── rbac/             # RBAC system
+│   └── services/         # API services
+├── server/                # Backend server
+│   ├── routes/           # API routes
+│   └── services/         # Business logic
+├── supabase/             # Supabase configuration
+│   ├── COMPLETE_SCHEMA.sql
+│   └── migrations/
+├── public/               # Static assets
+└── dist/                 # Build output
+```
+
+## 🛠️ Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start Vite development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run server       # Start backend server
+npm run lint         # Run ESLint
+npm run test         # Run unit tests (Jest)
+npm run vercel:prod  # Deploy to Vercel production
+```
+
+### Environment Variables
+
+**Frontend (.env.local):**
+```env
+VITE_SUPABASE_URL - Supabase project URL
+VITE_SUPABASE_ANON_KEY - Supabase anon key
+VITE_API_URL - Backend API URL
+VITE_GEMINI_API_KEY - Google Gemini AI API key (optional)
+```
+
+**Backend:**
+```env
+SUPABASE_SERVICE_KEY - Supabase service role key
+JWT_SECRET - JWT signing secret
+PORT - Server port (default: 3001)
+```
+
+## 🚀 Deployment
+
+### Frontend (Vercel)
+
+1. Connect GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on git push
+
+**Or manually:**
+```bash
+vercel login
+vercel --prod --yes
+```
+
+### Database (Supabase)
+
+1. Create Supabase project
+2. Run schema creation scripts
+3. Configure RLS policies
+4. Update password hashes
+
+## 🔒 Version Protection
+
+**Current Version:** v2.0.0
+
+This version is protected with Git tags. To restore:
+```bash
+git checkout v2.0.0
+```
+
+## 📊 Database Schema
+
+### Main Tables
+
+- `companies` - Multi-tenant companies
+- `users` - User accounts with RBAC
+- `projects` - Construction projects
+- `sdk_apps` - Marketplace applications
+- `user_app_installations` - User app installs
+- `company_app_installations` - Company app installs
+- `app_review_history` - App review workflow
+- `app_analytics` - App usage analytics
+- `activities` - Audit log
+
+## 🤝 Contributing
+
+This is a private project. For access, contact the repository owner.
+
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+## 👨‍💻 Author
+
+**Adrian Stanca**
+- Email: adrian.stanca1@gmail.com
+- GitHub: [@adrianstanca1](https://github.com/adrianstanca1)
+
+## 🎉 Acknowledgments
+
+- Built with ❤️ for the construction industry
+- Powered by Supabase and Vercel
+- Designed for scalability and performance
 
 ---
 
-## 🎯 **KEY FEATURES**
-
-### **🔧 Advanced Workflow Builders**
-1. **N8N + Procore Builder**: Visual node editor with 60+ Procore APIs
-2. **Zapier-Style Builder**: Professional templates and automation
-3. **Basic Workflow Builder**: Simple drag-and-drop interface
-
-### **🤖 AI-Powered Intelligence**
-- **8 Specialized AI Agents** for construction-specific tasks
-- **Cognitive Core** with pattern detection and root cause analysis
-- **Real-time AI Chat** with context-aware assistance
-- **Automated Decision Making** with confidence scoring
-
-### **📊 Complete Project Management**
-- **Real-time Collaboration** with WebSocket integration
-- **Document Management** with version control
-- **Financial Tracking** and budget analysis
-- **Quality Control** with automated inspections
-
-### **🔌 Developer Ecosystem**
-- **Open SDK** for custom module development
-- **Module Marketplace** with 70% revenue sharing
-- **64 REST API Endpoints** for complete integration
-- **Sandbox Environment** for testing and deployment
-
----
-
-## 📚 **DOCUMENTATION**
-
-### **Quick Links**
-- 📖 [Advanced Features Guide](ADVANCED_FEATURES_v2.md)
-- 🚀 [Deployment Guide](DEPLOYMENT_GUIDE_v2.md)
-- 🔧 [Implementation Status](IMPLEMENTATION_STATUS.md)
-- 🏗️ [Platform Architecture](PLATFORM_ARCHITECTURE.md)
-
-### **API Documentation**
-- **REST APIs**: 64 endpoints for complete construction management
-- **WebSocket APIs**: Real-time collaboration and updates
-- **AI APIs**: Chat, analysis, and prediction endpoints
-- **Authentication**: JWT-based with role-based access control
-
----
-
-## 🏆 **WHAT'S NEW IN v2.0**
-
-### **🔥 Revolutionary Features**
-1. **Visual Workflow Editor**: N8N-style drag-and-drop builder
-2. **Complete API Backend**: 64/64 endpoints implemented (was 30%)
-3. **Advanced AI Agents**: Predictive maintenance & intelligent routing
-4. **Professional Templates**: Pre-built workflow automation
-5. **Enhanced UX**: Accessibility and performance improvements
-
-### **🚀 Technical Improvements**
-- **Complete Backend Infrastructure**: All API endpoints implemented
-- **Enhanced Security**: JWT + RBAC + Row Level Security
-- **Performance Optimization**: Code splitting and caching
-- **Developer Experience**: Better TypeScript types and error handling
-
----
-
-## 🔧 **TECHNOLOGY STACK**
-
-### **Frontend**
-- **React 19** + **TypeScript** + **Vite**
-- **Tailwind CSS** for styling
-- **Lucide React** for icons
-- **Monaco Editor** for code editing
-
-### **Backend**
-- **Express.js** + **TypeScript**
-- **SQLite/Supabase** for database
-- **JWT Authentication** with RBAC
-- **WebSocket** for real-time features
-
-### **AI Integration**
-- **OpenAI GPT-4** for general intelligence
-- **Google Gemini** for analysis
-- **Anthropic Claude** for reasoning
-- **Specialized Agents** for construction tasks
-
----
-
-## 📊 **PLATFORM METRICS**
-
-### **Codebase Stats**
-- **200+ Components**: Comprehensive UI library
-- **50,000+ Lines**: Production-ready codebase
-- **64 API Endpoints**: Complete backend coverage
-- **8 AI Agents**: Specialized construction intelligence
-
-### **Performance**
-- **< 2s Page Load**: Optimized for speed
-- **< 500ms API Response**: Fast backend processing
-- **99.9% Uptime**: Enterprise reliability
-- **Real-time Updates**: < 100ms WebSocket latency
-
----
-
-## 🤝 **CONTRIBUTING**
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### **Development Setup**
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
----
-
-## 📄 **LICENSE**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🆘 **SUPPORT**
-
-- **Documentation**: Check our comprehensive guides
-- **Issues**: [GitHub Issues](https://github.com/adrianstanca1/CortexBuild/issues)
-- **Community**: Join our Discord server
-- **Email**: support@cortexbuild.com
-
----
-
-## 🎉 **ACKNOWLEDGMENTS**
-
-Built with ❤️ for the construction industry. Special thanks to all contributors and the open-source community.
-
-**CortexBuild v2.0** - Where AI meets construction automation! 🏗️🤖
-
----
-
-**Ready to revolutionize your construction workflows?** [Get Started Now!](DEPLOYMENT_GUIDE_v2.md)
+**Last Updated:** 2025-11-02 | **Version:** 2.0.0

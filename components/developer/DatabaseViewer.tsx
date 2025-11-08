@@ -11,8 +11,7 @@ import {
     Play,
     Download,
     RefreshCw,
-    Eye,
-    Filter
+    Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';

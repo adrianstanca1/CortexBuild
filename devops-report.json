@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-10-17T04:09:54.479Z",
+  "services": {
+    "frontend": {
+      "status": "HEALTHY",
+      "responseTime": 102,
+      "statusCode": 200,
+      "url": "http://localhost:3005"
+    },
+    "api": {
+      "status": "HEALTHY",
+      "responseTime": 5,
+      "statusCode": 200,
+      "url": "http://localhost:3001/api/health"
+    },
+    "chat": {
+      "status": "FAILED",
+      "error": "Request failed with status code 401",
+      "url": "http://localhost:3001/api/chat/message?sessionId=monitor"
+    },
+    "admin": {
+      "status": "FAILED",
+      "error": "Request failed with status code 404",
+      "url": "http://localhost:3001/api/platformAdmin"
+    }
+  },
+  "performance": {
+    "Frontend Load": {
+      "average": 64,
+      "min": 50,
+      "max": 82,
+      "samples": [
+        60,
+        82,
+        50
+      ]
+    },
+    "API Response": {
+      "average": 4,
+      "min": 3,
+      "max": 5,
+      "samples": [
+        3,
+        5,
+        3
+      ]
+    }
+  },
+  "errors": [
+    "chat: Request failed with status code 401",
+    "admin: Request failed with status code 404"
+  ],
+  "security": {
+    "cors": "not_detected"
+  },
+  "integration": {
+    "chat": "failed",
+    "error": "Request failed with status code 401"
+  }
+}

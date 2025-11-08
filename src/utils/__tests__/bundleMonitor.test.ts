@@ -3,6 +3,9 @@
  * Tests bundle size monitoring, metrics recording, and optimization recommendations
  */
 
+// Mock logging config before importing
+jest.mock('../../config/logging.config');
+
 import { BundleMonitor, checkBundleThresholds, BUNDLE_THRESHOLDS, exportBundleMetrics } from '../bundleMonitor';
 
 describe('BundleMonitor', () => {

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexBuild Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 CortexBuild System Test</h1>
+        <p>Testing system components and connectivity...</p>
+        
+        <div id="test-results">
+            <div class="test-result info">Running tests...</div>
+        </div>
+    </div>
+
+    <script>
+        const testResults = document.getElementById('test-results');
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            testResults.appendChild(div);
+        }
+        
+        function clearResults() {
+            testResults.innerHTML = '';
+        }
+        
+        async function runTests() {
+            clearResults();
+            addResult('Starting system tests...', 'info');
+            
+            // Test 1: Backend Health
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Backend Health: OK (${data.status})`, 'success');
+                } else {
+                    addResult(`❌ Backend Health: Failed (${response.status})`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Backend Health: Error - ${error.message}`, 'error');
+            }
+            
+            // Test 2: API.ts file
+            try {
+                const response = await fetch('/api.ts');
+                if (response.ok) {
+                    addResult(`✅ API.ts file: Accessible (${response.headers.get('content-type')})`, 'success');
+                } else {
+                    addResult(`❌ API.ts file: Failed (${response.status})`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ API.ts file: Error - ${error.message}`, 'error');
+            }
+            
+            // Test 3: MockAPI.ts file
+            try {
+                const response = await fetch('/api/mockApi.ts');
+                if (response.ok) {
+                    addResult(`✅ MockAPI.ts file: Accessible (${response.headers.get('content-type')})`, 'success');
+                } else {
+                    addResult(`❌ MockAPI.ts file: Failed (${response.status})`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ MockAPI.ts file: Error - ${error.message}`, 'error');
+            }
+            
+            // Test 4: Main React App
+            try {
+                const response = await fetch('/main.tsx');
+                if (response.ok) {
+                    addResult(`✅ Main.tsx: Accessible (${response.headers.get('content-type')})`, 'success');
+                } else {
+                    addResult(`❌ Main.tsx: Failed (${response.status})`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Main.tsx: Error - ${error.message}`, 'error');
+            }
+            
+            // Test 5: Try to load API module
+            try {
+                // This will test if the API module can be loaded as a JavaScript module
+                const apiModule = await import('/api.ts');
+                addResult(`✅ API Module: Loaded successfully`, 'success');
+            } catch (error) {
+                addResult(`❌ API Module: Failed to load - ${error.message}`, 'error');
+            }
+            
+            // Test 6: Try to load MockAPI module
+            try {
+                const mockApiModule = await import('/api/mockApi.ts');
+                addResult(`✅ MockAPI Module: Loaded successfully`, 'success');
+            } catch (error) {
+                addResult(`❌ MockAPI Module: Failed to load - ${error.message}`, 'error');
+            }
+            
+            addResult('Tests completed!', 'info');
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+        
+        // Add refresh button
+        const refreshBtn = document.createElement('button');
+        refreshBtn.textContent = '🔄 Run Tests Again';
+        refreshBtn.style.marginTop = '20px';
+        refreshBtn.style.padding = '10px 20px';
+        refreshBtn.style.backgroundColor = '#007bff';
+        refreshBtn.style.color = 'white';
+        refreshBtn.style.border = 'none';
+        refreshBtn.style.borderRadius = '4px';
+        refreshBtn.style.cursor = 'pointer';
+        refreshBtn.onclick = runTests;
+        document.querySelector('.test-container').appendChild(refreshBtn);
+    </script>
+</body>
+</html>

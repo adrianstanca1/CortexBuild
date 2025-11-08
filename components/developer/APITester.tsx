@@ -11,8 +11,7 @@ import {
     Copy,
     Check,
     Globe,
-    Clock,
-    AlertCircle
+    Clock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { LightErrorBoundary } from '../../src/components/ErrorBoundaries';

@@ -1,9 +1,10 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { User } from './types';
+import { getEnv } from './src/utils/env';
 
 // Use environment variables directly - no global variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = getEnv('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY');
 
 // Configuration check - only warn if explicitly configured but invalid
 if (supabaseUrl && supabaseAnonKey) {
@@ -14,7 +15,12 @@ if (supabaseUrl && supabaseAnonKey) {
 
 let supabaseInstance: SupabaseClient | null = null;
 
-if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'YOUR_SUPABASE_URL' && supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY') {
+// Only initialize Supabase if both URL and key are properly configured
+if (supabaseUrl && supabaseAnonKey &&
+    supabaseUrl !== 'YOUR_SUPABASE_URL' &&
+    supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY' &&
+    supabaseUrl.startsWith('http') &&
+    supabaseAnonKey.length > 20) {
     try {
         supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
         // Store globally to avoid multiple client instances
@@ -23,6 +29,7 @@ if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'YOUR_SUPABASE_URL' && sup
     } catch (e) {
         console.error("❌ Failed to initialize Supabase client:", e);
         console.warn('⚠️ Supabase initialization failed. Application will use local authentication.');
+        supabaseInstance = null;
     }
 } else {
     if (supabaseUrl || supabaseAnonKey) {
@@ -32,7 +39,21 @@ if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'YOUR_SUPABASE_URL' && sup
     }
 }
 
-export const supabase = supabaseInstance;
+// Create a safe wrapper that prevents errors when Supabase is not available
+export const safeSupabase = {
+    auth: {
+        signUp: async () => ({ data: null, error: { message: 'Supabase not configured' } }),
+        signInWithOAuth: async () => ({ data: null, error: { message: 'Supabase not configured' } }),
+        getSession: async () => ({ data: { session: null }, error: null }),
+        signOut: async () => ({ error: null })
+    },
+    from: () => ({
+        select: () => ({ eq: () => ({ limit: () => ({ data: [], error: null }) }) }),
+        insert: () => ({ select: () => ({ single: () => ({ data: null, error: { message: 'Supabase not configured' } }) }) })
+    })
+};
+
+export const supabase = supabaseInstance || safeSupabase;
 
 export const getMyProfile = async (): Promise<User | null> => {
     if (!supabase) {

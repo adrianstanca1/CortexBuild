@@ -7,7 +7,6 @@
 
 import { advancedErrorLogger } from '../utils/advancedErrorLogger';
 import { ErrorSeverity, ErrorCategory } from '../types/errorTypes';
-import { Logger } from '../config/logging.config';
 
 /**
  * Long Task Entry
@@ -85,8 +84,9 @@ class PerformanceObserverManager {
                     this.longTasks.push(longTask);
                     this.notifyListeners('longtask', longTask);
 
-                    // Log tasks longer than 100ms
-                    if (entry.duration > 100) {
+                    // Log tasks longer than 300ms to reduce noise during dev
+                    // Tasks under 300ms are normal and don't need logging
+                    if (entry.duration > 300) {
                         this.logLongTask(longTask);
                     }
 
@@ -214,7 +214,7 @@ class PerformanceObserverManager {
      */
     private logLongTask(task: LongTaskEntry): void {
         if (import.meta.env.DEV) {
-            Logger.warn('⚠️ Long task detected:', {
+            console.warn('⚠️ Long task detected:', {
                 duration: `${Math.round(task.duration)}ms`,
                 attribution: task.attribution
             });

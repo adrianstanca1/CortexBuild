@@ -1,16 +1,16 @@
 // CortexBuild Platform - Milestones API Routes
-// Version: 1.1.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Milestone, ApiResponse, PaginatedResponse } from '../types';
 
-export function createMilestonesRouter(db: Database.Database): Router {
+export function createMilestonesRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/milestones - List all milestones
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -24,55 +24,62 @@ export function createMilestonesRouter(db: Database.Database): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT m.*, 
-               p.name as project_name,
-               COUNT(t.id) as task_count,
-               SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks
-        FROM milestones m
-        LEFT JOIN projects p ON m.project_id = p.id
-        LEFT JOIN tasks t ON m.id = t.milestone_id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('milestones')
+        .select(`
+          *,
+          projects!milestones_project_id_fkey(id, name),
+          tasks!tasks_milestone_id_fkey(id, status)
+        `, { count: 'exact' });
 
+      // Apply filters
       if (project_id) {
-        query += ' AND m.project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (status) {
-        query += ' AND m.status = ?';
-        params.push(status);
+        query = query.eq('status', status);
       }
 
       if (search) {
-        query += ' AND (m.name LIKE ? OR m.description LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm);
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
       }
 
-      query += ' GROUP BY m.id';
+      // Add pagination and ordering
+      query = query
+        .order('due_date', { ascending: true })
+        .range(offset, offset + limitNum - 1);
 
-      const countQuery = `SELECT COUNT(*) as total FROM (${query})`;
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      const { data: milestones, error, count } = await query;
 
-      query += ' ORDER BY m.due_date ASC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      if (error) throw error;
 
-      const milestones = db.prepare(query).all(...params);
+      // Transform data and calculate task counts
+      const transformedMilestones = (milestones || []).map((m: any) => {
+        const projects = Array.isArray(m.projects) ? m.projects[0] : m.projects;
+        const tasks = m.tasks || [];
+        const completedTasks = tasks.filter((t: any) => t.status === 'completed').length;
+
+        return {
+          ...m,
+          project_name: projects?.name || null,
+          task_count: tasks.length,
+          completed_tasks: completedTasks
+        };
+      });
 
       res.json({
         success: true,
-        data: milestones,
+        data: transformedMilestones,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get milestones error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -81,19 +88,20 @@ export function createMilestonesRouter(db: Database.Database): Router {
   });
 
   // GET /api/milestones/:id - Get single milestone with tasks
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const milestone = db.prepare(`
-        SELECT m.*, 
-               p.name as project_name
-        FROM milestones m
-        LEFT JOIN projects p ON m.project_id = p.id
-        WHERE m.id = ?
-      `).get(id);
+      const { data: milestone, error: milestoneError } = await supabase
+        .from('milestones')
+        .select(`
+          *,
+          projects!milestones_project_id_fkey(id, name)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!milestone) {
+      if (milestoneError || !milestone) {
         return res.status(404).json({
           success: false,
           error: 'Milestone not found'
@@ -101,23 +109,37 @@ export function createMilestonesRouter(db: Database.Database): Router {
       }
 
       // Get associated tasks
-      const tasks = db.prepare(`
-        SELECT t.*, 
-               u.name as assigned_to_name
-        FROM tasks t
-        LEFT JOIN users u ON t.assigned_to = u.id
-        WHERE t.milestone_id = ?
-        ORDER BY t.due_date ASC
-      `).all(id);
+      const { data: tasks } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          users!tasks_assigned_to_fkey(id, name)
+        `)
+        .eq('milestone_id', id)
+        .order('due_date', { ascending: true });
+
+      // Transform data
+      const projects = Array.isArray(milestone.projects) ? milestone.projects[0] : milestone.projects;
+      const transformedTasks = (tasks || []).map((t: any) => {
+        const users = Array.isArray(t.users) ? t.users[0] : t.users;
+        return {
+          ...t,
+          assigned_to_name: users?.name || null
+        };
+      });
+
+      const transformedMilestone = {
+        ...milestone,
+        project_name: projects?.name || null,
+        tasks: transformedTasks
+      };
 
       res.json({
         success: true,
-        data: {
-          ...milestone,
-          tasks
-        }
+        data: transformedMilestone
       });
     } catch (error: any) {
+      console.error('Get milestone error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -126,7 +148,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
   });
 
   // POST /api/milestones - Create new milestone
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -143,26 +165,36 @@ export function createMilestonesRouter(db: Database.Database): Router {
         });
       }
 
-      const result = db.prepare(`
-        INSERT INTO milestones (
-          project_id, name, description, due_date, status
-        ) VALUES (?, ?, ?, ?, ?)
-      `).run(project_id, title, description, due_date, status);
+      const { data: milestone, error } = await supabase
+        .from('milestones')
+        .insert({
+          project_id,
+          name: title, // Note: database uses 'name' but API accepts 'title'
+          description: description || null,
+          due_date,
+          status
+        })
+        .select()
+        .single();
 
-      const milestone = db.prepare('SELECT * FROM milestones WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        project_id,
-        'milestone',
-        result.lastInsertRowid,
-        'created',
-        `Created milestone: ${title}`
-      );
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id,
+            entity_type: 'milestone',
+            entity_id: milestone.id,
+            action: 'created',
+            description: `Created milestone: ${title}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -170,6 +202,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
         message: 'Milestone created successfully'
       });
     } catch (error: any) {
+      console.error('Create milestone error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -178,12 +211,17 @@ export function createMilestonesRouter(db: Database.Database): Router {
   });
 
   // PUT /api/milestones/:id - Update milestone
-  router.put('/:id', (req: Request, res: Response) => {
+  router.put('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const existing = db.prepare('SELECT * FROM milestones WHERE id = ?').get(id);
+      const { data: existing } = await supabase
+        .from('milestones')
+        .select('id, name, project_id')
+        .eq('id', id)
+        .single();
+
       if (!existing) {
         return res.status(404).json({
           success: false,
@@ -191,37 +229,46 @@ export function createMilestonesRouter(db: Database.Database): Router {
         });
       }
 
-      const fields = Object.keys(updates).filter(key => key !== 'id');
-      if (fields.length === 0) {
+      // Map 'title' to 'name' if provided
+      const updateData = { ...updates };
+      if (updateData.title) {
+        updateData.name = updateData.title;
+        delete updateData.title;
+      }
+
+      const { id: _, ...updateFields } = updateData;
+      if (Object.keys(updateFields).length === 0) {
         return res.status(400).json({
           success: false,
           error: 'No fields to update'
         });
       }
 
-      const setClause = fields.map(field => `${field} = ?`).join(', ');
-      const values = fields.map(field => updates[field]);
+      const { data: milestone, error } = await supabase
+        .from('milestones')
+        .update(updateFields)
+        .eq('id', id)
+        .select()
+        .single();
 
-      db.prepare(`
-        UPDATE milestones 
-        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(...values, id);
-
-      const milestone = db.prepare('SELECT * FROM milestones WHERE id = ?').get(id);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        req.user?.id || 1,
-        (existing as any).project_id,
-        'milestone',
-        id,
-        'updated',
-        `Updated milestone: ${(existing as any).title}`
-      );
+      try {
+        const userId = (req as any).user?.id || 'user-1';
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: userId,
+            project_id: existing.project_id,
+            entity_type: 'milestone',
+            entity_id: id,
+            action: 'updated',
+            description: `Updated milestone: ${existing.name}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.json({
         success: true,
@@ -229,6 +276,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
         message: 'Milestone updated successfully'
       });
     } catch (error: any) {
+      console.error('Update milestone error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -237,11 +285,16 @@ export function createMilestonesRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/milestones/:id - Delete milestone
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const milestone = db.prepare('SELECT * FROM milestones WHERE id = ?').get(id);
+      const { data: milestone } = await supabase
+        .from('milestones')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!milestone) {
         return res.status(404).json({
           success: false,
@@ -250,24 +303,31 @@ export function createMilestonesRouter(db: Database.Database): Router {
       }
 
       // Check if milestone has tasks
-      const taskCount = db.prepare(`
-        SELECT COUNT(*) as count FROM tasks WHERE milestone_id = ?
-      `).get(id) as { count: number };
+      const { count } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('milestone_id', id);
 
-      if (taskCount.count > 0) {
+      if ((count || 0) > 0) {
         return res.status(400).json({
           success: false,
           error: 'Cannot delete milestone with associated tasks. Remove tasks first.'
         });
       }
 
-      db.prepare('DELETE FROM milestones WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('milestones')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Milestone deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete milestone error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -277,4 +337,3 @@ export function createMilestonesRouter(db: Database.Database): Router {
 
   return router;
 }
-

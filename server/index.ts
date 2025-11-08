@@ -1,12 +1,25 @@
 /**
  * Express Server with Real Authentication
- * JWT-based auth with SQLite database
+ * JWT-based auth with Supabase PostgreSQL database
  */
 
+// Load environment variables FIRST, before any other imports
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..');
+
+dotenv.config({ path: join(projectRoot, '.env.local') });
+dotenv.config({ path: join(projectRoot, '.env') });
+
+// Now import other modules after environment is configured
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { createServer } from 'http';
+import { supabase, verifyConnection } from './supabase';
 import { db, initDatabase } from './database';
 import * as auth from './auth';
 import * as mcp from './services/mcp';
@@ -40,6 +53,7 @@ import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
 import { createMyApplicationsRouter } from './routes/my-applications';
+import createCodexMCPRoutes from './routes/codex-mcp.js';
 import { createSubscriptionService, SubscriptionService } from './services/subscription-service';
 
 // Import error handling middleware
@@ -68,23 +82,31 @@ import {
   refreshTokenSchema
 } from './utils/validation';
 
-// Load environment variables from .env.local first, then .env
-dotenv.config({ path: '.env.local' });
-dotenv.config();
 
 // Setup process-level error handlers (MUST be before any other code)
 handleUncaughtException();
 handleUnhandledRejection();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3005'],
     credentials: true
 }));
 app.use(express.json());
+
+// Serve static files from public directory
+app.use(express.static('public'));
+
+// Only serve the React app for non-API routes when not in development
+// In development, Vite handles the frontend on port 3001
+if (process.env.NODE_ENV !== 'development') {
+    app.get('/', (req, res) => {
+        res.sendFile('index.html', { root: '.' });
+    });
+}
 
 // HTTP Request logging middleware
 app.use(logger.httpLogger());
@@ -104,8 +126,8 @@ app.post('/api/auth/refresh', validateBody(refreshTokenSchema), async (req, res)
     try {
         const { token } = req.body;
 
-        const result = await auth.refreshToken(token);
-        
+        const result = auth.refreshToken(db, token);
+
         res.json({
             success: true,
             user: result.user,
@@ -113,9 +135,9 @@ app.post('/api/auth/refresh', validateBody(refreshTokenSchema), async (req, res)
         });
     } catch (error: any) {
         console.error('Refresh token error:', error);
-        res.status(401).json({ 
+        res.status(401).json({
             success: false,
-            error: error.message || 'Token refresh failed' 
+            error: error.message || 'Token refresh failed'
         });
     }
 });
@@ -150,23 +172,23 @@ app.get('/api/chat/message', generalRateLimit, auth.authenticateToken, async (re
 });
 
 // POST /api/chat/message
-app.post('/api/chat/message', generalRateLimit, async (req, res) => {
+app.post('/api/chat/message', generalRateLimit, auth.authenticateToken, async (req, res) => {
             try {
                 const { message, sessionId, currentPage } = req.body;
-                const userId = (req as any).user.id;
-                const companyId = (req as any).user.company_id;
+                const user = (req as any).user;
+                const userId = user?.id || 'user-1';
+                const companyId = user?.company_id || 'company-1';
 
                 // Import chatbot dynamically
                 const { GeminiChatbot } = await import('../lib/ai/gemini-client');
-                const { ChatTools } = await import('../lib/ai/chat-tools');
 
                 // Build context
                 const chatContext = {
                     userId,
                     companyId,
-                    userName: (req as any).user.name,
-                    companyName: (req as any).user.company?.name || 'Company',
-                    userRole: (req as any).user.role,
+                    userName: user?.name || 'User',
+                    companyName: user?.company_id ? 'Company' : 'Company', // Simplified for now
+                    userRole: user?.role || 'user',
                     currentPage,
                     availableData: {},
                 };
@@ -175,7 +197,7 @@ app.post('/api/chat/message', generalRateLimit, async (req, res) => {
                 const chatbot = new GeminiChatbot();
                 await chatbot.initializeChat(chatContext, []);
 
-                // Send message
+                // Send message via Gemini
                 const response = await chatbot.sendMessage(message, chatContext);
 
                 res.json({
@@ -213,25 +235,17 @@ app.delete('/api/chat/message', generalRateLimit, auth.authenticateToken, async 
  */
 const startServer = async () => {
     try {
-        // Initialize database
-        initDatabase();
-        auth.setDatabase(db);
-
-        // Initialize MCP tables
-        console.log('🧠 Initializing MCP (Model Context Protocol)...');
-        try {
-            mcp.initializeMCPTables(db);
-        } catch (error) {
-            console.warn('⚠️ MCP initialization failed, continuing without MCP:', error.message);
+        // Verify Supabase connection
+        console.log('🔌 Connecting to Supabase...');
+        const isConnected = await verifyConnection();
+        if (!isConnected) {
+            throw new Error('Failed to connect to Supabase');
         }
 
-        // Initialize deployment tables
-        console.log('🚀 Initializing Deployment tables...');
-        deploymentService.initDeploymentTables(db);
-
-        // Initialize SDK tables
-        console.log('🔧 Initializing SDK Developer tables...');
-        initSdkTables(db);
+        // Initialize local SQLite for modules/marketplace/SDK local features
+        console.log('🗄️ Initializing local SQLite (for marketplace/SDK)...');
+        initDatabase();
+        console.log('✅ Supabase connection verified');
 
         // Initialize subscription service
         console.log('💳 Initializing Subscription service...');
@@ -245,6 +259,13 @@ const startServer = async () => {
                 const { email, password } = req.body;
 
                 const result = auth.login(db, email, password);
+
+                if (!result) {
+                    return res.status(401).json({
+                        success: false,
+                        error: 'Invalid email or password'
+                    });
+                }
 
                 res.json({
                     success: true,
@@ -262,7 +283,7 @@ const startServer = async () => {
 
         app.post('/api/auth/register', authRateLimit, validateBody(registerSchema), (req, res) => {
             try {
-                const { email, password, name, companyName } = req.body;
+                const { email, password, firstName, lastName, role, companyId } = req.body;
 
                 const result = auth.register(db, email, password, name, companyName);
 
@@ -401,8 +422,62 @@ const startServer = async () => {
         app.use('/api/automations', generalRateLimit, createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
-        app.use('/api/my-applications', generalRateLimit, createMyApplicationsRouter(db));
+        app.use('/api/my-apps', generalRateLimit, createMyApplicationsRouter(db));
         console.log('  ✓ /api/my-applications');
+
+        app.use('/api/codex-mcp', generalRateLimit, createCodexMCPRoutes(db));
+        console.log('  ✓ /api/codex-mcp');
+
+        // Tenant API routes
+        app.get('/api/tenants', generalRateLimit, (req, res) => {
+            try {
+                const tenants = [
+                    {
+                        id: 'default',
+                        name: 'CortexBuild Platform',
+                        domain: 'localhost',
+                        settings: {
+                            theme: 'light',
+                            features: ['dashboard', 'projects', 'ai-agents']
+                        }
+                    }
+                ];
+
+                const currentTenant = tenants[0];
+
+                res.json({
+                    tenants,
+                    currentTenant,
+                    success: true
+                });
+            } catch (error: any) {
+                console.error('Error fetching tenants:', error);
+                res.status(500).json({
+                    error: 'Failed to fetch tenants',
+                    success: false
+                });
+            }
+        });
+
+        app.post('/api/tenants/:id/switch', generalRateLimit, (req, res) => {
+            try {
+                const { id } = req.params;
+
+                res.json({
+                    success: true,
+                    message: `Successfully switched to tenant ${id}`,
+                    tenantId: id
+                });
+            } catch (error: any) {
+                console.error('Error switching tenant:', error);
+                res.status(500).json({
+                    error: 'Failed to switch tenant',
+                    success: false
+                });
+            }
+        });
+
+        console.log('  ✓ /api/tenants');
 
         // Stripe webhook endpoint (no auth required)
         app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -446,7 +521,7 @@ const startServer = async () => {
             }
         });
 
-        console.log('✅ All 27 API routes registered successfully');
+        console.log('✅ All 28 API routes registered successfully');
 
         // ==================================================
         // ERROR HANDLING MIDDLEWARE (MUST BE LAST!)
@@ -461,9 +536,9 @@ const startServer = async () => {
         console.log('  ✓ Global error handler registered');
 
         // Clean up expired sessions every hour
-        setInterval(() => {
-            auth.cleanupExpiredSessions();
-        }, 60 * 60 * 1000);
+        // setInterval(() => {
+        //     auth.cleanupExpiredSessions();
+        // }, 60 * 60 * 1000);
 
         // Check subscription statuses every 6 hours
         setInterval(async () => {
@@ -479,7 +554,7 @@ const startServer = async () => {
         const server = createServer(app);
 
         // Setup WebSocket
-        setupWebSocket(server, db);
+        setupWebSocket(server, supabase);
 
         // Start listening
         server.listen(PORT, () => {

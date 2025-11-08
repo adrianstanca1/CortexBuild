@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../../types';
 import * as api from '../../../api';
+import type { CompanyPlan } from '../../../api/platformAdmin';
 
 interface PlansManagementProps {
     currentUser: User;
@@ -162,7 +163,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="text"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Enter plan name"
                                     title="Plan Name"
@@ -176,7 +177,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="number"
                                     value={formData.sortOrder}
-                                    onChange={(e) => setFormData({...formData, sortOrder: parseInt(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0"
                                     title="Sort Order"
@@ -191,7 +192,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                             </label>
                             <textarea
                                 value={formData.description}
-                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter plan description"
                                 title="Description"
@@ -207,7 +208,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="number"
                                     value={formData.priceMonthly}
-                                    onChange={(e) => setFormData({...formData, priceMonthly: parseFloat(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, priceMonthly: parseFloat(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0.00"
                                     title="Monthly Price"
@@ -222,7 +223,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="number"
                                     value={formData.priceYearly}
-                                    onChange={(e) => setFormData({...formData, priceYearly: parseFloat(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, priceYearly: parseFloat(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0.00"
                                     title="Yearly Price"
@@ -240,7 +241,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="number"
                                     value={formData.maxUsers}
-                                    onChange={(e) => setFormData({...formData, maxUsers: parseInt(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, maxUsers: parseInt(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0"
                                     title="Max Users"
@@ -254,7 +255,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="number"
                                     value={formData.maxProjects}
-                                    onChange={(e) => setFormData({...formData, maxProjects: parseInt(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, maxProjects: parseInt(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0"
                                     title="Max Projects"
@@ -268,7 +269,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="number"
                                     value={formData.storageGb}
-                                    onChange={(e) => setFormData({...formData, storageGb: parseInt(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, storageGb: parseInt(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0"
                                     title="Storage GB"
@@ -285,7 +286,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                 <input
                                     type="number"
                                     value={formData.aiAgentsLimit}
-                                    onChange={(e) => setFormData({...formData, aiAgentsLimit: parseInt(e.target.value) || 0})}
+                                    onChange={(e) => setFormData({ ...formData, aiAgentsLimit: parseInt(e.target.value) || 0 })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="0"
                                     title="AI Agents Limit"
@@ -297,7 +298,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                     <input
                                         type="checkbox"
                                         checked={formData.isActive}
-                                        onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                                        onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="ml-2 text-sm text-gray-700">Active</span>
@@ -306,7 +307,7 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                     <input
                                         type="checkbox"
                                         checked={formData.isFeatured}
-                                        onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
+                                        onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="ml-2 text-sm text-gray-700">Featured</span>
@@ -392,9 +393,8 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                        plan.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}>
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${plan.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        }`}>
                                         {plan.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 </td>
@@ -407,9 +407,8 @@ const PlansManagement: React.FC<PlansManagementProps> = ({ currentUser }) => {
                                     </button>
                                     <button
                                         onClick={() => handleTogglePlanStatus(plan.id, !plan.isActive)}
-                                        className={`hover:text-gray-900 ${
-                                            plan.isActive ? 'text-red-600' : 'text-green-600'
-                                        }`}
+                                        className={`hover:text-gray-900 ${plan.isActive ? 'text-red-600' : 'text-green-600'
+                                            }`}
                                     >
                                         {plan.isActive ? 'Deactivate' : 'Activate'}
                                     </button>

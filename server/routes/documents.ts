@@ -1,16 +1,16 @@
 // CortexBuild Platform - Documents API Routes
-// Version: 1.1.0 GOLDEN
-// Last Updated: 2025-10-08
+// Version: 2.0.0 - Supabase Migration
+// Last Updated: 2025-10-31
 
 import { Router, Request, Response } from 'express';
-import Database from 'better-sqlite3';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Document, ApiResponse, PaginatedResponse } from '../types';
 
-export function createDocumentsRouter(db: Database.Database): Router {
+export function createDocumentsRouter(supabase: SupabaseClient): Router {
   const router = Router();
 
   // GET /api/documents - List all documents
-  router.get('/', (req: Request, res: Response) => {
+  router.get('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -25,57 +25,63 @@ export function createDocumentsRouter(db: Database.Database): Router {
       const limitNum = parseInt(limit);
       const offset = (pageNum - 1) * limitNum;
 
-      let query = `
-        SELECT d.*, 
-               p.name as project_name,
-               u.name as uploaded_by_name
-        FROM documents d
-        LEFT JOIN projects p ON d.project_id = p.id
-        LEFT JOIN users u ON d.uploaded_by = u.id
-        WHERE 1=1
-      `;
-      const params: any[] = [];
+      let query = supabase
+        .from('documents')
+        .select(`
+          *,
+          projects!documents_project_id_fkey(id, name),
+          users!documents_uploaded_by_fkey(id, name)
+        `, { count: 'exact' });
 
+      // Apply filters
       if (project_id) {
-        query += ' AND d.project_id = ?';
-        params.push(parseInt(project_id));
+        query = query.eq('project_id', project_id);
       }
 
       if (category) {
-        query += ' AND d.category = ?';
-        params.push(category);
+        query = query.eq('category', category);
       }
 
       if (uploaded_by) {
-        query += ' AND d.uploaded_by = ?';
-        params.push(parseInt(uploaded_by));
+        query = query.eq('uploaded_by', uploaded_by);
       }
 
       if (search) {
-        query += ' AND (d.name LIKE ? OR d.description LIKE ?)';
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm);
+        query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
       }
 
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
-      const { total } = db.prepare(countQuery).get(...params) as { total: number };
+      // Add pagination and ordering
+      query = query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limitNum - 1);
 
-      query += ' ORDER BY d.created_at DESC LIMIT ? OFFSET ?';
-      params.push(limitNum, offset);
+      const { data: documents, error, count } = await query;
 
-      const documents = db.prepare(query).all(...params);
+      if (error) throw error;
+
+      // Transform data
+      const transformedDocuments = (documents || []).map((d: any) => {
+        const projects = Array.isArray(d.projects) ? d.projects[0] : d.projects;
+        const users = Array.isArray(d.users) ? d.users[0] : d.users;
+        return {
+          ...d,
+          project_name: projects?.name || null,
+          uploaded_by_name: users?.name || null
+        };
+      });
 
       res.json({
         success: true,
-        data: documents,
+        data: transformedDocuments,
         pagination: {
           page: pageNum,
           limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limitNum)
         }
       });
     } catch (error: any) {
+      console.error('Get documents error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -84,33 +90,44 @@ export function createDocumentsRouter(db: Database.Database): Router {
   });
 
   // GET /api/documents/:id - Get single document
-  router.get('/:id', (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const document = db.prepare(`
-        SELECT d.*, 
-               p.name as project_name,
-               u.name as uploaded_by_name,
-               u.email as uploaded_by_email
-        FROM documents d
-        LEFT JOIN projects p ON d.project_id = p.id
-        LEFT JOIN users u ON d.uploaded_by = u.id
-        WHERE d.id = ?
-      `).get(id);
+      const { data: document, error } = await supabase
+        .from('documents')
+        .select(`
+          *,
+          projects!documents_project_id_fkey(id, name),
+          users!documents_uploaded_by_fkey(id, name, email)
+        `)
+        .eq('id', id)
+        .single();
 
-      if (!document) {
+      if (error || !document) {
         return res.status(404).json({
           success: false,
           error: 'Document not found'
         });
       }
 
+      // Transform data
+      const projects = Array.isArray(document.projects) ? document.projects[0] : document.projects;
+      const users = Array.isArray(document.users) ? document.users[0] : document.users;
+
+      const transformedDocument = {
+        ...document,
+        project_name: projects?.name || null,
+        uploaded_by_name: users?.name || null,
+        uploaded_by_email: users?.email || null
+      };
+
       res.json({
         success: true,
-        data: document
+        data: transformedDocument
       });
     } catch (error: any) {
+      console.error('Get document error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -119,7 +136,7 @@ export function createDocumentsRouter(db: Database.Database): Router {
   });
 
   // POST /api/documents - Upload new document
-  router.post('/', (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     try {
       const {
         project_id,
@@ -139,30 +156,38 @@ export function createDocumentsRouter(db: Database.Database): Router {
         });
       }
 
-      const result = db.prepare(`
-        INSERT INTO documents (
-          project_id, name, description, category, file_path,
-          file_size, file_type, uploaded_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        project_id, name, description, category, file_path,
-        file_size, file_type, uploaded_by
-      );
+      const { data: document, error } = await supabase
+        .from('documents')
+        .insert({
+          project_id,
+          name,
+          description: description || null,
+          category: category || null,
+          file_path,
+          file_size: file_size || null,
+          file_type: file_type || null,
+          uploaded_by
+        })
+        .select()
+        .single();
 
-      const document = db.prepare('SELECT * FROM documents WHERE id = ?').get(result.lastInsertRowid);
+      if (error) throw error;
 
       // Log activity
-      db.prepare(`
-        INSERT INTO activities (user_id, project_id, entity_type, entity_id, action, description)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(
-        uploaded_by,
-        project_id,
-        'document',
-        result.lastInsertRowid,
-        'uploaded',
-        `Uploaded document: ${name}`
-      );
+      try {
+        await supabase
+          .from('activities')
+          .insert({
+            user_id: uploaded_by,
+            project_id,
+            entity_type: 'document',
+            entity_id: document.id,
+            action: 'uploaded',
+            description: `Uploaded document: ${name}`
+          });
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+      }
 
       res.status(201).json({
         success: true,
@@ -170,6 +195,7 @@ export function createDocumentsRouter(db: Database.Database): Router {
         message: 'Document uploaded successfully'
       });
     } catch (error: any) {
+      console.error('Upload document error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -178,13 +204,17 @@ export function createDocumentsRouter(db: Database.Database): Router {
   });
 
   // GET /api/documents/:id/download - Download document
-  router.get('/:id/download', (req: Request, res: Response) => {
+  router.get('/:id/download', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const document = db.prepare('SELECT * FROM documents WHERE id = ?').get(id) as any;
+      const { data: document, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-      if (!document) {
+      if (error || !document) {
         return res.status(404).json({
           success: false,
           error: 'Document not found'
@@ -206,6 +236,7 @@ export function createDocumentsRouter(db: Database.Database): Router {
         message: 'Document ready for download'
       });
     } catch (error: any) {
+      console.error('Download document error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -214,11 +245,16 @@ export function createDocumentsRouter(db: Database.Database): Router {
   });
 
   // DELETE /api/documents/:id - Delete document
-  router.delete('/:id', (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const document = db.prepare('SELECT * FROM documents WHERE id = ?').get(id);
+      const { data: document } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('id', id)
+        .single();
+
       if (!document) {
         return res.status(404).json({
           success: false,
@@ -227,13 +263,19 @@ export function createDocumentsRouter(db: Database.Database): Router {
       }
 
       // In a real implementation, this would also delete the physical file
-      db.prepare('DELETE FROM documents WHERE id = ?').run(id);
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       res.json({
         success: true,
         message: 'Document deleted successfully'
       });
     } catch (error: any) {
+      console.error('Delete document error:', error);
       res.status(500).json({
         success: false,
         error: error.message
@@ -243,4 +285,3 @@ export function createDocumentsRouter(db: Database.Database): Router {
 
   return router;
 }
-

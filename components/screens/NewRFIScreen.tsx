@@ -29,7 +29,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
     const [isSuggesting, setIsSuggesting] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<AIRFISuggestion | null>(null);
     const [suggestionError, setSuggestionError] = useState<string | null>(null);
-    
+
     // In a real app, this would be a more sophisticated list
     const possibleAssignees = ['Architect Team', 'Structural Engineer', 'MEP Consultant', 'General Contractor'];
 
@@ -42,7 +42,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
 
         const attachmentsForApi: Attachment[] = await Promise.all(
             attachments.map(file => new Promise<Attachment>((resolve, reject) => {
-                 const reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = (e) => {
                     resolve({ name: file.name, url: e.target?.result as string });
                 };
@@ -50,7 +50,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                 reader.readAsDataURL(file);
             }))
         );
-        
+
         const newRFI = {
             projectId: project.id,
             subject,
@@ -88,7 +88,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
             setIsSuggesting(false);
         }
     };
-    
+
     const handleApplyAllSuggestions = () => {
         if (!aiSuggestion) return;
         if (aiSuggestion.suggestedAssignee) {
@@ -109,13 +109,13 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
         if (event.target.files) {
             processFiles(event.target.files);
         }
-        if(event.target) event.target.value = '';
+        if (event.target) event.target.value = '';
     };
 
     const handleRemoveFile = (indexToRemove: number) => {
         setAttachments(prev => prev.filter((_, index) => index !== indexToRemove));
     };
-    
+
     const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDraggingOver(true); };
     const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDraggingOver(false); };
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); };
@@ -169,7 +169,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                         required
                     />
                 </div>
-                
+
                 <div className="mt-2">
                     <button
                         type="button"
@@ -177,7 +177,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                         disabled={isSuggesting || (!subject.trim() && !question.trim())}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSuggesting ? <ArrowPathIcon className="w-5 h-5 animate-spin"/> : <SparklesIcon className="w-5 h-5"/>}
+                        {isSuggesting ? <ArrowPathIcon className="w-5 h-5 animate-spin" /> : <SparklesIcon className="w-5 h-5" />}
                         Get AI Suggestions
                     </button>
                     {suggestionError && <p className="text-xs text-center text-red-600 mt-2">{suggestionError}</p>}
@@ -186,7 +186,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                 {aiSuggestion && !isSuggesting && (
                     <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg text-center transition-opacity duration-500">
                         <h4 className="font-bold text-purple-800 flex items-center justify-center gap-2">
-                            <SparklesIcon className="w-5 h-5"/>
+                            <SparklesIcon className="w-5 h-5" />
                             AI Suggestions Ready!
                         </h4>
                         <p className="text-sm text-purple-700 mt-1 mb-3">Apply all suggestions with one click, or apply them individually below.</p>
@@ -207,7 +207,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                             Assigned To <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                             <select
+                            <select
                                 id="assignee"
                                 value={assignee}
                                 onChange={(e) => setAssignee(e.target.value)}
@@ -227,7 +227,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                                 onClick={() => setAssignee(aiSuggestion.suggestedAssignee)}
                                 className="text-xs text-purple-600 hover:text-purple-800 font-semibold mt-1.5 flex items-center gap-1"
                             >
-                                <SparklesIcon className="w-3.5 h-3.5"/>
+                                <SparklesIcon className="w-3.5 h-3.5" />
                                 Apply Suggestion: {aiSuggestion.suggestedAssignee}
                             </button>
                         )}
@@ -246,7 +246,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                                 className="w-full p-2 pl-10 border border-gray-300 rounded-md shadow-sm"
                                 required
                             />
-                             <CalendarDaysIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <CalendarDaysIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         </div>
                         {aiSuggestion?.suggestedDueDate && (
                             <button
@@ -254,7 +254,7 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                                 onClick={() => setDueDate(aiSuggestion.suggestedDueDate)}
                                 className="text-xs text-purple-600 hover:text-purple-800 font-semibold mt-1.5 flex items-center gap-1"
                             >
-                                <SparklesIcon className="w-3.5 h-3.5"/>
+                                <SparklesIcon className="w-3.5 h-3.5" />
                                 Apply Suggestion: {new Date(aiSuggestion.suggestedDueDate + 'T00:00:00').toLocaleDateString()}
                             </button>
                         )}
@@ -266,9 +266,8 @@ const NewRFIScreen: React.FC<NewRFIScreenProps> = ({ project, goBack, currentUse
                     <div
                         onDragEnter={handleDragEnter} onDragLeave={handleDragLeave} onDragOver={handleDragOver} onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
-                        className={`mt-2 flex justify-center rounded-lg border border-dashed px-6 py-10 transition-colors cursor-pointer ${
-                            isDraggingOver ? 'border-blue-600 bg-blue-50' : 'border-gray-900/25 hover:border-blue-500'
-                        }`}
+                        className={`mt-2 flex justify-center rounded-lg border border-dashed px-6 py-10 transition-colors cursor-pointer ${isDraggingOver ? 'border-blue-600 bg-blue-50' : 'border-gray-900/25 hover:border-blue-500'
+                            }`}
                     >
                         <div className="text-center">
                             <PaperClipIcon className="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />

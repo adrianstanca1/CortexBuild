@@ -1,0 +1,51 @@
+================================================================================
+VERCEL ENVIRONMENT VARIABLES - COPY & PASTE
+================================================================================
+
+VARIABLE 1
+================================================================================
+Name:
+SUPABASE_URL
+
+Value:
+<YOUR_SUPABASE_URL>
+
+================================================================================
+
+VARIABLE 2
+================================================================================
+Name:
+SUPABASE_SERVICE_KEY
+
+Value:
+<YOUR_SUPABASE_SERVICE_KEY>
+
+================================================================================
+
+VARIABLE 3
+================================================================================
+Name:
+JWT_SECRET
+
+Value:
+<SET_A_STRONG_RANDOM_SECRET>
+
+================================================================================
+
+INSTRUCTIONS:
+1. Go to https://vercel.com/dashboard
+2. Select CortexBuild project
+3. Click Settings → Environment Variables
+4. For each variable above:
+   a. Click "Add New"
+   b. Copy the Name and paste into Name field
+   c. Copy the Value and paste into Value field
+   d. Select all environments (Production, Preview, Development)
+   e. Click Save
+5. After all 3 are added, go to Deployments tab
+6. Click ... on latest deployment
+7. Select Redeploy
+8. Wait for deployment to complete
+
+================================================================================
+
