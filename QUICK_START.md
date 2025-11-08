@@ -1,232 +1,80 @@
 # 🚀 CortexBuild - Quick Start Guide
 
-**Status**: ✅ All bugs fixed and ready to go!
-
----
-
-## ⚡ 30-Second Setup
+## ⚡ Start in 3 Commands
 
 ```bash
-# 1. Install dependencies (already done)
+cd /Users/admin/main/CortexBuild
 npm install
-
-# 2. Start development server
-npm run dev
-
-# 3. Open browser
-# http://localhost:3000
+npm run dev:all
 ```
 
-**That's it!** Your dev server is running. 🎉
+## 🌐 Access Your App
 
----
+**Frontend:** http://localhost:5174/ (or http://localhost:3000)
+**Backend:** http://localhost:3001/api
 
-## 🔐 Test Login
-
-Use these credentials to test:
+## 🔑 Demo Login
 
 ```
-Email:    adrian.stanca1@gmail.com
-Password: parola123
-Role:     Super Admin
+Email:    admin@cortexbuild.com
+Password: admin123
 ```
 
-Or try:
-```
-Email:    adrian@ascladdingltd.co.uk
-Password: lolozania1
-Role:     Company Admin
-```
+## 📊 What You'll See
 
----
+1. **Dashboard** - Project stats, quick actions
+2. **Projects** - All construction projects
+3. **Tasks** - Kanban board
+4. **AI Chat** - Click icon (bottom right)
+5. **Marketplace** - Browse & install apps
 
-## 📊 What's Working
+## 🎭 All Available Dashboards
 
-✅ Dev server (port 3000)  
-✅ Supabase connection  
-✅ Authentication  
-✅ React components  
-✅ TypeScript  
-✅ Tailwind CSS  
-✅ Error handling  
+| Role | Email | Password | Access |
+|------|-------|----------|--------|
+| Super Admin | admin@cortexbuild.com | admin123 | Everything |
+| Company Admin | company@demo.com | company123 | Company + Projects |
+| Developer | developer@demo.com | dev123 | SDK & Tools |
+| Project Manager | pm@demo.com | pm123 | Projects |
+| Field Worker | worker@demo.com | worker123 | Daily Tasks |
+| Client | client@demo.com | client123 | View Only |
 
----
-
-## 🛠️ Common Commands
+## 🔌 API Quick Test
 
 ```bash
-# Development
-npm run dev              # Start frontend
-npm run server           # Start backend (port 5000)
-npm run dev:all          # Start both
+# Health check
+curl http://localhost:3001/api/health
 
-# Production
-npm run build            # Build for production
-npm run preview          # Preview build
+# Login
+curl -X POST http://localhost:3001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@cortexbuild.com","password":"admin123"}'
 
-# Linting
-npm run lint             # Check code quality
-
-# Deployment
-npm run vercel:deploy    # Deploy to Vercel
+# Get projects (use token from login response)
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  http://localhost:3001/api/projects
 ```
 
----
+## 📚 Full Documentation
 
-## 📁 Project Structure
+- `COMPLETE_APP_OVERVIEW.md` - Complete technical docs
+- `APP_DEMO_GUIDE.md` - Interactive walkthrough
+- `YOUR_COMPLETE_APP.md` - Feature summary
 
-```
-CortexBuild/
-├── components/          # React components
-│   ├── screens/        # Dashboard screens
-│   ├── developer/      # Developer tools
-│   ├── admin/          # Admin dashboards
-│   └── marketplace/    # Marketplace
-├── lib/                # Libraries
-│   ├── supabase/      # Supabase client
-│   └── services/      # API services
-├── hooks/              # Custom hooks
-├── utils/              # Utilities
-├── types.ts            # TypeScript types
-├── App.tsx             # Main app
-└── index.tsx           # Entry point
-```
+## ✅ What's Included
 
----
+- ✅ 15+ Dashboards
+- ✅ 100+ API Endpoints
+- ✅ 40+ Database Tables
+- ✅ 400+ React Components
+- ✅ AI Integration (Gemini)
+- ✅ Real-Time Collaboration
+- ✅ Developer SDK
+- ✅ Global Marketplace
 
-## 🎯 Key Features
+## 🎉 You're Ready!
 
-### 👥 Three User Roles
-- **Super Admin** - Platform control
-- **Company Admin** - Company management
-- **Developer** - Development tools
+Your complete construction management platform is ready to use!
 
-### 📱 Main Modules
-- Projects & Tasks
-- RFIs & Punch Lists
-- Daily Logs & Photos
-- Drawings & Documents
-- Time Tracking
-- Accounting
-- AI Tools
-- Marketplace
-
-### 🛠️ Developer Tools
-- SDK Developer Console
-- API Builder
-- Workflow Builder
-- Git Integration
-- Code Sandbox
-
----
-
-## 🔧 Environment Variables
-
-Already configured in `.env.local`:
-
-```env
-VITE_SUPABASE_URL=https://zpbuvuxpfemldsknerew.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-VITE_API_URL=http://localhost:5000
-```
-
----
-
-## 🐛 Bugs Fixed Today
-
-### ✅ Bug #1: Vite Dependencies
-- **Problem**: Dev server failed to start
-- **Solution**: Updated vite.config.ts with missing dependencies
-- **Result**: Dev server now running smoothly
-
-### ✅ Bug #2: Missing .env.local
-- **Problem**: Supabase not configured
-- **Solution**: Created .env.local with all required variables
-- **Result**: Supabase client properly initialized
-
----
-
-## 📚 Documentation
-
-- **BUG_FIXES_REPORT.md** - Detailed bug analysis
-- **TROUBLESHOOTING_GUIDE.md** - Common issues & solutions
-- **FIXES_SUMMARY.md** - Complete summary
-- **README.md** - Project overview
-
----
-
-## 🆘 Troubleshooting
-
-### Dev server won't start?
-```bash
-rm -rf node_modules/.vite
-npm install
-npm run dev
-```
-
-### Supabase not connecting?
-- Check `.env.local` exists
-- Verify `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
-- Restart dev server
-
-### Login not working?
-- Verify backend is running: `npm run server`
-- Check browser console for errors
-- Use correct test credentials
-
----
-
-## 🎓 Next Steps
-
-1. **Explore the Dashboard**
-   - Login with test account
-   - Navigate different sections
-   - Check out developer tools
-
-2. **Test Features**
-   - Create a project
-   - Add tasks
-   - Upload documents
-   - Try AI features
-
-3. **Build Something**
-   - Create a custom app
-   - Use the SDK
-   - Deploy to marketplace
-
-4. **Deploy**
-   - Build: `npm run build`
-   - Deploy: `npm run vercel:deploy`
-
----
-
-## 💡 Pro Tips
-
-- Use `npm run dev:all` to run frontend + backend together
-- Press `h + enter` in dev server for help
-- Check browser console (F12) for debug info
-- Use React DevTools for component inspection
-- Monitor Supabase dashboard for database issues
-
----
-
-## 📞 Support
-
-**Need help?**
-1. Check TROUBLESHOOTING_GUIDE.md
-2. Review BUG_FIXES_REPORT.md
-3. Check browser console for errors
-4. Verify environment variables
-
----
-
-## ✨ You're All Set!
-
-Your CortexBuild development environment is ready. Start building! 🚀
-
-```bash
-npm run dev
-```
-
-Happy coding! 💻
+**Start exploring:** http://localhost:5174/
 
