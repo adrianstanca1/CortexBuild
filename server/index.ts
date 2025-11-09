@@ -41,6 +41,7 @@ import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
 import procurementRouter from './routes/automation/procurement';
 import subscriptionsRouter from './routes/subscriptions';
+import agentsRouter from './routes/agents';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -384,7 +385,11 @@ const startServer = async () => {
         app.use('/api/subscriptions', subscriptionsRouter);
         console.log('  ✓ /api/subscriptions (Subscription Management)');
 
-        console.log('✅ All 26 API routes registered successfully (including Automation Studio & Subscriptions)');
+        // AI Agents routes
+        app.use('/api/agents', agentsRouter);
+        console.log('  ✓ /api/agents (AI Agent Marketplace)');
+
+        console.log('✅ All 27 API routes registered successfully (including AI Agents)');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {
@@ -412,8 +417,17 @@ const startServer = async () => {
         // Setup WebSocket
         setupWebSocket(server, db);
 
+        // Add error handler for server
+        server.on('error', (error: any) => {
+            console.error('❌ Server error:', error);
+            if (error.code === 'EADDRINUSE') {
+                console.error(`❌ Port ${PORT} is already in use`);
+                process.exit(1);
+            }
+        });
+
         // Start listening
-        server.listen(PORT, () => {
+        server.listen(PORT, '0.0.0.0', () => {
             console.log('');
             console.log('🚀 CortexBuild AI Platform Server');
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

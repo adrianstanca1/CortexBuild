@@ -10,7 +10,7 @@
  * - Enhanced error handling
  */
 
-import { sql } from '@vercel/postgres';
+import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +20,11 @@ import { setSecurityHeaders, validateJwtSecret, getClientIp } from '../middlewar
 import { logger, logRequest, logResponse } from '../middleware/logger';
 import { validate, emailRule, passwordRule } from '../middleware/validation';
 import { loginRateLimit } from '../middleware/rateLimit';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const TOKEN_EXPIRY = '24h';
@@ -78,13 +83,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             });
         }
 
-        // Find user
-        const { rows } = await sql`
-            SELECT * FROM users WHERE email = ${email} LIMIT 1
-        `;
+        // Find user in Supabase
+        const { data: users, error: queryError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .limit(1);
 
-        if (rows.length === 0) {
-            logger.warn('Login failed: User not found', { email, ip: clientIp });
+        if (queryError || !users || users.length === 0) {
+            logger.warn('Login failed: User not found', { email, ip: clientIp, error: queryError });
             // Use same error message to prevent user enumeration
             return res.status(401).json({
                 success: false,
@@ -92,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             });
         }
 
-        const user = rows[0];
+        const user = users[0];
 
         // Verify password
         const isValidPassword = await bcrypt.compare(password, user.password_hash);
@@ -116,14 +123,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             { expiresIn: TOKEN_EXPIRY }
         );
 
-        // Create session in database
+        // Create session in Supabase
         const sessionId = uuidv4();
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-        await sql`
-            INSERT INTO sessions (id, user_id, token, expires_at)
-            VALUES (${sessionId}, ${user.id}, ${token}, ${expiresAt.toISOString()})
-        `;
+        const { error: sessionError } = await supabase
+            .from('sessions')
+            .insert({
+                id: sessionId,
+                user_id: user.id,
+                token: token,
+                expires_at: expiresAt.toISOString()
+            });
+
+        if (sessionError) {
+            logger.warn('Failed to create session', { error: sessionError, userId: user.id });
+            // Continue anyway - session creation is not critical for login
+        }
 
         logger.info('Login successful', {
             userId: user.id,

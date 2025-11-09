@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion, PermissionAction, PermissionSubject } from './types.ts';
+import { Screen, User, Project, NotificationLink, AISuggestion } from './types.ts';
 import * as api from './api.ts';
 import AuthScreen from './components/screens/AuthScreen.tsx';
 import AppLayout from './components/layout/AppLayout.tsx';
@@ -68,13 +68,21 @@ import CompanyAdminDashboardNew from './components/screens/dashboards/CompanyAdm
 import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard.tsx';
 
 
-type NavigationItem = {
-    screen: Screen;
-    params?: any;
+interface ScreenComponentProps {
+    currentUser?: User;
+    selectProject?: (project: Project) => void;
+    navigateTo?: (screen: Screen, params?: Record<string, unknown>) => void;
+    onDeepLink?: (projectId: string, screen: Screen, params: Record<string, unknown>) => void;
+    onQuickAction?: (action: Screen) => void;
+    onSuggestAction?: () => void;
+    openProjectSelector?: (title: string, onSelect: (projectId: string) => void) => void;
     project?: Project;
-};
+    goBack?: () => void;
+    can?: (action: string, subject: string) => boolean;
+    [key: string]: unknown;
+}
 
-const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
+const SCREEN_COMPONENTS: Record<Screen, React.FC<ScreenComponentProps>> = {
     'global-dashboard': UnifiedDashboardScreen,
     'projects': ProjectsListScreen,
     'project-home': ProjectHomeScreen,
@@ -145,11 +153,11 @@ const App: React.FC = () => {
     const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
 
     const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
-    const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => () => { });
+    const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => (_projectId: string) => { });
     const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
 
     const { can } = usePermissions(currentUser!);
-    const { toasts, removeToast, showSuccess, showError } = useToast();
+    const { toasts, removeToast, showSuccess } = useToast();
 
     // Note: handleOAuthCallback and handleUserSignIn removed - Supabase auth replaced with JWT authService
 
@@ -172,7 +180,7 @@ const App: React.FC = () => {
                                 : 'global-dashboard';
                         navigateToModule(defaultScreenForRole, {});
                     }
-                    window.dispatchEvent(new CustomEvent('userLoggedIn'));
+                    window.dispatchEvent(new Event('userLoggedIn'));
                 } else {
                     console.log('ℹ️ No active session');
                 }
@@ -250,7 +258,7 @@ const App: React.FC = () => {
         console.log('🔄 Setting current user...');
         setCurrentUser(user);
 
-        window.dispatchEvent(new CustomEvent('userLoggedIn'));
+        window.dispatchEvent(new Event('userLoggedIn'));
         showSuccess('Welcome back!', `Hello ${user.name}`);
 
         console.log('✅ User set - dashboard will render automatically');
@@ -263,7 +271,7 @@ const App: React.FC = () => {
 
         setCurrentUser(null);
         setNavigationStack([]);
-        window.dispatchEvent(new CustomEvent('userLoggedOut'));
+        window.dispatchEvent(new Event('userLoggedOut'));
         showSuccess('Logged out', 'You have been successfully logged out');
         logger.logUserAction('logout_successful', { userId: currentUser?.id }, currentUser?.id);
     };
@@ -271,14 +279,14 @@ const App: React.FC = () => {
 
     const openProjectSelector = useCallback((title: string, onSelect: (projectId: string) => void) => {
         setProjectSelectorTitle(title);
-        setProjectSelectorCallback(() => (projectId: string) => {
-            onSelect(projectId);
+        setProjectSelectorCallback(() => (selectedProjectId: string) => {
+            onSelect(selectedProjectId);
             setIsProjectSelectorOpen(false);
         });
         setIsProjectSelectorOpen(true);
     }, []);
 
-    const handleDeepLinkWrapper = useCallback((projectId: string, screen: Screen, params: any) => {
+    const handleDeepLinkWrapper = useCallback((projectId: string, screen: Screen, params: Record<string, unknown>) => {
         handleDeepLink(projectId, screen, params, allProjects);
     }, [handleDeepLink, allProjects]);
 
@@ -406,64 +414,66 @@ const App: React.FC = () => {
     }, [currentUser.role, navigateToModule, goHome]);
 
     return (
-        <div className="bg-slate-50">
-            <AppLayout
-                sidebar={
-                    <Sidebar
-                        project={getSidebarProject}
-                        navigateTo={navigateTo}
+        <ErrorBoundary>
+            <div className="bg-slate-50">
+                <AppLayout
+                    sidebar={
+                        <Sidebar
+                            project={getSidebarProject}
+                            navigateTo={navigateTo}
+                            navigateToModule={navigateToModule}
+                            goHome={sidebarGoHome}
+                            currentUser={currentUser}
+                            onLogout={handleLogout}
+                        />
+                    }
+                    floatingMenu={<FloatingMenu
+                        currentUser={currentUser}
                         navigateToModule={navigateToModule}
-                        goHome={sidebarGoHome}
-                        currentUser={currentUser}
-                        onLogout={handleLogout}
-                    />
-                }
-                floatingMenu={<FloatingMenu
-                    currentUser={currentUser}
-                    navigateToModule={navigateToModule}
-                    openProjectSelector={openProjectSelector}
-                    onDeepLink={handleDeepLinkWrapper}
-                />}
-            >
-                <div className="p-8">
-                    <ScreenComponent
-                        currentUser={currentUser}
-                        selectProject={selectProject}
-                        navigateTo={navigateTo}
-                        onDeepLink={handleDeepLink}
-                        onQuickAction={handleQuickAction}
-                        onSuggestAction={handleSuggestAction}
                         openProjectSelector={openProjectSelector}
-                        project={project}
-                        goBack={goBack}
-                        can={can}
-                        {...params}
-                    />
-                </div>
-            </AppLayout>
+                        onDeepLink={handleDeepLinkWrapper}
+                    />}
+                >
+                    <div className="p-8">
+                        <ScreenComponent
+                            currentUser={currentUser}
+                            selectProject={selectProject}
+                            navigateTo={navigateTo}
+                            onDeepLink={handleDeepLink}
+                            onQuickAction={handleQuickAction}
+                            onSuggestAction={handleSuggestAction}
+                            openProjectSelector={openProjectSelector}
+                            project={project}
+                            goBack={goBack}
+                            can={can}
+                            {...params}
+                        />
+                    </div>
+                </AppLayout>
 
-            <AISuggestionModal
-                isOpen={isAISuggestionModalOpen}
-                isLoading={isAISuggestionLoading}
-                suggestion={aiSuggestion}
-                onClose={() => setIsAISuggestionModalOpen(false)}
-                onAction={handleAISuggestionAction}
-                currentUser={currentUser}
-            />
-            {isProjectSelectorOpen && (
-                <ProjectSelectorModal
-                    title={projectSelectorTitle}
-                    onClose={() => setIsProjectSelectorOpen(false)}
-                    onSelectProject={projectSelectorCallback}
+                <AISuggestionModal
+                    isOpen={isAISuggestionModalOpen}
+                    isLoading={isAISuggestionLoading}
+                    suggestion={aiSuggestion}
+                    onClose={() => setIsAISuggestionModalOpen(false)}
+                    onAction={handleAISuggestionAction}
                     currentUser={currentUser}
                 />
-            )}
+                {isProjectSelectorOpen && (
+                    <ProjectSelectorModal
+                        title={projectSelectorTitle}
+                        onClose={() => setIsProjectSelectorOpen(false)}
+                        onSelectProject={projectSelectorCallback}
+                        currentUser={currentUser}
+                    />
+                )}
 
-            <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+                <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
 
-            {/* Global AI Chatbot - Available on all pages */}
-            {currentUser && <ChatbotWidget />}
-        </div>
+                {/* Global AI Chatbot - Available on all pages */}
+                {currentUser && <ChatbotWidget />}
+            </div>
+        </ErrorBoundary>
     );
 }
 

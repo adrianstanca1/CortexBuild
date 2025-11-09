@@ -372,7 +372,14 @@ export const authenticateToken = (req: any, res: any, next: any) => {
       return res.status(401).json({ success: false, error: 'User not found' });
     }
 
-    req.user = mapUserRow(user);
+    const mappedUser = mapUserRow(user);
+    
+    // Set user in both formats for compatibility
+    req.user = {
+      ...mappedUser,
+      userId: mappedUser?.id,
+      companyId: mappedUser?.company_id,
+    };
     next();
   } catch (error) {
     console.error('Token verification error:', error);
