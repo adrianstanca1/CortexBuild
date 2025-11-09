@@ -403,17 +403,5 @@ const App: React.FC = () => {
         {...params}
     />;
 }
-// Before (BROKEN - infinite loop):
-const permissions = useMemo(() => {
-    const can = (...) => canCheck(currentUser.role, ...);
-    return { can };
-}, [currentUser?.role, currentUser?.id]); // ❌ Still depends on currentUser object
 
-// After (FIXED - completely stable):
-const currentUserRef = useRef(currentUser);
-currentUserRef.current = currentUser; // Updates every render
-
-const can = useCallback((...) => {
-    const user = currentUserRef.current; // Access latest user
-    return canCheck(user.role, ...);
-}, []); // ✅ Empty deps - never recreates
+export default App;
