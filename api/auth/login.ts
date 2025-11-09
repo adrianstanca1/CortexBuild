@@ -1,13 +1,6 @@
 /**
- * Vercel Serverless Function - Enhanced Login
+ * Vercel Serverless Function - Login
  * POST /api/auth/login
- *
- * Features:
- * - Rate limiting (5 attempts per 15 minutes)
- * - Request validation
- * - Structured logging
- * - Security headers
- * - Enhanced error handling
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -19,9 +12,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 // Initialize Supabase client
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'cortexbuild-secret-2025';
 const TOKEN_EXPIRY = '24h';
 
 // Simple CORS handler
@@ -39,6 +31,8 @@ function handleCors(req: VercelRequest, res: VercelResponse): boolean {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+    const startTime = Date.now();
+
     // Handle CORS
     if (handleCors(req, res)) {
         return;
@@ -54,46 +48,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
         const { email, password } = req.body;
-        const clientIp = getClientIp(req);
 
-        logRequest('POST', '/api/auth/login', { email, ip: clientIp });
+        console.log('🔐 [Login] Attempt:', email);
 
         // Validate input
-        const validationErrors = validate(req.body, [emailRule, passwordRule]);
-        if (validationErrors.length > 0) {
-            logger.warn('Validation failed', { errors: validationErrors, ip: clientIp });
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                error: 'Validation failed',
-                errors: validationErrors
+                error: 'Email and password are required'
             });
         }
 
-        // Rate limiting
-        const rateLimitResult = loginRateLimit(clientIp);
-        res.setHeader('X-RateLimit-Limit', '5');
-        res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
-        res.setHeader('X-RateLimit-Reset', new Date(rateLimitResult.resetTime).toISOString());
-
-        if (!rateLimitResult.allowed) {
-            logger.warn('Rate limit exceeded', { email, ip: clientIp });
-            return res.status(429).json({
+        // Check if Supabase is configured
+        if (!supabaseUrl || !supabaseServiceKey) {
+            console.error('❌ Supabase not configured');
+            return res.status(500).json({
                 success: false,
-                error: 'Too many login attempts. Please try again later.',
-                retryAfter: new Date(rateLimitResult.resetTime).toISOString()
+                error: 'Database not configured. Please contact administrator.'
             });
         }
+
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
         // Find user in Supabase
         const { data: users, error: queryError } = await supabase
             .from('users')
             .select('*')
-            .eq('email', email)
+            .ilike('email', email)
             .limit(1);
 
-        if (queryError || !users || users.length === 0) {
-            logger.warn('Login failed: User not found', { email, ip: clientIp, error: queryError });
-            // Use same error message to prevent user enumeration
+        if (queryError) {
+            console.error('❌ Database query error:', queryError);
+            return res.status(500).json({
+                success: false,
+                error: 'Database error occurred'
+            });
+        }
+
+        if (!users || users.length === 0) {
+            console.warn('⚠️  User not found:', email);
             return res.status(401).json({
                 success: false,
                 error: 'Invalid email or password'
@@ -106,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
         if (!isValidPassword) {
-            logger.warn('Login failed: Invalid password', { email, ip: clientIp });
+            console.warn('⚠️  Invalid password for:', email);
             return res.status(401).json({
                 success: false,
                 error: 'Invalid email or password'
@@ -118,7 +111,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             {
                 userId: user.id,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                companyId: user.company_id
             },
             JWT_SECRET,
             { expiresIn: TOKEN_EXPIRY }
@@ -128,28 +122,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const sessionId = uuidv4();
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-        const { error: sessionError } = await supabase
+        await supabase
             .from('sessions')
             .insert({
                 id: sessionId,
                 user_id: user.id,
                 token: token,
                 expires_at: expiresAt.toISOString()
+            })
+            .catch(err => {
+                console.warn('⚠️  Session creation failed:', err);
+                // Non-fatal - continue with login
             });
 
-        if (sessionError) {
-            logger.warn('Failed to create session', { error: sessionError, userId: user.id });
-            // Continue anyway - session creation is not critical for login
-        }
-
-        logger.info('Login successful', {
-            userId: user.id,
-            email: user.email,
-            ip: clientIp
-        });
-
-        const duration = Date.now() - startTime;
-        logResponse('POST', '/api/auth/login', 200, duration);
+        console.log('✅ Login successful:', user.email, `(${Date.now() - startTime}ms)`);
 
         // Return user data (without password) and token
         return res.status(200).json({
@@ -157,23 +143,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name,
+                name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
                 role: user.role,
-                avatar: user.avatar,
-                companyId: user.company_id
+                avatar: user.avatar_url || user.avatar || '',
+                company_id: user.company_id
             },
-            token,
-            expiresAt: expiresAt.toISOString()
+            token
         });
     } catch (error: any) {
-        logger.error('Login error', error, { ip: getClientIp(req) });
-
-        const duration = Date.now() - startTime;
-        logResponse('POST', '/api/auth/login', 500, duration);
+        console.error('❌ Login error:', error);
 
         return res.status(500).json({
             success: false,
-            error: 'Internal server error'
+            error: 'Internal server error. Please try again later.'
         });
     }
 }
