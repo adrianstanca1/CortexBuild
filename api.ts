@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type } from '@google/genai';
+// GoogleGenAI is only available server-side - don't use in browser
+// import { GoogleGenAI, Type } from '@google/genai';
 import {
     User, Project, Task, RFI, PunchListItem, Drawing, Document, SiteInstruction, DeliveryItem, DayworkSheet,
     Comment, Notification, ActivityEvent, Company, AISuggestion, AIInsight, AIFeedback, DailyLog, LogItem, Attachment,
@@ -25,7 +26,8 @@ import * as authService from './auth/authService.ts';
 const LATENCY = 200;
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// AI is not available in browser - this file should only use authService for real API calls
+const ai: any = null;
 const model = 'gemini-2.5-flash';
 
 const checkPermissions = (user: User, action: PermissionAction, subject: PermissionSubject) => {
