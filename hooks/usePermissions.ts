@@ -1,26 +1,25 @@
-import { useMemo } from 'react';
+import { useCallback, useRef } from 'react';
 import { User, PermissionAction, PermissionSubject } from '../types.ts';
 import { can as canCheck } from '../permissions.ts';
 
 /**
  * Custom hook to provide a convenient 'can' function for the current user.
+ * Uses a ref pattern to prevent infinite loops when currentUser object changes.
  * @param currentUser The currently logged-in user object.
  * @returns An object with a 'can' function.
  */
 export const usePermissions = (currentUser: User) => {
-    const permissions = useMemo(() => {
-        /**
-         * Checks if the current user can perform a given action on a subject.
-         * @example const { can } = usePermissions(currentUser);
-         * if (can('create', 'task')) { ... }
-         */
-        const can = (action: PermissionAction, subject: PermissionSubject): boolean => {
-            if (!currentUser) return false;
-            return canCheck(currentUser.role, action, subject);
-        };
+    // Use ref to hold the latest currentUser without creating dependencies
+    const currentUserRef = useRef(currentUser);
+    currentUserRef.current = currentUser;
 
-        return { can };
-    }, [currentUser]);
+    // Create a stable 'can' function with empty dependencies
+    // This prevents infinite loops by never recreating the function
+    const can = useCallback((action: PermissionAction, subject: PermissionSubject): boolean => {
+        const user = currentUserRef.current;
+        if (!user) return false;
+        return canCheck(user.role, action, subject);
+    }, []); // Empty deps - completely stable function
 
-    return permissions;
+    return { can };
 };

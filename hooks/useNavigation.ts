@@ -19,18 +19,21 @@ export const useNavigation = () => {
     }, []);
 
     const goBack = useCallback(() => {
-        if (navigationStack.length > 1) {
-            setNavigationStack(prev => prev.slice(0, -1));
-        }
-    }, [navigationStack]);
+        setNavigationStack(prev => {
+            if (prev.length > 1) {
+                return prev.slice(0, -1);
+            }
+            return prev;
+        });
+    }, []); // No dependencies - uses function form of setState
 
     const goHome = useCallback((currentProject?: Project) => {
         if (currentProject) {
             setNavigationStack(prev => [prev[0], { screen: 'project-home', project: currentProject }]);
         } else {
-            navigateToModule('global-dashboard');
+            setNavigationStack([{ screen: 'global-dashboard', params: {}, project: undefined }]);
         }
-    }, [navigateToModule]);
+    }, []); // No dependencies - navigateToModule is now inlined
 
     const selectProject = useCallback((project: Project) => {
         setNavigationStack([{ screen: 'project-home', project }]);

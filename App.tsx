@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, useReducer } from 'react';
 import { Screen, User, Project, NotificationLink, AISuggestion } from './types.ts';
 import * as api from './api.ts';
 import AuthScreen from './components/screens/AuthScreen.tsx';
@@ -10,7 +10,7 @@ import ProjectSelectorModal from './components/modals/ProjectSelectorModal.tsx';
 import FloatingMenu from './components/layout/FloatingMenu.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import ToastContainer from './components/ToastContainer.tsx';
-import { usePermissions } from './hooks/usePermissions.ts';
+import { can as canCheck } from './permissions.ts';
 import * as authService from './auth/authService.ts';
 import { useToast } from './hooks/useToast.ts';
 import { useNavigation } from './hooks/useNavigation.ts';
@@ -156,8 +156,21 @@ const App: React.FC = () => {
     const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => (_projectId: string) => { });
     const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
 
-    const { can } = usePermissions(currentUser!);
+    // Prevent infinite loop: track if we've done initial navigation
+    const hasInitializedNavigation = useRef(false);
+
     const { toasts, removeToast, showSuccess } = useToast();
+
+    // Create a stable 'can' function that uses a ref to access the latest currentUser
+    // This prevents infinite loops by not depending on currentUser in the dependency array
+    const currentUserRef = useRef(currentUser);
+    currentUserRef.current = currentUser;
+
+    const can = useCallback((action, subject) => {
+        const user = currentUserRef.current;
+        if (!user) return false;
+        return canCheck(user.role, action, subject);
+    }, []); // Empty deps - stable function that accesses latest user via ref
 
     // Note: handleOAuthCallback and handleUserSignIn removed - Supabase auth replaced with JWT authService
 
@@ -165,14 +178,14 @@ const App: React.FC = () => {
         // Check for existing session on mount
         const checkSession = async () => {
             try {
-                console.log('🔍 Checking for existing session...');
+                logger.debug('Checking for existing session...');
                 const user = await authService.getCurrentUser();
 
                 if (user) {
-                    console.log('✅ Session found:', user.name);
+                    logger.info('Session found', { userId: user.id, name: user.name });
                     setCurrentUser(user);
                     if (navigationStack.length === 0) {
-                        console.log('🔄 Navigating to dashboard from session restore...');
+                        logger.debug('Navigating to dashboard from session restore...');
                         const defaultScreenForRole: Screen = user.role === 'developer'
                             ? 'developer-dashboard'
                             : user.role === 'super_admin'
@@ -182,10 +195,10 @@ const App: React.FC = () => {
                     }
                     window.dispatchEvent(new Event('userLoggedIn'));
                 } else {
-                    console.log('ℹ️ No active session');
+                    logger.info('No active session');
                 }
             } catch (error) {
-                console.error('Session check error:', error);
+                logger.error('Session check error', { error });
             } finally {
                 setSessionChecked(true);
             }
@@ -215,7 +228,7 @@ const App: React.FC = () => {
         return () => {
             window.removeEventListener('hashchange', handleHashChange);
         };
-    }, [currentUser]);
+    }, [currentUser?.id, currentUser?.role, navigateToModule]); // Use specific properties, not whole object
 
 
     useEffect(() => {
@@ -225,17 +238,6 @@ const App: React.FC = () => {
                 setAllProjects(projects);
             };
             loadProjects();
-
-            // Ensure user is navigated to dashboard if no navigation exists
-            if (navigationStack.length === 0) {
-                console.log('🔄 No navigation stack - navigating to dashboard...');
-                const defaultScreen: Screen = currentUser.role === 'developer'
-                    ? 'developer-dashboard'
-                    : currentUser.role === 'super_admin'
-                        ? 'super-admin-dashboard'
-                        : 'global-dashboard';
-                navigateToModule(defaultScreen, {});
-            }
         } else {
             // User logged out - clear navigation
             if (navigationStack.length > 0) {
@@ -243,7 +245,26 @@ const App: React.FC = () => {
             }
             setAllProjects([]);
         }
-    }, [currentUser]);
+    }, [currentUser?.id]); // Only run when user ID changes, not on every render
+
+    // Separate effect for initial navigation - runs ONCE after login
+    useEffect(() => {
+        if (currentUser && navigationStack.length === 0 && sessionChecked && !hasInitializedNavigation.current) {
+            logger.debug('No navigation stack - navigating to dashboard...');
+            hasInitializedNavigation.current = true; // Mark as initialized
+            const defaultScreen: Screen = currentUser.role === 'developer'
+                ? 'developer-dashboard'
+                : currentUser.role === 'super_admin'
+                    ? 'super-admin-dashboard'
+                    : 'global-dashboard';
+            navigateToModule(defaultScreen, {});
+        }
+
+        // Reset flag when user logs out
+        if (!currentUser && hasInitializedNavigation.current) {
+            hasInitializedNavigation.current = false;
+        }
+    }, [currentUser?.id, sessionChecked]); // Don't track navigationStack.length - causes infinite loop!
 
     useEffect(() => {
         const handleLogoutTrigger = () => {
@@ -254,14 +275,11 @@ const App: React.FC = () => {
     }, []);
 
     const handleLoginSuccess = (user: User) => {
-        console.log('✅ Login successful:', user.name);
-        console.log('🔄 Setting current user...');
+        logger.info('Login successful', { userId: user.id, name: user.name });
         setCurrentUser(user);
 
         window.dispatchEvent(new Event('userLoggedIn'));
         showSuccess('Welcome back!', `Hello ${user.name}`);
-
-        console.log('✅ User set - dashboard will render automatically');
     };
 
     const handleLogout = async () => {
@@ -287,16 +305,24 @@ const App: React.FC = () => {
     }, []);
 
     const handleDeepLinkWrapper = useCallback((projectId: string, screen: Screen, params: Record<string, unknown>) => {
-        handleDeepLink(projectId, screen, params, allProjects);
-    }, [handleDeepLink, allProjects]);
-
-    const handleQuickAction = (action: Screen) => {
-        openProjectSelector(`Select a project for the new ${action.split('-')[1]}`, (projectId) => {
-            handleDeepLink(projectId, action, {}, allProjects);
+        // Use function to get current allProjects without depending on it
+        setAllProjects(currentProjects => {
+            handleDeepLink(projectId, screen, params, currentProjects);
+            return currentProjects; // Don't actually update state
         });
-    };
+    }, [handleDeepLink]);
 
-    const handleSuggestAction = async () => {
+    const handleQuickAction = useCallback((action: Screen) => {
+        openProjectSelector(`Select a project for the new ${action.split('-')[1]}`, (projectId) => {
+            // Access current projects without dependency
+            setAllProjects(currentProjects => {
+                handleDeepLink(projectId, action, {}, currentProjects);
+                return currentProjects;
+            });
+        });
+    }, [openProjectSelector, handleDeepLink]);
+
+    const handleSuggestAction = useCallback(async () => {
         if (!currentUser) return;
         setIsAISuggestionModalOpen(true);
         setIsAISuggestionLoading(true);
@@ -304,14 +330,17 @@ const App: React.FC = () => {
         const suggestion = await api.getAISuggestedAction(currentUser);
         setAiSuggestion(suggestion);
         setIsAISuggestionLoading(false);
-    };
+    }, [currentUser]);
 
-    const handleAISuggestionAction = (link: NotificationLink) => {
-        if (link.projectId) {
-            handleDeepLink(link.projectId, link.screen, link.params, allProjects);
-        }
+    const handleAISuggestionAction = useCallback((link: NotificationLink) => {
+        setAllProjects(currentProjects => {
+            if (link.projectId) {
+                handleDeepLink(link.projectId, link.screen, link.params, currentProjects);
+            }
+            return currentProjects;
+        });
         setIsAISuggestionModalOpen(false);
-    };
+    }, [handleDeepLink]);
 
     if (!sessionChecked) {
         return (
@@ -326,9 +355,10 @@ const App: React.FC = () => {
     }
 
     if (!currentUser) {
-        console.log('🚫 No currentUser - showing AuthScreen');
-        console.log('📊 Session checked:', sessionChecked);
-        console.log('📊 Navigation stack:', navigationStack);
+        logger.debug('No currentUser - showing AuthScreen', {
+            sessionChecked,
+            navigationStackLength: navigationStack.length
+        });
         return (
             <div className="bg-slate-100 min-h-screen flex items-center justify-center">
                 <AuthScreen onLoginSuccess={handleLoginSuccess} />
@@ -336,50 +366,18 @@ const App: React.FC = () => {
         );
     }
 
-    console.log('✅ Current user exists - showing app:', currentUser.name);
-    console.log('📊 Navigation stack length:', navigationStack.length);
-    console.log('📊 Current nav item:', currentNavItem);
+    logger.debug('Current user exists - showing app', {
+        userName: currentUser.name,
+        navigationStackLength: navigationStack.length,
+        currentNavItem
+    });
 
-    // If no navigation stack, show dashboard directly
-    if (!currentNavItem || navigationStack.length === 0) {
-        console.log('🏠 No navigation - showing dashboard directly');
-        if (currentUser.role === 'developer') {
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    <DeveloperDashboardScreen />
-                </div>
-            );
-        }
-        if (currentUser.role === 'super_admin') {
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    <SuperAdminDashboardNew
-                        currentUser={currentUser}
-                        selectProject={(projectId: string) => {
-                            const project = allProjects.find(p => p.id === projectId);
-                            if (project) selectProject(project);
-                        }}
-                    />
-                </div>
-            );
-        }
-        const dashboardProps = {
-            currentUser,
-            navigateTo,
-            onDeepLink: handleDeepLinkWrapper,
-            onQuickAction: handleQuickAction,
-            onSuggestAction: handleSuggestAction,
-            selectProject: (id: string) => {
-                const project = allProjects.find(p => p.id === id);
-                if (project) selectProject(project);
-            },
-            can: () => true, // Simple permission check - allow all for now
-            goBack
-        };
-
+    // Wait for navigation to be initialized by the useEffect
+    if (!currentNavItem) {
+        logger.debug('Waiting for navigation initialization...');
         return (
-            <div className="min-h-screen bg-gray-50">
-                <UnifiedDashboardScreen {...dashboardProps} />
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-500">Loading...</div>
             </div>
         );
     }
@@ -391,90 +389,31 @@ const App: React.FC = () => {
         return <Base44Clone user={currentUser} onLogout={handleLogout} />;
     }
 
-    const getSidebarProject = useMemo(() => {
-        if (project) {
-            return project;
-        }
-        return {
-            ...MOCK_PROJECT,
-            id: '',
-            name: 'Global View',
-            location: `Welcome, ${currentUser?.name || 'User'}`,
-        };
-    }, [project, currentUser?.name]);
-
-    const sidebarGoHome = useCallback(() => {
-        if (currentUser.role === 'developer') {
-            navigateToModule('developer-dashboard');
-        } else if (currentUser.role === 'super_admin') {
-            navigateToModule('super-admin-dashboard');
-        } else {
-            goHome();
-        }
-    }, [currentUser.role, navigateToModule, goHome]);
-
-    return (
-        <ErrorBoundary>
-            <div className="bg-slate-50">
-                <AppLayout
-                    sidebar={
-                        <Sidebar
-                            project={getSidebarProject}
-                            navigateTo={navigateTo}
-                            navigateToModule={navigateToModule}
-                            goHome={sidebarGoHome}
-                            currentUser={currentUser}
-                            onLogout={handleLogout}
-                        />
-                    }
-                    floatingMenu={<FloatingMenu
-                        currentUser={currentUser}
-                        navigateToModule={navigateToModule}
-                        openProjectSelector={openProjectSelector}
-                        onDeepLink={handleDeepLinkWrapper}
-                    />}
-                >
-                    <div className="p-8">
-                        <ScreenComponent
-                            currentUser={currentUser}
-                            selectProject={selectProject}
-                            navigateTo={navigateTo}
-                            onDeepLink={handleDeepLink}
-                            onQuickAction={handleQuickAction}
-                            onSuggestAction={handleSuggestAction}
-                            openProjectSelector={openProjectSelector}
-                            project={project}
-                            goBack={goBack}
-                            can={can}
-                            {...params}
-                        />
-                    </div>
-                </AppLayout>
-
-                <AISuggestionModal
-                    isOpen={isAISuggestionModalOpen}
-                    isLoading={isAISuggestionLoading}
-                    suggestion={aiSuggestion}
-                    onClose={() => setIsAISuggestionModalOpen(false)}
-                    onAction={handleAISuggestionAction}
-                    currentUser={currentUser}
-                />
-                {isProjectSelectorOpen && (
-                    <ProjectSelectorModal
-                        title={projectSelectorTitle}
-                        onClose={() => setIsProjectSelectorOpen(false)}
-                        onSelectProject={projectSelectorCallback}
-                        currentUser={currentUser}
-                    />
-                )}
-
-                <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-
-                {/* Global AI Chatbot - Available on all pages */}
-                {currentUser && <ChatbotWidget />}
-            </div>
-        </ErrorBoundary>
-    );
+    return <ScreenComponent
+        currentUser={currentUser}
+        selectProject={selectProject}
+        navigateTo={navigateTo}
+        onDeepLink={handleDeepLink}
+        onQuickAction={handleQuickAction}
+        onSuggestAction={handleSuggestAction}
+        openProjectSelector={openProjectSelector}
+        project={project}
+        goBack={goBack}
+        can={can}
+        {...params}
+    />;
 }
+// Before (BROKEN - infinite loop):
+const permissions = useMemo(() => {
+    const can = (...) => canCheck(currentUser.role, ...);
+    return { can };
+}, [currentUser?.role, currentUser?.id]); // ❌ Still depends on currentUser object
 
-export default App;
+// After (FIXED - completely stable):
+const currentUserRef = useRef(currentUser);
+currentUserRef.current = currentUser; // Updates every render
+
+const can = useCallback((...) => {
+    const user = currentUserRef.current; // Access latest user
+    return canCheck(user.role, ...);
+}, []); // ✅ Empty deps - never recreates
