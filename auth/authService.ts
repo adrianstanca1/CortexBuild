@@ -37,7 +37,7 @@ export const login = async (email: string, password: string): Promise<User> => {
     console.log('🔐 [AuthService] Login attempt:', email);
 
     try {
-        const response = await api.post('/auth/login-simple', { email, password });
+        const response = await api.post('/auth/login', { email, password });
 
         if (response.data.success) {
             // Save token
