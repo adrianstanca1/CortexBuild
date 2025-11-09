@@ -13,6 +13,10 @@ export interface Tenant {
 
 export type UserRole = 'super_admin' | 'admin' | 'project_manager' | 'field' | 'viewer';
 
+export type PermissionAction = 'view' | 'create' | 'update' | 'delete' | 'approve';
+
+export type PermissionSubject = 'projects' | 'rfis' | 'finance' | 'automation' | 'copilot';
+
 export interface User {
   id: UUID;
   tenantId: UUID;
@@ -80,6 +84,13 @@ export interface Invoice {
   submittedAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FinanceAlert {
+  id: string;
+  type: 'invoice_overdue' | 'budget_over_commit';
+  severity: 'warning' | 'critical';
+  message: string;
 }
 
 export interface ApiListResponse<T> {

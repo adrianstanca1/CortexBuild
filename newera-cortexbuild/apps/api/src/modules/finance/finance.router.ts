@@ -4,6 +4,7 @@ import * as budgetService from './budget.service';
 import * as invoiceService from './invoice.service';
 import { createBudgetLineSchema, updateBudgetLineSchema } from './budget.schemas';
 import { createInvoiceSchema, updateInvoiceSchema } from './invoice.schemas';
+import { getFinanceAlerts } from './automation.service';
 
 export const financeRouter = Router();
 financeRouter.use(authenticate);
@@ -84,4 +85,10 @@ financeRouter.put('/invoices/:invoiceId', async (req: AuthenticatedRequest, res)
   } catch (error: any) {
     res.status(404).json({ error: error.message });
   }
+});
+
+financeRouter.get('/alerts', async (req: AuthenticatedRequest, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+  const alerts = await getFinanceAlerts(req.user.tenantId);
+  res.json({ alerts });
 });

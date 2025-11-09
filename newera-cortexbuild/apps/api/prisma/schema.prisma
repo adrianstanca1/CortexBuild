@@ -15,8 +15,13 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users    User[]
-  projects Project[]
+  users      User[]
+  projects   Project[]
+  rfis       RFI[]
+  budgets    BudgetLine[]
+  invoices   Invoice[]
+  automations AutomationTemplate[] @relation("TenantAutomations")
+  audits     AuditEvent[]
 }
 
 model User {
@@ -32,6 +37,7 @@ model User {
 
   tenant  Tenant  @relation(fields: [tenantId], references: [id])
   members ProjectMember[]
+  rfis    RFI[] @relation("RfiAuthor")
 }
 
 model Project {
@@ -76,7 +82,7 @@ model AutomationTemplate {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation("TenantAutomations", fields: [tenantId], references: [id])
 }
 
 model AuditEvent {
@@ -107,7 +113,7 @@ model RFI {
 
   tenant  Tenant  @relation(fields: [tenantId], references: [id])
   project Project @relation(fields: [projectId], references: [id])
-  author  User    @relation(fields: [createdBy], references: [id])
+  author  User    @relation("RfiAuthor", fields: [createdBy], references: [id])
 
   @@unique([tenantId, number])
   @@index([projectId])

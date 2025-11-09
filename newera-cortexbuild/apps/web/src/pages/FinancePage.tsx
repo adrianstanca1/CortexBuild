@@ -2,8 +2,10 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../lib/api';
-import type { BudgetLine, Invoice, Project } from '@newera/types';
+import type { BudgetLine, FinanceAlert, Invoice, Project } from '@newera/types';
 import { CopilotPanel } from '../components/copilot/CopilotPanel';
+import { useAuth } from '../providers/AuthProvider';
+import { usePermissions } from '../hooks/usePermissions';
 
 type BudgetForm = {
   projectId: string;
@@ -18,6 +20,8 @@ type InvoiceForm = {
   amount: number;
   dueDate?: string;
 };
+
+type AlertResponse = FinanceAlert[];
 
 async function fetchBudget() {
   const res = await apiClient.get('/finance/budgets');
@@ -34,11 +38,21 @@ async function fetchProjects() {
   return res.data.projects as Project[];
 }
 
+async function fetchFinanceAlerts() {
+  const res = await apiClient.get('/finance/alerts');
+  return res.data.alerts as AlertResponse;
+}
+
 export const FinancePage: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: budget } = useQuery({ queryKey: ['budget'], queryFn: fetchBudget });
   const { data: invoices } = useQuery({ queryKey: ['invoices'], queryFn: fetchInvoices });
   const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: fetchProjects });
+  const { data: alerts } = useQuery({ queryKey: ['finance', 'alerts'], queryFn: fetchFinanceAlerts, staleTime: 60_000 });
+  const { user } = useAuth();
+  const { can } = usePermissions(user);
+  const canManageFinance = can('create', 'finance') || can('update', 'finance');
+  const canUseCopilot = can('view', 'copilot');
 
   const summary = React.useMemo(() => {
     const totalBudget = budget?.reduce((sum, line) => sum + line.amount, 0) ?? 0;
@@ -89,6 +103,21 @@ export const FinancePage: React.FC = () => {
         </article>
       </section>
 
+      <section className="finance-alerts">
+        <h3>Automation alerts</h3>
+        {alerts && alerts.length > 0 ? (
+          <ul>
+            {alerts.map((alert) => (
+              <li key={alert.id} className={`alert alert-${alert.severity}`}>
+                {alert.message}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No blocking issues detected.</p>
+        )}
+      </section>
+
       <section className="finance-grid">
         <div>
           <h3>Budget lines</h3>
@@ -117,21 +146,31 @@ export const FinancePage: React.FC = () => {
             </tbody>
           </table>
 
-          <form onSubmit={submitBudget((values) => budgetMutation.mutate({ ...values, amount: Number(values.amount) }))} className="stack">
-            <h4>Add budget line</h4>
-            <select {...registerBudget('projectId', { required: true })}>
-              <option value="">Select project</option>
-              {projects?.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-            <input placeholder="Category" {...registerBudget('category', { required: true })} />
-            <input placeholder="Description" {...registerBudget('description', { required: true })} />
-            <input type="number" step="0.01" placeholder="Amount" {...registerBudget('amount', { required: true, valueAsNumber: true })} />
-            <button disabled={budgetMutation.isPending}>{budgetMutation.isPending ? 'Adding…' : 'Add line'}</button>
-          </form>
+          {canManageFinance ? (
+            <form
+              onSubmit={submitBudget((values) => {
+                if (!canManageFinance) return;
+                budgetMutation.mutate({ ...values, amount: Number(values.amount) });
+              })}
+              className="stack"
+            >
+              <h4>Add budget line</h4>
+              <select {...registerBudget('projectId', { required: true })}>
+                <option value="">Select project</option>
+                {projects?.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+              <input placeholder="Category" {...registerBudget('category', { required: true })} />
+              <input placeholder="Description" {...registerBudget('description', { required: true })} />
+              <input type="number" step="0.01" placeholder="Amount" {...registerBudget('amount', { required: true, valueAsNumber: true })} />
+              <button disabled={budgetMutation.isPending}>{budgetMutation.isPending ? 'Adding…' : 'Add line'}</button>
+            </form>
+          ) : (
+            <p className="muted">Finance editing disabled for your role.</p>
+          )}
         </div>
         <div>
           <h3>Invoices</h3>
@@ -160,26 +199,36 @@ export const FinancePage: React.FC = () => {
             </tbody>
           </table>
 
-          <form onSubmit={submitInvoice((values) => invoiceMutation.mutate({ ...values, amount: Number(values.amount) }))} className="stack">
-            <h4>Create invoice</h4>
-            <select {...registerInvoice('projectId', { required: true })}>
-              <option value="">Select project</option>
-              {projects?.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-            <input placeholder="Vendor" {...registerInvoice('vendor', { required: true })} />
-            <input type="number" step="0.01" placeholder="Amount" {...registerInvoice('amount', { required: true, valueAsNumber: true })} />
-            <label>
-              Due date
-              <input type="date" {...registerInvoice('dueDate')} />
-            </label>
-            <button disabled={invoiceMutation.isPending}>{invoiceMutation.isPending ? 'Submitting…' : 'Create invoice'}</button>
-          </form>
+          {canManageFinance ? (
+            <form
+              onSubmit={submitInvoice((values) => {
+                if (!canManageFinance) return;
+                invoiceMutation.mutate({ ...values, amount: Number(values.amount) });
+              })}
+              className="stack"
+            >
+              <h4>Create invoice</h4>
+              <select {...registerInvoice('projectId', { required: true })}>
+                <option value="">Select project</option>
+                {projects?.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+              <input placeholder="Vendor" {...registerInvoice('vendor', { required: true })} />
+              <input type="number" step="0.01" placeholder="Amount" {...registerInvoice('amount', { required: true, valueAsNumber: true })} />
+              <label>
+                Due date
+                <input type="date" {...registerInvoice('dueDate')} />
+              </label>
+              <button disabled={invoiceMutation.isPending}>{invoiceMutation.isPending ? 'Submitting…' : 'Create invoice'}</button>
+            </form>
+          ) : (
+            <p className="muted">Invoice creation limited to admin/project managers.</p>
+          )}
         </div>
-        <CopilotPanel />
+        {canUseCopilot && <CopilotPanel />}
       </section>
     </div>
   );
