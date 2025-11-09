@@ -52,10 +52,10 @@ describe('Authentication API', () => {
     expect(data.error).toBeDefined();
   });
 
-  test('should get current user with valid token', async () => {
-    const response = await fetch(`${BASE_URL}/auth/me`, {
+  it('should get current user with valid token', async () => {
+    const response = await fetch(`${API_URL}/auth/me`, {
       headers: {
-        'Authorization': `Bearer ${testToken}`
+        'Authorization': `Bearer ${authToken}`
       }
     });
     
@@ -136,10 +136,10 @@ describe('Workflows API', () => {
 });
 
 describe('AI Agents API', () => {
-  test('should list available agents', async () => {
-    const response = await fetch(`${BASE_URL}/agents`, {
+  it('should list available agents', async () => {
+    const response = await fetch(`${API_URL}/agents`, {
       headers: {
-        'Authorization': `Bearer ${testToken}`
+        'Authorization': `Bearer ${authToken}`
       }
     });
     
@@ -189,10 +189,9 @@ describe('Projects API', () => {
     
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
-    // Response might be array or object with projects property
-    const projects = data.projects || data;
-    expect(projects).toBeDefined();
-    expect(Array.isArray(projects)).toBe(true);
+    // Response should have projects property as array
+    expect(data.projects).toBeDefined();
+    expect(Array.isArray(data.projects)).toBe(true);
   });
 });
 

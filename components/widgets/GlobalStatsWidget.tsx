@@ -12,11 +12,17 @@ interface GlobalStatsWidgetProps {
 }
 
 const GlobalStatsWidget: React.FC<GlobalStatsWidgetProps> = ({ projects }) => {
-    const stats = projects.reduce((acc, project) => ({
-        openRFIs: acc.openRFIs + project.snapshot.openRFIs,
-        overdueTasks: acc.overdueTasks + project.snapshot.overdueTasks,
-        pendingTMTickets: acc.pendingTMTickets + project.snapshot.pendingTMTickets,
-    }), { openRFIs: 0, overdueTasks: 0, pendingTMTickets: 0 });
+    const stats = (projects || []).reduce((acc, project) => {
+        // Safety check: ensure project and snapshot exist
+        if (!project || !project.snapshot) {
+            return acc;
+        }
+        return {
+            openRFIs: acc.openRFIs + (project.snapshot.openRFIs || 0),
+            overdueTasks: acc.overdueTasks + (project.snapshot.overdueTasks || 0),
+            pendingTMTickets: acc.pendingTMTickets + (project.snapshot.pendingTMTickets || 0),
+        };
+    }, { openRFIs: 0, overdueTasks: 0, pendingTMTickets: 0 });
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

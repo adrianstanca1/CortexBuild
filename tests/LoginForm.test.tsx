@@ -19,25 +19,29 @@ vi.mock('../supabaseClient', () => ({
     supabase: null,
 }));
 
+const mockNavigate = vi.fn();
+
 describe('LoginForm Component', () => {
     it('renders login form with email and password fields', () => {
-        const mockOnLoginSuccess = vi.fn();
-        render(<LoginForm onLoginSuccess={mockOnLoginSuccess} />);
+        render(<LoginForm onNavigate={mockNavigate} />);
 
         expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+        // Use type="submit" to get only the main sign in button, not Google/GitHub SSO buttons
+        const submitButton = screen.getByRole('button', { name: /^sign in$/i });
+        expect(submitButton).toBeInTheDocument();
     });
 
     it('displays default credentials hint', () => {
-        const mockOnLoginSuccess = vi.fn();
-        render(<LoginForm onLoginSuccess={mockOnLoginSuccess} />);
+        render(<LoginForm onNavigate={mockNavigate} />);
 
         expect(screen.getByText(/adrian.stanca1@gmail.com/i)).toBeInTheDocument();
-        expect(screen.getByText(/parola123/i)).toBeInTheDocument();
+        // Use getAllByText since password appears in multiple places
+        const passwordTexts = screen.getAllByText(/parola123/i);
+        expect(passwordTexts.length).toBeGreaterThan(0);
     });
 
-    test('submits form with credentials', async () => {
+    it('submits form with credentials', async () => {
         const mockOnLoginSuccess = vi.fn();
 
         render(<LoginForm onLoginSuccess={mockOnLoginSuccess} />);
@@ -52,12 +56,12 @@ describe('LoginForm Component', () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(mockAuthService.login).toHaveBeenCalledWith('test@example.com', 'password123');
+            expect(authService.login).toHaveBeenCalledWith('test@example.com', 'password123');
         });
     });
 
-    test('displays error message on failed login', async () => {
-        mockAuthService.login.mockRejectedValue(new Error('Invalid credentials'));
+    it('displays error message on failed login', async () => {
+        (authService.login as vi.Mock).mockRejectedValue(new Error('Invalid credentials'));
 
         render(<LoginForm onLoginSuccess={vi.fn()} />);
 
@@ -66,10 +70,13 @@ describe('LoginForm Component', () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
+            // The actual error message displayed is "Invalid email or password. Please try again."
+            expect(screen.getByText(/invalid email or password/i)).toBeInTheDocument();
         });
-    }); it('shows loading state during login', async () => {
-        (authService.login as any).mockImplementation(() =>
+    });
+
+    it('shows loading state during login', async () => {
+        (authService.login as vi.Mock).mockImplementation(() =>
             new Promise(resolve => setTimeout(resolve, 1000))
         );
 
