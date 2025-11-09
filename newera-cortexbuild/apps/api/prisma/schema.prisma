@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("starter")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users    User[]
+  projects Project[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  tenantId     String
+  email        String   @unique
+  fullName     String
+  passwordHash String
+  role         String   @default("project_manager")
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  members ProjectMember[]
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  code      String   @unique
+  status    String   @default("planning")
+  startDate DateTime?
+  endDate   DateTime?
+  budget    Decimal  @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id])
+  members ProjectMember[]
+  rfis    RFI[]
+  budgets BudgetLine[]
+  invoices Invoice[]
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  role      String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model AutomationTemplate {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  kind        String
+  config      Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
+
+model AuditEvent {
+  id        String   @id @default(uuid())
+  tenantId  String
+  actorId   String?
+  action    String
+  entity    String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
+
+model RFI {
+  id        String   @id @default(uuid())
+  tenantId  String
+  projectId String
+  number    String
+  subject   String
+  question  String
+  response  String?
+  dueDate   DateTime?
+  status    String   @default("open")
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+  author  User    @relation(fields: [createdBy], references: [id])
+
+  @@unique([tenantId, number])
+  @@index([projectId])
+}
+
+model BudgetLine {
+  id          String   @id @default(uuid())
+  tenantId    String
+  projectId   String
+  category    String
+  description String
+  amount      Decimal
+  committed   Decimal @default(0)
+  forecast    Decimal @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+
+  @@index([projectId])
+}
+
+model Invoice {
+  id          String   @id @default(uuid())
+  tenantId    String
+  projectId   String
+  vendor      String
+  amount      Decimal
+  status      String   @default("draft")
+  dueDate     DateTime?
+  submittedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+
+  @@index([projectId])
+  @@index([status])
+}

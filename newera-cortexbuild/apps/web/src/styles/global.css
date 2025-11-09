@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #101828;
+  background-color: #f4f6fb;
+}
+
+body,
+#root {
+  margin: 0;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+aside {
+  background: #101828;
+  color: white;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: white;
+}
+
+.logo span {
+  color: #22d3ee;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+nav a {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a.active {
+  color: #22d3ee;
+}
+
+main {
+  background: white;
+  padding: 32px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.cards article {
+  border: 1px solid #e4e7ec;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.finance {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.finance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.finance-summary article {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e4e7ec;
+}
+
+.finance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.projects {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e4e7ec;
+  text-align: left;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account button {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: #f97066;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+input,
+select,
+button {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d0d5dd;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+button {
+  background: #22d3ee;
+  color: #0f172a;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.link {
+  background: none;
+  color: #2563eb;
+  border: none;
+  padding: 0;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+textarea {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d0d5dd;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.rfis {
+  display: grid;
+  grid-template-columns: 3fr 1.2fr;
+  gap: 24px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.badge-open {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.badge-answered {
+  background: #ecfccb;
+  color: #4d7c0f;
+}
+
+.badge-closed {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-draft {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badge-submitted {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.badge-approved {
+  background: #ecfccb;
+  color: #4d7c0f;
+}
+
+.badge-paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-void {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.copilot {
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  max-height: 540px;
+}
+
+.copilot header h3 {
+  margin: 0;
+}
+
+.copilot-log {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bubble {
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.bubble-user {
+  align-self: flex-end;
+  background: #2563eb;
+  color: white;
+}
+
+.bubble-assistant {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid #e4e7ec;
+}
+
+.copilot-input {
+  display: flex;
+  gap: 8px;
+}
+
+.copilot-input input {
+  flex: 1;
+}

@@ -171,9 +171,9 @@ Recent Tasks: ${recentTasks.length}
       const stats = db.prepare(`
         SELECT 
           COUNT(*) as total_requests,
-          SUM(tokens_used) as total_tokens,
-          SUM(cost) as total_cost,
-          AVG(tokens_used) as avg_tokens_per_request
+          SUM(total_tokens) as total_tokens,
+          SUM(estimated_cost) as total_cost,
+          AVG(total_tokens) as avg_tokens_per_request
         FROM ai_requests
         WHERE user_id = ?
       `).get(user.userId) as any;
@@ -181,8 +181,8 @@ Recent Tasks: ${recentTasks.length}
       const recentRequests = db.prepare(`
         SELECT 
           model,
-          tokens_used,
-          cost,
+          total_tokens as tokens_used,
+          estimated_cost as cost,
           created_at
         FROM ai_requests
         WHERE user_id = ?
