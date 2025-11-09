@@ -38,7 +38,7 @@ export default function LoginPage() {
 
             // Store token
             if (data.token) {
-                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('constructai_token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
             }
 
