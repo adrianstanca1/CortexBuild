@@ -1,21 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, useReducer } from 'react';
-import { Screen, User, Project, NotificationLink, AISuggestion } from './types.ts';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Screen, User, Project } from './types.ts';
 import * as api from './api.ts';
 import AuthScreen from './components/screens/AuthScreen.tsx';
-import AppLayout from './components/layout/AppLayout.tsx';
-import Sidebar from './components/layout/Sidebar.tsx';
-import { MOCK_PROJECT } from './constants.ts';
-import AISuggestionModal from './components/modals/AISuggestionModal.tsx';
-import ProjectSelectorModal from './components/modals/ProjectSelectorModal.tsx';
-import FloatingMenu from './components/layout/FloatingMenu.tsx';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
-import ToastContainer from './components/ToastContainer.tsx';
 import { can as canCheck } from './permissions.ts';
 import * as authService from './auth/authService.ts';
 import { useToast } from './hooks/useToast.ts';
 import { useNavigation } from './hooks/useNavigation.ts';
 import { logger } from './utils/logger.ts';
-import { ChatbotWidget } from './components/chat/ChatbotWidget.tsx';
 
 // Screen Components
 import UnifiedDashboardScreen from './components/screens/UnifiedDashboardScreen.tsx';
@@ -79,6 +70,7 @@ interface ScreenComponentProps {
     project?: Project;
     goBack?: () => void;
     can?: (action: string, subject: string) => boolean;
+    onLogout?: () => void;
     [key: string]: unknown;
 }
 
@@ -141,25 +133,15 @@ const App: React.FC = () => {
         navigateTo,
         navigateToModule,
         goBack,
-        goHome,
         selectProject,
         handleDeepLink,
         setNavigationStack
     } = useNavigation();
 
-
-    const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
-    const [isAISuggestionLoading, setIsAISuggestionLoading] = useState(false);
-    const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
-
-    const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
-    const [projectSelectorCallback, setProjectSelectorCallback] = useState<(projectId: string) => void>(() => (_projectId: string) => { });
-    const [projectSelectorTitle, setProjectSelectorTitle] = useState('');
-
     // Prevent infinite loop: track if we've done initial navigation
     const hasInitializedNavigation = useRef(false);
 
-    const { toasts, removeToast, showSuccess } = useToast();
+    const { showSuccess } = useToast();
 
     // Create a stable 'can' function that uses a ref to access the latest currentUser
     // This prevents infinite loops by not depending on currentUser in the dependency array
@@ -294,54 +276,6 @@ const App: React.FC = () => {
         logger.logUserAction('logout_successful', { userId: currentUser?.id }, currentUser?.id);
     };
 
-
-    const openProjectSelector = useCallback((title: string, onSelect: (projectId: string) => void) => {
-        setProjectSelectorTitle(title);
-        setProjectSelectorCallback(() => (selectedProjectId: string) => {
-            onSelect(selectedProjectId);
-            setIsProjectSelectorOpen(false);
-        });
-        setIsProjectSelectorOpen(true);
-    }, []);
-
-    const handleDeepLinkWrapper = useCallback((projectId: string, screen: Screen, params: Record<string, unknown>) => {
-        // Use function to get current allProjects without depending on it
-        setAllProjects(currentProjects => {
-            handleDeepLink(projectId, screen, params, currentProjects);
-            return currentProjects; // Don't actually update state
-        });
-    }, [handleDeepLink]);
-
-    const handleQuickAction = useCallback((action: Screen) => {
-        openProjectSelector(`Select a project for the new ${action.split('-')[1]}`, (projectId) => {
-            // Access current projects without dependency
-            setAllProjects(currentProjects => {
-                handleDeepLink(projectId, action, {}, currentProjects);
-                return currentProjects;
-            });
-        });
-    }, [openProjectSelector, handleDeepLink]);
-
-    const handleSuggestAction = useCallback(async () => {
-        if (!currentUser) return;
-        setIsAISuggestionModalOpen(true);
-        setIsAISuggestionLoading(true);
-        setAiSuggestion(null);
-        const suggestion = await api.getAISuggestedAction(currentUser);
-        setAiSuggestion(suggestion);
-        setIsAISuggestionLoading(false);
-    }, [currentUser]);
-
-    const handleAISuggestionAction = useCallback((link: NotificationLink) => {
-        setAllProjects(currentProjects => {
-            if (link.projectId) {
-                handleDeepLink(link.projectId, link.screen, link.params, currentProjects);
-            }
-            return currentProjects;
-        });
-        setIsAISuggestionModalOpen(false);
-    }, [handleDeepLink]);
-
     if (!sessionChecked) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -394,9 +328,7 @@ const App: React.FC = () => {
         selectProject={selectProject}
         navigateTo={navigateTo}
         onDeepLink={handleDeepLink}
-        onQuickAction={handleQuickAction}
-        onSuggestAction={handleSuggestAction}
-        openProjectSelector={openProjectSelector}
+        onLogout={handleLogout}
         project={project}
         goBack={goBack}
         can={can}

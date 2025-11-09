@@ -28,6 +28,27 @@ export function createMarketplaceRouter(db: Database.Database): Router {
     next();
   };
 
+  // GET /api/marketplace - Marketplace overview
+  router.get('/', getCurrentUser, (req: Request, res: Response) => {
+    try {
+      const moduleCount = db.prepare('SELECT COUNT(*) as count FROM modules WHERE status = ?').get('published') as any;
+      const categoryCount = db.prepare('SELECT COUNT(*) as count FROM module_categories').get() as any;
+      const popularModules = db.prepare('SELECT * FROM modules WHERE status = ? ORDER BY downloads DESC LIMIT 5').all('published');
+      
+      res.json({
+        success: true,
+        data: {
+          modules: moduleCount.count,
+          categories: categoryCount.count,
+          popular: popularModules
+        }
+      });
+    } catch (error: any) {
+      console.error('Marketplace overview error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // GET /api/marketplace/modules - Browse available modules
   router.get('/modules', getCurrentUser, (req: Request, res: Response) => {
     try {

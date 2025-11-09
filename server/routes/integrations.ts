@@ -15,6 +15,30 @@ export const createIntegrationsRouter = (db: Database.Database) => {
 
   // ===== INTEGRATIONS =====
 
+  // Get all available integrations
+  router.get('/', (req: Request, res: Response) => {
+    try {
+      const availableIntegrations = [
+        { id: 'quickbooks', name: 'QuickBooks Online', category: 'accounting', icon: '💰' },
+        { id: 'slack', name: 'Slack', category: 'communication', icon: '💬' },
+        { id: 'zapier', name: 'Zapier', category: 'automation', icon: '⚡' },
+        { id: 'gmail', name: 'Gmail', category: 'communication', icon: '📧' },
+        { id: 'drive', name: 'Google Drive', category: 'storage', icon: '📁' },
+        { id: 'dropbox', name: 'Dropbox', category: 'storage', icon: '📦' },
+        { id: 'github', name: 'GitHub', category: 'development', icon: '🔧' }
+      ];
+      
+      res.json({
+        success: true,
+        integrations: availableIntegrations,
+        count: availableIntegrations.length
+      });
+    } catch (error: any) {
+      console.error('List integrations error:', error);
+      res.status(500).json({ error: 'Failed to list integrations' });
+    }
+  });
+
   // Get all integrations for current user
   router.get('/list', (req: Request, res: Response) => {
     try {

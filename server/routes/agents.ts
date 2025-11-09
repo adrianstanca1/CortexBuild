@@ -31,6 +31,32 @@ const router = Router();
 initializeAgentTables(db);
 
 /**
+ * GET /api/agents
+ * Get all agents (root endpoint - alias for marketplace)
+ */
+router.get('/', authenticateToken, (req, res) => {
+  try {
+    const { category, minRating, search } = req.query;
+
+    const agents = getMarketplaceAgents(db, {
+      category: category as string,
+      minRating: minRating ? Number.parseFloat(minRating as string) : undefined,
+      search: search as string
+    });
+
+    res.json({
+      success: true,
+      agents,
+      count: agents.length,
+      message: 'Use /api/agents/marketplace for marketplace-specific features'
+    });
+  } catch (error: any) {
+    console.error('Get agents error:', error);
+    res.status(500).json({ error: 'Failed to fetch agents' });
+  }
+});
+
+/**
  * GET /api/agents/marketplace
  * Get all public agents from marketplace
  */

@@ -291,6 +291,34 @@ router.get('/apps', authenticateToken, requireDeveloper, (req: Request, res: Res
   }
 });
 
+// Get all modules (alias for apps)
+router.get('/modules', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const db = (req as any).db;
+
+    const modules = db.prepare(`
+      SELECT * FROM sdk_apps 
+      WHERE developer_id = ? 
+      ORDER BY created_at DESC
+    `).all(user.id);
+
+    res.json({
+      success: true,
+      modules: modules.map((m: any) => ({
+        ...m,
+        developerId: m.developer_id,
+        companyId: m.company_id,
+        createdAt: m.created_at,
+        updatedAt: m.updated_at
+      }))
+    });
+  } catch (error: any) {
+    console.error('Get modules error:', error);
+    res.status(500).json({ error: 'Failed to get modules' });
+  }
+});
+
 // Save app
 router.post('/apps', authenticateToken, requireDeveloper, (req: Request, res: Response) => {
   try {

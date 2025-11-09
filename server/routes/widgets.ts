@@ -28,6 +28,26 @@ export function createWidgetsRouter(db: Database.Database): Router {
     next();
   };
 
+  // GET /api/widgets - List all available widgets
+  router.get('/', getCurrentUser, (req: Request, res: Response) => {
+    try {
+      const widgets = [
+        { id: 'project-stats', name: 'Project Statistics', type: 'chart' },
+        { id: 'task-list', name: 'Task List', type: 'list' },
+        { id: 'budget-overview', name: 'Budget Overview', type: 'chart' },
+        { id: 'team-activity', name: 'Team Activity', type: 'timeline' },
+        { id: 'ai-insights', name: 'AI Insights', type: 'card' },
+        { id: 'recent-rfis', name: 'Recent RFIs', type: 'list' },
+        { id: 'milestone-tracker', name: 'Milestone Tracker', type: 'progress' }
+      ];
+      
+      res.json({ success: true, data: widgets, count: widgets.length });
+    } catch (error: any) {
+      console.error('List widgets error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // GET /api/widgets/dashboards - Get user's dashboards
   router.get('/dashboards', getCurrentUser, (req: Request, res: Response) => {
     try {
