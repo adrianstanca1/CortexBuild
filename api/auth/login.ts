@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Initialize Supabase client
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cortexbuild-secret-2025';
