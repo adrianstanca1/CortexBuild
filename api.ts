@@ -1909,7 +1909,7 @@ export const hasAgentAccess = async (currentUser: User, agentId: string): Promis
 };
 
 // Subscribe company to an AI agent
-export const subscribeToAgent = async (
+export const subscribeCompanyToAgent = async (
     currentUser: User,
     agentId: string,
     billingCycle: 'monthly' | 'yearly'

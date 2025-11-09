@@ -61,7 +61,7 @@ export function createAdminRouter(db: Database.Database): Router {
 
       const userStats = {
         total: totals.users,
-        active: getCount('SELECT COUNT(*) as count FROM users WHERE is_active = 1'),
+        active: getCount('SELECT COUNT(*) as count FROM users WHERE role IS NOT NULL'),
         newThisWeek: getCount('SELECT COUNT(*) as count FROM users WHERE created_at >= ?', weekAgoIso),
         superAdmins: getCount('SELECT COUNT(*) as count FROM users WHERE role = ?', 'super_admin'),
         developers: getCount('SELECT COUNT(*) as count FROM users WHERE role = ?', 'developer')
@@ -145,31 +145,40 @@ export function createAdminRouter(db: Database.Database): Router {
 
       let recentActivity: any[] = [];
       try {
-        recentActivity = db
-          .prepare(
+        // Check if activities table exists first
+        const tableExists = db.prepare(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='activities'"
+        ).get();
+        
+        if (tableExists) {
+          recentActivity = db
+            .prepare(
+              `
+              SELECT a.id,
+                     a.action,
+                     a.description,
+                     a.created_at,
+                     u.name as user_name,
+                     c.name as company_name
+              FROM activities a
+              LEFT JOIN users u ON u.id = a.user_id
+              LEFT JOIN companies c ON c.id = u.company_id
+              ORDER BY a.created_at DESC
+              LIMIT 10
             `
-            SELECT a.id,
-                   a.action,
-                   a.description,
-                   a.created_at,
-                   u.name as user_name,
-                   c.name as company_name
-            FROM activities a
-            LEFT JOIN users u ON u.id = a.user_id
-            LEFT JOIN companies c ON c.id = u.company_id
-            ORDER BY a.created_at DESC
-            LIMIT 10
-          `
-          )
-          .all()
-          .map((row: any) => ({
-            id: String(row.id),
-            action: row.action,
-            description: row.description,
-            createdAt: row.created_at,
-            userName: row.user_name ?? undefined,
-            companyName: row.company_name ?? undefined
-          }));
+            )
+            .all()
+            .map((row: any) => ({
+              id: String(row.id),
+              action: row.action,
+              description: row.description,
+              createdAt: row.created_at,
+              userName: row.user_name ?? undefined,
+              companyName: row.company_name ?? undefined
+            }));
+        } else {
+          console.warn('[Admin dashboard] activities table does not exist, returning empty array');
+        }
       } catch (activityError) {
         console.warn('[Admin dashboard] recent activity unavailable', activityError);
       }

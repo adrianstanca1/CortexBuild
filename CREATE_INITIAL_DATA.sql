@@ -1,53 +1,119 @@
--- =====================================================
--- CREATE INITIAL DATA FOR ConstructAI
--- Run this after setting up the database schema
--- =====================================================
+-- CortexBuild Initial Data Seed
+-- Ensures baseline companies, users, and SDK integration data exist.
+-- Run this script after applying the schema to populate the minimum viable dataset.
 
--- =====================================================
--- PART 1: CREATE SAMPLE COMPANIES
--- =====================================================
+BEGIN TRANSACTION;
 
-INSERT INTO companies (name, address, phone, email) VALUES
-('ABC Construction LLC', '123 Main St, Anytown, USA', '+1-555-0123', 'info@abcconstruction.com'),
-('BuildCorp Industries', '456 Oak Ave, Springfield, USA', '+1-555-0456', 'contact@buildcorp.com'),
-('Metro Builders Inc', '789 Pine Rd, Rivertown, USA', '+1-555-0789', 'projects@metrobuilder.com')
-ON CONFLICT DO NOTHING;
+-- Companies ---------------------------------------------------------------
+INSERT OR IGNORE INTO companies (id, name, industry, size, city, state, country)
+VALUES
+    (1, 'ConstructCo', 'Commercial Construction', '500+', 'San Francisco', 'CA', 'US'),
+    (2, 'Metro Builders', 'Residential Construction', '200+', 'Austin', 'TX', 'US');
 
--- =====================================================
--- PART 2: CREATE SAMPLE USERS (in auth.users)
--- Note: These would normally be created through registration,
--- but for demo purposes, we'll assume they exist.
--- In a real scenario, create users in Supabase Auth dashboard first.
--- =====================================================
+-- Password hashes generated with bcrypt (cost 10)
+INSERT OR IGNORE INTO users (
+    id, email, password, first_name, last_name, phone, role, company_id, is_active, email_verified
+) VALUES
+    (1, 'adrian.stanca1@gmail.com', '$2b$10$9XRnZE4YllqnMQ9rzno3BuwVXt0zOxsJ5cdpgiosgeGF8slxrwva2', 'Adrian', 'Stanca', '+1-555-0100', 'super_admin', 1, 1, 1),
+    (2, 'adrian@ascladdingltd.co.uk', '$2b$10$YlCeQTdkB5cyjGvGgsSjBO8UG5uI/f7NWZP29WOKfdiqcupxPG44W', 'Adrian', 'Cladding', '+44-20-5550-1020', 'company_admin', 2, 1, 1),
+    (3, 'dev@constructco.com', '$2b$10$AK62gIQ9xOQkhQc4MbHnAOj/9zhw/oMdgDbw1wwiaTEutvp4Ocki.', 'Dana', 'Builder', '+1-555-0200', 'developer', 1, 1, 1);
 
--- For demo purposes, we'll use placeholder UUIDs
--- In reality, these would be the actual auth.users IDs
+-- SDK Profiles ------------------------------------------------------------
+INSERT OR IGNORE INTO sdk_profiles (
+    id, user_id, subscription_tier, api_requests_used, api_requests_limit, gemini_api_key
+) VALUES
+    ('sdk-profile-superadmin', 1, 'enterprise', 2450, 100000, 'enc::superadmin-gemini-key'),
+    ('sdk-profile-dev-primary', 2, 'pro', 1250, 10000, 'enc::developer-gemini-key');
 
--- =====================================================
--- PART 3: CREATE SAMPLE PROFILES
--- =====================================================
+-- API Keys ----------------------------------------------------------------
+INSERT OR IGNORE INTO api_keys (
+    id, user_id, name, key_hash, key_prefix, scopes, is_active
+) VALUES
+    (1, 2, 'Primary SDK Key', '$2a$10$H5nB2G7KZf4E0Pp9z0VSb.vr1VbVbQhYpbx8b9rh0lYUFgA8wyTgC', 'sdk_dev_01', '["sdk:read","sdk:write","sandbox:run"]', 1);
 
--- Get company IDs for reference
-DO $$
-DECLARE
-    abc_company_id UUID;
-    buildcorp_company_id UUID;
-    metro_company_id UUID;
-BEGIN
-    SELECT id INTO abc_company_id FROM companies WHERE name = 'ABC Construction LLC' LIMIT 1;
-    SELECT id INTO buildcorp_company_id FROM companies WHERE name = 'BuildCorp Industries' LIMIT 1;
-    SELECT id INTO metro_company_id FROM companies WHERE name = 'Metro Builders Inc' LIMIT 1;
+-- SDK Apps ----------------------------------------------------------------
+INSERT OR IGNORE INTO sdk_apps (
+    id, developer_id, company_id, name, description, version, status, code
+) VALUES
+    ('sdk-app-smart-scheduler', 2, 1, 'Smart Scheduler', 'AI-assisted scheduling assistant for field crews.', '1.2.0', 'approved', '// Smart Scheduler core implementation');
 
-    -- Insert sample profiles (these would normally be created by triggers)
-    -- Note: In production, these are created automatically when users register
-    INSERT INTO profiles (id, name, email, role, company_id) VALUES
-    ('550e8400-e29b-41d4-a716-446655440000', 'John Smith', 'john@abcconstruction.com', 'project_manager', abc_company_id),
-    ('550e8400-e29b-41d4-a716-446655440001', 'Sarah Johnson', 'sarah@abcconstruction.com', 'supervisor', abc_company_id),
-    ('550e8400-e29b-41d4-a716-446655440002', 'Mike Davis', 'mike@buildcorp.com', 'company_admin', buildcorp_company_id),
-    ('550e8400-e29b-41d4-a716-446655440003', 'Lisa Chen', 'lisa@metrobuilder.com', 'operative', metro_company_id),
-    ('550e8400-e29b-41d4-a716-446655440004', 'Tom Wilson', 'tom@metrobuilder.com', 'foreman', metro_company_id)
-    ON CONFLICT (id) DO NOTHING;
-END $$;
+-- SDK Workflows -----------------------------------------------------------
+INSERT OR IGNORE INTO sdk_workflows (
+    id, developer_id, company_id, name, definition, is_active
+) VALUES
+    ('sdk-workflow-rfi-digest', 2, 1, 'Morning RFI Digest',
+     '{"nodes":[{"id":"trigger","type":"trigger","name":"6am schedule","config":{"cron":"0 6 * * *"}},{"id":"aggregate","type":"action","name":"Aggregate RFIs","config":{"source":"projects"}},{"id":"notify","type":"action","name":"Notify PM","config":{"channel":"email"}}],"connections":[{"id":"c1","source":"trigger","target":"aggregate"},{"id":"c2","source":"aggregate","target":"notify"}]}',
+     1);
+
+-- Builder Modules ---------------------------------------------------------
+INSERT OR IGNORE INTO builder_modules (
+    id, user_id, company_id, name, description, version, status, manifest
+) VALUES
+    ('builder-module-safety-audit', 2, 1, 'Safety Audit Automation', 'Automates safety inspection summaries and alerts.', '1.0.3', 'published',
+     '{"nodes":[{"id":"start","type":"trigger","name":"Inspection Completed","config":{"event":"inspection.completed"}},{"id":"summarise","type":"action","name":"Summarise Report","config":{"provider":"openai"}},{"id":"notify","type":"action","name":"Notify Safety Lead","config":{"channel":"slack"}}],"connections":[{"id":"c1","source":"start","target":"summarise"},{"id":"c2","source":"summarise","target":"notify"}],"metadata":{"testPayload":{"inspectionId":"insp-001"}}}');
+
+-- Sandbox Runs ------------------------------------------------------------
+INSERT OR IGNORE INTO sandbox_runs (
+    id, user_id, company_id, name, definition, result, status, duration_ms, input_payload
+) VALUES
+    ('sandbox-run-demo-1', 2, 1, 'Smart Scheduler QA',
+     '{"appId":"sdk-app-smart-scheduler"}',
+     '{"executedAt":"2025-01-15T14:05:00.000Z","result":"Simulation completed successfully","logs":["Sandbox initialised","Module executed","Summary generated"]}',
+     'completed', 1842,
+     '{"projectId":"proj-001","forecastDays":7}');
+
+-- Developer Console Events -------------------------------------------------
+INSERT OR IGNORE INTO developer_console_events (
+    id, user_id, company_id, event_type, payload
+) VALUES
+    ('dev-event-1', 2, 1, 'sandbox.run', '{"result":"completed","durationMs":1842}'),
+    ('dev-event-2', 2, 1, 'modules.publish', '{"appId":"sdk-app-smart-scheduler","newStatus":"approved"}');
+
+-- API Usage Logs ----------------------------------------------------------
+INSERT OR IGNORE INTO api_usage_logs (
+    id, user_id, provider, model, prompt_tokens, completion_tokens, total_tokens, cost
+) VALUES
+    ('usage-log-1', 2, 'openai', 'gpt-4o-mini', 1200, 800, 2000, 3.60);
+
+-- AI Agents ---------------------------------------------------------------
+INSERT OR IGNORE INTO ai_agents (
+    id, slug, company_id, developer_id, name, description, status, is_global, tags, capabilities, config
+) VALUES
+    ('agent-site-monitor', 'site-monitor', 1, 2, 'Site Monitor Agent', 'Observes site activity logs and flags anomalies.', 'running', 0,
+     '["safety","monitoring"]', '{"canEscalate":true}', '{"inputs":["siteLogs"],"outputs":["alerts"]}');
+
+-- Agent Subscriptions -----------------------------------------------------
+INSERT OR IGNORE INTO agent_subscriptions (
+    id, company_id, agent_id, status, seats
+) VALUES
+    ('agent-subscription-1', 1, 'agent-site-monitor', 'active', 15);
+
+-- Agent Executions --------------------------------------------------------
+INSERT OR IGNORE INTO agent_executions (
+    id, agent_id, company_id, triggered_by, input_payload, output_payload, status, duration_ms
+) VALUES
+    ('agent-exec-1', 'agent-site-monitor', 1, 'dev@constructco.com', '{"site":"Tower-A"}', '{"alerts":0}', 'completed', 642);
+
+-- Sandbox Environments ----------------------------------------------------
+INSERT OR IGNORE INTO sandbox_environments (
+    id, user_id, name, description, config, is_active
+) VALUES
+    (1, 2, 'Developer Sandbox', 'Primary SDK testing environment.', '{"region":"us-west","features":["sdk","automation","agents"]}', 1);
+
+-- Webhooks ----------------------------------------------------------------
+INSERT OR IGNORE INTO webhooks (
+    id, user_id, company_id, name, url, events, secret, is_active, success_count, failure_count
+) VALUES
+    (1, 2, 1, 'Sandbox Events Hook', 'https://hooks.constructco.com/sandbox', '["sandbox.run","modules.publish"]', 'whsec_demo_123', 1, 42, 1);
+
+-- Webhook Logs ------------------------------------------------------------
+INSERT OR IGNORE INTO webhook_logs (
+    id, webhook_id, status_code, response_ms, error_message
+) VALUES
+    (1, 1, 200, 350, NULL),
+    (2, 1, 500, 420, 'Timeout while delivering payload');
+
+COMMIT;
 
 -- =====================================================
 -- PART 4: CREATE SAMPLE PROJECTS

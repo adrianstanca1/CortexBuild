@@ -1,5 +1,12 @@
+/* global HTMLInputElement, HTMLDivElement, localStorage, navigator */
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Play, Trash2, Download, Copy, Check } from 'lucide-react';
+import {
+  DEMO_SDK_APPS,
+  DEMO_WORKFLOW_PRESETS,
+  findDemoSdkApp,
+  findDemoWorkflow
+} from './demoData';
 
 interface ConsoleOutput {
   id: string;
@@ -75,7 +82,11 @@ export const DeveloperConsole: React.FC = () => {
   npm list          - List installed packages
   deploy <env>      - Deploy to environment
   logs <service>    - View service logs
-  env               - Show environment variables`,
+  env               - Show environment variables
+  workflow list     - Show demo workflow presets
+  workflow run <id> - Simulate workflow run in sandbox
+  app list          - Show demo SDK sandbox apps
+  app run <id>      - Launch demo SDK sandbox app`,
           timestamp: new Date()
         });
       } else if (command === 'clear') {
@@ -94,15 +105,25 @@ export const DeveloperConsole: React.FC = () => {
         await executeGitStatus();
       } else if (command === 'env') {
         await executeEnv();
+      } else if (command === 'workflow list') {
+        await listDemoWorkflows();
+      } else if (command.startsWith('workflow run')) {
+        const [, , workflowIdRaw] = command.split(' ');
+        await runDemoWorkflow(workflowIdRaw);
+      } else if (command === 'app list') {
+        await listDemoApps();
+      } else if (command.startsWith('app run')) {
+        const [, , appIdRaw] = command.split(' ');
+        await runDemoApp(appIdRaw);
       } else {
         // Send to backend for execution
         await executeRemoteCommand(command);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       addOutput({
         id: Date.now().toString(),
         type: 'error',
-        content: `Error: ${error.message}`,
+        content: `Error: ${error instanceof Error ? error.message : 'Unexpected error'}`,
         timestamp: new Date()
       });
     } finally {
@@ -116,13 +137,15 @@ export const DeveloperConsole: React.FC = () => {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await response.json();
-    
+
     if (data.success) {
-      const endpoints = data.endpoints || [];
+      const endpoints: Array<{ method: string; path: string }> = data.endpoints || [];
       addOutput({
         id: Date.now().toString(),
         type: 'output',
-        content: `API Endpoints (${endpoints.length}):\n${endpoints.map((e: any) => `  ${e.method.padEnd(6)} ${e.path}`).join('\n')}`,
+        content: `API Endpoints (${endpoints.length}):\n${endpoints
+          .map((endpoint) => `  ${endpoint.method.padEnd(6)} ${endpoint.path}`)
+          .join('\n')}`,
         timestamp: new Date()
       });
     }
@@ -205,6 +228,133 @@ export const DeveloperConsole: React.FC = () => {
       id: Date.now().toString(),
       type: 'output',
       content: `Environment Variables:\n  NODE_ENV=development\n  PORT=3001\n  DATABASE_URL=sqlite:./database.db`,
+      timestamp: new Date()
+    });
+  };
+
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const listDemoWorkflows = async () => {
+    const content = DEMO_WORKFLOW_PRESETS.map((workflow) => `  ${workflow.id.padEnd(20)} ${workflow.name}`).join('\n');
+    addOutput({
+      id: Date.now().toString(),
+      type: 'output',
+      content: `Demo Workflows (${DEMO_WORKFLOW_PRESETS.length}):\n${content}`,
+      timestamp: new Date()
+    });
+  };
+
+  const runDemoWorkflow = async (workflowIdRaw?: string) => {
+    const workflowId = workflowIdRaw?.trim();
+    if (!workflowId) {
+      addOutput({
+        id: Date.now().toString(),
+        type: 'error',
+        content: 'Usage: workflow run <workflow-id>. Try "workflow list" to see available presets.',
+        timestamp: new Date()
+      });
+      return;
+    }
+
+    const workflow = findDemoWorkflow(workflowId);
+    if (!workflow) {
+      addOutput({
+        id: Date.now().toString(),
+        type: 'error',
+        content: `Unknown workflow "${workflowId}". Try "workflow list" to see available presets.`,
+        timestamp: new Date()
+      });
+      return;
+    }
+
+    addOutput({
+      id: Date.now().toString(),
+      type: 'output',
+      content: `▶️  Executing ${workflow.name} (${workflow.category})…`,
+      timestamp: new Date()
+    });
+
+    for (const step of workflow.steps) {
+      await delay(250);
+      addOutput({
+        id: Date.now().toString(),
+        type: 'output',
+        content: ` • ${step}`,
+        timestamp: new Date()
+      });
+    }
+
+    await delay(250);
+    addOutput({
+      id: Date.now().toString(),
+      type: 'success',
+      content: `✅ ${workflow.resultSummary}`,
+      timestamp: new Date()
+    });
+
+    addOutput({
+      id: Date.now().toString(),
+      type: 'output',
+      content: `Payload: ${JSON.stringify(workflow.payload, null, 2)}`,
+      timestamp: new Date()
+    });
+  };
+
+  const listDemoApps = async () => {
+    const content = DEMO_SDK_APPS.map((app) => `  ${app.id.padEnd(24)} ${app.name}`).join('\n');
+    addOutput({
+      id: Date.now().toString(),
+      type: 'output',
+      content: `Demo SDK Apps (${DEMO_SDK_APPS.length}):\n${content}`,
+      timestamp: new Date()
+    });
+  };
+
+  const runDemoApp = async (appIdRaw?: string) => {
+    const appId = appIdRaw?.trim();
+    if (!appId) {
+      addOutput({
+        id: Date.now().toString(),
+        type: 'error',
+        content: 'Usage: app run <app-id>. Try "app list" to see available sandbox apps.',
+        timestamp: new Date()
+      });
+      return;
+    }
+
+    const app = findDemoSdkApp(appId);
+    if (!app) {
+      addOutput({
+        id: Date.now().toString(),
+        type: 'error',
+        content: `Unknown SDK app "${appId}". Try "app list" for options.`,
+        timestamp: new Date()
+      });
+      return;
+    }
+
+    addOutput({
+      id: Date.now().toString(),
+      type: 'output',
+      content: `🚀 Launching ${app.name} (${app.category})…`,
+      timestamp: new Date()
+    });
+
+    for (const logLine of app.logs) {
+      await delay(220);
+      addOutput({
+        id: Date.now().toString(),
+        type: 'output',
+        content: `   ${logLine}`,
+        timestamp: new Date()
+      });
+    }
+
+    await delay(220);
+    addOutput({
+      id: Date.now().toString(),
+      type: 'success',
+      content: `${app.name} ready. Use "workflow run <id>" to trigger a preset.`,
       timestamp: new Date()
     });
   };
@@ -316,11 +466,7 @@ export const DeveloperConsole: React.FC = () => {
       </div>
 
       {/* Output Area */}
-      <div
-        ref={outputRef}
-        className="h-[500px] overflow-y-auto p-4 font-mono text-sm"
-        style={{ fontFamily: 'Fira Code, JetBrains Mono, monospace' }}
-      >
+      <div ref={outputRef} className="h-[500px] overflow-y-auto p-4 font-mono text-sm">
         {output.map(item => (
           <div key={item.id} className="mb-2">
             {item.type === 'command' && (
@@ -353,7 +499,6 @@ export const DeveloperConsole: React.FC = () => {
           onKeyDown={handleKeyDown}
           placeholder="Type a command... (try 'help')"
           className="flex-1 bg-transparent text-gray-300 outline-none font-mono"
-          style={{ fontFamily: 'Fira Code, JetBrains Mono, monospace' }}
           disabled={isExecuting}
         />
         <button
@@ -361,6 +506,7 @@ export const DeveloperConsole: React.FC = () => {
           onClick={() => executeCommand(input)}
           disabled={isExecuting || !input.trim()}
           className="p-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded transition-colors"
+          aria-label="Execute command"
         >
           <Play className="w-4 h-4 text-white" />
         </button>

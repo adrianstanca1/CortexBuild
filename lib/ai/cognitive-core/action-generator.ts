@@ -6,7 +6,6 @@
 import type {
     RootCauseHypothesis,
     StrategicAction,
-    ActionPriority,
 } from './types';
 
 export class ActionGenerator {

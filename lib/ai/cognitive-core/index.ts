@@ -204,7 +204,7 @@ export class CognitiveCore {
     /**
      * Get cognitive insights for dashboard
      */
-    async getInsights(projectId: string): Promise<{
+    async getInsights(_projectId: string): Promise<{
         activePatterns: DetectedPattern[];
         activeHypotheses: RootCauseHypothesis[];
         riskSummary: {

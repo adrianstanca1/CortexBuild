@@ -131,15 +131,18 @@ export function createMilestonesRouter(db: Database.Database): Router {
       const {
         project_id,
         title,
+        name: nameFromBody,
         description,
         due_date,
         status = 'pending'
       } = req.body;
 
-      if (!project_id || !title || !due_date) {
+      const milestoneName = nameFromBody ?? title;
+
+      if (!project_id || !milestoneName || !due_date) {
         return res.status(400).json({
           success: false,
-          error: 'Project ID, title, and due date are required'
+          error: 'Project ID, name/title, and due date are required'
         });
       }
 
@@ -147,7 +150,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
         INSERT INTO milestones (
           project_id, name, description, due_date, status
         ) VALUES (?, ?, ?, ?, ?)
-      `).run(project_id, name, description, due_date, status);
+      `).run(project_id, milestoneName, description, due_date, status);
 
       const milestone = db.prepare('SELECT * FROM milestones WHERE id = ?').get(result.lastInsertRowid);
 
@@ -161,7 +164,7 @@ export function createMilestonesRouter(db: Database.Database): Router {
         'milestone',
         result.lastInsertRowid,
         'created',
-        `Created milestone: ${title}`
+  `Created milestone: ${milestoneName}`
       );
 
       res.status(201).json({

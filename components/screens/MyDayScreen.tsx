@@ -34,7 +34,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
                 api.fetchTasksForUser(currentUser),
                 api.fetchSiteInstructions()
             ]);
-            
+
             const filteredTasks = allTasks.filter(task => task.projectId === project.id && (task.assignee === currentUser.name || task.targetRoles?.includes(currentUser.role)));
             setMyTasks(filteredTasks);
             setInstructions(siteInstructions);
@@ -46,7 +46,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
         };
         loadData();
     }, [currentUser, project.id]);
-    
+
     const handleRefreshInsights = async () => {
         setIsInsightsRefreshing(true);
         const aiInsights = await api.getAIInsightsForMyDay(myTasks, project, weatherData);
@@ -83,7 +83,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
         <div className="flex flex-col h-full">
             {/* Header */}
             <header className="bg-white p-4 flex items-center border-b mb-8">
-                 <button onClick={goBack} className="mr-4 p-2 rounded-full hover:bg-gray-100">
+                <button onClick={goBack} className="mr-4 p-2 rounded-full hover:bg-gray-100">
                     <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
                 </button>
                 <div>
@@ -93,7 +93,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
             </header>
 
             <main className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8">
-                 {/* Main Column */}
+                {/* Main Column */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* AI Suggested Actions Widget */}
                     <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-6 transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
@@ -148,9 +148,9 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
                     )}
                 </div>
 
-                 {/* Sidebar Column */}
+                {/* Sidebar Column */}
                 <div className="lg:col-span-1 space-y-8">
-                     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                         <h2 className="font-bold text-lg text-gray-800 mb-3">Daily Summary</h2>
                         <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 mb-4">
                             <SunIcon className="w-8 h-8 text-yellow-500" />
@@ -160,7 +160,7 @@ const MyDayScreen: React.FC<MyDayScreenProps> = ({ project, navigateTo, goBack, 
                             </div>
                         </div>
                         <p className="text-sm text-gray-600 mb-2">You haven't submitted your log for today.</p>
-                        <button 
+                        <button
                             onClick={() => navigateTo('daily-log')}
                             className="w-full px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 text-sm"
                         >

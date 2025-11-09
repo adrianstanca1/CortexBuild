@@ -2,12 +2,11 @@ import React from 'react';
 import { User, Screen, PermissionAction, PermissionSubject } from '../../types.ts';
 import PlatformAdminScreen from './admin/PlatformAdminScreen.tsx';
 import SuperAdminDashboardScreen from './admin/SuperAdminDashboardScreen.tsx';
-import CompanyAdminDashboard from './dashboards/CompanyAdminDashboard.tsx';
-import CompanyAdminDashboardNew from './dashboards/CompanyAdminDashboardNew.tsx';
 import SupervisorDashboard from './dashboards/SupervisorDashboard.tsx';
 import OperativeDashboard from './dashboards/OperativeDashboard.tsx';
 import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard.tsx';
-import DeveloperDashboardScreen from './developer/DeveloperDashboardScreen.tsx';
+import DeveloperDashboard from './dashboards/DeveloperDashboard.tsx';
+import ProjectManagerDashboard from './dashboards/ProjectManagerDashboard.tsx';
 
 
 interface UnifiedDashboardScreenProps {
@@ -60,12 +59,16 @@ const UnifiedDashboardScreen: React.FC<UnifiedDashboardScreenProps> = (props) =>
             );
 
         case 'developer':
-            return <DeveloperDashboardScreen currentUser={currentUser} navigateTo={props.navigateTo} />;
+            // Note: Developers are caught in App.tsx and redirected to DeveloperPlatform
+            // This fallback should never be reached, but keeping for safety
+            return <DeveloperDashboard currentUser={currentUser} navigateTo={props.navigateTo} />;
 
         case 'company_admin':
-        case 'Project Manager':
         case 'Accounting Clerk':
             return <EnhancedDashboard />;
+
+        case 'Project Manager':
+            return <ProjectManagerDashboard currentUser={currentUser} navigateTo={props.navigateTo} />;
 
         case 'Foreman':
         case 'Safety Officer':

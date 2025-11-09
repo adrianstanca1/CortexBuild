@@ -369,17 +369,6 @@
             font-weight: 600;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // These would be set by your build/deployment environment.
-        // In a real app, these should be secured.
-        // IMPORTANT: Replace with your actual Supabase project URL and anon key.
-        var __supabase_url = 'https://jkpeuejmhlccnpyorxfz.supabase.co';
-        var __supabase_anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprcGV1ZWptaGxjY25weW9yeGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NjkyNDcsImV4cCI6MjA3NTM0NTI0N30.vPLMIfL5rfWdoNealtviBQRfrPuSLq9siPs23oiV9FE';
-
-        // Firebase config for demo form - replace with your actual Firebase config
-        var __firebase_config = undefined; // Set to valid Firebase config JSON string when needed
-    </script>
     <script type="importmap">
 {
   "imports": {
@@ -387,8 +376,7 @@
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/+esm"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
   }
 }
 </script>
@@ -446,7 +434,9 @@
                     </nav>
                     <div class="flex items-center space-x-3">
                         <button id="auth-button"
-                            class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center"></button>
+                            class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center">
+                            Login
+                        </button>
                         <button id="logout-button"
                             class="hidden bg-red-600 text-white font-bold py-2 px-4 rounded-md hover:bg-red-700 transition-colors text-sm flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -1675,32 +1665,6 @@
 
     <script type="module" src="/index.tsx"></script>
     <script type="module">
-        import { createClient } from "@supabase/supabase-js";
-
-        let supabaseClient;
-
-        async function initializeSupabase() {
-            try {
-                // Check if a Supabase client already exists to avoid multiple instances
-                if (window.supabaseClient) {
-                    supabaseClient = window.supabaseClient;
-                    console.log('Using existing Supabase client for demo form');
-                    return;
-                }
-
-                if (typeof __supabase_url === 'undefined' || !__supabase_url || __supabase_url === 'YOUR_SUPABASE_URL' ||
-                    typeof __supabase_anon_key === 'undefined' || !__supabase_anon_key || __supabase_anon_key === 'YOUR_SUPABASE_ANON_KEY') {
-                    console.warn('Supabase not configured. Demo form submissions will not work.');
-                    return;
-                }
-                supabaseClient = createClient(__supabase_url, __supabase_anon_key);
-                window.supabaseClient = supabaseClient; // Store globally to avoid duplicates
-                console.log('Supabase client initialized for demo form');
-            } catch (error) {
-                console.error("Supabase initialization failed:", error);
-            }
-        }
-
         const featuresData = [
             // Core Platform Features
             { name: 'Project Management', category: 'project', icon: '🏗️', status: 'active', description: 'Complete project lifecycle management with task tracking, milestones, and team collaboration.', improvement: 'AI-powered project insights predict delays and suggest optimizations.' },
@@ -1745,8 +1709,6 @@
             // AI Tools
             { name: 'AI Chatbot Assistant', category: 'business', icon: '🤖', status: 'in-progress', description: 'Conversational AI assistant for platform navigation and insights.', improvement: 'Natural language interface for all platform features.' },
             { name: 'Document Analysis', category: 'business', icon: '📄', status: 'in-progress', description: 'AI-powered document parsing and information extraction.', improvement: 'Automatic extraction of key data from contracts and plans.' },
-            { name: 'Predictive Analytics', category: 'business', icon: '🔮', status: 'in-progress', description: 'ML models for project outcome prediction.', improvement: 'Forecast project success and identify risks early.' },
-            { name: 'Smart Scheduling', category: 'project', icon: '🗓️', status: 'in-progress', description: 'AI-optimized resource scheduling and allocation.', improvement: 'Dynamic schedule optimization based on constraints.' },
             { name: 'Risk Assessment', category: 'business', icon: '⚠️', status: 'in-progress', description: 'Automated risk identification and mitigation.', improvement: 'Proactive risk alerts with suggested actions.' },
             { name: 'Cost Estimation', category: 'financial', icon: '🧮', status: 'in-progress', description: 'AI-powered project cost estimation.', improvement: 'Historical data analysis for accurate estimates.' },
 
@@ -2284,33 +2246,34 @@
             const submitBtn = form.querySelector('button[type="submit"]');
             const feedbackEl = document.getElementById('form-feedback');
 
-            if (!supabaseClient) {
-                feedbackEl.textContent = 'Database not connected. Please try again later.';
-                feedbackEl.className = 'text-sm text-center mt-4 text-red-600';
-                return;
-            }
-
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
             feedbackEl.textContent = '';
 
             try {
-                const { error } = await supabaseClient
-                    .from('demo_requests')
-                    .insert({
+                // Send demo request to backend API
+                const response = await fetch('/api/demo-requests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
                         name: form.name.value,
                         email: form.email.value,
                         company: form.company.value,
                         submitted_at: new Date().toISOString()
-                    });
+                    })
+                });
 
-                if (error) throw error;
+                if (!response.ok) {
+                    throw new Error('Failed to submit demo request');
+                }
 
                 feedbackEl.textContent = 'Thank you! We will be in touch shortly.';
                 feedbackEl.className = 'text-sm text-center mt-4 text-green-600';
                 form.reset();
             } catch (error) {
-                console.error("Error adding document: ", error);
+                console.error("Error submitting demo request:", error);
                 feedbackEl.textContent = 'An error occurred. Please try again.';
                 feedbackEl.className = 'text-sm text-center mt-4 text-red-600';
             } finally {
@@ -2345,8 +2308,8 @@
             observer.observe(aiCoreSection);
         }
 
-        initializeSupabase();
-        handleLogoutUI(); // Ensure initial state is logged out
+        // CortexBuild uses better-sqlite3 database with JWT authentication
+        // No external services needed - all authentication handled by Express backend
     </script>
 </body>
 

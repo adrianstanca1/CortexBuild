@@ -1,4 +1,3 @@
-
 // Fix: Broke circular dependency by defining UserRole, PermissionSubject, and PermissionAction types directly in this file.
 export type UserRole = 
     | 'super_admin'
@@ -29,7 +28,6 @@ export type PermissionAction =
     | 'update'
     | 'delete'
     | 'approve';
-
 
 export interface User {
     id: string;
@@ -110,11 +108,15 @@ export type Screen =
     | 'financial-management'
     | 'business-development'
     | 'ai-agents-marketplace'
-    | 'developer-dashboard'
     | 'super-admin-dashboard'
-    | 'sdk-developer'
+    | 'super-admin-dashboard-new'
+    | 'my-apps-desktop'
     // Admin screens
     | 'platform-admin'
+    | 'company-admin-dashboard-new'
+    // Developer screens
+    | 'developer-dashboard'
+    | 'sdk-developer'
     // ML & Advanced Analytics
     | 'ml-analytics'
     // Tool screens

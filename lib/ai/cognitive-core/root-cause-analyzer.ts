@@ -8,8 +8,7 @@ import type {
     CrossAgentQuery,
     CrossAgentResponse,
     RootCauseHypothesis,
-    AgentType,
-    RiskLevel
+    AgentType
 } from './types';
 
 export class RootCauseAnalyzer {

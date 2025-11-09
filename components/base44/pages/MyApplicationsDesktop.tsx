@@ -1,5 +1,7 @@
+/* global localStorage */
 import React, { useState, useEffect } from 'react';
 import { Monitor, Maximize2, Minimize2, X, ExternalLink, Package, Grid3x3, List } from 'lucide-react';
+import { DEMO_SDK_APPS } from '../../developer/demoData';
 
 interface MarketplaceApp {
   id: string;
@@ -17,14 +19,12 @@ interface RunningApp {
   app: MarketplaceApp;
   isMaximized: boolean;
   isMinimized: boolean;
-  zIndex: number;
 }
 
 export const MyApplicationsDesktop: React.FC = () => {
   const [installedApps, setInstalledApps] = useState<MarketplaceApp[]>([]);
   const [runningApps, setRunningApps] = useState<RunningApp[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [maxZIndex, setMaxZIndex] = useState(100);
 
   useEffect(() => {
     fetchInstalledApps();
@@ -37,7 +37,7 @@ export const MyApplicationsDesktop: React.FC = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setInstalledApps(data.modules || []);
       }
@@ -46,11 +46,21 @@ export const MyApplicationsDesktop: React.FC = () => {
       // Set demo apps for testing
       setInstalledApps([
         { id: '1', name: 'Project Manager', icon: '🏗️', description: 'Manage your construction projects', installed: true, category: 'productivity', color: 'blue', url: '/projects' },
-        { id: '2', name: 'Time Tracker', icon: '⏱️', description: 'Track time and attendance', installed: true, category: 'productivity', color: 'green', url: '/timetracking' },
+        { id: '2', name: 'Time Tracker', icon: '⏱️', description: 'Track time and attendance', installed: true, category: 'productivity', color: 'green', url: '/time-tracking' },
         { id: '3', name: 'Invoice Generator', icon: '💰', description: 'Create and manage invoices', installed: true, category: 'finance', color: 'purple', url: '/invoices' },
         { id: '4', name: 'Document Manager', icon: '📄', description: 'Organize project documents', installed: true, category: 'productivity', color: 'orange', url: '/documents' },
         { id: '5', name: 'RFI System', icon: '❓', description: 'Request for Information management', installed: true, category: 'communication', color: 'red', url: '/rfis' },
         { id: '6', name: 'Analytics Dashboard', icon: '📊', description: 'View project analytics', installed: true, category: 'analytics', color: 'indigo', url: '/reports' },
+        {
+          id: 'sandbox-orchestrator',
+          name: DEMO_SDK_APPS[0]?.name || 'Sandbox Orchestrator',
+          icon: DEMO_SDK_APPS[0]?.icon || '🧪',
+          description: DEMO_SDK_APPS[0]?.description || 'Launch developer sandbox runs and workflow presets',
+          installed: true,
+          category: 'developer',
+          color: 'green',
+          url: '/developer?tab=console'
+        },
       ]);
     }
   };
@@ -59,13 +69,10 @@ export const MyApplicationsDesktop: React.FC = () => {
     // Check if app is already running
     const existing = runningApps.find(ra => ra.app.id === app.id);
     if (existing) {
-      // Bring to front and restore if minimized
-      setRunningApps(prev => prev.map(ra => 
-        ra.id === existing.id 
-          ? { ...ra, isMinimized: false, zIndex: maxZIndex + 1 }
-          : ra
-      ));
-      setMaxZIndex(prev => prev + 1);
+      setRunningApps(prev => {
+        const withoutExisting = prev.filter(ra => ra.id !== existing.id);
+        return [...withoutExisting, { ...existing, isMinimized: false }];
+      });
       return;
     }
 
@@ -75,11 +82,9 @@ export const MyApplicationsDesktop: React.FC = () => {
       app,
       isMaximized: false,
       isMinimized: false,
-      zIndex: maxZIndex + 1
     };
 
     setRunningApps(prev => [...prev, newRunningApp]);
-    setMaxZIndex(prev => prev + 1);
   };
 
   const closeApp = (runningAppId: string) => {
@@ -99,10 +104,14 @@ export const MyApplicationsDesktop: React.FC = () => {
   };
 
   const bringToFront = (runningAppId: string) => {
-    setRunningApps(prev => prev.map(ra =>
-      ra.id === runningAppId ? { ...ra, zIndex: maxZIndex + 1 } : ra
-    ));
-    setMaxZIndex(prev => prev + 1);
+    setRunningApps(prev => {
+      const target = prev.find(ra => ra.id === runningAppId);
+      if (!target) {
+        return prev;
+      }
+      const others = prev.filter(ra => ra.id !== runningAppId);
+      return [...others, target];
+    });
   };
 
   const getColorClasses = (color: string) => {
@@ -133,18 +142,22 @@ export const MyApplicationsDesktop: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              aria-label="Switch to grid view"
+              title="Grid view"
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'grid' ? 'bg-white bg-opacity-20 text-white' : 'text-gray-300 hover:bg-white hover:bg-opacity-10'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white bg-opacity-20 text-white' : 'text-gray-300 hover:bg-white hover:bg-opacity-10'
+                }`}
             >
               <Grid3x3 className="w-5 h-5" />
             </button>
             <button
+              type="button"
+              aria-label="Switch to list view"
+              title="List view"
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'list' ? 'bg-white bg-opacity-20 text-white' : 'text-gray-300 hover:bg-white hover:bg-opacity-10'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white bg-opacity-20 text-white' : 'text-gray-300 hover:bg-white hover:bg-opacity-10'
+                }`}
             >
               <List className="w-5 h-5" />
             </button>
@@ -204,6 +217,7 @@ export const MyApplicationsDesktop: React.FC = () => {
         <div className="flex items-center gap-2">
           {runningApps.filter(ra => !ra.isMinimized).map(ra => (
             <button
+              type="button"
               key={ra.id}
               onClick={() => bringToFront(ra.id)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors"
@@ -214,6 +228,7 @@ export const MyApplicationsDesktop: React.FC = () => {
           ))}
           {runningApps.filter(ra => ra.isMinimized).map(ra => (
             <button
+              type="button"
               key={ra.id}
               onClick={() => toggleMinimize(ra.id)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors opacity-60"
@@ -229,10 +244,8 @@ export const MyApplicationsDesktop: React.FC = () => {
       {runningApps.map(ra => !ra.isMinimized && (
         <div
           key={ra.id}
-          className={`absolute bg-white rounded-lg shadow-2xl overflow-hidden transition-all ${
-            ra.isMaximized ? 'inset-4' : 'top-20 left-20 w-[800px] h-[600px]'
-          }`}
-          style={{ zIndex: ra.zIndex }}
+          className={`absolute bg-white rounded-lg shadow-2xl overflow-hidden transition-all ${ra.isMaximized ? 'inset-4' : 'top-20 left-20 w-[800px] h-[600px]'
+            }`}
           onClick={() => bringToFront(ra.id)}
         >
           {/* Window Title Bar */}
@@ -243,20 +256,29 @@ export const MyApplicationsDesktop: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); toggleMinimize(ra.id); }}
                 className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+                aria-label="Minimize window"
+                title="Minimize"
               >
                 <Minimize2 className="w-4 h-4 text-white" />
               </button>
               <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); toggleMaximize(ra.id); }}
                 className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+                aria-label={ra.isMaximized ? 'Restore window' : 'Maximize window'}
+                title={ra.isMaximized ? 'Restore' : 'Maximize'}
               >
                 <Maximize2 className="w-4 h-4 text-white" />
               </button>
               <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); closeApp(ra.id); }}
                 className="p-1 hover:bg-red-500 rounded transition-colors"
+                aria-label="Close window"
+                title="Close"
               >
                 <X className="w-4 h-4 text-white" />
               </button>

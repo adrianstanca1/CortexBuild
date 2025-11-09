@@ -3,7 +3,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { SimpleApp } from './SimpleApp.tsx';
+import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 const rootElement = document.getElementById('root');
@@ -15,7 +15,7 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <SimpleApp />
+      <App />
     </ErrorBoundary>
   </React.StrictMode>
 );

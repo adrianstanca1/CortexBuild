@@ -35,9 +35,12 @@ import { createEnhancedAdminRoutes } from './routes/enhanced-admin';
 import { createAIChatRoutes } from './routes/ai-chat';
 import { createDeveloperRoutes } from './routes/developer';
 import { createIntegrationsRouter } from './routes/integrations';
+import { initDeveloperTables } from './init-developer-tables';
 import { createAgentKitRouter } from './routes/agentkit';
 import { createWorkflowsRouter } from './routes/workflows';
 import { createAutomationsRouter } from './routes/automations';
+import procurementRouter from './routes/automation/procurement';
+import subscriptionsRouter from './routes/subscriptions';
 
 // Load environment variables from .env.local first, then .env
 dotenv.config({ path: '.env.local' });
@@ -124,10 +127,6 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
                 const userId = (req as any).user.id;
                 const companyId = (req as any).user.company_id;
 
-                // Import chatbot dynamically
-                const { GeminiChatbot } = await import('../lib/ai/gemini-client');
-                const { ChatTools } = await import('../lib/ai/chat-tools');
-
                 // Build context
                 const chatContext = {
                     userId,
@@ -139,12 +138,24 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
                     availableData: {},
                 };
 
-                // Initialize chatbot
-                const chatbot = new GeminiChatbot();
-                await chatbot.initializeChat(chatContext, []);
+                let chatbot;
+                let response;
 
-                // Send message
-                const response = await chatbot.sendMessage(message, chatContext);
+                // Try OpenAI first (primary), then fallback to Gemini
+                try {
+                    const { OpenAIChatbot } = await import('../lib/ai/openai-chatbot');
+                    chatbot = new OpenAIChatbot();
+                    await chatbot.initializeChat(chatContext, []);
+                    response = await chatbot.sendMessage(message, chatContext);
+                } catch (openaiError: any) {
+                    console.warn('OpenAI unavailable, trying Gemini fallback:', openaiError.message);
+                    
+                    // Fallback to Gemini
+                    const { GeminiChatbot } = await import('../lib/ai/gemini-client');
+                    chatbot = new GeminiChatbot();
+                    await chatbot.initializeChat(chatContext, []);
+                    response = await chatbot.sendMessage(message, chatContext);
+                }
 
                 res.json({
                     success: true,
@@ -156,7 +167,10 @@ app.post('/api/chat/message', auth.authenticateToken, async (req, res) => {
                 });
             } catch (error: any) {
                 console.error('Chat error:', error.message);
-                res.status(500).json({ error: error.message || 'Chat failed' });
+                res.status(500).json({ 
+                    error: error.message || 'Failed to send message',
+                    details: 'Please check that AI API keys are configured correctly'
+                });
             }
         });
 
@@ -184,6 +198,10 @@ const startServer = async () => {
         // Initialize SDK tables
         console.log('🔧 Initializing SDK Developer tables...');
         initSdkTables(db);
+
+        // Initialize Developer Dashboard tables
+        console.log('👨‍💻 Initializing Developer Dashboard tables...');
+        initDeveloperTables(db);
 
         // Register Auth routes
         console.log('🔐 Registering Auth routes...');
@@ -358,7 +376,15 @@ const startServer = async () => {
         app.use('/api/automations', createAutomationsRouter(db));
         console.log('  ✓ /api/automations');
 
-        console.log('✅ All 24 API routes registered successfully');
+        // Automation Studio routes (new)
+        app.use('/api/automation', procurementRouter);
+        console.log('  ✓ /api/automation (Procurement Pipeline)');
+
+        // Subscription & Billing routes
+        app.use('/api/subscriptions', subscriptionsRouter);
+        console.log('  ✓ /api/subscriptions (Subscription Management)');
+
+        console.log('✅ All 26 API routes registered successfully (including Automation Studio & Subscriptions)');
 
         // Register 404 handler AFTER all routes
         app.use((req, res) => {

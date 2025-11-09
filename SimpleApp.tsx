@@ -8,6 +8,7 @@ import { User } from './types';
 import { Base44Clone } from './components/base44/Base44Clone';
 import { SuperAdminDashboard } from './components/base44/pages/SuperAdminDashboard';
 import { CompanyAdminDashboard } from './components/base44/pages/CompanyAdminDashboard';
+import { DeveloperPlatform } from './components/developer-platform/DeveloperPlatform';
 
 // Simple Login Component
 const SimpleLogin: React.FC<{ onLoginSuccess: (user: User) => void }> = ({ onLoginSuccess }) => {
@@ -286,6 +287,12 @@ export const SimpleApp: React.FC = () => {
     // Role-based routing: show appropriate dashboard based on user role
     if (currentUser) {
         console.log('✅ Rendering dashboard for:', currentUser.name, 'Role:', currentUser.role);
+
+        // DEVELOPERS GET COMPLETELY SEPARATE PLATFORM
+        if (currentUser.role === 'developer') {
+            console.log('🔴 DEVELOPER DETECTED - RENDERING DEVELOPER PLATFORM');
+            return <DeveloperPlatform user={currentUser} onLogout={handleLogout} />;
+        }
 
         // Super Admin gets the Super Admin Dashboard
         if (currentUser.role === 'super_admin') {

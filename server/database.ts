@@ -751,7 +751,7 @@ const seedInitialData = () => {
             {
                 id: 'user-1',
                 email: 'adrian.stanca1@gmail.com',
-                password: 'password123',
+                password: 'parola123',
                 name: 'Adrian Stanca',
                 role: 'super_admin',
                 companyId: 'company-1'
@@ -783,7 +783,7 @@ const seedInitialData = () => {
             {
                 id: 'user-5',
                 email: 'dev@constructco.com',
-                password: 'password123',
+                password: 'parola123',
                 name: 'Dev User',
                 role: 'developer',
                 companyId: 'company-1'
@@ -1511,6 +1511,21 @@ const seedInitialData = () => {
         subscribeAgent('agent-hse-sentinel', 'company-2', 'user-4');
 
         console.log('✅ Initial data seeded');
+    }
+
+    // Ensure documented super admin password is applied even if data already existed
+    const superAdmin = db
+        .prepare('SELECT password_hash FROM users WHERE email = ?')
+        .get('adrian.stanca1@gmail.com') as { password_hash?: string } | undefined;
+
+    if (superAdmin?.password_hash) {
+        const expectedPassword = 'parola123';
+        const passwordMatches = bcrypt.compareSync(expectedPassword, superAdmin.password_hash);
+        if (!passwordMatches) {
+            const updatedHash = bcrypt.hashSync(expectedPassword, 10);
+            db.prepare('UPDATE users SET password_hash = ? WHERE email = ?').run(updatedHash, 'adrian.stanca1@gmail.com');
+            console.log('🔐 Super admin password synchronized with documented default.');
+        }
     }
 };
 

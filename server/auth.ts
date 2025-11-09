@@ -138,7 +138,11 @@ export const login = (
   }
 
   const token = jwt.sign(
-    { userId: String(user.id), email: user.email } as JWTPayload,
+    { 
+      userId: String(user.id), 
+      email: user.email,
+      companyId: user.company_id ? String(user.company_id) : undefined
+    } as JWTPayload,
     JWT_SECRET,
     { expiresIn: TOKEN_EXPIRY },
   );

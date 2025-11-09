@@ -14,27 +14,33 @@
 
 ### Step 1: Access the Application
 
-**Production URL**: https://constructai-5-d11h4xy4m-adrian-b7e84541.vercel.app
+**Production URL**: <https://constructai-5-d11h4xy4m-adrian-b7e84541.vercel.app>
 
 ### Step 2: Choose Your Login Method
 
 You have 3 options:
 
 #### Option A: Google OAuth (Recommended)
+
 1. Click **"Google"** button
 2. Select your Google account
 3. Authorize ConstructAI
 4. ✅ Done! You're logged in
 
 #### Option B: GitHub OAuth
+
 1. Click **"GitHub"** button
 2. Authorize on GitHub
 3. ✅ Done! You're logged in
 
 #### Option C: Traditional Login
-```
-Email: casey@constructco.com
-Password: password123
+
+```text
+Email: adrian@ascladdingltd.co.uk
+Password: Lolozania1
+
+Email: dev@constructco.com
+Password: parola123
 ```
 
 ---
@@ -56,6 +62,7 @@ Password: password123
 ### Understanding Predictions
 
 #### Budget Forecast
+
 - 🟢 **Green**: Under budget
 - 🟡 **Yellow**: On budget
 - 🔴 **Red**: Over budget
@@ -63,6 +70,7 @@ Password: password123
 **Example**: `"8.3% over budget"` means project will exceed budget by 8.3%
 
 #### Timeline Forecast
+
 - 🟢 **Green**: Ahead of schedule
 - 🟡 **Yellow**: On schedule
 - 🔴 **Red**: Delayed
@@ -70,6 +78,7 @@ Password: password123
 **Example**: `"15 days delayed"` means project will be 15 days late
 
 #### Risk Assessment
+
 - 🟢 **Low (0-40)**: Project is healthy
 - 🟡 **Medium (41-70)**: Some concerns
 - 🔴 **High (71-100)**: Significant issues
@@ -176,7 +185,7 @@ Password: password123
 
 ### How to: View Project Predictions
 
-```
+```text
 1. Login to ConstructAI
 2. Navigate to "ML Analytics"
 3. Click on any project
@@ -185,7 +194,7 @@ Password: password123
 
 ### How to: Create a Task
 
-```
+```text
 1. Open a project
 2. Go to "Tasks"
 3. Click "New Task"
@@ -196,7 +205,7 @@ Password: password123
 
 ### How to: Upload Documents
 
-```
+```text
 1. Open a project
 2. Go to "Documents"
 3. Click "Upload"
@@ -207,7 +216,7 @@ Password: password123
 
 ### How to: Submit Daily Log
 
-```
+```text
 1. Open a project
 2. Go to "Daily Logs"
 3. Click "New Log"
@@ -228,6 +237,7 @@ Password: password123
 ### Responsive Design
 
 ConstructAI works on all devices:
+
 - 💻 **Desktop**: Full features
 - 📱 **Tablet**: Optimized layout
 - 📱 **Mobile**: Touch-friendly
@@ -287,6 +297,7 @@ ConstructAI works on all devices:
 ### Q: How accurate are the ML predictions?
 
 **A**: Our neural network achieves:
+
 - Budget: 85-92% accuracy
 - Timeline: 80-88% accuracy
 - Risk: 88-94% accuracy
@@ -294,13 +305,15 @@ ConstructAI works on all devices:
 ### Q: Can I use ConstructAI offline?
 
 **A**: No, ConstructAI requires internet connection for:
+
 - Real-time updates
 - ML predictions
 - Cloud storage
 
 ### Q: How do I invite team members?
 
-**A**: 
+**A**:
+
 1. Go to Settings
 2. Click "Team"
 3. Click "Invite Member"
@@ -310,7 +323,8 @@ ConstructAI works on all devices:
 
 ### Q: What roles are available?
 
-**A**: 
+**A**:
+
 - Super Admin
 - Company Admin
 - Project Manager
@@ -322,6 +336,7 @@ ConstructAI works on all devices:
 ### Q: How do I change my password?
 
 **A**:
+
 1. Go to Profile
 2. Click "Security"
 3. Click "Change Password"
@@ -343,7 +358,7 @@ ConstructAI works on all devices:
    - View contextual help
 
 3. **Contact Support**
-   - Email: support@constructai.com
+   - Email: <support@constructai.com>
    - Response time: 24 hours
 
 ### Reporting Issues
@@ -391,4 +406,3 @@ ConstructAI works on all devices:
 **🚀 Ready to build smarter with ConstructAI!**
 
 **Questions? Check our [documentation](./ML_NEURAL_NETWORK_GUIDE.md) or contact support.**
-

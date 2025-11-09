@@ -42,15 +42,14 @@ CREATE TABLE IF NOT EXISTS companies (
 );
 
 -- Sessions Table (Compatible with database.ts)
--- NOTE: This table is created by database.ts, schema kept for reference
--- CREATE TABLE IF NOT EXISTS sessions (
---     id TEXT PRIMARY KEY,
---     user_id TEXT NOT NULL,
---     token TEXT UNIQUE NOT NULL,
---     expires_at DATETIME NOT NULL,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
+CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    token TEXT UNIQUE NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
 -- ============================================
 -- PROJECT MANAGEMENT
@@ -430,18 +429,182 @@ CREATE TABLE IF NOT EXISTS module_reviews (
     UNIQUE(module_id, user_id)
 );
 
--- API Keys Table
-CREATE TABLE IF NOT EXISTS api_keys (
+-- SDK Profiles Table
+CREATE TABLE IF NOT EXISTS sdk_profiles (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    subscription_tier TEXT DEFAULT 'free' CHECK(subscription_tier IN ('free', 'starter', 'pro', 'enterprise')),
+    api_requests_used INTEGER DEFAULT 0,
+    api_requests_limit INTEGER DEFAULT 100,
+    gemini_api_key TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- SDK Developers Table
+CREATE TABLE IF NOT EXISTS sdk_developers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    tier TEXT DEFAULT 'free' CHECK(tier IN ('free', 'starter', 'pro', 'enterprise')),
+    api_requests_used INTEGER DEFAULT 0,
+    api_requests_limit INTEGER DEFAULT 10,
+    modules_published INTEGER DEFAULT 0,
+    total_revenue DECIMAL(15, 2) DEFAULT 0,
+    is_verified BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- SDK Apps Table
+CREATE TABLE IF NOT EXISTS sdk_apps (
+    id TEXT PRIMARY KEY,
+    developer_id INTEGER NOT NULL,
+    company_id INTEGER,
+    name TEXT NOT NULL,
+    description TEXT,
+    version TEXT DEFAULT '1.0.0',
+    status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'pending_review', 'approved', 'rejected')),
+    code TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (developer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
+);
+
+-- SDK Workflows Table
+CREATE TABLE IF NOT EXISTS sdk_workflows (
+    id TEXT PRIMARY KEY,
+    developer_id INTEGER NOT NULL,
+    company_id INTEGER,
+    name TEXT NOT NULL,
+    definition TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (developer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS builder_modules (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    company_id INTEGER,
+    name TEXT NOT NULL,
+    description TEXT,
+    version TEXT DEFAULT '1.0.0',
+    status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'pending_review', 'published', 'archived')),
+    manifest TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
+);
+
+-- Sandbox Runs Table
+CREATE TABLE IF NOT EXISTS sandbox_runs (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    company_id INTEGER,
+    name TEXT NOT NULL,
+    definition TEXT,
+    result TEXT,
+    status TEXT DEFAULT 'completed' CHECK(status IN ('completed', 'failed', 'running')),
+    duration_ms INTEGER DEFAULT 0,
+    input_payload TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
+);
+
+-- Developer Console Events Table
+CREATE TABLE IF NOT EXISTS developer_console_events (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    company_id INTEGER,
+    event_type TEXT NOT NULL,
+    payload TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
+);
+
+-- API Usage Logs Table
+CREATE TABLE IF NOT EXISTS api_usage_logs (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    provider TEXT NOT NULL,
+    model TEXT,
+    prompt_tokens INTEGER DEFAULT 0,
+    completion_tokens INTEGER DEFAULT 0,
+    total_tokens INTEGER DEFAULT 0,
+    cost DECIMAL(10, 6) DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- AI Agents Table
+CREATE TABLE IF NOT EXISTS ai_agents (
+    id TEXT PRIMARY KEY,
+    slug TEXT UNIQUE NOT NULL,
+    company_id INTEGER,
+    developer_id INTEGER,
+    name TEXT NOT NULL,
+    description TEXT,
+    icon TEXT,
+    status TEXT DEFAULT 'inactive' CHECK(status IN ('inactive', 'running', 'paused')),
+    is_global BOOLEAN DEFAULT 0,
+    tags TEXT,
+    capabilities TEXT,
+    config TEXT,
+    metadata TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (developer_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Agent Subscriptions Table
+CREATE TABLE IF NOT EXISTS agent_subscriptions (
+    id TEXT PRIMARY KEY,
+    company_id INTEGER NOT NULL,
+    agent_id TEXT NOT NULL,
+    status TEXT DEFAULT 'active' CHECK(status IN ('active', 'paused', 'cancelled')),
+    seats INTEGER DEFAULT 10,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (agent_id) REFERENCES ai_agents(id) ON DELETE CASCADE,
+    UNIQUE(company_id, agent_id)
+);
+
+-- Agent Executions Table
+CREATE TABLE IF NOT EXISTS agent_executions (
+    id TEXT PRIMARY KEY,
+    agent_id TEXT NOT NULL,
+    company_id INTEGER NOT NULL,
+    triggered_by TEXT,
+    input_payload TEXT,
+    output_payload TEXT,
+    status TEXT DEFAULT 'running' CHECK(status IN ('running', 'completed', 'failed')),
+    duration_ms INTEGER,
+    error_message TEXT,
+    started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    completed_at DATETIME,
+    FOREIGN KEY (agent_id) REFERENCES ai_agents(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sandbox_environments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     name TEXT NOT NULL,
-    key_hash TEXT UNIQUE NOT NULL,
-    key_prefix TEXT NOT NULL,
-    permissions TEXT,
-    last_used_at DATETIME,
-    expires_at DATETIME,
+    description TEXT,
+    config TEXT NOT NULL,
     is_active BOOLEAN DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -449,11 +612,43 @@ CREATE TABLE IF NOT EXISTS api_keys (
 CREATE TABLE IF NOT EXISTS webhooks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
+    company_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
     url TEXT NOT NULL,
     events TEXT NOT NULL,
     secret TEXT NOT NULL,
     is_active BOOLEAN DEFAULT 1,
+    success_count INTEGER DEFAULT 0,
+    failure_count INTEGER DEFAULT 0,
     last_triggered_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+-- Webhook Logs Table
+CREATE TABLE IF NOT EXISTS webhook_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    webhook_id INTEGER NOT NULL,
+    status_code INTEGER,
+    response_ms INTEGER,
+    error_message TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (webhook_id) REFERENCES webhooks(id) ON DELETE CASCADE
+);
+
+-- API Keys Table
+CREATE TABLE IF NOT EXISTS api_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    key_hash TEXT UNIQUE NOT NULL,
+    key_prefix TEXT NOT NULL,
+    scopes TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT 1,
+    last_used_at DATETIME,
+    expires_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -503,4 +698,23 @@ CREATE INDEX IF NOT EXISTS idx_activities_entity ON activities(entity_type, enti
 CREATE INDEX IF NOT EXISTS idx_modules_developer ON modules(developer_id);
 CREATE INDEX IF NOT EXISTS idx_modules_status ON modules(status);
 CREATE INDEX IF NOT EXISTS idx_modules_category ON modules(category);
+
+-- Developer platform indexes
+CREATE INDEX IF NOT EXISTS idx_sdk_profiles_user ON sdk_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_sdk_developers_user ON sdk_developers(user_id);
+CREATE INDEX IF NOT EXISTS idx_sdk_apps_developer ON sdk_apps(developer_id);
+CREATE INDEX IF NOT EXISTS idx_sdk_apps_company ON sdk_apps(company_id);
+CREATE INDEX IF NOT EXISTS idx_sdk_workflows_developer ON sdk_workflows(developer_id);
+CREATE INDEX IF NOT EXISTS idx_builder_modules_user ON builder_modules(user_id);
+CREATE INDEX IF NOT EXISTS idx_sandbox_runs_user ON sandbox_runs(user_id);
+CREATE INDEX IF NOT EXISTS idx_developer_events_user ON developer_console_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_usage_logs_user ON api_usage_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_ai_agents_company ON ai_agents(company_id);
+CREATE INDEX IF NOT EXISTS idx_agent_subscriptions_company ON agent_subscriptions(company_id);
+CREATE INDEX IF NOT EXISTS idx_agent_executions_agent ON agent_executions(agent_id);
+CREATE INDEX IF NOT EXISTS idx_sandbox_environments_user ON sandbox_environments(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id);
+CREATE INDEX IF NOT EXISTS idx_webhooks_user ON webhooks(user_id);
+CREATE INDEX IF NOT EXISTS idx_webhooks_company ON webhooks(company_id);
+CREATE INDEX IF NOT EXISTS idx_webhook_logs_webhook ON webhook_logs(webhook_id);
 

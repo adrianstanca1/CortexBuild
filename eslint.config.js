@@ -5,7 +5,29 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
+  {
+    ignores: ['dist/**', 'index.html'],
+  },
   js.configs.recommended,
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+      },
+    },
+  },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -48,7 +70,10 @@ export default [
     },
     rules: {
       'react/react-in-jsx-scope': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
     },
     settings: {

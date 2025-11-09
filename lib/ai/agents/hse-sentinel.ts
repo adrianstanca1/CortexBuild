@@ -3,7 +3,7 @@
  * Health, Safety & Environment monitoring and compliance
  */
 
-import { BaseAgent, type AgentResponse } from './base-agent';
+import { BaseAgent } from './base-agent';
 
 export class HSESentinelAgent extends BaseAgent {
     constructor() {

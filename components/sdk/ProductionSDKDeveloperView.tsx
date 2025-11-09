@@ -239,11 +239,17 @@ const Button: React.FC<{
 
 interface ProductionSDKDeveloperViewProps {
   user: User;
-  onNavigate: (page: string) => void;
+  onNavigate?: (page: string) => void;
+  onLogout?: () => void;
   startTab?: TabKey;
 }
 
-export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProps> = ({ user, onNavigate: _onNavigate, startTab }) => {
+export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProps> = ({
+  user,
+  onNavigate: _onNavigate,
+  onLogout,
+  startTab
+}) => {
   // State
   const [activeTab, setActiveTab] = useState<TabKey>(startTab ?? 'builder');
   const [provider, setProvider] = useState<Provider>('openai');
@@ -547,7 +553,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         description: aiExplanation || 'AI generated application',
         code: generatedCode,
         status: 'draft',
-        companyId: user.company_id
+        companyId: user.companyId
       });
 
       if (response.data.success) {
@@ -594,7 +600,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
         name: newWorkflowName.trim(),
         definition,
         isActive: !isDemo,
-        companyId: user.company_id
+        companyId: user.companyId
       });
 
       if (response.data.success) {
@@ -913,7 +919,7 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
               connections: workflow.connections
             },
             isActive: true,
-            companyId: user.company_id
+            companyId: user.companyId
           }).then(response => {
             if (response.data.success) {
               setWorkflows(prev => [response.data.workflow, ...prev]);
@@ -1735,6 +1741,10 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
               <p className="text-slate-600 mt-1">Build, test, and deploy AI-powered construction apps</p>
             </div>
             <div className="flex items-center space-x-3">
+              <div className="text-right mr-3">
+                <p className="text-sm font-medium text-slate-900">{user.name}</p>
+                <p className="text-xs text-slate-500">{user.email}</p>
+              </div>
               <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
                 {profile ? SUBSCRIPTION_DETAILS[subscriptionTier].label : 'Loading...'}
               </span>
@@ -1742,10 +1752,19 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+
 
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-slate-200">
@@ -1756,8 +1775,8 @@ export const ProductionSDKDeveloperView: React.FC<ProductionSDKDeveloperViewProp
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  ? 'border-emerald-500 text-emerald-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}
               >
                 <tab.icon className="w-5 h-5" />

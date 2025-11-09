@@ -6,9 +6,9 @@
 import bcrypt from 'bcryptjs';
 
 const passwords = [
-    { email: 'adrian.stanca1@gmail.com', password: 'Cumparavinde1' },
-    { email: 'casey@constructco.com', password: 'password123' },
-    { email: 'mike@constructco.com', password: 'password123' }
+    { email: 'adrian.stanca1@gmail.com', password: 'parola123' },
+    { email: 'adrian@ascladdingltd.co.uk', password: 'Lolozania1' },
+    { email: 'dev@constructco.com', password: 'parola123' }
 ];
 
 async function generateHashes() {

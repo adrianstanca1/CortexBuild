@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Database from 'better-sqlite3';
+import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '../auth';
 
 export function createEnhancedAdminRoutes(db: Database.Database) {
@@ -123,7 +124,7 @@ export function createEnhancedAdminRoutes(db: Database.Database) {
   // POST /api/admin/users/create - Create new user
   router.post('/users/create', getCurrentUser, requireSuperAdmin, (req, res) => {
     try {
-      const { email, name, password, role, company_id } = req.body;
+  const { email, name, password, role, company_id } = req.body;
 
       // Validate required fields
       if (!email || !name || !password || !role) {
@@ -136,9 +137,8 @@ export function createEnhancedAdminRoutes(db: Database.Database) {
         return res.status(400).json({ success: false, error: 'User already exists' });
       }
 
-      // Hash password (using bcrypt in production)
-      const bcrypt = require('bcrypt');
-      const hashedPassword = bcrypt.hashSync(password, 10);
+  // Hash password (using bcrypt in production)
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
       // Create user
       const result = db.prepare(`
@@ -159,8 +159,8 @@ export function createEnhancedAdminRoutes(db: Database.Database) {
   // PATCH /api/admin/users/:id - Update user
   router.patch('/users/:id', getCurrentUser, requireSuperAdmin, (req, res) => {
     try {
-      const { id } = req.params;
-      const { name, email, role, company_id, active } = req.body;
+  const { id } = req.params;
+  const { name, email, role, company_id } = req.body;
 
       const updates: string[] = [];
       const values: any[] = [];
@@ -247,7 +247,7 @@ export function createEnhancedAdminRoutes(db: Database.Database) {
   // POST /api/admin/companies/create - Create new company
   router.post('/companies/create', getCurrentUser, requireSuperAdmin, (req, res) => {
     try {
-      const { name, industry, size } = req.body;
+  const { name } = req.body;
 
       if (!name) {
         return res.status(400).json({ success: false, error: 'Company name is required' });

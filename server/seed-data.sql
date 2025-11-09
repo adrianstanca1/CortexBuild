@@ -35,9 +35,9 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 -- Insert company
 INSERT OR IGNORE INTO companies (id, name) VALUES ('company-1', 'ConstructCo');
 
--- Insert users (password: password123)
+-- Insert users (super admin password: Cumparavinde1, others: password123)
 INSERT OR IGNORE INTO users (id, email, password_hash, name, role, company_id) VALUES 
-('user-1', 'adrian.stanca1@gmail.com', '$2b$10$84qfBVGh6GWAvEqhUKjy9uyu0xAWEQesDAN/qDj/i42G69DUH5VJu', 'Adrian Stanca', 'super_admin', 'company-1'),
+('user-1', 'adrian.stanca1@gmail.com', '$2b$10$p7jaaXZGYNdCWghK1RFr4uaA3C29RjxHxdk2L/X8jQd4zO7BRqJr2', 'Adrian Stanca', 'super_admin', 'company-1'),
 ('user-2', 'casey@constructco.com', '$2b$10$84qfBVGh6GWAvEqhUKjy9uyu0xAWEQesDAN/qDj/i42G69DUH5VJu', 'Casey Johnson', 'admin', 'company-1'),
 ('user-3', 'mike@constructco.com', '$2b$10$84qfBVGh6GWAvEqhUKjy9uyu0xAWEQesDAN/qDj/i42G69DUH5VJu', 'Mike Wilson', 'manager', 'company-1');
 
@@ -106,4 +106,3 @@ INSERT OR IGNORE INTO milestones (project_id, name, description, due_date, statu
 (1, 'Steel Frame Complete', 'Structural steel installation finished', '2024-11-30', 'in-progress', 65),
 (2, 'Site Preparation', 'Site cleared and ready for construction', '2024-03-31', 'completed', 100),
 (2, 'Foundation Complete', 'Foundation poured and cured', '2024-10-31', 'in-progress', 75);
-

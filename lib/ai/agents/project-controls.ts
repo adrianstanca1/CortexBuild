@@ -3,7 +3,7 @@
  * Schedule, cost, and performance analysis
  */
 
-import { BaseAgent, type AgentResponse } from './base-agent';
+import { BaseAgent } from './base-agent';
 
 export class ProjectControlsAgent extends BaseAgent {
     constructor() {

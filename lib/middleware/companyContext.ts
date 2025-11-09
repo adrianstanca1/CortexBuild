@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserCompanyId, verifyCompanyAccess } from '../supabase/client';
+import { getUserCompanyId } from '../supabase/client';
 
 export interface CompanyContext {
     userId: string;
@@ -48,7 +48,7 @@ async function getUserIdFromRequest(req: NextRequest): Promise<string | null> {
  */
 export async function withCompanyContext(
     req: NextRequest,
-    handler: (req: NextRequest, context: CompanyContext) => Promise<NextResponse>
+    handler: (_req: NextRequest, _context: CompanyContext) => Promise<NextResponse>
 ): Promise<NextResponse> {
     try {
         // 1. Extract user ID from request
@@ -65,7 +65,7 @@ export async function withCompanyContext(
         let companyId: string;
         try {
             companyId = await getUserCompanyId(userId);
-        } catch (error) {
+        } catch {
             return NextResponse.json(
                 { error: 'User company not found' },
                 { status: 403 }
@@ -184,7 +184,7 @@ export async function validateResourceOwnership(
  * Helper to create company-scoped query
  * Automatically adds company_id filter
  */
-export function createCompanyQuery<T>(
+export function createCompanyQuery(
     client: any,
     table: string,
     companyId: string

@@ -7,11 +7,13 @@ Get up and running in 5 minutes!
 ## 🚀 Deploy to Vercel (Production)
 
 ### **1. Create Vercel Account**
+
 ```
 https://vercel.com → Sign up with GitHub
 ```
 
 ### **2. Create Database**
+
 ```
 Dashboard → Storage → Create Database → Postgres
 Name: constructai-db
@@ -19,6 +21,7 @@ Region: Choose closest to you
 ```
 
 ### **3. Initialize Database**
+
 ```
 Go to database → Query tab
 Copy content from: sql/init.sql
@@ -26,6 +29,7 @@ Click "Run Query"
 ```
 
 ### **4. Set Environment Variables**
+
 ```
 Project Settings → Environment Variables
 
@@ -35,6 +39,7 @@ JWT_SECRET = <generate with: node -e "console.log(require('crypto').randomBytes(
 ```
 
 ### **5. Deploy**
+
 ```bash
 npx vercel --prod
 ```
@@ -46,34 +51,47 @@ npx vercel --prod
 ## 💻 Local Development
 
 ### **Option 1: Vite Only (Frontend)**
+
 ```bash
 npm install
 npm run dev
 ```
-Open http://localhost:3000
+
+Open <http://localhost:3000>
 
 ### **Option 2: Full Stack (Frontend + Backend)**
+
 ```bash
 npm install
 npm run dev:all
 ```
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001
+
+- Frontend: <http://localhost:3000>
+- Backend: <http://localhost:3001>
 
 ---
 
 ## 🔐 Login
 
 **Super Admin:**
-```
+
+```text
 Email: adrian.stanca1@gmail.com
-Password: Cumparavinde1
+Password: parola123
 ```
 
 **Company Admin:**
+
+```text
+Email: adrian@ascladdingltd.co.uk
+Password: Lolozania1
 ```
-Email: casey@constructco.com
-Password: password123
+
+**Developer:**
+
+```text
+Email: dev@constructco.com
+Password: parola123
 ```
 
 ---
@@ -133,4 +151,3 @@ npm run build            # Build for production
 ---
 
 **🚀 That's it! You're ready to go!** 🎉
-

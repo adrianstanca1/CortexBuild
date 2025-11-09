@@ -31,7 +31,7 @@ import RFIsScreen from './components/screens/RFIsScreen.tsx';
 import RFIDetailScreen from './components/screens/RFIDetailScreen.tsx';
 import NewRFIScreen from './components/screens/NewRFIScreen.tsx';
 import { ProductionSDKDeveloperView } from './components/sdk/ProductionSDKDeveloperView';
-import DeveloperDashboardScreen from './components/screens/developer/DeveloperDashboardScreen.tsx';
+import { DeveloperDashboardScreen } from './components/screens/developer/DeveloperDashboardScreen.tsx';
 import PunchListScreen from './components/screens/PunchListScreen.tsx';
 import PunchListItemDetailScreen from './components/screens/PunchListItemDetailScreen.tsx';
 import NewPunchListItemScreen from './components/screens/NewPunchListItemScreen.tsx';
@@ -61,6 +61,8 @@ import { Base44Clone } from './components/base44/Base44Clone.tsx';
 // Admin Screens
 import PlatformAdminScreen from './components/screens/admin/PlatformAdminScreen.tsx';
 import SuperAdminDashboardScreen from './components/screens/admin/SuperAdminDashboardScreen.tsx';
+import SuperAdminDashboardNew from './components/screens/dashboards/SuperAdminDashboard.tsx';
+import CompanyAdminDashboardNew from './components/screens/dashboards/CompanyAdminDashboardNew.tsx';
 
 // ML & Advanced Analytics Screens
 import AdvancedMLDashboard from './components/screens/dashboards/AdvancedMLDashboard.tsx';
@@ -108,6 +110,8 @@ const SCREEN_COMPONENTS: { [key in Screen]: React.FC<any> } = {
     'ai-agents-marketplace': AIAgentsMarketplaceScreen,
     'developer-dashboard': DeveloperDashboardScreen,
     'super-admin-dashboard': SuperAdminDashboardScreen,
+    'super-admin-dashboard-new': SuperAdminDashboardNew,
+    'company-admin-dashboard-new': CompanyAdminDashboardNew,
     'sdk-developer': ProductionSDKDeveloperView,
     'my-apps-desktop': Base44Clone,
     // Admin
@@ -507,14 +511,20 @@ const App: React.FC = () => {
         if (currentUser.role === 'developer') {
             return (
                 <div className="min-h-screen bg-gray-50">
-                    <DeveloperDashboardScreen currentUser={currentUser} navigateTo={navigateTo} />
+                    <DeveloperDashboardScreen />
                 </div>
             );
         }
         if (currentUser.role === 'super_admin') {
             return (
                 <div className="min-h-screen bg-gray-50">
-                    <SuperAdminDashboardScreen />
+                    <SuperAdminDashboardNew
+                        currentUser={currentUser}
+                        selectProject={(projectId: string) => {
+                            const project = allProjects.find(p => p.id === projectId);
+                            if (project) selectProject(project);
+                        }}
+                    />
                 </div>
             );
         }
@@ -572,14 +582,14 @@ const App: React.FC = () => {
         <div className="bg-slate-50">
             <AppLayout
                 sidebar={
-                <Sidebar
-                    project={getSidebarProject}
-                    navigateTo={navigateTo}
-                    navigateToModule={navigateToModule}
-                    goHome={sidebarGoHome}
-                    currentUser={currentUser}
-                    onLogout={handleLogout}
-                />
+                    <Sidebar
+                        project={getSidebarProject}
+                        navigateTo={navigateTo}
+                        navigateToModule={navigateToModule}
+                        goHome={sidebarGoHome}
+                        currentUser={currentUser}
+                        onLogout={handleLogout}
+                    />
                 }
                 floatingMenu={<FloatingMenu
                     currentUser={currentUser}

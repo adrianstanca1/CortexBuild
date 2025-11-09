@@ -20,7 +20,7 @@ export interface RealtimePayload<T = any> {
  */
 export function subscribeToProjects(
     companyId: string,
-    callback: (payload: RealtimePayload) => void
+    callback: (_payload: RealtimePayload) => void
 ): RealtimeChannel {
     return supabase
         .channel(`projects:${companyId}`)
@@ -49,7 +49,7 @@ export function subscribeToProjects(
  */
 export function subscribeToNotifications(
     userId: string,
-    callback: (payload: RealtimePayload) => void
+    callback: (_payload: RealtimePayload) => void
 ): RealtimeChannel {
     return supabase
         .channel(`notifications:${userId}`)
@@ -78,7 +78,7 @@ export function subscribeToNotifications(
  */
 export function subscribeToCognitiveResponses(
     companyId: string,
-    callback: (payload: RealtimePayload) => void
+    callback: (_payload: RealtimePayload) => void
 ): RealtimeChannel {
     return supabase
         .channel(`cognitive:${companyId}`)
@@ -107,7 +107,7 @@ export function subscribeToCognitiveResponses(
  */
 export function subscribeToStrategicActions(
     companyId: string,
-    callback: (payload: RealtimePayload) => void
+    callback: (_payload: RealtimePayload) => void
 ): RealtimeChannel {
     return supabase
         .channel(`actions:${companyId}`)
@@ -136,7 +136,7 @@ export function subscribeToStrategicActions(
  */
 export function subscribeToTimeEntries(
     projectId: string,
-    callback: (payload: RealtimePayload) => void
+    callback: (_payload: RealtimePayload) => void
 ): RealtimeChannel {
     return supabase
         .channel(`time_entries:${projectId}`)
@@ -165,7 +165,7 @@ export function subscribeToTimeEntries(
  */
 export function subscribeToInvoices(
     companyId: string,
-    callback: (payload: RealtimePayload) => void
+    callback: (_payload: RealtimePayload) => void
 ): RealtimeChannel {
     return supabase
         .channel(`invoices:${companyId}`)
@@ -203,11 +203,11 @@ export function subscribeToMultiple(
     companyId: string,
     userId: string,
     callbacks: {
-        onProject?: (payload: RealtimePayload) => void;
-        onNotification?: (payload: RealtimePayload) => void;
-        onCognitive?: (payload: RealtimePayload) => void;
-        onAction?: (payload: RealtimePayload) => void;
-        onInvoice?: (payload: RealtimePayload) => void;
+        onProject?: (_payload: RealtimePayload) => void;
+        onNotification?: (_payload: RealtimePayload) => void;
+        onCognitive?: (_payload: RealtimePayload) => void;
+        onAction?: (_payload: RealtimePayload) => void;
+        onInvoice?: (_payload: RealtimePayload) => void;
     }
 ): RealtimeChannel[] {
     const channels: RealtimeChannel[] = [];

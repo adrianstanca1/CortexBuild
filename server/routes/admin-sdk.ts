@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import Database from 'better-sqlite3';
+import * as fs from 'fs';
+import * as path from 'path';
 import { getCurrentUser } from '../auth';
 
 const router = Router();
@@ -401,9 +403,6 @@ router.get('/user-quotas', getCurrentUser, checkSuperAdmin, async (req: Request,
 // POST /api/admin/sdk/database-backup - Create database backup
 router.post('/database-backup', getCurrentUser, checkSuperAdmin, async (req: Request, res: Response) => {
   try {
-    const fs = require('fs');
-    const path = require('path');
-    
     const backupPath = path.join(__dirname, '../../cortexbuild-backup.db');
     
     // Use SQLite backup API
