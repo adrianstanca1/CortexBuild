@@ -43,8 +43,8 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
                 </div>
                 <img src={currentUser.avatar} alt="User Avatar" className="w-12 h-12 rounded-full" />
             </header>
-            
-            <GlobalStatsWidget currentUser={currentUser} />
+
+            <GlobalStatsWidget projects={projects} />
 
             <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
@@ -61,7 +61,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
                     )}
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
-                     <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <UsersIcon className="w-6 h-6 text-gray-500" />
                         All Users ({users.length})
                     </h2>
@@ -76,8 +76,8 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ currentUser, 
                         </ul>
                     )}
                 </div>
-                 <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
-                     <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
+                    <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                         All Projects ({projects.length})
                     </h2>
                     {isLoading ? <p>Loading...</p> : (
