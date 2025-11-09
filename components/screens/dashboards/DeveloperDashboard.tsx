@@ -1,6 +1,6 @@
 import React from 'react';
 import { User } from '../../../types';
-import DeveloperDashboardScreen from '../developer/DeveloperDashboardScreen';
+import { DeveloperDashboardScreen } from '../developer/DeveloperDashboardScreen';
 
 interface DeveloperDashboardProps {
   currentUser: User;
