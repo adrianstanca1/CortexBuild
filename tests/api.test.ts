@@ -185,13 +185,15 @@ describe('Projects API', () => {
       }
     });
 
-    const data = await response.json();
+    const result = await response.json();
     
     expect(response.status).toBe(200);
-    expect(data.success).toBe(true);
-    // Response should have projects property as array
-    expect(data.projects).toBeDefined();
-    expect(Array.isArray(data.projects)).toBe(true);
+    expect(result.success).toBe(true);
+    // Response has data property with array of projects
+    expect(result.data).toBeDefined();
+    expect(Array.isArray(result.data)).toBe(true);
+    // Should also have pagination metadata
+    expect(result.pagination).toBeDefined();
   });
 });
 

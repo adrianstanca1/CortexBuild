@@ -1,5 +1,6 @@
 // GoogleGenAI is only available server-side - don't use in browser
 // import { GoogleGenAI, Type } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
 import {
     User, Project, Task, RFI, PunchListItem, Drawing, Document, SiteInstruction, DeliveryItem, DayworkSheet,
     Comment, Notification, ActivityEvent, Company, AISuggestion, AIInsight, AIFeedback, DailyLog, LogItem, Attachment,
@@ -21,6 +22,11 @@ import { APIError, withErrorHandling } from './utils/errorHandling.ts';
 import { getMLPredictor } from './utils/mlPredictor.ts';
 import { PredictionResult } from './utils/neuralNetwork.ts';
 import * as authService from './auth/authService.ts';
+
+// Initialize Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 // Simulate API latency
 const LATENCY = 200;
