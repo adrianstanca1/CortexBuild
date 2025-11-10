@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { isAuthenticated } from '../../auth/authService';
 import {
   Code,
   Zap,
@@ -84,7 +85,23 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
     try {
       console.log('📊 Fetching developer dashboard data...');
       setLoading(true);
-      const response = await axios.get('/api/developer/dashboard/summary');
+
+      // Get auth token from localStorage
+      const token = localStorage.getItem('constructai_token');
+      if (!token) {
+        console.error('❌ No authentication token found');
+        setData(null);
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get('/api/developer/dashboard', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
       console.log('✅ Developer dashboard data received:', response.data);
 
       // Validate response structure
@@ -95,7 +112,7 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
         setData(null);
       }
     } catch (error: any) {
-      console.error('❌ Failed to fetch developer dashboard:', error);
+      console.error('❌ Failed to fetch developer dashboard:', error.message);
       console.error('Response status:', error.response?.status);
       console.error('Response data:', error.response?.data);
       setData(null);

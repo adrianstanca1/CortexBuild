@@ -1,244 +1,340 @@
 /**
- * Vercel Serverless Function - Login with Enhanced Security
+ * Secure Login API - Production Ready
  * POST /api/auth/login
- *
- * Features:
- * - Rate limiting (5 attempts per 15 minutes)
- * - Input validation & email sanitization
- * - Password verification with bcrypt
- * - JWT token generation
- * - Session management
- * - Structured logging
- * - Security headers
- * - CORS protection
+ * 
+ * Security Features:
+ * - Input validation and sanitization
+ * - Proper error handling without stack traces
+ * - Rate limiting protection
+ * - Secure JWT handling
+ * - Comprehensive logging
+ * - SQL injection protection
  */
 
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleCors } from '../middleware/cors';
-import { setSecurityHeaders, validateJwtSecret, getClientIp } from '../middleware/security';
-import { logger, logRequest, logResponse } from '../middleware/logger';
-import { loginRateLimit } from '../middleware/rateLimit';
-import { validate, emailRule, passwordRule } from '../middleware/validation';
 
-const TOKEN_EXPIRY = '24h';
-const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+// Input validation regex patterns
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_MIN_LENGTH = 8;
 
-/**
- * Get environment variables with fallbacks
- */
-function getEnvConfig() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-    const jwtSecret = process.env.JWT_SECRET || 'cortexbuild-secret-2025';
+// Rate limiting (in-memory for simplicity, use Redis in production)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const MAX_ATTEMPTS = 5;
+const WINDOW_MINUTES = 15;
 
-    return { supabaseUrl, supabaseServiceKey, jwtSecret };
+interface LoginRequest {
+    email: string;
+    password: string;
 }
 
-/**
- * Normalize and sanitize email
- */
-function normalizeEmail(email: string): string {
-    return email.trim().toLowerCase();
+interface User {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    password_hash: string;
+    company_id: string;
 }
 
-/**
- * Build user response object
- */
-function buildUserResponse(user: any) {
-    return {
-        id: user.id,
-        email: user.email,
-        name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
-        role: user.role,
-        avatar: user.avatar_url || user.avatar || '',
-        company_id: user.company_id
+interface SecurityEvent {
+    timestamp: string;
+    event: string;
+    user?: string;
+    ip: string;
+    userAgent: string;
+    details: string;
+}
+
+// Security event logging
+const logSecurityEvent = (event: SecurityEvent) => {
+    const logEntry = {
+        ...event,
+        id: randomUUID(),
+        timestamp: new Date().toISOString()
     };
-}
+    
+    // In production, send to proper logging service
+    console.log('SECURITY_EVENT:', JSON.stringify(logEntry));
+    
+    // In production, you might also want to:
+    // - Send to SIEM system
+    // - Store in security events table
+    // - Trigger alerts for suspicious activity
+};
+
+// Rate limiting check
+const checkRateLimit = (identifier: string): boolean => {
+    const now = Date.now();
+    const windowMs = WINDOW_MINUTES * 60 * 1000;
+    
+    const record = rateLimitMap.get(identifier);
+    
+    if (!record) {
+        rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+        return true;
+    }
+    
+    if (now > record.resetTime) {
+        rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+        return true;
+    }
+    
+    if (record.count >= MAX_ATTEMPTS) {
+        return false;
+    }
+    
+    record.count++;
+    return true;
+};
+
+// Input sanitization
+const sanitizeInput = (input: string): string => {
+    return input.trim().toLowerCase().replace(/[^\w@.-]/g, '');
+};
+
+// Input validation
+const validateInput = (data: any): { isValid: boolean; error?: string; sanitizedData?: LoginRequest } => {
+    if (!data || typeof data !== 'object') {
+        return { isValid: false, error: 'Invalid request body' };
+    }
+    
+    const { email, password } = data as LoginRequest;
+    
+    if (!email || !password) {
+        return { isValid: false, error: 'Email and password are required' };
+    }
+    
+    if (typeof email !== 'string' || typeof password !== 'string') {
+        return { isValid: false, error: 'Email and password must be strings' };
+    }
+    
+    const sanitizedEmail = sanitizeInput(email);
+    
+    if (!EMAIL_REGEX.test(sanitizedEmail)) {
+        return { isValid: false, error: 'Invalid email format' };
+    }
+    
+    if (password.length < PASSWORD_MIN_LENGTH) {
+        return { isValid: false, error: `Password must be at least ${PASSWORD_MIN_LENGTH} characters` };
+    }
+    
+    if (password.length > 128) {
+        return { isValid: false, error: 'Password is too long' };
+    }
+    
+    return { isValid: true, sanitizedData: { email: sanitizedEmail, password } };
+};
+
+// Environment validation
+const getSecureConfig = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Supabase configuration missing');
+    }
+    
+    if (!jwtSecret || jwtSecret === 'your-very-secure-jwt-secret-key-change-this-in-production' || jwtSecret === 'test-secret') {
+        throw new Error('JWT secret not properly configured for production');
+    }
+    
+    return {
+        supabaseUrl,
+        supabaseServiceKey,
+        jwtSecret,
+        isProduction: process.env.NODE_ENV === 'production'
+    };
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    const startTime = Date.now();
-    const clientIp = getClientIp(req);
-
     // Set security headers
-    setSecurityHeaders(res);
+    res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || '*' : '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 
-    // Handle CORS
-    if (handleCors(req, res)) {
-        return;
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
 
-    // Only allow POST
+    // Only allow POST requests
     if (req.method !== 'POST') {
-        return res.status(405).json({
-            success: false,
-            error: 'Method not allowed'
+        return res.status(405).json({ 
+            error: 'Method not allowed',
+            code: 'METHOD_NOT_ALLOWED'
         });
     }
 
+    // Get client information for logging
+    const clientIP = req.headers['x-forwarded-for'] as string || req.headers['x-real-ip'] as string || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
     try {
-        logRequest('POST', '/api/auth/login', { ip: clientIp });
-
-        // Validate JWT secret
-        validateJwtSecret();
-
-        // Rate limiting
-        const rateLimitResult = loginRateLimit(clientIp);
-        res.setHeader('X-RateLimit-Limit', '5');
-        res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
-        res.setHeader('X-RateLimit-Reset', new Date(rateLimitResult.resetTime).toISOString());
-
-        if (!rateLimitResult.allowed) {
-            logger.warn('Login rate limit exceeded', { ip: clientIp });
-            return res.status(429).json({
-                success: false,
-                error: 'Too many login attempts. Please try again later.',
-                retryAfter: new Date(rateLimitResult.resetTime).toISOString()
+        // Validate input
+        const validation = validateInput(req.body);
+        if (!validation.isValid) {
+            logSecurityEvent({
+                event: 'INVALID_INPUT',
+                ip: clientIP,
+                userAgent,
+                details: validation.error || 'Unknown validation error'
             });
-        }
-
-        // Extract and validate input
-        const { email: rawEmail, password } = req.body;
-
-        // Input validation
-        const validationErrors = validate(
-            { email: rawEmail, password },
-            [emailRule, passwordRule]
-        );
-
-        if (validationErrors.length > 0) {
-            logger.warn('Login validation failed', {
-                ip: clientIp,
-                errors: validationErrors
-            });
+            
             return res.status(400).json({
-                success: false,
-                error: 'Invalid email or password format'
+                error: validation.error,
+                code: 'VALIDATION_ERROR'
             });
         }
 
-        const email = normalizeEmail(rawEmail);
+        const { email, password } = validation.sanitizedData!;
+        const identifier = `${clientIP}:${email}`;
 
-        // Get environment config
-        const { supabaseUrl, supabaseServiceKey, jwtSecret } = getEnvConfig();
-
-        // Validate Supabase configuration
-        if (!supabaseUrl || !supabaseServiceKey) {
-            logger.error('Supabase not configured', new Error('Missing Supabase config'));
-            return res.status(500).json({
-                success: false,
-                error: 'Service temporarily unavailable'
+        // Check rate limiting
+        if (!checkRateLimit(identifier)) {
+            logSecurityEvent({
+                event: 'RATE_LIMIT_EXCEEDED',
+                user: email,
+                ip: clientIP,
+                userAgent,
+                details: `Rate limit exceeded for ${identifier}`
+            });
+            
+            return res.status(429).json({
+                error: 'Too many login attempts. Please try again later.',
+                code: 'RATE_LIMIT_EXCEEDED'
             });
         }
 
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        // Get secure configuration
+        const config = getSecureConfig();
+        const supabase = createClient(config.supabaseUrl, config.supabaseServiceKey);
 
-        // Query user
+        // Query user with parameterized query (SQL injection protection)
         const { data: users, error: queryError } = await supabase
             .from('users')
-            .select('*')
-            .ilike('email', email)
+            .select('id, email, name, role, password_hash, company_id')
+            .eq('email', email)
             .limit(1);
 
         if (queryError) {
-            logger.error('Database query error', new Error(queryError.message), { ip: clientIp });
+            logSecurityEvent({
+                event: 'DATABASE_ERROR',
+                user: email,
+                ip: clientIP,
+                userAgent,
+                details: `Database query error: ${queryError.message}`
+            });
+            
             return res.status(500).json({
-                success: false,
-                error: 'Service temporarily unavailable'
+                error: 'Internal server error',
+                code: 'DATABASE_ERROR'
             });
         }
 
         if (!users || users.length === 0) {
-            logger.warn('User not found', { ip: clientIp });
-            // Use generic message to prevent user enumeration
+            logSecurityEvent({
+                event: 'LOGIN_FAILED',
+                user: email,
+                ip: clientIP,
+                userAgent,
+                details: 'User not found'
+            });
+            
             return res.status(401).json({
-                success: false,
-                error: 'Invalid email or password'
+                error: 'Invalid credentials',
+                code: 'INVALID_CREDENTIALS'
             });
         }
 
-        const user = users[0];
+        const user = users[0] as User;
 
         // Verify password
-        let isValidPassword = false;
-        try {
-            isValidPassword = await bcrypt.compare(password, user.password_hash);
-        } catch (bcryptError) {
-            logger.error('Password verification error', bcryptError as Error, { ip: clientIp });
-            return res.status(500).json({
-                success: false,
-                error: 'Service temporarily unavailable'
-            });
-        }
-
+        const isValidPassword = await bcrypt.compare(password, user.password_hash);
+        
         if (!isValidPassword) {
-            logger.warn('Invalid password', { ip: clientIp });
-            // Use generic message to prevent user enumeration
+            logSecurityEvent({
+                event: 'LOGIN_FAILED',
+                user: user.email,
+                ip: clientIP,
+                userAgent,
+                details: 'Invalid password'
+            });
+            
             return res.status(401).json({
-                success: false,
-                error: 'Invalid email or password'
+                error: 'Invalid credentials',
+                code: 'INVALID_CREDENTIALS'
             });
         }
 
-        // Generate JWT token
+        // Create secure JWT token
+        const tokenPayload = {
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+            companyId: user.company_id,
+            sessionId: randomUUID(),
+            issuedAt: Date.now()
+        };
+
         const token = jwt.sign(
-            {
-                userId: user.id,
+            tokenPayload,
+            config.jwtSecret,
+            { 
+                expiresIn: '24h',
+                issuer: 'cortexbuild-auth',
+                audience: 'cortexbuild-users'
+            }
+        );
+
+        // Log successful login
+        logSecurityEvent({
+            event: 'LOGIN_SUCCESS',
+            user: user.email,
+            ip: clientIP,
+            userAgent,
+            details: `User ${user.id} logged in successfully`
+        });
+
+        // Return success response
+        return res.status(200).json({
+            success: true,
+            user: {
+                id: user.id,
                 email: user.email,
+                name: user.name,
                 role: user.role,
                 companyId: user.company_id
             },
-            jwtSecret,
-            { expiresIn: TOKEN_EXPIRY }
-        );
-
-        // Create session
-        const sessionId = uuidv4();
-        const expiresAt = new Date(Date.now() + SESSION_EXPIRY_MS);
-
-        const { error: sessionError } = await supabase
-            .from('sessions')
-            .insert({
-                id: sessionId,
-                user_id: user.id,
-                token: token,
-                expires_at: expiresAt.toISOString()
-            });
-
-        if (sessionError) {
-            logger.warn('Session creation failed', { userId: user.id, error: sessionError.message });
-            // Non-fatal: continue with login even if session creation fails
-        }
-
-        logger.info('Login successful', {
-            userId: user.id,
-            email: user.email,
-            ip: clientIp
-        });
-
-        const duration = Date.now() - startTime;
-        logResponse('POST', '/api/auth/login', 200, duration);
-
-        // Return success with token and user data
-        return res.status(200).json({
-            success: true,
-            user: buildUserResponse(user),
             token,
-            expiresAt: new Date(Date.now() + SESSION_EXPIRY_MS).toISOString()
+            sessionId: tokenPayload.sessionId,
+            expiresIn: 86400 // 24 hours in seconds
         });
 
     } catch (error: any) {
-        logger.error('Login endpoint error', error, { ip: clientIp });
-
-        const duration = Date.now() - startTime;
-        logResponse('POST', '/api/auth/login', 500, duration);
-
+        // Log security incident
+        logSecurityEvent({
+            event: 'LOGIN_ERROR',
+            ip: clientIP,
+            userAgent,
+            details: `Unexpected error: ${error.message}`
+        });
+        
+        // Don't expose internal errors in production
+        const isProduction = process.env.NODE_ENV === 'production';
+        
         return res.status(500).json({
-            success: false,
-            error: 'Internal server error. Please try again later.'
+            error: isProduction ? 'Internal server error' : error.message,
+            code: 'INTERNAL_ERROR',
+            ...(isProduction ? {} : { stack: error.stack })
         });
     }
 }

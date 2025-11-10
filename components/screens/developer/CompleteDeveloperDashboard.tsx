@@ -194,11 +194,34 @@ export const CompleteDeveloperDashboard: React.FC = () => {
     try {
       console.log('📊 Fetching developer dashboard data...');
       setLoading(true);
-      const response = await axios.get('/api/developer/dashboard/summary');
+
+      // Get auth token from localStorage
+      const token = localStorage.getItem('constructai_token');
+      if (!token) {
+        console.error('❌ No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get('/api/developer/dashboard', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
       console.log('✅ Developer dashboard data received:', response.data);
-      setData(response.data);
-    } catch (error) {
-      console.error('❌ Failed to fetch developer dashboard:', error);
+
+      // Validate response structure
+      if (response.data && typeof response.data === 'object' && response.data.stats) {
+        setData(response.data);
+      } else {
+        console.error('❌ Invalid response structure:', response.data);
+      }
+    } catch (error: any) {
+      console.error('❌ Failed to fetch developer dashboard:', error.message);
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
     } finally {
       setLoading(false);
     }
