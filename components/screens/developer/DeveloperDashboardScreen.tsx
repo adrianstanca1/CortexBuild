@@ -25,10 +25,12 @@ import {
   Webhook,
   Play,
   Settings,
-  LogOut
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { User } from '../../../types';
+import { UserAccountSettings } from './UserAccountSettings';
 
 interface DeveloperDashboardScreenProps {
   currentUser?: User;
@@ -75,6 +77,7 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'sdk' | 'agents' | 'sandbox' | 'analytics'>('overview');
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     console.log('🎯 DeveloperDashboardScreen mounted');
@@ -144,6 +147,18 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
 
   const stats = data.stats;
 
+  // Handle showing settings modal
+  if (showSettings) {
+    return (
+      <>
+        <UserAccountSettings
+          userId={currentUser?.id}
+          onClose={() => setShowSettings(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
       {/* Top Navigation Bar with Logout */}
@@ -166,6 +181,15 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
                   <p className="text-xs text-gray-500">{currentUser.email}</p>
                 </div>
               )}
+              <button
+                type="button"
+                onClick={() => setShowSettings(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                title="Account Settings"
+              >
+                <UserIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Settings</span>
+              </button>
               {onLogout && (
                 <button
                   type="button"
