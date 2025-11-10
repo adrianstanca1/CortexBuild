@@ -26,11 +26,13 @@ import {
   Play,
   Settings,
   LogOut,
-  User as UserIcon
+  User as UserIcon,
+  RefreshCw
 } from 'lucide-react';
 import { Card } from '../../ui/Card';
 import { User } from '../../../types';
 import { UserAccountSettings } from './UserAccountSettings';
+import ErrorNotification from '../../error/ErrorNotification';
 
 interface DeveloperDashboardScreenProps {
   currentUser?: User;
@@ -78,6 +80,7 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'sdk' | 'agents' | 'sandbox' | 'analytics'>('overview');
   const [showSettings, setShowSettings] = useState(false);
+  const [error, setError] = useState<{ message: string; code?: string; details?: Record<string, any> } | null>(null);
 
   useEffect(() => {
     console.log('🎯 DeveloperDashboardScreen mounted');
@@ -88,11 +91,17 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
     try {
       console.log('📊 Fetching developer dashboard data...');
       setLoading(true);
+      setError(null);
 
       // Get auth token from localStorage
       const token = localStorage.getItem('constructai_token');
       if (!token) {
-        console.error('❌ No authentication token found');
+        const errorMsg = 'No authentication token found. Please log in again.';
+        console.error('❌', errorMsg);
+        setError({
+          message: errorMsg,
+          code: 'MISSING_TOKEN'
+        });
         setData(null);
         setLoading(false);
         return;
@@ -102,7 +111,8 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000 // 10 second timeout
       });
 
       console.log('✅ Developer dashboard data received:', response.data);
@@ -110,14 +120,54 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
       // Validate response structure
       if (response.data && typeof response.data === 'object' && response.data.stats) {
         setData(response.data);
+        setError(null);
       } else {
-        console.error('❌ Invalid response structure:', response.data);
+        const errorMsg = 'Dashboard data is incomplete or invalid. Please refresh the page.';
+        console.error('❌', errorMsg, 'Received:', response.data);
+        setError({
+          message: errorMsg,
+          code: 'INVALID_RESPONSE',
+          details: { receivedData: response.data }
+        });
         setData(null);
       }
     } catch (error: any) {
-      console.error('❌ Failed to fetch developer dashboard:', error.message);
-      console.error('Response status:', error.response?.status);
-      console.error('Response data:', error.response?.data);
+      // Handle different error types
+      let errorMsg = 'Failed to load dashboard data. Please try again.';
+      let errorCode = 'DASHBOARD_ERROR';
+
+      if (error.response?.status === 401) {
+        errorMsg = 'Your session has expired. Please log in again.';
+        errorCode = 'UNAUTHORIZED';
+      } else if (error.response?.status === 403) {
+        errorMsg = 'You do not have permission to access this dashboard.';
+        errorCode = 'FORBIDDEN';
+      } else if (error.response?.status === 404) {
+        errorMsg = 'Dashboard endpoint not found. Please contact support.';
+        errorCode = 'NOT_FOUND';
+      } else if (error.code === 'ECONNABORTED') {
+        errorMsg = 'Request timeout. The server is taking too long to respond.';
+        errorCode = 'TIMEOUT';
+      } else if (!navigator.onLine) {
+        errorMsg = 'No internet connection. Please check your network.';
+        errorCode = 'OFFLINE';
+      }
+
+      console.error('❌ Failed to fetch developer dashboard:', {
+        message: error.message,
+        status: error.response?.status,
+        code: error.code,
+        data: error.response?.data
+      });
+
+      setError({
+        message: errorMsg,
+        code: errorCode,
+        details: {
+          status: error.response?.status,
+          apiError: error.response?.data?.error
+        }
+      });
       setData(null);
     } finally {
       setLoading(false);
@@ -134,12 +184,60 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
 
   if (!data || !data.stats) {
     return (
-      <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Failed to load developer dashboard</p>
-          {data && !data.stats && (
-            <p className="text-red-700 text-sm mt-2">Dashboard data is incomplete. Please refresh the page.</p>
-          )}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg border border-red-200 overflow-hidden">
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="bg-red-100 rounded-full p-3">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Unable to Load Dashboard</h2>
+              </div>
+
+              <p className="text-gray-700 mb-6">
+                {error?.message || 'Dashboard data is incomplete. Please try again.'}
+              </p>
+
+              {error?.code && (
+                <p className="text-sm text-gray-600 mb-6 font-mono">
+                  Error Code: <span className="text-red-600">{error.code}</span>
+                </p>
+              )}
+
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    fetchDashboardData();
+                  }}
+                  className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Try Again
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/'}
+                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Go to Home
+                </button>
+              </div>
+
+              {error?.details && (
+                <details className="mt-8 p-4 bg-gray-100 rounded-lg">
+                  <summary className="cursor-pointer font-mono text-sm text-gray-700 font-semibold">
+                    Additional Details (Developer)
+                  </summary>
+                  <pre className="mt-3 text-xs text-gray-600 overflow-auto max-h-40">
+                    {JSON.stringify(error.details, null, 2)}
+                  </pre>
+                </details>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -161,6 +259,22 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
+      {/* Error Notification */}
+      {error && (
+        <ErrorNotification
+          message={error.message}
+          code={error.code}
+          details={error.details}
+          onClose={() => setError(null)}
+          onRetry={() => {
+            setError(null);
+            fetchDashboardData();
+          }}
+          autoClose={false}
+          showDetails={process.env.NODE_ENV === 'development'}
+        />
+      )}
+
       {/* Top Navigation Bar with Logout */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
