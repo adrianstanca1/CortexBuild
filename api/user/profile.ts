@@ -4,6 +4,7 @@
  * PUT /api/user/profile - Update user profile
  *
  * Returns user information and allows profile updates
+ * Uses Supabase database for persistent storage
  * Uses centralized error handling for consistency
  */
 
@@ -14,9 +15,15 @@ import {
   createSuccessResponse,
   ErrorCodes,
   getStatusCode,
-  logger,
-  validateRequiredFields
+  logger
 } from '../../utils/errorHandler';
+import {
+  getUserProfile,
+  createUserProfile,
+  updateUserProfile,
+  updateLastLogin,
+  type UserProfile as DbUserProfile
+} from '../../utils/supabaseServer';
 
 interface UserProfile {
   id: string;
@@ -27,6 +34,7 @@ interface UserProfile {
   avatar?: string;
   bio?: string;
   createdAt: string;
+  updatedAt: string;
   lastLogin?: string;
   preferences?: {
     theme: 'light' | 'dark';
@@ -46,41 +54,28 @@ interface UpdateProfileRequest {
   };
 }
 
-// Mock database of users with profiles
-const userProfiles: Map<string, UserProfile> = new Map([
-  ['user-123', {
-    id: 'user-123',
-    email: 'adrian.stanca1@gmail.com',
-    name: 'Adrian Stanca',
-    role: 'developer',
-    companyId: '00000000-0000-0000-0000-000000000001',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Adrian',
-    bio: 'Full-stack developer passionate about AI and scalable systems',
-    createdAt: '2025-01-01T00:00:00Z',
-    lastLogin: new Date().toISOString(),
+/**
+ * Transform database profile to API response format
+ */
+function formatUserProfile(dbProfile: DbUserProfile): UserProfile {
+  return {
+    id: dbProfile.id,
+    email: dbProfile.email,
+    name: dbProfile.name,
+    role: dbProfile.role,
+    companyId: dbProfile.company_id,
+    avatar: dbProfile.avatar,
+    bio: dbProfile.bio,
+    createdAt: dbProfile.created_at,
+    updatedAt: dbProfile.updated_at,
+    lastLogin: dbProfile.last_login,
     preferences: {
-      theme: 'dark',
-      emailNotifications: true,
-      twoFactorEnabled: false
+      theme: dbProfile.theme,
+      emailNotifications: dbProfile.email_notifications,
+      twoFactorEnabled: dbProfile.two_factor_enabled
     }
-  }],
-  ['user-dev', {
-    id: 'user-dev',
-    email: 'dev@constructco.com',
-    name: 'Dev User',
-    role: 'developer',
-    companyId: '00000000-0000-0000-0000-000000000001',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Dev',
-    bio: 'Software engineer and platform developer',
-    createdAt: '2025-01-05T00:00:00Z',
-    lastLogin: new Date().toISOString(),
-    preferences: {
-      theme: 'light',
-      emailNotifications: true,
-      twoFactorEnabled: false
-    }
-  }]
-]);
+  };
+}
 
 function verifyToken(token: string): any {
   const jwtSecret = process.env.JWT_SECRET;
@@ -148,83 +143,125 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Get user profile
       logger.info('Get profile request', { userId });
 
-      const profile = userProfiles.get(userId);
+      try {
+        let profile = await getUserProfile(userId);
 
-      if (!profile) {
-        logger.warn('User profile not found', { userId, ip: clientIP });
-        const error = createErrorResponse(
-          ErrorCodes.NOT_FOUND,
-          'User profile not found'
+        // If profile doesn't exist, create it
+        if (!profile) {
+          logger.info('Creating new user profile', { userId, email: decoded.email });
+          profile = await createUserProfile(
+            userId,
+            decoded.email || `user-${userId}`,
+            decoded.name || `User ${userId.substring(0, 8)}`,
+            'developer'
+          );
+        }
+
+        // Update last login
+        await updateLastLogin(userId);
+
+        const formattedProfile = formatUserProfile(profile);
+        return res.status(200).json(
+          createSuccessResponse({ profile: formattedProfile })
         );
-        return res.status(getStatusCode(ErrorCodes.NOT_FOUND)).json(error);
+      } catch (dbError: any) {
+        logger.error('Database error in GET profile', dbError, { userId });
+        const error = createErrorResponse(
+          ErrorCodes.DATABASE_ERROR,
+          'Failed to retrieve user profile. Please try again.'
+        );
+        return res.status(getStatusCode(ErrorCodes.DATABASE_ERROR)).json(error);
       }
-
-      return res.status(200).json(
-        createSuccessResponse({ profile })
-      );
 
     } else if (req.method === 'PUT') {
       // Update user profile
       logger.info('Update profile request', { userId });
 
-      const existingProfile = userProfiles.get(userId);
+      try {
+        // Get current profile
+        let currentProfile = await getUserProfile(userId);
 
-      if (!existingProfile) {
-        logger.warn('User profile not found for update', { userId, ip: clientIP });
-        const error = createErrorResponse(
-          ErrorCodes.NOT_FOUND,
-          'User profile not found'
+        // Create if doesn't exist
+        if (!currentProfile) {
+          logger.info('Creating new user profile for update', { userId });
+          currentProfile = await createUserProfile(
+            userId,
+            decoded.email || `user-${userId}`,
+            decoded.name || `User ${userId.substring(0, 8)}`,
+            'developer'
+          );
+        }
+
+        const updateData: UpdateProfileRequest = req.body;
+
+        // Validate input types
+        if (updateData.name !== undefined && typeof updateData.name !== 'string') {
+          logger.warn('Invalid name type in profile update', { userId, type: typeof updateData.name });
+          const error = createErrorResponse(
+            ErrorCodes.INVALID_INPUT,
+            'Name must be a string'
+          );
+          return res.status(getStatusCode(ErrorCodes.INVALID_INPUT)).json(error);
+        }
+
+        if (updateData.bio !== undefined && typeof updateData.bio !== 'string') {
+          logger.warn('Invalid bio type in profile update', { userId, type: typeof updateData.bio });
+          const error = createErrorResponse(
+            ErrorCodes.INVALID_INPUT,
+            'Bio must be a string'
+          );
+          return res.status(getStatusCode(ErrorCodes.INVALID_INPUT)).json(error);
+        }
+
+        // Build update object
+        const dbUpdateData: any = {};
+
+        if (updateData.name !== undefined) {
+          dbUpdateData.name = updateData.name;
+        }
+        if (updateData.bio !== undefined) {
+          dbUpdateData.bio = updateData.bio;
+        }
+        if (updateData.avatar !== undefined) {
+          dbUpdateData.avatar = updateData.avatar;
+        }
+        if (updateData.preferences) {
+          if (updateData.preferences.theme !== undefined) {
+            dbUpdateData.theme = updateData.preferences.theme;
+          }
+          if (updateData.preferences.emailNotifications !== undefined) {
+            dbUpdateData.email_notifications = updateData.preferences.emailNotifications;
+          }
+          if (updateData.preferences.twoFactorEnabled !== undefined) {
+            dbUpdateData.two_factor_enabled = updateData.preferences.twoFactorEnabled;
+          }
+        }
+
+        // Update profile in database
+        const updatedProfile = await updateUserProfile(userId, dbUpdateData);
+
+        logger.info('User profile updated successfully', {
+          userId,
+          email: updatedProfile.email,
+          ip: clientIP
+        });
+
+        const formattedProfile = formatUserProfile(updatedProfile);
+        return res.status(200).json(
+          createSuccessResponse({
+            profile: formattedProfile,
+            message: 'Profile updated successfully'
+          })
         );
-        return res.status(getStatusCode(ErrorCodes.NOT_FOUND)).json(error);
-      }
 
-      const updateData: UpdateProfileRequest = req.body;
-
-      // Validate input
-      if (updateData.name !== undefined && typeof updateData.name !== 'string') {
-        logger.warn('Invalid name type in profile update', { userId, type: typeof updateData.name });
+      } catch (dbError: any) {
+        logger.error('Database error in PUT profile', dbError, { userId });
         const error = createErrorResponse(
-          ErrorCodes.INVALID_INPUT,
-          'Name must be a string'
+          ErrorCodes.DATABASE_ERROR,
+          'Failed to update user profile. Please try again.'
         );
-        return res.status(getStatusCode(ErrorCodes.INVALID_INPUT)).json(error);
+        return res.status(getStatusCode(ErrorCodes.DATABASE_ERROR)).json(error);
       }
-
-      if (updateData.bio !== undefined && typeof updateData.bio !== 'string') {
-        logger.warn('Invalid bio type in profile update', { userId, type: typeof updateData.bio });
-        const error = createErrorResponse(
-          ErrorCodes.INVALID_INPUT,
-          'Bio must be a string'
-        );
-        return res.status(getStatusCode(ErrorCodes.INVALID_INPUT)).json(error);
-      }
-
-      // Update profile with new data
-      const updatedProfile: UserProfile = {
-        ...existingProfile,
-        name: updateData.name !== undefined ? updateData.name : existingProfile.name,
-        bio: updateData.bio !== undefined ? updateData.bio : existingProfile.bio,
-        avatar: updateData.avatar !== undefined ? updateData.avatar : existingProfile.avatar,
-        preferences: updateData.preferences
-          ? { ...existingProfile.preferences, ...updateData.preferences }
-          : existingProfile.preferences
-      };
-
-      // Save updated profile
-      userProfiles.set(userId, updatedProfile);
-
-      logger.info('User profile updated successfully', {
-        userId,
-        email: updatedProfile.email,
-        ip: clientIP
-      });
-
-      return res.status(200).json(
-        createSuccessResponse({
-          profile: updatedProfile,
-          message: 'Profile updated successfully'
-        })
-      );
 
     } else {
       const error = createErrorResponse(ErrorCodes.METHOD_NOT_ALLOWED);
