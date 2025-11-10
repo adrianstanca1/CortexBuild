@@ -86,9 +86,19 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
       setLoading(true);
       const response = await axios.get('/api/developer/dashboard/summary');
       console.log('✅ Developer dashboard data received:', response.data);
-      setData(response.data);
-    } catch (error) {
+
+      // Validate response structure
+      if (response.data && typeof response.data === 'object' && response.data.stats) {
+        setData(response.data);
+      } else {
+        console.error('❌ Invalid response structure:', response.data);
+        setData(null);
+      }
+    } catch (error: any) {
       console.error('❌ Failed to fetch developer dashboard:', error);
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -102,11 +112,14 @@ export const DeveloperDashboardScreen: React.FC<DeveloperDashboardScreenProps> =
     );
   }
 
-  if (!data) {
+  if (!data || !data.stats) {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">Failed to load developer dashboard</p>
+          {data && !data.stats && (
+            <p className="text-red-700 text-sm mt-2">Dashboard data is incomplete. Please refresh the page.</p>
+          )}
         </div>
       </div>
     );
