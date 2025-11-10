@@ -1,111 +1,172 @@
 /**
- * Vercel Serverless Function - Refresh Token
+ * Token Refresh API Endpoint
  * POST /api/auth/refresh
  * 
- * Features:
- * - Token refresh without re-login
- * - Session extension
- * - Rate limiting
- * - Security headers
+ * Security Features:
+ * - JWT token validation and refresh
+ * - Session management
+ * - Rate limiting protection
  * - Structured logging
+ * - SQL injection protection
  */
 
 import { sql } from '@vercel/postgres';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleCors } from '../middleware/cors';
-import { setSecurityHeaders, validateJwtSecret, getClientIp } from '../middleware/security';
-import { logger, logRequest, logResponse } from '../middleware/logger';
-import { apiRateLimit } from '../middleware/rateLimit';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const TOKEN_EXPIRY = '24h';
+const REFRESH_WINDOW_MINUTES = 30;
+const MAX_REFRESH_ATTEMPTS = 3;
+
+// Simple rate limiting for refresh tokens
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+// Environment validation
+const getSecureConfig = () => {
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    if (!jwtSecret || 
+        jwtSecret === 'your-very-secure-jwt-secret-key-change-this-in-production' || 
+        jwtSecret === 'test-secret' ||
+        jwtSecret === 'cortexbuild-secret-2025') {
+        throw new Error('JWT secret not properly configured for production');
+    }
+    
+    return { jwtSecret, isProduction: process.env.NODE_ENV === 'production' };
+};
+
+// Rate limiting check
+const checkRefreshRateLimit = (identifier: string): boolean => {
+    const now = Date.now();
+    const windowMs = REFRESH_WINDOW_MINUTES * 60 * 1000;
+    
+    const record = rateLimitMap.get(identifier);
+    
+    if (!record) {
+        rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+        return true;
+    }
+    
+    if (now > record.resetTime) {
+        rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs });
+        return true;
+    }
+    
+    if (record.count >= MAX_REFRESH_ATTEMPTS) {
+        return false;
+    }
+    
+    record.count++;
+    return true;
+};
+
+// Security event logging
+const logSecurityEvent = (event: string, details: any) => {
+    const logEntry = {
+        event,
+        timestamp: new Date().toISOString(),
+        ...details
+    };
+    
+    console.log('SECURITY_EVENT:', JSON.stringify(logEntry));
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    const startTime = Date.now();
-    
-    setSecurityHeaders(res);
-    
-    if (handleCors(req, res)) {
-        return;
+    // Set security headers
+    res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || '*' : '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
 
     if (req.method !== 'POST') {
         return res.status(405).json({ 
             success: false,
-            error: 'Method not allowed' 
+            error: 'Method not allowed',
+            code: 'METHOD_NOT_ALLOWED'
         });
     }
 
+    const clientIP = req.headers['x-forwarded-for'] as string || req.headers['x-real-ip'] as string || 'unknown';
+    
     try {
-        validateJwtSecret();
-
-        const clientIp = getClientIp(req);
-        logRequest('POST', '/api/auth/refresh', { ip: clientIp });
+        // Get secure configuration
+        const config = getSecureConfig();
 
         // Rate limiting
-        const rateLimitResult = apiRateLimit(clientIp);
-        res.setHeader('X-RateLimit-Limit', '60');
-        res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
-        res.setHeader('X-RateLimit-Reset', new Date(rateLimitResult.resetTime).toISOString());
-
-        if (!rateLimitResult.allowed) {
-            logger.warn('Rate limit exceeded', { ip: clientIp });
+        const identifier = `${clientIP}:${req.headers.authorization?.split(' ')[1]?.slice(-10) || 'unknown'}`;
+        if (!checkRefreshRateLimit(identifier)) {
+            logSecurityEvent('REFRESH_RATE_LIMIT_EXCEEDED', { ip: clientIP, identifier });
             return res.status(429).json({
                 success: false,
-                error: 'Too many requests. Please try again later.',
-                retryAfter: new Date(rateLimitResult.resetTime).toISOString()
+                error: 'Too many refresh attempts. Please try again later.',
+                code: 'RATE_LIMIT_EXCEEDED'
             });
         }
 
-        // Extract old token
+        // Extract and validate token
         const authHeader = req.headers.authorization;
         const oldToken = authHeader?.replace('Bearer ', '');
 
         if (!oldToken) {
-            logger.warn('Missing token', { ip: clientIp });
+            logSecurityEvent('REFRESH_MISSING_TOKEN', { ip: clientIP });
             return res.status(401).json({
                 success: false,
-                error: 'Authentication token is required'
+                error: 'Authentication token is required',
+                code: 'MISSING_TOKEN'
             });
         }
 
-        // Verify old JWT (allow expired tokens for refresh)
+        // Verify JWT (allow expired tokens for refresh)
         let payload: { userId: string; email: string; role?: string };
         try {
-            payload = jwt.verify(oldToken, JWT_SECRET, { ignoreExpiration: true }) as { userId: string; email: string; role?: string };
+            payload = jwt.verify(oldToken, config.jwtSecret, { ignoreExpiration: true }) as { userId: string; email: string; role?: string };
         } catch (jwtError: any) {
-            logger.warn('Invalid JWT token', { error: jwtError.message, ip: clientIp });
+            logSecurityEvent('REFRESH_INVALID_TOKEN', { ip: clientIP, error: jwtError.message });
             return res.status(401).json({
                 success: false,
-                error: 'Invalid token'
+                error: 'Invalid token',
+                code: 'INVALID_TOKEN'
             });
         }
 
-        // Check if old session exists
+        // Check if session exists (SQL injection protected)
         const { rows: sessions } = await sql`
-            SELECT * FROM sessions WHERE token = ${oldToken} LIMIT 1
+            SELECT * FROM sessions 
+            WHERE token = ${oldToken} AND expires_at > NOW()
+            LIMIT 1
         `;
 
         if (sessions.length === 0) {
-            logger.warn('Session not found for refresh', { userId: payload.userId, ip: clientIp });
+            logSecurityEvent('REFRESH_SESSION_NOT_FOUND', { userId: payload.userId, ip: clientIP });
             return res.status(401).json({
                 success: false,
-                error: 'Session not found. Please login again.'
+                error: 'Session not found or expired. Please login again.',
+                code: 'SESSION_NOT_FOUND'
             });
         }
 
-        // Get user
+        // Get user (SQL injection protected)
         const { rows: users } = await sql`
-            SELECT * FROM users WHERE id = ${payload.userId} LIMIT 1
+            SELECT id, email, name, role, avatar, company_id 
+            FROM users 
+            WHERE id = ${payload.userId}
+            LIMIT 1
         `;
 
         if (users.length === 0) {
-            logger.warn('User not found', { userId: payload.userId, ip: clientIp });
+            logSecurityEvent('REFRESH_USER_NOT_FOUND', { userId: payload.userId, ip: clientIP });
             return res.status(401).json({
                 success: false,
-                error: 'User not found'
+                error: 'User not found',
+                code: 'USER_NOT_FOUND'
             });
         }
 
@@ -116,10 +177,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             { 
                 userId: user.id, 
                 email: user.email,
-                role: user.role 
+                role: user.role,
+                companyId: user.company_id,
+                sessionId: uuidv4(),
+                issuedAt: Date.now()
             },
-            JWT_SECRET,
-            { expiresIn: TOKEN_EXPIRY }
+            config.jwtSecret,
+            { 
+                expiresIn: TOKEN_EXPIRY,
+                issuer: 'cortexbuild-auth',
+                audience: 'cortexbuild-users'
+            }
         );
 
         // Delete old session
@@ -134,19 +202,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             VALUES (${sessionId}, ${user.id}, ${newToken}, ${expiresAt.toISOString()})
         `;
 
-        logger.info('Token refreshed', { 
+        logSecurityEvent('REFRESH_SUCCESS', { 
             userId: user.id, 
             email: user.email,
-            ip: clientIp 
+            ip: clientIP 
         });
-
-        const duration = Date.now() - startTime;
-        logResponse('POST', '/api/auth/refresh', 200, duration);
 
         return res.status(200).json({
             success: true,
             token: newToken,
+            sessionId,
             expiresAt: expiresAt.toISOString(),
+            expiresIn: 86400, // 24 hours in seconds
             user: {
                 id: user.id,
                 email: user.email,
@@ -156,16 +223,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 companyId: user.company_id
             }
         });
+
     } catch (error: any) {
-        logger.error('Token refresh error', error, { ip: getClientIp(req) });
+        logSecurityEvent('REFRESH_ERROR', { ip: clientIP, error: error.message });
         
-        const duration = Date.now() - startTime;
-        logResponse('POST', '/api/auth/refresh', 500, duration);
+        const isProduction = process.env.NODE_ENV === 'production';
         
         return res.status(500).json({
             success: false,
-            error: 'Internal server error'
+            error: isProduction ? 'Internal server error' : error.message,
+            code: 'INTERNAL_ERROR',
+            ...(isProduction ? {} : { stack: error.stack })
         });
     }
 }
-
