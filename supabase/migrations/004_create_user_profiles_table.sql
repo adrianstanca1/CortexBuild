@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     email VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     bio TEXT,
-    avatar URL,
+    avatar TEXT,
     role VARCHAR(50) NOT NULL DEFAULT 'developer',
     company_id UUID,
 
@@ -18,13 +18,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     -- Metadata
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    last_login TIMESTAMP WITH TIME ZONE,
-
-    -- Indexes for common queries
-    INDEX idx_email (email),
-    INDEX idx_company_id (company_id),
-    INDEX idx_created_at (created_at),
-    INDEX idx_role (role)
+    last_login TIMESTAMP WITH TIME ZONE
 );
 
 -- Create updated_at trigger to automatically update timestamp
@@ -48,7 +42,7 @@ RETURNS TABLE (
     email VARCHAR,
     name VARCHAR,
     bio TEXT,
-    avatar URL,
+    avatar TEXT,
     role VARCHAR,
     company_id UUID,
     theme VARCHAR,
